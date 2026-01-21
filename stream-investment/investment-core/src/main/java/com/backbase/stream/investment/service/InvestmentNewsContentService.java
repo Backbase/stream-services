@@ -1,16 +1,17 @@
 package com.backbase.stream.investment.service;
 
-import com.backbase.investment.api.service.ApiClient;
-import com.backbase.investment.api.service.v1.ContentApi;
-import com.backbase.investment.api.service.v1.model.EntryCreateUpdate;
-import com.backbase.investment.api.service.v1.model.EntryCreateUpdateRequest;
-import com.backbase.investment.api.service.v1.model.PaginatedEntryList;
+import com.backbase.investment.api.service.sync.ApiClient;
+import com.backbase.investment.api.service.sync.v1.ContentApi;
+import com.backbase.investment.api.service.sync.v1.model.Entry;
+import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdate;
+import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -24,12 +25,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * <p>Design notes (see CODING_RULES_COPILOT.md):
+ * <p>Design notes (see CODING_RULES_COPILOT.md):</p>.
  * <ul>
  *   <li>No direct manipulation of generated API classes beyond construction & mapping</li>
  *   <li>Side-effecting operations are logged at info (create) or debug (patch) levels</li>
@@ -44,6 +46,7 @@ public class InvestmentNewsContentService {
     public static final int CONTENT_RETRIEVE_LIMIT = 100;
     private final ContentApi contentApi;
     private final ApiClient apiClient;
+    private final ObjectMapper objectMapper;
 
     /**
      * Upserts a list of content entries. For each entry, checks if content with the same title exists. If exists,
@@ -97,23 +100,26 @@ public class InvestmentNewsContentService {
             .collect(Collectors.toMap(EntryCreateUpdateRequest::getTitle, Function.identity()));
         log.debug("Searching for existing content entry with title: '{}'", entryByTitle.keySet());
 
-        return contentApi.listContentEntries(null, CONTENT_RETRIEVE_LIMIT, 0,
+        List<Entry> existsNews = contentApi.listContentEntries(null, CONTENT_RETRIEVE_LIMIT, 0,
                 null, null, null, null)
-            .doOnSuccess(result -> log.debug("Retrieved {} content entries for title search",
-                Optional.ofNullable(result).map(PaginatedEntryList::getCount).orElse(0)))
-            .map(PaginatedEntryList::getResults)
+            .getResults()
+            .stream()
             .filter(Objects::nonNull)
-            .filter(List::isEmpty)
-            .doOnError(error -> log.error("Error searching for content entry with titles '{}': {}",
-                entryByTitle.keySet(), error.getMessage(), error))
-            .flatMapIterable(entries -> {
-                List<EntryCreateUpdateRequest> newEntries = entries.isEmpty() ? contentEntries : entries.stream()
-                    .filter(e -> entryByTitle.containsKey(e.getTitle()))
-                    .map(e -> entryByTitle.get(e.getTitle())).toList();
-                log.debug("New content entries to create: {}", newEntries.stream()
-                    .map(EntryCreateUpdateRequest::getTitle).collect(Collectors.toList()));
-                return newEntries;
-            });
+            .toList();
+        if (existsNews.isEmpty()) {
+            log.debug("No existing content entries found. All {} entries are new.",
+                entryByTitle.size());
+            return Flux.fromIterable(entryByTitle.values());
+        }
+        Set<String> existTitles = existsNews.stream()
+            .map(Entry::getTitle)
+            .collect(Collectors.toSet());
+        List<EntryCreateUpdateRequest> newEntries = contentEntries.stream()
+            .filter(c -> existTitles.stream().noneMatch(e -> c.getTitle().contains(e)))
+            .toList();
+
+        log.debug("New content entries to create: {}", newEntries.stream());
+        return Flux.fromIterable(newEntries);
     }
 
     /**
@@ -126,92 +132,59 @@ public class InvestmentNewsContentService {
         log.debug("Creating new content entry with title: '{}'", request.getTitle());
         File thumbnail = request.getThumbnail();
         request.setThumbnail(null);
-        return contentApi.createContentEntry(request)
-
+        return Mono.defer(() -> Mono.just(contentApi.createContentEntry(request)))
+            .flatMap(e -> addThumbnail(e, thumbnail))
             .doOnSuccess(created -> log.info("Successfully created new content entry with title: '{}'",
                 request.getTitle()))
             .doOnError(error -> log.error("Failed to create content entry with title '{}': {}",
-                request.getTitle(), error.getMessage(), error));
+                request.getTitle(), error.getMessage(), error))
+            .onErrorResume(error -> Mono.empty());
     }
 
-    private Mono<EntryCreateUpdate> createContentEntry(EntryCreateUpdateRequest entryCreateUpdateRequest)
-        throws WebClientResponseException {
-        Object postBody = entryCreateUpdateRequest;
-        // verify the required parameter 'entryCreateUpdateRequest' is set
-        if (entryCreateUpdateRequest == null) {
-            throw new WebClientResponseException(
-                "Missing the required parameter 'entryCreateUpdateRequest' when calling createContentEntry",
-                HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), null, null, null);
-        }
-        // create path and map variables
-        final Map<String, Object> pathParams = new HashMap<String, Object>();
+    private Mono<EntryCreateUpdate> addThumbnail(EntryCreateUpdate entry, File thumbnail) {
+        UUID uuid = entry.getUuid();
+        return Mono.defer(() -> {
+                Object localVarPostBody = null;
+                // verify the required parameter 'uuid' is set
+                if (uuid == null) {
+                    throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                        "Missing the required parameter 'uuid' when calling patchContentEntry");
+                }
 
-        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
-        final HttpHeaders headerParams = new HttpHeaders();
-        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
-        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<String, Object>();
+                // create path and map variables
+                final Map<String, Object> uriVariables = new HashMap<String, Object>();
+                uriVariables.put("uuid", uuid);
 
-        FileSystemResource value = new FileSystemResource(entryCreateUpdateRequest.getThumbnail());
+                final MultiValueMap<String, String> localVarQueryParams = new LinkedMultiValueMap<String, String>();
+                final HttpHeaders localVarHeaderParams = new HttpHeaders();
+                final MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<String, String>();
+                final MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<String, Object>();
 
-        entryCreateUpdateRequest.setThumbnail(null);
+                FileSystemResource value = new FileSystemResource(thumbnail);
+                localVarFormParams.add("thumbnail", value);
 
-        final String[] localVarAccepts = {
-            "application/json"
-        };
-        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
-        final String[] localVarContentTypes = {
-            "application/json"
-        };
-        final MediaType localVarContentType = MediaType.MULTIPART_FORM_DATA;
+                final String[] localVarAccepts = {
+                    "application/json"
+                };
+                final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+                final String[] localVarContentTypes = {
+                    "multipart/form-data"
+                };
+                final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
 
-        String[] localVarAuthNames = new String[]{};
+                String[] localVarAuthNames = new String[]{};
 
-        ParameterizedTypeReference<EntryCreateUpdate> localVarReturnType = new ParameterizedTypeReference<EntryCreateUpdate>() {
-        };
-        return apiClient.invokeAPI("/service-api/v2/content/entries/", HttpMethod.POST, pathParams, queryParams,
-                postBody, headerParams, cookieParams, formParams, localVarAccept, localVarContentType, localVarAuthNames,
-                localVarReturnType)
-            .bodyToMono(localVarReturnType)
-            .flatMap(e -> patchContentEntryRequestCreation(e.getUuid(), value));
-    }
-
-    private Mono<EntryCreateUpdate> patchContentEntryRequestCreation(
-        UUID uuid, FileSystemResource value) throws WebClientResponseException {
-        Object postBody = null;
-        // verify the required parameter 'uuid' is set
-        if (uuid == null) {
-            throw new WebClientResponseException("Missing the required parameter 'uuid' when calling patchContentEntry",
-                HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), null, null, null);
-        }
-        // create path and map variables
-        final Map<String, Object> pathParams = new HashMap<String, Object>();
-
-        pathParams.put("uuid", uuid);
-
-        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
-        final HttpHeaders headerParams = new HttpHeaders();
-        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
-        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<String, Object>();
-
-        formParams.add("thumbnail", value);
-
-        final String[] localVarAccepts = {
-            "application/json"
-        };
-        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
-        final String[] localVarContentTypes = {
-            "multipart/form-data"
-        };
-        final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
-
-        String[] localVarAuthNames = new String[]{};
-
-        ParameterizedTypeReference<EntryCreateUpdate> localVarReturnType = new ParameterizedTypeReference<EntryCreateUpdate>() {
-        };
-        return apiClient.invokeAPI("/service-api/v2/content/entries/{uuid}/", HttpMethod.PATCH, pathParams, queryParams,
-                postBody, headerParams, cookieParams, formParams, localVarAccept, localVarContentType, localVarAuthNames,
-                localVarReturnType)
-            .bodyToMono(localVarReturnType);
+                ParameterizedTypeReference<EntryCreateUpdate> localReturnType = new ParameterizedTypeReference<EntryCreateUpdate>() {
+                };
+                apiClient.invokeAPI(
+                    "/service-api/v2/content/entries/{uuid}/", HttpMethod.PATCH, uriVariables,
+                    localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams,
+                    localVarAccept, localVarContentType, localVarAuthNames, localReturnType);
+                return Mono.just(entry);
+            })
+            .doOnError(error -> log.error("Failed to set content `{}` thumbnail: {}",
+                uuid, error.getMessage(), error))
+            .onErrorResume(error -> Mono.just(entry));
     }
 
 }
