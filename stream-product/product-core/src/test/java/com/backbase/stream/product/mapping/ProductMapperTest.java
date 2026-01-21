@@ -29,6 +29,7 @@ import com.backbase.stream.legalentity.model.TermUnit;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -107,9 +108,8 @@ class ProductMapperTest {
             .accountHolderAddressLine2("Western Aqua")
             .postCode("500084")
             .town("Hyderabad")
-            .countrySubDivision("Telangana");
-
-
+            .countrySubDivision("Telangana")
+            .validThru(OffsetDateTime.parse("2050-12-23T11:20:30.000001Z"));
     }
 
     private SavingsAccount buildSavingsAccount() {
@@ -290,6 +290,26 @@ class ProductMapperTest {
         Assertions.assertEquals(target.getState().getState(), source.getState().getExternalId());
         Assertions.assertEquals(target.getAccountHolderNames(), source.getAccountHolder().getNames());
     }
+
+    @Test
+    void map_AccountArrangementItemBase_To_AccountArrangementItem_when_validThruNull() {
+        Product product = buildProduct();
+        product.setValidThru(null);
+        ArrangementPost source = productMapper.toPresentation(product);
+        ArrangementItem target = productMapper.toArrangementItem(source);
+        Assertions.assertNull(target.getValidThru());
+    }
+
+    @Test
+    void map_AccountArrangementItemBase_To_AccountArrangementItem_when_validThruNotNull() {
+        Product product = buildProduct();
+        ArrangementPost source = productMapper.toPresentation(product);
+        ArrangementItem target = productMapper.toArrangementItem(source);
+
+        Assertions.assertEquals(OffsetDateTime.of(2050, 12, 23, 0, 0, 0, 0, ZoneOffset.UTC).toLocalDate(), source.getValidThru());
+        Assertions.assertEquals("2050-12-23T00:00Z", target.getValidThru().toString());
+    }
+
 
     @Test
     void map_Product_To_AccountArrangementItem() {
