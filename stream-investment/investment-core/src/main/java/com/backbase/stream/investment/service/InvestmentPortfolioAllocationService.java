@@ -260,7 +260,7 @@ public class InvestmentPortfolioAllocationService {
                     new ModelAsset(a.getAsset().getIsin(), a.getAsset().getMarket(), a.getAsset().getCurrency()),
                     a.getWeight())).toList()).build()).orElse(ModelPortfolio.builder().cashWeight(0.6).allocations(
                     assetByUuid.values().stream().limit(2)
-                        .map(a -> new Allocation(new ModelAsset(a.getIsin(), a.getMarket(), a.currency()), 0.2)).toList())
+                        .map(a -> new Allocation(new ModelAsset(a.getIsin(), a.getMarket(), a.getCurrency()), 0.2)).toList())
                 .build()));
     }
 

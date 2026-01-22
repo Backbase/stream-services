@@ -1,11 +1,29 @@
 package com.backbase.stream.configuration;
 
 import com.backbase.investment.api.service.ApiClient;
-import com.backbase.investment.api.service.v1.*;
+import com.backbase.investment.api.service.v1.AllocationsApi;
+import com.backbase.investment.api.service.v1.AssetUniverseApi;
+import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
+import com.backbase.investment.api.service.v1.ClientApi;
+import com.backbase.investment.api.service.v1.FinancialAdviceApi;
+import com.backbase.investment.api.service.v1.InvestmentApi;
+import com.backbase.investment.api.service.v1.InvestmentProductsApi;
+import com.backbase.investment.api.service.v1.PaymentsApi;
+import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
-import com.backbase.stream.investment.saga.InvestmentAssetUniversSaga;
+import com.backbase.stream.investment.saga.InvestmentAssetUniverseSaga;
+import com.backbase.stream.investment.saga.InvestmentContentSaga;
 import com.backbase.stream.investment.saga.InvestmentSaga;
-import com.backbase.stream.investment.service.*;
+import com.backbase.stream.investment.service.AsyncTaskService;
+import com.backbase.stream.investment.service.CustomIntegrationApiService;
+import com.backbase.stream.investment.service.InvestmentAssetPriceService;
+import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
+import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
+import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
+import com.backbase.stream.investment.service.InvestmentPortfolioService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -44,8 +62,10 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentAssetUniverseService investmentAssetUniverseService(AssetUniverseApi assetUniverseApi,
+        InvestmentRestAssetUniverseService investmentRestAssetUniverseService,
         CustomIntegrationApiService customIntegrationApiService) {
-        return new InvestmentAssetUniverseService(assetUniverseApi, customIntegrationApiService);
+        return new InvestmentAssetUniverseService(assetUniverseApi, investmentRestAssetUniverseService,
+            customIntegrationApiService);
     }
 
     @Bean
@@ -73,11 +93,6 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
-    public InvestmentNewsContentService investmentNewsContentService(ContentApi contentApi, ApiClient apiClient) {
-        return new InvestmentNewsContentService(contentApi, apiClient);
-    }
-
-    @Bean
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
         InvestmentPortfolioService investmentPortfolioService,
         InvestmentModelPortfolioService investmentModelPortfolioService,
@@ -89,13 +104,19 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
-    public InvestmentAssetUniversSaga investmentStaticDataSaga(
+    public InvestmentAssetUniverseSaga investmentStaticDataSaga(
         InvestmentAssetUniverseService investmentAssetUniverseService,
         InvestmentAssetPriceService investmentAssetPriceService,
-        InvestmentNewsContentService investmentNewsContentService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
-        return new InvestmentAssetUniversSaga(investmentAssetUniverseService, investmentAssetPriceService,
-            investmentNewsContentService, coreConfigurationProperties);
+        return new InvestmentAssetUniverseSaga(investmentAssetUniverseService, investmentAssetPriceService,
+            coreConfigurationProperties);
+    }
+
+    @Bean
+    public InvestmentContentSaga investmentContentSaga(
+        InvestmentRestNewsContentService investmentRestNewsContentService,
+        InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
+        return new InvestmentContentSaga(investmentRestNewsContentService, coreConfigurationProperties);
     }
 
 }

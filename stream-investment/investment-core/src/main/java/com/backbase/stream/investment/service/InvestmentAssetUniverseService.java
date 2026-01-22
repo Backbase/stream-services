@@ -12,6 +12,8 @@ import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryList;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -33,6 +35,7 @@ import reactor.core.publisher.Mono;
 public class InvestmentAssetUniverseService {
 
     private final AssetUniverseApi assetUniverseApi;
+    private final InvestmentRestAssetUniverseService investmentRestAssetUniverseService;
     private final CustomIntegrationApiService customIntegrationApiService;
     private final AssetMapper assetMapper = Mappers.getMapper(AssetMapper.class);
 
@@ -69,14 +72,15 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing asset by its identifier, or creates it if not found (404). Handles 404 NOT_FOUND from getAsset
-     * by returning Mono.empty(), which triggers asset creation via switchIfEmpty.
+     * Gets an existing asset by its identifier, or creates it if not found (404). Handles 404 NOT_FOUND from
+     * getAsset by returning Mono.empty(), which triggers asset creation via switchIfEmpty.
      *
      * @param assetRequest the asset request details
+     * @param logo the thumbnail image
      * @return Mono<Asset> representing the existing or newly created asset
      * @throws IOException if an I/O error occurs
      */
-    public Mono<Asset> getOrCreateAsset(OASAssetRequestDataRequest assetRequest) {
+    public Mono<Asset> getOrCreateAsset(OASAssetRequestDataRequest assetRequest, File logo) {
         log.debug("Creating asset: {}", assetRequest);
 
         // Build a unique asset identifier using ISIN, market, and currency
@@ -101,6 +105,8 @@ public class InvestmentAssetUniverseService {
             })
             // If Mono is empty (asset not found), create the asset
             .switchIfEmpty(customIntegrationApiService.createAsset(assetRequest)
+                .flatMap(a -> investmentRestAssetUniverseService.setAssetLogo(a, logo)
+                    .thenReturn(a))
                 .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
                 .doOnError(error -> {
                     if (error instanceof WebClientResponseException w) {
@@ -115,8 +121,8 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing market special day by date and market, or creates it if not found. Handles 404 or empty results
-     * by creating the market special day.
+     * Gets an existing market special day by date and market, or creates it if not found. Handles 404 or empty
+     * results by creating the market special day.
      *
      * @param marketSpecialDayRequest the request containing market and date details
      * @return Mono\<MarketSpecialDay\> representing the existing or newly created market special day
@@ -179,18 +185,17 @@ public class InvestmentAssetUniverseService {
             .flatMapMany(categories -> {
                 Map<String, UUID> categoryIdByCode = categories.stream()
                     .collect(Collectors.toMap(AssetCategory::getCode, AssetCategory::getUuid));
-
                 return Flux.fromIterable(assets)
                     .flatMap(asset -> {
                         OASAssetRequestDataRequest assetRequest = assetMapper.map(asset, categoryIdByCode);
-                        return this.getOrCreateAsset(assetRequest).map(assetMapper::map);
+                        return this.getOrCreateAsset(assetRequest, asset.getLogo()).map(assetMapper::map);
                     });
             });
     }
 
     /**
-     * Gets an existing asset category by its code, or creates it if not found. Handles empty results by creating the
-     * asset category.
+     * Gets an existing asset category by its code, or creates it if not found. Handles empty results by creating
+     * the asset category.
      *
      * @param assetCategoryRequest the request containing asset category details
      * @return Mono<AssetCategory> representing the existing or newly created asset category
@@ -199,6 +204,9 @@ public class InvestmentAssetUniverseService {
         if (assetCategoryRequest == null) {
             return Mono.empty();
         }
+        File logo = assetCategoryRequest.getImage();
+        // Post request cannot insert file directly, so set to null for the initial creation call
+        assetCategoryRequest.setImage(null);
         return assetUniverseApi.listAssetCategories(assetCategoryRequest.getCode(), 100,
                 assetCategoryRequest.getName(), 0, assetCategoryRequest.getOrder(), assetCategoryRequest.getType())
             .flatMap(paginatedAssetCategoryList -> {
@@ -221,6 +229,8 @@ public class InvestmentAssetUniverseService {
             })
             .switchIfEmpty(
                 assetUniverseApi.createAssetCategory(assetCategoryRequest)
+//                    .flatMap(ac -> investmentRestAssetUniverseService.setAssetCategoryLogo(ac.getUuid(), logo)
+//                        .thenReturn(ac))
                     .doOnSuccess(createdCategory -> log.info("Created asset category : {}", createdCategory))
                     .doOnError(error -> {
                         if (error instanceof WebClientResponseException w) {
@@ -232,6 +242,9 @@ public class InvestmentAssetUniverseService {
                                 error.getMessage(), error);
                         }
                     })
+            )
+            .flatMap(ac -> investmentRestAssetUniverseService.setAssetCategoryLogo(ac.getUuid(), logo)
+                .thenReturn(ac)
             );
     }
 

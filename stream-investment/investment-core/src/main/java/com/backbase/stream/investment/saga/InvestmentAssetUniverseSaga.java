@@ -1,6 +1,5 @@
 package com.backbase.stream.investment.saga;
 
-import com.backbase.investment.api.service.v1.model.AssetCategoryRequest;
 import com.backbase.investment.api.service.v1.model.AssetCategoryTypeRequest;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
@@ -10,7 +9,6 @@ import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
-import com.backbase.stream.investment.service.InvestmentNewsContentService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
@@ -48,7 +46,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class InvestmentAssetUniversSaga implements StreamTaskExecutor<InvestmentAssetsTask> {
+public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<InvestmentAssetsTask> {
 
     public static final String INVESTMENT = "investment-client";
     public static final String OP_UPSERT = "upsert";
@@ -60,20 +58,18 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
 
     private final InvestmentAssetUniverseService assetUniverseService;
     private final InvestmentAssetPriceService investmentAssetPriceService;
-    private final InvestmentNewsContentService investmentNewsContentService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
 
     @Override
     public Mono<InvestmentAssetsTask> executeTask(InvestmentAssetsTask streamTask) {
-        if (!coreConfigurationProperties.isAssetUniversEnabled()) {
-            log.warn("Skip investment asset univers saga execution: taskId={}, taskName={}",
+        if (!coreConfigurationProperties.isAssetUniverseEnabled()) {
+            log.warn("Skip investment asset universe saga execution: taskId={}, taskName={}",
                 streamTask.getId(), streamTask.getName());
             return Mono.just(streamTask);
         }
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
         return createMarkets(streamTask)
-            .flatMap(this::upsertNewsContent)
             .flatMap(this::createMarketSpecialDays)
             .flatMap(this::createAssetCategoryTypes)
             .flatMap(this::createAssetCategories)
@@ -91,11 +87,6 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
                 streamTask.setState(State.FAILED);
             })
             .onErrorResume(throwable -> Mono.just(streamTask));
-    }
-
-    private Mono<InvestmentAssetsTask> upsertNewsContent(InvestmentAssetsTask investmentAssetsTask) {
-        return investmentNewsContentService.upsertContent(investmentAssetsTask.getData().getContents())
-            .map(o -> investmentAssetsTask);
     }
 
     private Mono<InvestmentAssetsTask> upsertPrices(InvestmentAssetsTask investmentTask) {
@@ -253,18 +244,10 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
         }
 
         return Flux.fromIterable(investmentData.getAssetCategories())
-            .flatMap(assetCategory -> {
-                AssetCategoryRequest request = new AssetCategoryRequest()
-                    .name(assetCategory.getName())
-                    .code(assetCategory.getCode())
-                    .order(assetCategory.getOrder())
-                    .type(assetCategory.getType())
-                    .description(assetCategory.getDescription());
-                return assetUniverseService.createAssetCategory(request);
-            })
+            .flatMap(assetUniverseService::createAssetCategory)
             .collectList()
             .map(assetCategories -> {
-                investmentTask.setAssetCategories(assetCategories);
+                investmentTask.setInsertedAssetCategories(assetCategories);
                 investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
                     investmentTask.getId(),
                     RESULT_CREATED + " " + assetCategories.size() + " Investment Asset Categories");

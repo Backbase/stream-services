@@ -54,9 +54,9 @@ public class InvestmentAssetPriceService {
                 LocalDate from = now.minusYears(1);
                 // we get only last days price
                 int daysOfPrices = 10;
-                return assetUniverseApi.listAssetClosePrices(asset.currency(), now.minusDays(daysOfPrices), now, null,
-                        null, null, null,
-                        asset.isin(), daysOfPrices + 1, asset.market(), null, null)
+                return assetUniverseApi.listAssetClosePrices(asset.getCurrency(), now.minusDays(daysOfPrices), now,
+                        null, null, null, null,
+                        asset.getIsin(), daysOfPrices + 1, asset.getMarket(), null, null)
                     .filter(Objects::nonNull)
                     .map(PaginatedOASPriceList::getResults)
                     .filter(Objects::nonNull)
@@ -113,7 +113,7 @@ public class InvestmentAssetPriceService {
             .orElse(defaultRandomParam);
         double price = Optional.ofNullable(lastPrice)
             .or(() -> Optional.ofNullable(configAssetPrice).map(AssetPrice::price)
-                .or(() -> Optional.of(a).map(Asset::defaultPrice)))
+                .or(() -> Optional.of(a).map(Asset::getDefaultPrice)))
             .orElse(DEFAULT_START_PRICE);
         return new RandomPriceParam(price, randomParam);
     }

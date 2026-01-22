@@ -11,7 +11,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "backbase.bootstrap.ingestions.investment")
 public class InvestmentIngestionConfigurationProperties {
 
-    private boolean assetUniversEnabled = true;
+    private boolean contentEnabled = true;
+    private boolean assetUniverseEnabled = true;
     private boolean wealthEnabled = true;
     private int portfolioActivationPastMonths = 1;
 

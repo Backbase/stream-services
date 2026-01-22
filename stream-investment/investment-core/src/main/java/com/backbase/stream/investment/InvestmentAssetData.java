@@ -1,8 +1,8 @@
 package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.AssetCategory;
+import com.backbase.investment.api.service.v1.model.AssetCategoryRequest;
 import com.backbase.investment.api.service.v1.model.AssetCategoryType;
-import com.backbase.investment.api.service.v1.model.EntryCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
@@ -24,10 +24,10 @@ public class InvestmentAssetData {
     private List<Market> markets;
     private List<MarketSpecialDay> marketSpecialDays;
     private List<AssetCategoryType> assetCategoryTypes;
-    private List<AssetCategory> assetCategories;
+    private List<AssetCategoryRequest> assetCategories;
     private List<Asset> assets;
-    private List<EntryCreateUpdateRequest> contents;
     private List<AssetPrice> assetPrices;
+    private List<AssetCategory> insertedAssetCategories;
     private List<GroupResult> priceAsyncTasks;
 
     public Map<String, AssetPrice> getPriceByAsset() {
@@ -37,7 +37,7 @@ public class InvestmentAssetData {
 
     public Map<UUID, Asset> getAssetByUuid() {
         return Objects.requireNonNullElse(assets, List.<Asset>of()).stream()
-            .collect(Collectors.toMap(Asset::uuid, Function.identity()));
+            .collect(Collectors.toMap(Asset::getUuid, Function.identity()));
 
     }
 
