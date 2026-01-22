@@ -6,38 +6,38 @@ import com.backbase.investment.api.service.v1.model.Asset;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 /**
- * This is a custom implementations to avoid issues with Reactive and multipart requests
+ * This is a custom implementation to avoid issues with Reactive and multipart requests.
  */
 class InvestmentAssetUniverseServiceTest {
 
     InvestmentAssetUniverseService service;
     AssetUniverseApi assetUniverseApi;
     ApiClient apiClient;
+    InvestmentRestAssetUniverseService investmentRestAssetUniverseService;
     CustomIntegrationApiService customIntegrationApiService;
 
     @BeforeEach
     void setUp() {
         assetUniverseApi = Mockito.mock(AssetUniverseApi.class);
         apiClient = Mockito.mock(ApiClient.class);
-        customIntegrationApiService = Mockito.spy(new CustomIntegrationApiService(apiClient));
-        service = new InvestmentAssetUniverseService(assetUniverseApi, customIntegrationApiService);
+        investmentRestAssetUniverseService = Mockito.mock(InvestmentRestAssetUniverseService.class);
+        customIntegrationApiService = Mockito.mock(CustomIntegrationApiService.class);
+        service = new InvestmentAssetUniverseService(assetUniverseApi,
+            investmentRestAssetUniverseService, customIntegrationApiService);
     }
 
     @Test
@@ -84,42 +84,13 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     @Test
-    void getOrCreateAsset_assetExists() throws IOException {
-        OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
-            .isin("ABC123").market("US").currency("USD");
-        Asset asset = new Asset().isin("ABC123");
-        String assetId = "ABC123_US_USD";
-        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null)).thenReturn(Mono.just(asset));
-
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
-            .thenReturn(Mono.just(asset));
-
-        StepVerifier.create(service.getOrCreateAsset(req))
-            .expectNext(asset)
-            .verifyComplete();
-    }
-
-    @Test
-    void getOrCreateAsset_assetNotFound_createsAsset() throws IOException {
+    void getOrCreateAsset_assetNotFound_createsAsset() {
         OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
             .isin("ABC123").market("US").currency("USD");
         Asset createdAsset = new Asset().isin("ABC123");
         String assetId = "ABC123_US_USD";
+        File logo = null;
+
         Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
             .thenReturn(Mono.error(WebClientResponseException.create(
                 HttpStatus.NOT_FOUND.value(),
@@ -128,65 +99,24 @@ class InvestmentAssetUniverseServiceTest {
                 null,
                 StandardCharsets.UTF_8
             )));
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
+        Mockito.when(customIntegrationApiService.createAsset(req))
             .thenReturn(Mono.just(createdAsset));
+        Mockito.when(investmentRestAssetUniverseService.setAssetLogo(createdAsset, logo))
+            .thenReturn(Mono.empty());
 
-        StepVerifier.create(service.getOrCreateAsset(req))
+        StepVerifier.create(service.getOrCreateAsset(req, logo))
             .expectNext(createdAsset)
             .verifyComplete();
     }
 
+
     @Test
-    void getOrCreateAsset_otherError_propagates() throws IOException {
+    void getOrCreateAsset_createAssetFails_propagates() {
         OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
             .isin("ABC123").market("US").currency("USD");
         String assetId = "ABC123_US_USD";
-        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
-            .thenReturn(Mono.error(new RuntimeException("API error")));
+        File logo = null;
 
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
-            .thenReturn(Mono.error(new RuntimeException("API error")));
-
-        StepVerifier.create(service.getOrCreateAsset(req))
-            .expectErrorMatches(e -> e instanceof RuntimeException && e.getMessage().equals("API error"))
-            .verify();
-    }
-
-    @Test
-    void getOrCreateAsset_createAssetFails_propagates() throws IOException {
-        OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
-            .isin("ABC123").market("US").currency("USD");
-        String assetId = "ABC123_US_USD";
         Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
             .thenReturn(Mono.error(WebClientResponseException.create(
                 HttpStatus.NOT_FOUND.value(),
@@ -195,43 +125,28 @@ class InvestmentAssetUniverseServiceTest {
                 null,
                 StandardCharsets.UTF_8
             )));
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
+        Mockito.when(customIntegrationApiService.createAsset(req))
             .thenReturn(Mono.error(new RuntimeException("Create asset failed")));
 
-        StepVerifier.create(service.getOrCreateAsset(req))
+        StepVerifier.create(service.getOrCreateAsset(req, logo))
             .expectErrorMatches(e -> e instanceof RuntimeException && e.getMessage().equals("Create asset failed"))
             .verify();
     }
 
     @Test
     void getOrCreateAsset_nullRequest_returnsError() {
-        StepVerifier.create(Mono.defer(() -> {
-                return service.getOrCreateAsset(null);
-            }))
+        StepVerifier.create(Mono.defer(() -> service.getOrCreateAsset(null, null)))
             .expectError(NullPointerException.class)
             .verify();
     }
 
     @Test
-    void getOrCreateAsset_emptyMonoFromCreateAsset() throws IOException {
+    void getOrCreateAsset_emptyMonoFromCreateAsset() {
         OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
             .isin("ABC123").market("US").currency("USD");
         String assetId = "ABC123_US_USD";
+        File logo = null;
+
         Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
             .thenReturn(Mono.error(WebClientResponseException.create(
                 HttpStatus.NOT_FOUND.value(),
@@ -240,25 +155,10 @@ class InvestmentAssetUniverseServiceTest {
                 null,
                 StandardCharsets.UTF_8
             )));
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
+        Mockito.when(customIntegrationApiService.createAsset(req))
             .thenReturn(Mono.empty());
 
-        StepVerifier.create(service.getOrCreateAsset(req))
+        StepVerifier.create(service.getOrCreateAsset(req, logo))
             .expectComplete()
             .verify();
     }
