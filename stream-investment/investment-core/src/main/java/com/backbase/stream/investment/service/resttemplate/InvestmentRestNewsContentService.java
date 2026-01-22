@@ -158,41 +158,39 @@ public class InvestmentRestNewsContentService {
             thumbnail.getName(), thumbnail.length());
 
         return Mono.defer(() -> {
-                // create path and map variables
-                Map<String, Object> uriVariables = new HashMap<>();
-                uriVariables.put("uuid", uuid);
+            // create path and map variables
+            Map<String, Object> uriVariables = new HashMap<>();
+            uriVariables.put("uuid", uuid);
 
-                MultiValueMap<String, String> localVarQueryParams = new LinkedMultiValueMap<>();
-                HttpHeaders localVarHeaderParams = new HttpHeaders();
-                MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<>();
-                MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<>();
+            MultiValueMap<String, String> localVarQueryParams = new LinkedMultiValueMap<>();
+            HttpHeaders localVarHeaderParams = new HttpHeaders();
+            MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<>();
+            MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<>();
 
-                FileSystemResource value = new FileSystemResource(thumbnail);
-                localVarFormParams.add("thumbnail", value);
+            FileSystemResource value = new FileSystemResource(thumbnail);
+            localVarFormParams.add("thumbnail", value);
 
-                final String[] localVarAccepts = {"application/json"};
-                final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
-                final String[] localVarContentTypes = {"multipart/form-data"};
-                final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+            final String[] localVarAccepts = {"application/json"};
+            final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+            final String[] localVarContentTypes = {"multipart/form-data"};
+            final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
 
-                String[] localVarAuthNames = new String[]{};
+            String[] localVarAuthNames = new String[]{};
 
-                ParameterizedTypeReference<EntryCreateUpdate> localReturnType = new ParameterizedTypeReference<>() {
-                };
-                apiClient.invokeAPI("/service-api/v2/content/entries/{uuid}/", HttpMethod.PATCH, uriVariables,
-                    localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
-                    localVarAccept, localVarContentType, localVarAuthNames, localReturnType);
+            ParameterizedTypeReference<EntryCreateUpdate> localReturnType = new ParameterizedTypeReference<>() {
+            };
+            apiClient.invokeAPI("/service-api/v2/content/entries/{uuid}/", HttpMethod.PATCH, uriVariables,
+                localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
+                localVarAccept, localVarContentType, localVarAuthNames, localReturnType);
 
-                log.info("Thumbnail attached successfully: uuid={}, thumbnailFile='{}'", uuid, thumbnail.getName());
-                return Mono.just(entry);
-            })
-            .doOnError(error -> log.error(
-                "Thumbnail attachment failed: uuid={}, thumbnailFile='{}', errorType={}, errorMessage={}", uuid,
-                thumbnail.getName(), error.getClass().getSimpleName(), error.getMessage(), error))
-            .onErrorResume(error -> {
-                log.warn("Content entry created without thumbnail: uuid={}, reason={}", uuid, error.getMessage());
-                return Mono.just(entry);
-            });
+            log.info("Thumbnail attached successfully: uuid={}, thumbnailFile='{}'", uuid, thumbnail.getName());
+            return Mono.just(entry);
+        }).doOnError(error -> log.error(
+            "Thumbnail attachment failed: uuid={}, thumbnailFile='{}', errorType={}, errorMessage={}", uuid,
+            thumbnail.getName(), error.getClass().getSimpleName(), error.getMessage(), error)).onErrorResume(error -> {
+            log.warn("Content entry created without thumbnail: uuid={}, reason={}", uuid, error.getMessage());
+            return Mono.just(entry);
+        });
     }
 
 }
