@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 ## [9.5.0]
 ### Added
  - investment service intraday generation and ingestion function
+ - ingest images for investment service (asset logo, asset category image, news content image)
 ### Changed
  - fix investment asset universe from create to upsert implementation
+
+### Fixed
+ - Added resttemplate client for investment service to fix request multipart/form-data to django server.
+   - Django & WebFlux don't work OOTB
 
 ## [9.4.x]
 ### Changed
