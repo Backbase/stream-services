@@ -21,6 +21,7 @@ public interface AssetMapper {
     OASAssetRequestDataRequest map(Asset asset, Map<String, UUID> categoryIdByCode);
 
     @Mapping(target = "categories", source = "categories", qualifiedByName = "mapCategories")
+    @Mapping(target = "logo", ignore = true)
     Asset map(com.backbase.investment.api.service.v1.model.Asset asset);
 
     @AfterMapping
@@ -29,7 +30,7 @@ public interface AssetMapper {
         if (requestDataRequest == null) {
             return;
         }
-        requestDataRequest.setCategories(Objects.requireNonNullElse(asset.categories(), new ArrayList<AssetCategory>())
+        requestDataRequest.setCategories(Objects.requireNonNullElse(asset.getCategories(), new ArrayList<AssetCategory>())
             .stream().filter(Objects::nonNull).map(categoryIdByCode::get)
             .filter(Objects::nonNull).toList());
     }

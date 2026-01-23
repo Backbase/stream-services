@@ -20,6 +20,7 @@ import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.RandomParam;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
+import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +34,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 /**
- * Test suite for {@link InvestmentAssetUniversSaga}, focusing on the asynchronous price ingestion workflow with polling
- * and timeout behavior.
+ * Test suite for {@link InvestmentAssetUniverseSaga}, focusing on the asynchronous price ingestion
+ * workflow with polling and timeout behavior.
  *
  * <p>These tests verify:
  * <ul>
@@ -44,7 +45,7 @@ import reactor.test.StepVerifier;
  *   <li>Error propagation during price ingestion</li>
  * </ul>
  */
-class InvestmentAssetUniversSagaTest {
+class InvestmentAssetUniverseSagaTest {
 
     @Mock
     private InvestmentAssetUniverseService assetUniverseService;
@@ -53,20 +54,24 @@ class InvestmentAssetUniversSagaTest {
     private InvestmentAssetPriceService investmentAssetPriceService;
 
     @Mock
+    private InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService;
+
+    @Mock
     private InvestmentIngestionConfigurationProperties configurationProperties;
 
-    private InvestmentAssetUniversSaga saga;
+    private InvestmentAssetUniverseSaga saga;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        saga = new InvestmentAssetUniversSaga(
+        saga = new InvestmentAssetUniverseSaga(
             assetUniverseService,
             investmentAssetPriceService,
+            investmentIntradayAssetPriceService,
             configurationProperties
         );
         // Enable asset universe by default
-        when(configurationProperties.isAssetUniversEnabled()).thenReturn(true);
+        when(configurationProperties.isAssetUniverseEnabled()).thenReturn(true);
     }
 
 
@@ -236,8 +241,8 @@ class InvestmentAssetUniversSagaTest {
         InvestmentAssetsTask task = createTestTask();
 
         // Mock: Markets and market special days creation succeed
-        when(assetUniverseService.getOrCreateMarket(any())).thenReturn(Mono.empty());
-        when(assetUniverseService.getOrCreateMarketSpecialDay(any())).thenReturn(Mono.empty());
+        when(assetUniverseService.upsertMarket(any())).thenReturn(Mono.empty());
+        when(assetUniverseService.upsertMarketSpecialDay(any())).thenReturn(Mono.empty());
         when(assetUniverseService.createAssets(anyList())).thenReturn(Flux.fromIterable(task.getData().getAssets()));
 
         // Mock: Price ingestion fails with an exception
@@ -364,7 +369,7 @@ class InvestmentAssetUniversSagaTest {
      * @return a configured test task
      */
     private InvestmentAssetsTask createTestTask() {
-        // Create sample assets using the record constructor
+        // Create sample assets using the Asset constructor
         Asset asset1 = new Asset(
             UUID.randomUUID(),
             "Apple Inc.",
@@ -376,8 +381,8 @@ class InvestmentAssetUniversSagaTest {
             Collections.emptyMap(),
             AssetTypeEnum.STOCK,
             List.of("Technology"),
-            null,
             "AAPL-001",
+            null,
             "Apple Inc. Stock",
             150.0
         );
@@ -393,8 +398,8 @@ class InvestmentAssetUniversSagaTest {
             Collections.emptyMap(),
             AssetTypeEnum.STOCK,
             List.of("Technology"),
-            null,
             "MSFT-001",
+            null,
             "Microsoft Corp. Stock",
             200.0
         );

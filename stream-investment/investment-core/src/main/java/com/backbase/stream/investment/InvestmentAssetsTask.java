@@ -23,7 +23,7 @@ public class InvestmentAssetsTask extends StreamTask {
 
     @Override
     public String getName() {
-        return "investment";
+        return "investment-assets";
     }
 
     public void setMarkets(List<Market> markets) {
@@ -38,8 +38,8 @@ public class InvestmentAssetsTask extends StreamTask {
         data.setAssetCategoryTypes(assetCategoryTypes);
     }
 
-    public void setAssetCategories(List<AssetCategory> assetCategories) {
-        data.setAssetCategories(assetCategories);
+    public void setInsertedAssetCategories(List<AssetCategory> assetCategories) {
+        data.setInsertedAssetCategories(assetCategories);
     }
 
     public void setAssets(List<Asset> assets) {
@@ -51,4 +51,8 @@ public class InvestmentAssetsTask extends StreamTask {
         return this;
     }
 
+    public InvestmentAssetsTask setIntradayPriceTasks(List<GroupResult> tasks) {
+        data.setIntradayPriceAsyncTasks(tasks);
+        return this;
+    }
 }

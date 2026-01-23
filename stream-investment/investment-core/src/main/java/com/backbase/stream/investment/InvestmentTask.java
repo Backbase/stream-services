@@ -19,7 +19,7 @@ public class InvestmentTask extends StreamTask {
 
     @Override
     public String getName() {
-        return "investment";
+        return "investment-portfolios-clients";
     }
 
     public void data(List<ClientUser> clients) {

@@ -11,7 +11,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class AsyncTaskService {
 
