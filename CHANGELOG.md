@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.5.0]
+### Added
+ - investment service intraday generation and ingestion function
+### Changed
+ - fix investment asset universe from create to upsert implementation
+
+## [9.4.x]
+### Changed
+
 ## [9.3.0](https://github.com/Backbase/stream-services/compare/9.2.0...9.3.0)
 ### Changed
   - fix for NoSuchElementException (No value present) thrown while update data groups
