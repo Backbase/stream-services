@@ -19,7 +19,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -41,19 +40,21 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     @Test
-    void getOrCreateMarket_marketExists() {
+    void upsertMarket_marketExists() {
         MarketRequest request = new MarketRequest().code("US");
-        Market market = new Market().code("US");
+        Market market = new Market().code("US").name("Usa Market");
+        Market marketUpdated = new Market().code("US").name("Usa Market Updated");
         Mockito.when(assetUniverseApi.getMarket("US")).thenReturn(Mono.just(market));
-        Mockito.when(assetUniverseApi.createMarket(request)).thenReturn(Mono.empty());
+        Mockito.when(assetUniverseApi.createMarket(request)).thenReturn(Mono.just(market));
+        Mockito.when(assetUniverseApi.updateMarket("US",request)).thenReturn(Mono.just(marketUpdated));
 
-        StepVerifier.create(service.getOrCreateMarket(request))
-            .expectNext(market)
+        StepVerifier.create(service.upsertMarket(request))
+            .expectNext(marketUpdated)
             .verifyComplete();
     }
 
     @Test
-    void getOrCreateMarket_marketNotFound_createsMarket() {
+    void upsertMarket_marketNotFound_createsMarket() {
         MarketRequest request = new MarketRequest().code("US");
         Market createdMarket = new Market().code("US");
         Mockito.when(assetUniverseApi.getMarket("US"))
@@ -66,25 +67,25 @@ class InvestmentAssetUniverseServiceTest {
             )));
         Mockito.when(assetUniverseApi.createMarket(request)).thenReturn(Mono.just(createdMarket));
 
-        StepVerifier.create(service.getOrCreateMarket(request))
+        StepVerifier.create(service.upsertMarket(request))
             .expectNext(createdMarket)
             .verifyComplete();
     }
 
     @Test
-    void getOrCreateMarket_otherError_propagates() {
+    void upsertMarket_otherError_propagates() {
         MarketRequest request = new MarketRequest().code("US");
         Mockito.when(assetUniverseApi.getMarket("US"))
             .thenReturn(Mono.error(new RuntimeException("API error")));
         Mockito.when(assetUniverseApi.createMarket(request)).thenReturn(Mono.empty());
 
-        StepVerifier.create(service.getOrCreateMarket(request))
+        StepVerifier.create(service.upsertMarket(request))
             .expectErrorMatches(e -> e instanceof RuntimeException && e.getMessage().equals("API error"))
             .verify();
     }
 
     @Test
-    void getOrCreateAsset_assetExists() throws IOException {
+    void getOrCreateAsset_assetExists() {
         OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
             .isin("ABC123").market("US").currency("USD");
         Asset asset = new Asset().isin("ABC123");
@@ -115,7 +116,7 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     @Test
-    void getOrCreateAsset_assetNotFound_createsAsset() throws IOException {
+    void getOrCreateAsset_assetNotFound_createsAsset() {
         OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
             .isin("ABC123").market("US").currency("USD");
         Asset createdAsset = new Asset().isin("ABC123");
@@ -152,7 +153,7 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     @Test
-    void getOrCreateAsset_otherError_propagates() throws IOException {
+    void getOrCreateAsset_otherError_propagates() {
         OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
             .isin("ABC123").market("US").currency("USD");
         String assetId = "ABC123_US_USD";
@@ -183,7 +184,7 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     @Test
-    void getOrCreateAsset_createAssetFails_propagates() throws IOException {
+    void getOrCreateAsset_createAssetFails_propagates() {
         OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
             .isin("ABC123").market("US").currency("USD");
         String assetId = "ABC123_US_USD";
@@ -228,7 +229,7 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     @Test
-    void getOrCreateAsset_emptyMonoFromCreateAsset() throws IOException {
+    void getOrCreateAsset_emptyMonoFromCreateAsset() {
         OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
             .isin("ABC123").market("US").currency("USD");
         String assetId = "ABC123_US_USD";

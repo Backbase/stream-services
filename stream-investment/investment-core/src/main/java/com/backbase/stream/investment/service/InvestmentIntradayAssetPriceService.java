@@ -4,8 +4,8 @@ import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.OASCreatePriceRequest;
 import com.backbase.investment.api.service.v1.model.TypeEnum;
-import com.backbase.stream.investment.AssetLatestPrice;
-import com.backbase.stream.investment.PaginatedExpandedAssetList;
+import com.backbase.stream.investment.model.AssetWithMarketAndLatestPrice;
+import com.backbase.stream.investment.model.PaginatedExpandedAssetList;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -65,12 +65,12 @@ public class InvestmentIntradayAssetPriceService {
         log.info("Generating Intraday Prices for Assets");
         return assetUniverseApi.listAssetsWithResponseSpec(
                 null, null, null, null,
-                Collections.singletonList("latest_price"),
+                List.of("market","latest_price"),
                 null, null,
-                "uuid,latest_price",
+                "uuid,market,latest_price",
                 null, null, null, null, null,
                 null, null, null, null
-            )
+            ) // Above API returns custom projection with market and latest price expanded only, hence needs a custom return type.
             .bodyToMono(PaginatedExpandedAssetList.class)
             .flatMap(paginatedAssetList -> {
 
@@ -80,9 +80,9 @@ public class InvestmentIntradayAssetPriceService {
                 }
 
                 return Flux.fromIterable(paginatedAssetList.getResults())
-                    .flatMap(assetLatestPrice -> {
+                    .flatMap(assetWithMarketAndLatestPrice -> {
                         List<OASCreatePriceRequest> requests =
-                            generateIntradayPricesForAsset(assetLatestPrice);
+                            generateIntradayPricesForAsset(assetWithMarketAndLatestPrice);
 
                         log.debug("Generated intraday price requests: {}", requests);
 
@@ -96,13 +96,13 @@ public class InvestmentIntradayAssetPriceService {
                                 log.info(
                                     "Successfully triggered creation of {} intraday prices for asset ({})",
                                     requests.size(),
-                                    assetLatestPrice.uuid()
+                                    assetWithMarketAndLatestPrice.uuid()
                                 )
                             )
                             .doOnError(WebClientResponseException.class, ex ->
                                 log.error(
                                     "Failed to create intraday prices for asset ({}): status={}, body={}",
-                                    assetLatestPrice.uuid(),
+                                    assetWithMarketAndLatestPrice.uuid(),
                                     ex.getStatusCode(),
                                     ex.getResponseBodyAsString(),
                                     ex
@@ -133,53 +133,56 @@ public class InvestmentIntradayAssetPriceService {
     /**
      * Generate a list of intraday price create requests for a single asset.
      *
-     * <p>Each request represents a 10-minute / 15-candle sequence starting around 10:30 UTC.
+     * <p>Each request represents a 15-minute / 15-candle sequence.
      *
-     * @param assetLatestPrice the asset data with latest price information
+     * @param assetWithMarketAndLatestPrice the asset data with latest price information
      * @return a list of {@link OASCreatePriceRequest} ready to be submitted
      */
-    private List<OASCreatePriceRequest> generateIntradayPricesForAsset(AssetLatestPrice assetLatestPrice) {
+    private List<OASCreatePriceRequest> generateIntradayPricesForAsset(
+        AssetWithMarketAndLatestPrice assetWithMarketAndLatestPrice) {
         List<OASCreatePriceRequest> requests = new ArrayList<>();
 
         // Base previous close
-        Double previousClose = assetLatestPrice.latestPrice().previousClosePrice();
+        Double previousClose = assetWithMarketAndLatestPrice.expandedLatestPrice().previousClosePrice();
 
-        // Today, starting at 10:30
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
-        LocalTime time = LocalTime.of(10, 30).plusMinutes(ThreadLocalRandom.current().nextInt(0, 10));
+        // Today
+        OffsetDateTime todaySessionStarts = assetWithMarketAndLatestPrice.expandedMarket().todaySessionStarts();
+        LocalDate today = todaySessionStarts.toLocalDate();
+        LocalTime time = intradayStartTime(todaySessionStarts);
 
         for (int i = 0; i < 15; i++) {
-
             // Generate intraday OHLC
-            Map<String, Double> ohlc = generateIntradayOhlc(previousClose);
+            Ohlc ohlc = generateIntradayOhlc(previousClose);
 
-            OASCreatePriceRequest oasCreatePriceRequest = new OASCreatePriceRequest();
-
-            try {
-                oasCreatePriceRequest.amount(ohlc.get("close"));
-                oasCreatePriceRequest.asset(Map.of("uuid", assetLatestPrice.uuid().toString()));
-                oasCreatePriceRequest.datetime(
-                    OffsetDateTime.of(today, time, ZoneOffset.UTC)
-                );
-                oasCreatePriceRequest.open(ohlc.get("open"));
-                oasCreatePriceRequest.high(ohlc.get("high"));
-                oasCreatePriceRequest.low(ohlc.get("low"));
-                oasCreatePriceRequest.previousClose(previousClose);
-                oasCreatePriceRequest.type(TypeEnum.INTRADAY);
-            } catch (NoSuchMethodError ignored) {
-                log.debug("AssetLatestPrice: {}", assetLatestPrice);
-                log.warn("Failed to map intraday price for asset: {}", assetLatestPrice.uuid(), ignored);
-            }
-
-            requests.add(oasCreatePriceRequest);
+            // Create request
+            requests.add(createIntradayRequest(assetWithMarketAndLatestPrice, ohlc, previousClose,
+                OffsetDateTime.of(today, time, ZoneOffset.UTC)));
 
             // Next candle starts from this close
-            previousClose = ohlc.get("close");
+            previousClose = ohlc.close();
 
             // Move time forward by 15 minutes
-            time = time.plusMinutes(10);
+            time = time.plusMinutes(15);
         }
         return requests;
+    }
+
+    private LocalTime intradayStartTime(OffsetDateTime offsetDateTime) {
+        return offsetDateTime.toLocalTime().plusMinutes(ThreadLocalRandom.current().nextInt(1, 15));
+    }
+
+    private OASCreatePriceRequest createIntradayRequest(AssetWithMarketAndLatestPrice asset, Ohlc ohlc, Double previousClose,
+        OffsetDateTime dateTime) {
+
+        return new OASCreatePriceRequest()
+            .amount(ohlc.close())
+            .asset(Map.of("uuid", asset.uuid().toString()))
+            .datetime(dateTime)
+            .open(ohlc.open())
+            .high(ohlc.high())
+            .low(ohlc.low())
+            .previousClose(previousClose)
+            .type(TypeEnum.INTRADAY);
     }
 
     /**
@@ -195,7 +198,7 @@ public class InvestmentIntradayAssetPriceService {
      * @return a map with keys \"open\", \"high\", \"low\", \"close\" rounded to 6 decimal places
      * @throws IllegalArgumentException if previousClose is null or not positive
      */
-    public static Map<String, Double> generateIntradayOhlc(Double previousClose) {
+    public static Ohlc generateIntradayOhlc(Double previousClose) {
         if (previousClose == null || previousClose <= 0) {
             throw new IllegalArgumentException("Previous close must be positive");
         }
@@ -235,12 +238,7 @@ public class InvestmentIntradayAssetPriceService {
         double high = Math.max(open, close) * (1 + upperWickPct);
         double low = Math.min(open, close) * (1 - lowerWickPct);
 
-        return Map.of(
-            "open", round6(open),
-            "high", round6(high),
-            "low", round6(low),
-            "close", round6(close)
-        );
+        return new Ohlc(round6(open), round6(high), round6(low), round6(close));
     }
 
     private static double round6(double value) {
@@ -249,5 +247,7 @@ public class InvestmentIntradayAssetPriceService {
             .setScale(6, RoundingMode.HALF_UP)
             .doubleValue();
     }
+
+    public record Ohlc(double open, double high, double low, double close) {}
 
 }

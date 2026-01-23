@@ -43,7 +43,7 @@ public class InvestmentAssetUniverseService {
      * @param marketRequest the market request details
      * @return Mono<Market> representing the existing or newly created market
      */
-    public Mono<Market> getOrCreateMarket(MarketRequest marketRequest) {
+    public Mono<Market> upsertMarket(MarketRequest marketRequest) {
         log.debug("Creating market: {}", marketRequest);
         return assetUniverseApi.getMarket(marketRequest.getCode())
             // If getMarket returns 404 NOT_FOUND, treat as "not found" and return Mono.empty()
@@ -131,7 +131,7 @@ public class InvestmentAssetUniverseService {
      * @param marketSpecialDayRequest the request containing market and date details
      * @return Mono\<MarketSpecialDay\> representing the existing or newly created market special day
      */
-    public Mono<MarketSpecialDay> getOrCreateMarketSpecialDay(MarketSpecialDayRequest marketSpecialDayRequest) {
+    public Mono<MarketSpecialDay> upsertMarketSpecialDay(MarketSpecialDayRequest marketSpecialDayRequest) {
         log.debug("Creating market special day: {}", marketSpecialDayRequest);
         LocalDate date = marketSpecialDayRequest.getDate();
 
@@ -218,7 +218,7 @@ public class InvestmentAssetUniverseService {
      * @param assetCategoryRequest the request containing asset category details
      * @return Mono<AssetCategory> representing the existing or newly created asset category
      */
-    public Mono<AssetCategory> createAssetCategory(AssetCategoryRequest assetCategoryRequest) {
+    public Mono<AssetCategory> upsertAssetCategory(AssetCategoryRequest assetCategoryRequest) {
         if (assetCategoryRequest == null) {
             return Mono.empty();
         }
@@ -277,7 +277,7 @@ public class InvestmentAssetUniverseService {
      * @param assetCategoryTypeRequest the request containing asset category type details
      * @return Mono<AssetCategoryType> representing the existing or newly created asset category type
      */
-    public Mono<AssetCategoryType> createAssetCategoryType(AssetCategoryTypeRequest assetCategoryTypeRequest) {
+    public Mono<AssetCategoryType> upsertAssetCategoryType(AssetCategoryTypeRequest assetCategoryTypeRequest) {
         if (assetCategoryTypeRequest == null) {
             return Mono.empty();
         }

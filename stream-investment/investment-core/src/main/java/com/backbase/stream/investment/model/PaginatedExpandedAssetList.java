@@ -1,4 +1,4 @@
-package com.backbase.stream.investment;
+package com.backbase.stream.investment.model;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -22,6 +22,6 @@ public class PaginatedExpandedAssetList {
     private URI previous;
 
     public static final String JSON_PROPERTY_RESULTS = "results";
-    private List<AssetLatestPrice> results = new ArrayList<>();
+    private List<AssetWithMarketAndLatestPrice> results = new ArrayList<>();
 
 }

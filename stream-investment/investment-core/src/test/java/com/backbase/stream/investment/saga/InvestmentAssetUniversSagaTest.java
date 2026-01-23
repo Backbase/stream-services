@@ -241,8 +241,8 @@ class InvestmentAssetUniversSagaTest {
         InvestmentAssetsTask task = createTestTask();
 
         // Mock: Markets and market special days creation succeed
-        when(assetUniverseService.getOrCreateMarket(any())).thenReturn(Mono.empty());
-        when(assetUniverseService.getOrCreateMarketSpecialDay(any())).thenReturn(Mono.empty());
+        when(assetUniverseService.upsertMarket(any())).thenReturn(Mono.empty());
+        when(assetUniverseService.upsertMarketSpecialDay(any())).thenReturn(Mono.empty());
         when(assetUniverseService.createAssets(anyList())).thenReturn(Flux.fromIterable(task.getData().getAssets()));
 
         // Mock: Price ingestion fails with an exception

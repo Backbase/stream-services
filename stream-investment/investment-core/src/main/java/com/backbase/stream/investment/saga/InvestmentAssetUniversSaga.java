@@ -78,7 +78,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
             .flatMap(this::upsertAssetCategories)
             .flatMap(this::createAssets)
             .flatMap(this::upsertPrices)
-            .flatMap(this::upsertIntradayPrices)
+            .flatMap(this::createIntradayPrices)
             .doOnSuccess(completedTask -> log.info(
                 "Successfully completed investment asset universe saga: taskId={}, taskName={}, state={}",
                 completedTask.getId(), completedTask.getName(), completedTask.getState()))
@@ -99,7 +99,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
             .map(investmentTask::setPriceTasks);
     }
 
-    private Mono<InvestmentAssetsTask> upsertIntradayPrices(InvestmentAssetsTask investmentTask) {
+    private Mono<InvestmentAssetsTask> createIntradayPrices(InvestmentAssetsTask investmentTask) {
         return investmentIntradayAssetPriceService.ingestIntradayPrices()
             .map(investmentTask::setIntradayPriceTasks);
     }
@@ -138,7 +138,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
 
         // Process each market: create or get from asset universe service
         return Flux.fromIterable(investmentData.getMarkets())
-            .flatMap(market -> assetUniverseService.getOrCreateMarket(
+            .flatMap(market -> assetUniverseService.upsertMarket(
                 new MarketRequest()
                     .code(market.getCode())
                     .name(market.getName())
@@ -196,7 +196,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
 
         // Process each market  special day: create or get from asset universe service
         return Flux.fromIterable(investmentData.getMarketSpecialDays())
-            .flatMap(marketSpecialDay -> assetUniverseService.getOrCreateMarketSpecialDay(
+            .flatMap(marketSpecialDay -> assetUniverseService.upsertMarketSpecialDay(
                 new MarketSpecialDayRequest()
                     .date(marketSpecialDay.getDate())
                     .market(marketSpecialDay.getMarket())
@@ -260,7 +260,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
                     .order(assetCategory.getOrder())
                     .type(assetCategory.getType())
                     .description(assetCategory.getDescription());
-                return assetUniverseService.createAssetCategory(request);
+                return assetUniverseService.upsertAssetCategory(request);
             })
             .collectList()
             .map(assetCategories -> {
@@ -304,7 +304,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
                 AssetCategoryTypeRequest request = new AssetCategoryTypeRequest()
                     .name(assetCategoryType.getName())
                     .code(assetCategoryType.getCode());
-                return assetUniverseService.createAssetCategoryType(request);
+                return assetUniverseService.upsertAssetCategoryType(request);
             })
             .collectList()
             .map(assetCategoryTypes -> {

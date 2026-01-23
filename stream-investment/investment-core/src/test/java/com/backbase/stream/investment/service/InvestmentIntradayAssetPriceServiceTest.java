@@ -3,7 +3,7 @@ package com.backbase.stream.investment.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.Map;
+import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService.Ohlc;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
@@ -28,14 +28,12 @@ class InvestmentIntradayAssetPriceServiceTest {
     @RepeatedTest(10)
     void generateIntradayOhlc_shouldProduceValidOhlcStructure() {
         double previous = 100.0;
-        Map<String, Double> ohlc = InvestmentIntradayAssetPriceService.generateIntradayOhlc(previous);
+        Ohlc ohlc = InvestmentIntradayAssetPriceService.generateIntradayOhlc(previous);
 
-        assertThat(ohlc).containsKeys("open", "high", "low", "close");
-
-        double open = ohlc.get("open");
-        double high = ohlc.get("high");
-        double low = ohlc.get("low");
-        double close = ohlc.get("close");
+        double open = ohlc.open();
+        double high = ohlc.high();
+        double low = ohlc.low();
+        double close = ohlc.close();
 
         // Basic sanity
         assertThat(open).isGreaterThan(0.0);
