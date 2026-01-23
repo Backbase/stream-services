@@ -27,6 +27,7 @@ public class InvestmentAssetData {
     private List<Asset> assets;
     private List<AssetPrice> assetPrices;
     private List<GroupResult> priceAsyncTasks;
+    private List<GroupResult> intradayPriceAsyncTasks;
 
     public Map<String, AssetPrice> getPriceByAsset() {
         return Objects.requireNonNullElse(assetPrices, List.<AssetPrice>of()).stream()

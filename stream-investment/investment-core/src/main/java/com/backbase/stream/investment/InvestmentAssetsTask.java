@@ -51,4 +51,8 @@ public class InvestmentAssetsTask extends StreamTask {
         return this;
     }
 
+    public InvestmentAssetsTask setIntradayPriceTasks(List<GroupResult> tasks) {
+        data.setIntradayPriceAsyncTasks(tasks);
+        return this;
+    }
 }

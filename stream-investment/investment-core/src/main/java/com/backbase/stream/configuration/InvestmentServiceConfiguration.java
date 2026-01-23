@@ -17,6 +17,7 @@ import com.backbase.stream.investment.service.CustomIntegrationApiService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
@@ -74,6 +75,11 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    public InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService(AssetUniverseApi assetUniverseApi) {
+        return new InvestmentIntradayAssetPriceService(assetUniverseApi);
+    }
+
+    @Bean
     public InvestmentPortfolioAllocationService investmentPortfolioAllocationService(AllocationsApi allocationsApi,
         AssetUniverseApi assetUniverseApi, InvestmentApi investmentApi,
         CustomIntegrationApiService customIntegrationApiService) {
@@ -96,9 +102,10 @@ public class InvestmentServiceConfiguration {
     public InvestmentAssetUniversSaga investmentStaticDataSaga(
         InvestmentAssetUniverseService investmentAssetUniverseService,
         InvestmentAssetPriceService investmentAssetPriceService,
+        InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
         return new InvestmentAssetUniversSaga(investmentAssetUniverseService, investmentAssetPriceService,
-            coreConfigurationProperties);
+            investmentIntradayAssetPriceService, coreConfigurationProperties);
     }
 
 }
