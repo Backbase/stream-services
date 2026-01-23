@@ -850,6 +850,55 @@ class AccessGroupServiceTest {
     }
 
     @Test
+    void updateExistingDataGroupsBatchWhenNoMatchingInDbsIngestionModeReplace() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+            List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroup unmatchedDataGroup1 = buildDataGroupItem(
+            "Unmatched Data Group 1",
+            "Unmatched Data Group 1",
+            "unmatched-1"
+        );
+        DataGroup unmatchedDataGroup2 = buildDataGroupItem(
+            "Unmatched Data Group 2",
+            "Unmatched Data Group 2",
+            "unmatched-2"
+        );
+
+        BaseProductGroup productGroup1 = buildBaseProductGroup(
+            "Different Product Group 1",
+            "Different Product Group 1",
+            BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+            "different-1"
+        );
+        BaseProductGroup productGroup2 = buildBaseProductGroup(
+            "Different Product Group 2",
+            "Different Product Group 2",
+            BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+            "different-2"
+        );
+
+        when(arrangementsApi.postSearchArrangements(any()))
+            .thenReturn(Mono.just(new ArrangementSearchesListResponse()
+                .arrangementElements(List.of(
+                    new ArrangementItem().id("unmatched-1").externalArrangementId("ext-unmatched-1"),
+                    new ArrangementItem().id("unmatched-2").externalArrangementId("ext-unmatched-2")
+                ))));
+
+        // When
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                List.of(unmatchedDataGroup1, unmatchedDataGroup2),
+                List.of(productGroup1, productGroup2))
+            .block();
+
+        // Then
+        verify(dataGroupIntegrationApi, times(0)).batchUpdateDataItems(any());
+    }
+
+    @Test
     void updateExistingDataGroupsBatchWithMissingInDbsIngestionModeReplace() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();

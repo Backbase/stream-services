@@ -22,6 +22,7 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.loan.LoansTask;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
+import com.backbase.stream.product.mapping.ProductMapper;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
@@ -59,8 +60,8 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
     public static final String BATCH_PRODUCT_GROUP = "batch-product-group";
 
 
-    public BatchProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties, LoansSaga loansSaga) {
-        super(arrangementService, accessGroupService, userService,  configurationProperties, loansSaga);
+    public BatchProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties, LoansSaga loansSaga, ProductMapper productMapper) {
+        super(arrangementService, accessGroupService, userService,  configurationProperties, loansSaga, productMapper);
     }
 
     public Mono<ProductGroupTask> process(ProductGroupTask streamTask) {
