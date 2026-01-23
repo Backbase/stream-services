@@ -109,10 +109,12 @@ public class InvestmentAssetUniverseService {
                 return Mono.error(error);
             })
             // If asset exists, log and return it
-            .flatMap(existingAsset -> {
+            .map(existingAsset -> {
                 log.info("Asset already exists with Asset Identifier : {}", assetIdentifier);
-                return Mono.just(existingAsset);
+                return existingAsset;
             })
+            .flatMap(a -> investmentRestAssetUniverseService.setAssetLogo(a, logo)
+                .thenReturn(a))
             // If Mono is empty (asset not found), create the asset
             .switchIfEmpty(customIntegrationApiService.createAsset(assetRequest)
                 .flatMap(a -> investmentRestAssetUniverseService.setAssetLogo(a, logo)
