@@ -10,6 +10,8 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest;
 import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest.UserKindEnum;
+import com.backbase.cdp.ingestion.api.service.v1.model.CdpEvent;
+import com.backbase.cdp.ingestion.api.service.v1.model.CdpEvents;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
@@ -23,6 +25,8 @@ import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.audiences.UserKindSegmentationTask;
+import com.backbase.stream.cdp.CdpSaga;
+import com.backbase.stream.cdp.CdpTask;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
@@ -45,6 +49,7 @@ import com.backbase.stream.mapper.ExternalContactMapper;
 import com.backbase.stream.mapper.LegalEntityV2toV1Mapper;
 import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
 import com.backbase.stream.mapper.UserProfileMapper;
+import com.backbase.stream.mapper.cdp.UserToCdpEventMapper;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.CustomerProfileService;
@@ -80,6 +85,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
     private final UserProfileMapper userProfileMapper = Mappers.getMapper(UserProfileMapper.class);
     private final LegalEntityV2toV1Mapper leV2Mapper = Mappers.getMapper(LegalEntityV2toV1Mapper.class);
     private final ServiceAgreementV2ToV1Mapper saV2Mapper = Mappers.getMapper(ServiceAgreementV2ToV1Mapper.class);
+    private final UserToCdpEventMapper cdpEventMapper = Mappers.getMapper(UserToCdpEventMapper.class);
 
     private final LegalEntityService legalEntityService;
     private final UserService userService;
@@ -90,6 +96,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
     private final CustomerAccessGroupSaga customerAccessGroupSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private final UserKindSegmentationSaga userKindSegmentationSaga;
+    private final CdpSaga cdpSaga;
     private final CustomerProfileService customerProfileService;
 
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
@@ -104,6 +111,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
         CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
         UserKindSegmentationSaga userKindSegmentationSaga,
+        CdpSaga cdpSaga,
         CustomerProfileService customerProfileService) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
@@ -114,6 +122,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
         this.customerAccessGroupSaga = customerAccessGroupSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
         this.userKindSegmentationSaga = userKindSegmentationSaga;
+        this.cdpSaga = cdpSaga;
         this.customerProfileService = customerProfileService;
     }
 
@@ -125,6 +134,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
             .flatMap(this::setupAdministrators)
             .flatMap(this::setupUsers)
             .flatMap(this::processAudiencesSegmentation)
+            .flatMap(this::processCdpProfilesIngestion)
             .flatMap(this::setupLimits)
             .flatMap(this::postLegalEntityContacts)
             .flatMap(this::processSubsidiaries)
@@ -182,6 +192,32 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
                 return task;
             })
             .flatMap(userKindSegmentationSaga::executeTask)
+            .then(Mono.just(streamTask));
+    }
+
+    private Mono<LegalEntityTaskV2> processCdpProfilesIngestion(LegalEntityTaskV2 streamTask) {
+        if (!cdpSaga.isEnabled()) {
+            log.info("Skipping cdp profiles ingestion - feature is disabled.");
+            return Mono.just(streamTask);
+        }
+
+        var le = streamTask.getData();
+
+        if (le.getLegalEntityType() != LegalEntityType.CUSTOMER) {
+            return Mono.just(streamTask);
+        }
+
+        log.info("Ingesting customers of LE {} into CDP", le.getExternalId());
+
+        return Flux.fromStream(StreamUtils.nullableCollectionToStream(le.getUsers()))
+            .map(user -> {
+                var task = new CdpTask();
+                CdpEvent cdpEvent = cdpEventMapper.mapUserToCdpEvent(
+                    le.getInternalId(), le.getExternalId(), le.getCustomerCategory(), user);
+                task.setCdpEvents(new CdpEvents().addCdpEventsItem(cdpEvent));
+                return task;
+            })
+            .flatMap(cdpSaga::executeTask)
             .then(Mono.just(streamTask));
     }
 
