@@ -91,6 +91,22 @@ This document lists all Investment Service API endpoints that are actively used 
 
 ---
 
+## Integration API (CustomIntegrationApiService)
+
+**Note:** This service is deprecated since 8.6.0 and uses integration-api endpoints instead of service-api.
+
+### Assets
+- `POST /integration-api/v2/asset/assets/` - Create asset (custom implementation)
+
+### Model Portfolios
+- `POST /integration-api/v2/advice-engines/model-portfolio/model_portfolios/` - Create model portfolio (with optional image upload via multipart/form-data)
+- `PATCH /integration-api/v2/advice-engines/model-portfolio/model_portfolios/{uuid}/` - Patch model portfolio (with optional image upload via multipart/form-data)
+
+### Portfolio Allocations
+- `POST /integration-api/v2/portfolios/{portfolio_uuid}/allocations/` - Create portfolio allocation
+
+---
+
 ## Summary by Service
 
 ### InvestmentAssetUniverseService
@@ -134,9 +150,9 @@ This document lists all Investment Service API endpoints that are actively used 
 
 ## Notes
 
-1. **Custom Integration API Service**: This is a custom wrapper service (marked as deprecated since 8.6.0) that handles multipart/form-data requests for:
-   - Asset creation (POST /service-api/v2/asset/assets)
-   - Model portfolio creation/patching with image uploads
+1. **Custom Integration API Service**: This is a custom wrapper service (marked as deprecated since 8.6.0) that uses `/integration-api/v2/` endpoints instead of `/service-api/v2/` endpoints. It handles:
+   - Asset creation via POST `/integration-api/v2/asset/assets/`
+   - Model portfolio creation/patching with optional image uploads via multipart/form-data
    - Portfolio allocation creation
 
 2. **REST Template Services**: Two services handle multipart uploads that generated API clients can't handle properly:
@@ -149,8 +165,39 @@ This document lists all Investment Service API endpoints that are actively used 
    - If not found (404), POST to create
 
 4. **Endpoint Patterns**:
-   - All endpoints follow the pattern: `/service-api/v2/{domain}/{resource}`
-   - Multipart upload endpoints use PATCH with `multipart/form-data` content type
+   - Service API endpoints follow: `/service-api/v2/{domain}/{resource}`
+   - Integration API endpoints follow: `/integration-api/v2/{domain}/{resource}` (used by CustomIntegrationApiService)
+   - Multipart upload endpoints use PATCH or POST with `multipart/form-data` content type
    - Most list endpoints support pagination and filtering
 
 5. **Error Handling**: All services handle WebClientResponseException with special logic for 404 (Not Found) responses to implement upsert patterns.
+
+---
+
+## Total Endpoint Count
+
+### Service API Endpoints: 42
+- Asset Universe API: 17 endpoints
+- Client API: 5 endpoints
+- Investment Products API: 3 endpoints
+- Portfolio API: 3 endpoints
+- Financial Advice API: 3 endpoints
+- Allocations API: 3 endpoints
+- Content API: 3 endpoints
+- Payments API: 2 endpoints
+- Investment API: 2 endpoints
+- Async Bulk Groups API: 1 endpoint
+
+### Integration API Endpoints: 4
+- Asset creation: 1 endpoint
+- Model portfolios: 2 endpoints
+- Portfolio allocations: 1 endpoint
+
+### Grand Total: 46 unique API endpoints
+
+By HTTP Method:
+- GET: 17 endpoints
+- POST: 19 endpoints (15 service-api + 4 integration-api)
+- PATCH: 8 endpoints (7 service-api + 1 integration-api)
+- PUT: 5 endpoints
+- DELETE: 1 endpoint
