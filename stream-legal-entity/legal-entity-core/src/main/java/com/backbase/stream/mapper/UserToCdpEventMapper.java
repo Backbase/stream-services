@@ -1,4 +1,4 @@
-package com.backbase.stream.mapper.cdp;
+package com.backbase.stream.mapper;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;

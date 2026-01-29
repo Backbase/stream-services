@@ -1,7 +1,7 @@
 package com.backbase.stream;
 
 import static com.backbase.stream.FixtureUtils.reflectiveAlphaFixtureMonkey;
-import static com.backbase.stream.mapper.cdp.UserToCdpEventMapper.PROFILE_CREATED_EVENT;
+import static com.backbase.stream.mapper.UserToCdpEventMapper.PROFILE_CREATED_EVENT;
 import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;

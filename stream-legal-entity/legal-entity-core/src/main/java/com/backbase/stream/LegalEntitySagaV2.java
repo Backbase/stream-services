@@ -49,7 +49,7 @@ import com.backbase.stream.mapper.ExternalContactMapper;
 import com.backbase.stream.mapper.LegalEntityV2toV1Mapper;
 import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
 import com.backbase.stream.mapper.UserProfileMapper;
-import com.backbase.stream.mapper.cdp.UserToCdpEventMapper;
+import com.backbase.stream.mapper.UserToCdpEventMapper;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.CustomerProfileService;
