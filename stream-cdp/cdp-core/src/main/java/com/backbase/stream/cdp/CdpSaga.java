@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class CdpSaga implements StreamTaskExecutor<CdpTask> {
 
-    public static final String ENTITY = "CustomerOnboarded";
+    public static final String ENTITY = "CdpProfile";
     public static final String INGEST = "ingest";
     public static final String SUCCESS = "success";
     public static final String ERROR = "error";
@@ -35,11 +35,13 @@ public class CdpSaga implements StreamTaskExecutor<CdpTask> {
 
         return cdpServiceApi.ingestEvents(request)
             .then(Mono.fromCallable(() -> {
-                streamTask.info(ENTITY, INGEST, SUCCESS, null, null, INGESTED_SUCCESSFULLY);
+                streamTask.info(ENTITY, INGEST, SUCCESS, null,
+                    request.getCdpEvents().getFirst().getSourceId(), INGESTED_SUCCESSFULLY);
                 return streamTask;
             }))
             .onErrorResume(throwable -> {
-                streamTask.error(ENTITY, INGEST, ERROR, null, null, FAILED_TO_INGEST);
+                streamTask.error(ENTITY, INGEST, ERROR, null,
+                    request.getCdpEvents().getFirst().getSourceId(), FAILED_TO_INGEST);
                 return Mono.error(new StreamTaskException(streamTask, throwable, FAILED_TO_INGEST));
             });
     }
