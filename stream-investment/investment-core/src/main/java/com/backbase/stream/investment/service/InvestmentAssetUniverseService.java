@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -90,7 +91,7 @@ public class InvestmentAssetUniverseService {
      * @return Mono<Asset> representing the existing or newly created asset
      * @throws IOException if an I/O error occurs
      */
-    public Mono<Asset> getOrCreateAsset(OASAssetRequestDataRequest assetRequest, File logo) {
+    public Mono<Asset> getOrCreateAsset(OASAssetRequestDataRequest assetRequest, Resource logo) {
         log.debug("Creating asset: {}", assetRequest);
 
         // Build a unique asset identifier using ISIN, market, and currency
@@ -213,7 +214,7 @@ public class InvestmentAssetUniverseService {
                 return Flux.fromIterable(assets)
                     .flatMap(asset -> {
                         OASAssetRequestDataRequest assetRequest = assetMapper.map(asset, categoryIdByCode);
-                        return this.getOrCreateAsset(assetRequest, asset.getLogo()).map(assetMapper::map);
+                        return this.getOrCreateAsset(assetRequest, asset.getLogoFile()).map(assetMapper::map);
                     });
             });
     }

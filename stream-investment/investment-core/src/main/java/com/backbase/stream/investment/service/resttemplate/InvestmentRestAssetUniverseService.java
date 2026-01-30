@@ -3,6 +3,7 @@ package com.backbase.stream.investment.service.resttemplate;
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.sync.v1.model.AssetCategory;
+import com.backbase.investment.api.service.sync.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.Asset;
 import java.io.File;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,7 +31,7 @@ public class InvestmentRestAssetUniverseService {
     private final AssetUniverseApi assetUniverseApi;
     private final ApiClient apiClient;
 
-    public Mono<Asset> setAssetLogo(Asset asset, File logo) {
+    public Mono<Asset> setAssetLogo(Asset asset, Resource logo) {
         String assetUuid = asset.getUuid().toString();
 
         if (logo == null) {
@@ -38,22 +40,23 @@ public class InvestmentRestAssetUniverseService {
         }
 
         log.info(
-            "Starting logo attachment for asset: assetUuid={}, assetName='{}', logoFile='{}', logoSize={}",
-            assetUuid, asset.getName(), logo.getName(), logo.length());
+            "Starting logo attachment for asset: assetUuid={}, assetName='{}', logoFile='{}'",
+            assetUuid, asset.getName(), logo.getFilename());
 
-        return Mono.defer(() -> Mono.just(assetUniverseApi.patchAsset(assetUuid, null, logo))).map(patchedAsset -> {
-            log.info(
-                "Logo attached successfully to asset:assetUuid={}, assetName='{}', logoFile='{}'", assetUuid,
-                asset.getName(), logo.getName());
-            return asset;
-        }).onErrorResume(throwable -> {
-            log.error(
-                "Logo attachment failed for asset:assetUuid={}, assetName='{}', logoFile='{}', errorType={}, errorMessage={}",
-                assetUuid, asset.getName(), logo.getName(), throwable.getClass().getSimpleName(),
-                throwable.getMessage(), throwable);
-            log.warn("Asset processing continuing without logo:assetUuid={}", assetUuid);
-            return Mono.just(asset);
-        });
+        return Mono.defer(() -> Mono.just(patchAsset(assetUuid, null, logo)))
+            .map(patchedAsset -> {
+                log.info(
+                    "Logo attached successfully to asset:assetUuid={}, assetName='{}', logoFile='{}'", assetUuid,
+                    asset.getName(), logo.getFilename());
+                return asset;
+            }).onErrorResume(throwable -> {
+                log.error(
+                    "Logo attachment failed for asset:assetUuid={}, assetName='{}', logoFile='{}', errorType={}, errorMessage={}",
+                    assetUuid, asset.getName(), logo.getFilename(), throwable.getClass().getSimpleName(),
+                    throwable.getMessage(), throwable);
+                log.warn("Asset processing continuing without logo:assetUuid={}", assetUuid);
+                return Mono.just(asset);
+            });
     }
 
     public Mono<UUID> setAssetCategoryLogo(UUID assetCategoryId, File logo) {
@@ -115,6 +118,51 @@ public class InvestmentRestAssetUniverseService {
                 "Asset processing continuing without logo: assetCategoryUuid={}", assetCategoryId);
             return Mono.just(assetCategoryId);
         });
+    }
+
+    public com.backbase.investment.api.service.sync.v1.model.Asset patchAsset(String assetIdentifier,
+        OASAssetRequestDataRequest data, Resource logo) {
+        Object localVarPostBody = null;
+
+        // verify the required parameter 'assetIdentifier' is set
+        if (assetIdentifier == null) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                "Missing the required parameter 'assetIdentifier' when calling patchAsset");
+        }
+
+        // create path and map variables
+        final Map<String, Object> uriVariables = new HashMap<String, Object>();
+        uriVariables.put("asset_identifier", assetIdentifier);
+
+        final MultiValueMap<String, String> localVarQueryParams = new LinkedMultiValueMap<String, String>();
+        final HttpHeaders localVarHeaderParams = new HttpHeaders();
+        final MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<String, String>();
+        final MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<String, Object>();
+
+        if (data != null) {
+            localVarFormParams.add("data", data);
+        }
+        if (logo != null) {
+            localVarFormParams.add("logo", logo);
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        final String[] localVarContentTypes = {
+            "multipart/form-data"
+        };
+        final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+
+        String[] localVarAuthNames = new String[]{};
+
+        ParameterizedTypeReference<com.backbase.investment.api.service.sync.v1.model.Asset> localReturnType = new ParameterizedTypeReference<com.backbase.investment.api.service.sync.v1.model.Asset>() {
+        };
+        return apiClient.invokeAPI("/service-api/v2/asset/assets/{asset_identifier}/", HttpMethod.PATCH, uriVariables,
+                localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams,
+                localVarAccept, localVarContentType, localVarAuthNames, localReturnType)
+            .getBody();
     }
 
 }

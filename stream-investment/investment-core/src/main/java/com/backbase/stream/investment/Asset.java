@@ -3,7 +3,6 @@ package com.backbase.stream.investment;
 import com.backbase.investment.api.service.v1.model.AssetTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA10Enum;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -11,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.core.io.Resource;
 
 /**
  * Lightweight projection of {@link com.backbase.investment.api.service.v1.model.Asset} that keeps the DTO immutable
@@ -35,7 +35,8 @@ public class Asset implements AssetKey {
     private AssetTypeEnum assetType;
     private List<String> categories;
     private String externalId;
-    private File logo;
+    private String logo;
+    private Resource logoFile;
     private String description;
     private Double defaultPrice;
 
