@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.6.0]
+### Added
+- customer-data-platform (CDP) module for the customer profiles ingestion
+
 ## [9.5.0]
 ### Added
  - investment service intraday generation and ingestion function
