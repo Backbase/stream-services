@@ -1,6 +1,5 @@
 package com.backbase.stream.investment;
 
-import com.backbase.investment.api.service.v1.model.AssetCategory;
 import com.backbase.investment.api.service.v1.model.AssetCategoryType;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.Market;
@@ -36,10 +35,6 @@ public class InvestmentAssetsTask extends StreamTask {
 
     public void setAssetCategoryTypes(List<AssetCategoryType> assetCategoryTypes) {
         data.setAssetCategoryTypes(assetCategoryTypes);
-    }
-
-    public void setInsertedAssetCategories(List<AssetCategory> assetCategories) {
-        data.setInsertedAssetCategories(assetCategories);
     }
 
     public void setAssets(List<Asset> assets) {

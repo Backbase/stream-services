@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>9.6.0</version>
+    <version>9.5.1</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -34,7 +34,6 @@
         <module>stream-contacts</module>
         <module>stream-loans</module>
         <module>stream-audiences</module>
-        <module>stream-cdp</module>
         <module>stream-compositions</module>
         <module>stream-plan-manager</module>
         <module>stream-customer-profile</module>

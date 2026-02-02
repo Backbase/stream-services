@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-legal-entity</artifactId>
-        <version>9.6.0</version>
+        <version>9.5.1</version>
     </parent>
 
     <artifactId>legal-entity-core</artifactId>
@@ -30,13 +30,6 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>audiences-core</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>cdp-core</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

@@ -1,11 +1,10 @@
 package com.backbase.stream.investment;
 
-import com.backbase.investment.api.service.v1.model.AssetCategory;
-import com.backbase.investment.api.service.v1.model.AssetCategoryRequest;
 import com.backbase.investment.api.service.v1.model.AssetCategoryType;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
+import com.backbase.stream.investment.model.AssetCategoryEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,10 +23,9 @@ public class InvestmentAssetData {
     private List<Market> markets;
     private List<MarketSpecialDay> marketSpecialDays;
     private List<AssetCategoryType> assetCategoryTypes;
-    private List<AssetCategoryRequest> assetCategories;
+    private List<AssetCategoryEntry> assetCategories;
     private List<Asset> assets;
     private List<AssetPrice> assetPrices;
-    private List<AssetCategory> insertedAssetCategories;
     private List<GroupResult> priceAsyncTasks;
     private List<GroupResult> intradayPriceAsyncTasks;
 
