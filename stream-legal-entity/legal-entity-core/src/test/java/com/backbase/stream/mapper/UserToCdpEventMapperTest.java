@@ -1,12 +1,11 @@
 package com.backbase.stream.mapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.backbase.cdp.ingestion.api.service.v1.model.CdpEvent;
+import com.backbase.cdp.profiles.api.service.v1.model.CustomerProfile;
 import com.backbase.cdp.profiles.api.service.v1.model.ExternalId;
+import com.backbase.stream.legalentity.model.Address;
 import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.Multivalued;
@@ -39,26 +38,24 @@ class UserToCdpEventMapperTest {
         user.setUserProfile(new UserProfile());
         CustomerCategory category = CustomerCategory.RETAIL;
         CdpEvent event = mapper.mapUserToCdpEvent("leIntId", "leExtId", category, user);
-        assertNotNull(event);
-        assertEquals(UserToCdpEventMapper.PROFILE_CREATED_EVENT, event.getEventType());
-        assertEquals(UserToCdpEventMapper.SOURCE_BACKBASE, event.getSourceSystem());
-        assertEquals(UserToCdpEventMapper.TYPE_USER_ID, event.getSourceType());
-        assertEquals("int-1", event.getSourceId());
-        assertNotNull(event.getEventId());
-        assertNotNull(event.getTimestamp());
-        assertNotNull(event.getMetadata());
-        assertNotNull(event.getMetadata().getProcessedBy());
-        assertTrue(event.getMetadata().getProcessedBy().contains("stream-services"));
-        assertEquals("1", event.getMetadata().getSchemaVersion());
-        assertEquals("stream-services", event.getMetadata().getSource());
-        assertNotNull(event.getData());
+        assertThat(event).isNotNull();
+        assertThat(event.getEventType()).isEqualTo(UserToCdpEventMapper.PROFILE_CREATED_EVENT);
+        assertThat(event.getSourceSystem()).isEqualTo(UserToCdpEventMapper.SOURCE_BACKBASE);
+        assertThat(event.getSourceType()).isEqualTo(UserToCdpEventMapper.TYPE_USER_ID);
+        assertThat(event.getSourceId()).isEqualTo("int-1");
+        assertThat(event.getEventId()).isNotNull();
+        assertThat(event.getTimestamp()).isNotNull();
+        assertThat(event.getMetadata()).isNotNull();
+        assertThat(event.getMetadata().getProcessedBy()).isNotNull().contains("stream-services");
+        assertThat(event.getMetadata().getSchemaVersion()).isEqualTo("1");
+        assertThat(event.getMetadata().getSource()).isEqualTo("stream-services");
+        assertThat(event.getData()).isNotNull();
     }
 
     @Test
     void testConvertPostalAddresses_handlesNulls() {
         User user = new User();
-        assertNotNull(mapper.convertPostalAddresses(user));
-        assertTrue(mapper.convertPostalAddresses(user).isEmpty());
+        assertThat(mapper.convertPostalAddresses(user)).isNotNull().isEmpty();
     }
 
     @Test
@@ -66,7 +63,13 @@ class UserToCdpEventMapperTest {
         Multivalued m1 = new Multivalued().value("a").primary(false);
         Multivalued m2 = new Multivalued().value("b").primary(true);
         List<Multivalued> list = List.of(m1, m2);
-        assertEquals("b", mapper.getPrimaryValueFromMultiValued(list));
+        assertThat(mapper.getPrimaryValueFromMultiValued(list)).isEqualTo("b");
+    }
+
+    @Test
+    void shouldProperlyMapProfileTypeTest() {
+        CustomerProfile.ProfileTypeEnum profileType = mapper.mapProfileType(CustomerCategory.BUSINESS);
+        assertThat(profileType).isEqualTo(CustomerProfile.ProfileTypeEnum.EMPLOYEE);
     }
 
     @Test
@@ -74,16 +77,16 @@ class UserToCdpEventMapperTest {
         Multivalued m1 = new Multivalued().value("a").primary(false);
         Multivalued m2 = new Multivalued().value("b").primary(false);
         List<Multivalued> list = List.of(m1, m2);
-        assertEquals("a", mapper.getPrimaryValueFromMultiValued(list));
+        assertThat(mapper.getPrimaryValueFromMultiValued(list)).isEqualTo("a");
     }
 
     @Test
     void testMapUserStatus_nulls() {
-        assertEquals("ACTIVE", mapper.mapUserStatus(null));
+        assertThat(mapper.mapUserStatus(null)).isEqualTo("ACTIVE");
         User user = new User();
-        assertEquals("ACTIVE", mapper.mapUserStatus(user));
+        assertThat(mapper.mapUserStatus(user)).isEqualTo("ACTIVE");
         user.setUserProfile(new UserProfile());
-        assertEquals("ACTIVE", mapper.mapUserStatus(user));
+        assertThat(mapper.mapUserStatus(user)).isEqualTo("ACTIVE");
     }
 
     @Test
@@ -92,20 +95,20 @@ class UserToCdpEventMapperTest {
         UserProfile profile = new UserProfile();
         profile.setActive(false);
         user.setUserProfile(profile);
-        assertEquals("INACTIVE", mapper.mapUserStatus(user));
+        assertThat(mapper.mapUserStatus(user)).isEqualTo("INACTIVE");
     }
 
     @Test
     void testMapDateOfBirth_handlesNullsAndEmpty() {
         User user = new User();
-        assertNull(mapper.mapDateOfBirth(user));
+        assertThat(mapper.mapDateOfBirth(user)).isNull();
         UserProfile profile = new UserProfile();
         user.setUserProfile(profile);
-        assertNull(mapper.mapDateOfBirth(user));
+        assertThat(mapper.mapDateOfBirth(user)).isNull();
         profile.setPersonalInformation(new PersonalInformation());
-        assertNull(mapper.mapDateOfBirth(user));
+        assertThat(mapper.mapDateOfBirth(user));
         profile.getPersonalInformation().setDateOfBirth("");
-        assertNull(mapper.mapDateOfBirth(user));
+        assertThat(mapper.mapDateOfBirth(user)).isNull();
     }
 
     @Test
@@ -116,7 +119,7 @@ class UserToCdpEventMapperTest {
         pi.setDateOfBirth("2000-01-01");
         profile.setPersonalInformation(pi);
         user.setUserProfile(profile);
-        assertEquals(LocalDate.of(2000, 1, 1), mapper.mapDateOfBirth(user));
+        assertThat(mapper.mapDateOfBirth(user)).isEqualTo(LocalDate.of(2000, 1, 1));
     }
 
     @Test
@@ -125,18 +128,85 @@ class UserToCdpEventMapperTest {
         user.setInternalId("int");
         user.setExternalId("ext");
         List<ExternalId> ids = mapper.mapUserToExternalIds(user, "leInt", "leExt");
-        assertEquals(4, ids.size());
+        assertThat(ids).hasSize(4);
     }
 
     @Test
     void testMapUserToExternalIds_handlesNulls() {
         User user = new User();
         List<ExternalId> ids = mapper.mapUserToExternalIds(user, null, null);
-        assertTrue(ids.isEmpty());
+        assertThat(ids).isEmpty();
         user.setInternalId("int");
         ids = mapper.mapUserToExternalIds(user, null, null);
-        assertEquals(1, ids.size());
+        assertThat(ids).hasSize(1);
     }
 
-    // Add more tests for edge cases and custom logic as needed
+    @Test
+    void testPhoneAddressMultiValuedMapping() {
+        Multivalued phone = new Multivalued().value("+123456789").primary(false);
+        var deliveryChannel = mapper.mapPhoneAddress(phone);
+        assertThat(deliveryChannel).isNotNull();
+        assertThat(deliveryChannel.getPrimary()).isFalse();
+        assertThat(deliveryChannel.getValue()).isEqualTo("+123456789");
+    }
+
+    @Test
+    void testElectronicAddressMapping() {
+        Multivalued email = new Multivalued().value("test@address.com").primary(true);
+        var deliveryChannel = mapper.mapElectronicAddress(email);
+        assertThat(deliveryChannel).isNotNull();
+        assertThat(deliveryChannel.getPrimary()).isTrue();
+        assertThat(deliveryChannel.getValue()).isEqualTo("test@address.com");
+    }
+
+    @Test
+    void testPrimaryEmailMapping() {
+        EmailAddress email = new EmailAddress().address("test@address.com").primary(true);
+        var deliveryChannel = mapper.mapEmailAddress(email);
+        assertThat(deliveryChannel).isNotNull();
+        assertThat(deliveryChannel.getPrimary()).isTrue();
+        assertThat(deliveryChannel.getValue()).isEqualTo("test@address.com");
+    }
+
+    @Test
+    void testPhoneAddressMapping() {
+        PhoneNumber phone = new PhoneNumber().number("987654321").primary(true);
+        var deliveryChannel = mapper.mapPhoneAddress(phone);
+        assertThat(deliveryChannel).isNotNull();
+        assertThat(deliveryChannel.getPrimary()).isTrue();
+        assertThat(deliveryChannel.getValue()).isEqualTo("987654321");
+    }
+
+    @Test
+    void testPostalAddressMappingWhenNull() {
+        User user = new User();
+        var addresses = mapper.convertPostalAddresses(user);
+        assertThat(addresses).isNotNull().isEmpty();
+    }
+
+    @Test
+    void testPostalAddressMapping() {
+        UserProfile userProfile = new UserProfile();
+        userProfile.setAddresses(List.of(new Address()
+            .streetAddress("123 Main St")
+            .locality("Anytown")
+            .region("CA")
+            .postalCode("12345")
+            .country("USA")
+            .primary(true)
+        , new Address()
+            .streetAddress("124 Main St")
+            .locality("Sometown")
+            .region("Alberta")
+            .postalCode("54321")
+            .country("Canada")
+            .primary(true)
+        ));
+        User user = new User();
+        user.setUserProfile(userProfile);
+        var addresses = mapper.convertPostalAddresses(user);
+        assertThat(addresses).isNotNull().hasSize(2);
+        assertThat(addresses.stream().map(com.backbase.cdp.profiles.api.service.v1.model.Address::getStreet1))
+            .containsExactlyInAnyOrder("123 Main St", "124 Main St");
+    }
 }
