@@ -71,7 +71,7 @@ public class InvestmentAssetPriceService {
                         if (oaSCreatePriceRequest.isEmpty()) {
                             return Mono.empty();
                         }
-                        log.debug("Generated prices for asset ({}) [{}]", asset.getKeyString(), oaSCreatePriceRequest);
+                        log.debug("Generated prices for asset ({}) count [{}]", asset.getKeyString(), oaSCreatePriceRequest.size());
                         return assetUniverseApi.bulkCreateAssetClosePrice(oaSCreatePriceRequest,
                                 null, null, null)
                             .collectList()
@@ -79,7 +79,7 @@ public class InvestmentAssetPriceService {
                                 log.info(
                                     "Successfully create prices: count={} for asset ({})", created.size(),
                                     asset.getKeyString());
-                                log.debug("Async tasks to create prices: for asset ({}) [{}]", asset.getKeyString(),
+                                log.trace("Async tasks to create prices: for asset ({}) [{}]", asset.getKeyString(),
                                     created);
                             })
                             .doOnError(throwable -> {

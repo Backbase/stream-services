@@ -1,26 +1,23 @@
 package com.backbase.stream.investment.service;
 
+import com.backbase.investment.api.service.sync.v1.model.AssetCategory;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
-import com.backbase.investment.api.service.v1.model.Asset;
-import com.backbase.investment.api.service.v1.model.AssetCategory;
-import com.backbase.investment.api.service.v1.model.AssetCategoryRequest;
 import com.backbase.investment.api.service.v1.model.AssetCategoryType;
 import com.backbase.investment.api.service.v1.model.AssetCategoryTypeRequest;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
-import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryList;
+import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +33,6 @@ public class InvestmentAssetUniverseService {
 
     private final AssetUniverseApi assetUniverseApi;
     private final InvestmentRestAssetUniverseService investmentRestAssetUniverseService;
-    private final CustomIntegrationApiService customIntegrationApiService;
     private final AssetMapper assetMapper = Mappers.getMapper(AssetMapper.class);
 
     /**
@@ -82,20 +78,17 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing asset by its identifier, or creates it if not found (404). Handles 404 NOT_FOUND from
-     * getAsset by returning Mono.empty(), which triggers asset creation via switchIfEmpty.
+     * Gets an existing asset by its identifier, or creates it if not found (404). Handles 404 NOT_FOUND from getAsset
+     * by returning Mono.empty(), which triggers asset creation via switchIfEmpty.
      *
-     * @param assetRequest the asset request details
-     * @param logo the thumbnail image
      * @return Mono<Asset> representing the existing or newly created asset
-     * @throws IOException if an I/O error occurs
      */
-    public Mono<Asset> getOrCreateAsset(OASAssetRequestDataRequest assetRequest, File logo) {
-        log.debug("Creating asset: {}", assetRequest);
+    public Mono<com.backbase.stream.investment.Asset> getOrCreateAsset(com.backbase.stream.investment.Asset asset,
+        Map<String, UUID> categoryIdByCode) {
+        log.debug("Creating asset: {}", asset);
 
         // Build a unique asset identifier using ISIN, market, and currency
-        final String assetIdentifier =
-            assetRequest.getIsin() + "_" + assetRequest.getMarket() + "_" + assetRequest.getCurrency();
+        String assetIdentifier = asset.getKeyString();
 
         // Try to fetch the asset by its identifier
         return assetUniverseApi.getAsset(assetIdentifier, null, null, null)
@@ -109,16 +102,13 @@ public class InvestmentAssetUniverseService {
                 return Mono.error(error);
             })
             // If asset exists, log and return it
-            .map(existingAsset -> {
+            .flatMap(a -> {
                 log.info("Asset already exists with Asset Identifier : {}", assetIdentifier);
-                return existingAsset;
+                return investmentRestAssetUniverseService.patchAsset(a, asset).thenReturn(a);
             })
-            .flatMap(a -> investmentRestAssetUniverseService.setAssetLogo(a, logo)
-                .thenReturn(a))
+            .map(assetMapper::map)
             // If Mono is empty (asset not found), create the asset
-            .switchIfEmpty(customIntegrationApiService.createAsset(assetRequest)
-                .flatMap(a -> investmentRestAssetUniverseService.setAssetLogo(a, logo)
-                    .thenReturn(a))
+            .switchIfEmpty(investmentRestAssetUniverseService.createAsset(asset, categoryIdByCode)
                 .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
                 .doOnError(error -> {
                     if (error instanceof WebClientResponseException w) {
@@ -133,8 +123,8 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing market special day by date and market, or creates it if not found. Handles 404 or empty
-     * results by creating the market special day.
+     * Gets an existing market special day by date and market, or creates it if not found. Handles 404 or empty results
+     * by creating the market special day.
      *
      * @param marketSpecialDayRequest the request containing market and date details
      * @return Mono\<MarketSpecialDay\> representing the existing or newly created market special day
@@ -185,8 +175,7 @@ public class InvestmentAssetUniverseService {
                 .doOnSuccess(
                     createdMarketSpecialDay -> log.info("Created market special day: {}", createdMarketSpecialDay))
                 .doOnError(error -> {
-                    if (error instanceof WebClientResponseException) {
-                        WebClientResponseException w = (WebClientResponseException) error;
+                    if (error instanceof WebClientResponseException w) {
                         log.error("Error creating market special day : {} : HTTP {} -> {}", marketSpecialDayRequest,
                             w.getStatusCode(), w.getResponseBodyAsString());
                     } else {
@@ -209,78 +198,64 @@ public class InvestmentAssetUniverseService {
             .filter(Objects::nonNull)
             .flatMapMany(categories -> {
                 Map<String, UUID> categoryIdByCode = categories.stream()
-                    .collect(Collectors.toMap(AssetCategory::getCode, AssetCategory::getUuid));
+                    .collect(Collectors.toMap(com.backbase.investment.api.service.v1.model.AssetCategory::getCode,
+                        com.backbase.investment.api.service.v1.model.AssetCategory::getUuid));
                 return Flux.fromIterable(assets)
-                    .flatMap(asset -> {
-                        OASAssetRequestDataRequest assetRequest = assetMapper.map(asset, categoryIdByCode);
-                        return this.getOrCreateAsset(assetRequest, asset.getLogo()).map(assetMapper::map);
-                    });
+                    .flatMap(asset -> this.getOrCreateAsset(asset, categoryIdByCode));
             });
     }
 
     /**
-     * Gets an existing asset category by its code, or creates it if not found. Handles empty results by creating
-     * the asset category.
+     * Gets an existing asset category by its code, or creates it if not found. Handles empty results by creating the
+     * asset category.
      *
-     * @param assetCategoryRequest the request containing asset category details
+     * @param assetCategoryEntry the request containing asset category details
      * @return Mono<AssetCategory> representing the existing or newly created asset category
      */
-    public Mono<AssetCategory> upsertAssetCategory(AssetCategoryRequest assetCategoryRequest) {
-        if (assetCategoryRequest == null) {
+    public Mono<AssetCategory> upsertAssetCategory(AssetCategoryEntry assetCategoryEntry) {
+        if (assetCategoryEntry == null) {
             return Mono.empty();
         }
-        File logo = assetCategoryRequest.getImage();
-        // Post request cannot insert file directly, so set to null for the initial creation call
-        assetCategoryRequest.setImage(null);
-        return assetUniverseApi.listAssetCategories(assetCategoryRequest.getCode(), 100,
-                assetCategoryRequest.getName(), 0, assetCategoryRequest.getOrder(), assetCategoryRequest.getType())
-            .flatMap(paginatedAssetCategoryList -> {
-                List<AssetCategory> assetCategoryList = paginatedAssetCategoryList.getResults();
-                if (assetCategoryList == null || assetCategoryList.isEmpty()) {
-                    log.debug("No asset category exists for code: {}", assetCategoryRequest.getCode());
+        return assetUniverseApi.listAssetCategories(assetCategoryEntry.getCode(), 100,
+                assetCategoryEntry.getName(), 0, assetCategoryEntry.getOrder(),
+                assetCategoryEntry.getType())
+            .flatMap(paginatedAssetCategoryList -> Optional.ofNullable(paginatedAssetCategoryList)
+                .map(PaginatedAssetCategoryList::getResults)
+                .filter(Predicate.not(List::isEmpty))
+                .flatMap(l -> l.stream()
+                    .filter(ac -> assetCategoryEntry.getCode().equals(ac.getCode()))
+                    .findAny())
+                .map(c -> {
+                    log.info("Asset category already exists for code: {}", assetCategoryEntry.getCode());
+                    return investmentRestAssetUniverseService.patchAssetCategory(
+                        c.getUuid(),
+                        assetCategoryEntry, assetCategoryEntry.getImageResource());
+                })
+                .orElseGet(() -> {
+                    log.debug("No asset category exists for code: {}", assetCategoryEntry.getCode());
                     return Mono.empty();
-                } else {
-                    Optional<AssetCategory> matchingCategory = assetCategoryList.stream()
-                        .filter(ac -> assetCategoryRequest.getCode().equals(ac.getCode()))
-                        .findFirst();
-                    if (matchingCategory.isPresent()) {
-                        log.info("Asset category already exists for code: {}", assetCategoryRequest.getCode());
-                        return assetUniverseApi.updateAssetCategory(matchingCategory.get().getUuid().toString(), assetCategoryRequest)
-                            .doOnSuccess(updatedCategory -> log.info("Updated asset category: {}", updatedCategory))
-                            .doOnError(error -> {
-                                if (error instanceof WebClientResponseException w) {
-                                    log.error("Error updating asset category: {} : HTTP {} -> {}", assetCategoryRequest.getCode(),
-                                        w.getStatusCode(), w.getResponseBodyAsString());
-                                } else {
-                                    log.error("Error updating asset category: {} : {}", assetCategoryRequest.getCode(),
-                                        error.getMessage(), error);
-                                }
-                            })
-                            .onErrorResume(e -> Mono.empty());
+                })
+                .switchIfEmpty(
+                    investmentRestAssetUniverseService
+                        .createAssetCategory(assetCategoryEntry, assetCategoryEntry.getImageResource())
+                )
+                .doOnSuccess(updatedCategory -> {
+                    assetCategoryEntry.setUuid(updatedCategory.getUuid());
+                    log.info("Updated asset category: {}", updatedCategory);
+                })
+                .doOnError(error -> {
+                    if (error instanceof WebClientResponseException w) {
+                        log.error("Error updating asset category: {} : HTTP {} -> {}",
+                            assetCategoryEntry.getCode(),
+                            w.getStatusCode(), w.getResponseBodyAsString());
                     } else {
-                        log.debug("No asset category exists for code: {}", assetCategoryRequest.getCode());
-                        return Mono.empty();
+                        log.error("Error updating asset category: {} : {}",
+                            assetCategoryEntry.getCode(),
+                            error.getMessage(), error);
                     }
-                }
-            })
-            .switchIfEmpty(
-                assetUniverseApi.createAssetCategory(assetCategoryRequest)
-                    .doOnSuccess(createdCategory -> log.info("Created asset category : {}", createdCategory))
-                    .doOnError(error -> {
-                        if (error instanceof WebClientResponseException w) {
-                            log.error("Error creating asset category: {} : HTTP {} -> {}",
-                                assetCategoryRequest.getCode(),
-                                w.getStatusCode(), w.getResponseBodyAsString());
-                        } else {
-                            log.error("Error creating asset category: {} : {}", assetCategoryRequest.getCode(),
-                                error.getMessage(), error);
-                        }
-                    })
-            )
-            .flatMap(ac -> investmentRestAssetUniverseService.setAssetCategoryLogo(ac.getUuid(), logo)
-                .thenReturn(ac)
-            )
-            .onErrorResume(e -> Mono.empty());
+                })
+                .onErrorResume(e -> Mono.empty())
+            );
     }
 
     /**
@@ -306,13 +281,16 @@ public class InvestmentAssetUniverseService {
                         .filter(act -> assetCategoryTypeRequest.getCode().equals(act.getCode()))
                         .findFirst();
                     if (matchingType.isPresent()) {
-                        log.info("Asset category type already exists for code: {}", assetCategoryTypeRequest.getCode());
-                        return assetUniverseApi.updateAssetCategoryType(matchingType.get().getUuid().toString(), assetCategoryTypeRequest)
+                        log.info("Asset category type already exists for code: {}",
+                            assetCategoryTypeRequest.getCode());
+                        return assetUniverseApi.updateAssetCategoryType(matchingType.get().getUuid().toString(),
+                                assetCategoryTypeRequest)
                             .doOnSuccess(updatedType -> log.info("Updated asset category type: {}", updatedType))
                             .doOnError(error -> {
                                 if (error instanceof WebClientResponseException w) {
                                     log.error("Error updating asset category type: {} : HTTP {} -> {}",
-                                        assetCategoryTypeRequest.getCode(), w.getStatusCode(), w.getResponseBodyAsString());
+                                        assetCategoryTypeRequest.getCode(), w.getStatusCode(),
+                                        w.getResponseBodyAsString());
                                 } else {
                                     log.error("Error updating asset category type: {} : {}",
                                         assetCategoryTypeRequest.getCode(), error.getMessage(), error);
@@ -334,7 +312,8 @@ public class InvestmentAssetUniverseService {
                                 assetCategoryTypeRequest.getCode(),
                                 w.getStatusCode(), w.getResponseBodyAsString());
                         } else {
-                            log.error("Error creating asset category type: {} : {}", assetCategoryTypeRequest.getCode(),
+                            log.error("Error creating asset category type: {} : {}",
+                                assetCategoryTypeRequest.getCode(),
                                 error.getMessage(), error);
                         }
                     })

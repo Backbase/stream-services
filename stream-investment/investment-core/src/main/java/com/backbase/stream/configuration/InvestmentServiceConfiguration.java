@@ -63,10 +63,8 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentAssetUniverseService investmentAssetUniverseService(AssetUniverseApi assetUniverseApi,
-        InvestmentRestAssetUniverseService investmentRestAssetUniverseService,
-        CustomIntegrationApiService customIntegrationApiService) {
-        return new InvestmentAssetUniverseService(assetUniverseApi, investmentRestAssetUniverseService,
-            customIntegrationApiService);
+        InvestmentRestAssetUniverseService investmentRestAssetUniverseService) {
+        return new InvestmentAssetUniverseService(assetUniverseApi, investmentRestAssetUniverseService);
     }
 
     @Bean
@@ -114,9 +112,10 @@ public class InvestmentServiceConfiguration {
         InvestmentAssetUniverseService investmentAssetUniverseService,
         InvestmentAssetPriceService investmentAssetPriceService,
         InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService,
+        AsyncTaskService asyncTaskService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
         return new InvestmentAssetUniverseSaga(investmentAssetUniverseService, investmentAssetPriceService,
-            investmentIntradayAssetPriceService, coreConfigurationProperties);
+            investmentIntradayAssetPriceService, asyncTaskService, coreConfigurationProperties);
     }
 
     @Bean

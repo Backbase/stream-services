@@ -5,6 +5,7 @@ import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.OASCreatePriceRequest;
 import com.backbase.investment.api.service.v1.model.TypeEnum;
 import com.backbase.stream.investment.model.AssetWithMarketAndLatestPrice;
+import com.backbase.stream.investment.model.ExpandedLatestPrice;
 import com.backbase.stream.investment.model.PaginatedExpandedAssetList;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,9 +15,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -29,14 +30,12 @@ import reactor.core.publisher.Mono;
  * Service responsible for generating and ingesting intraday asset prices.
  *
  * <p>Responsibilities:
- * - Read assets with latest prices via {@link AssetUniverseApi}.
- * - Generate a series of intraday OHLC price points per asset.
- * - Submit intraday prices back to the Asset API using bulk create.
+ * - Read assets with latest prices via {@link AssetUniverseApi}. - Generate a series of intraday OHLC price points per
+ * asset. - Submit intraday prices back to the Asset API using bulk create.
  *
  * <p>Notes:
- * - The generator uses a randomised model constrained to realistic percentage ranges.
- * - The service is reactive and non-blocking: ingestion returns a {@link Mono} that completes
- *   after all async submissions are triggered.
+ * - The generator uses a randomised model constrained to realistic percentage ranges. - The service is reactive and
+ * non-blocking: ingestion returns a {@link Mono} that completes after all async submissions are triggered.
  *
  */
 @Slf4j
@@ -65,7 +64,7 @@ public class InvestmentIntradayAssetPriceService {
         log.info("Generating Intraday Prices for Assets");
         return assetUniverseApi.listAssetsWithResponseSpec(
                 null, null, null, null,
-                List.of("market","latest_price"),
+                List.of("market", "latest_price"),
                 null, null,
                 "uuid,market,latest_price",
                 null, null, null, null, null,
@@ -84,7 +83,8 @@ public class InvestmentIntradayAssetPriceService {
                         List<OASCreatePriceRequest> requests =
                             generateIntradayPricesForAsset(assetWithMarketAndLatestPrice);
 
-                        log.debug("Generated intraday price requests: {}", requests);
+                        log.debug("Generated intraday price requests: {}", requests.size());
+                        log.trace("Generated intraday price requests: {}", requests);
 
                         if (requests.isEmpty()) {
                             return Mono.empty();
@@ -142,8 +142,15 @@ public class InvestmentIntradayAssetPriceService {
         AssetWithMarketAndLatestPrice assetWithMarketAndLatestPrice) {
         List<OASCreatePriceRequest> requests = new ArrayList<>();
 
+        // null check
         // Base previous close
-        Double previousClose = assetWithMarketAndLatestPrice.expandedLatestPrice().previousClosePrice();
+        Double previousClose = Optional.ofNullable(assetWithMarketAndLatestPrice.expandedLatestPrice())
+            .map(ExpandedLatestPrice::previousClosePrice).orElse(null);
+        if (previousClose == null) {
+            log.warn("The previous close price is null for asset {}, skipping intraday generation",
+                assetWithMarketAndLatestPrice.uuid());
+            return requests;
+        }
 
         // Today
         OffsetDateTime todaySessionStarts = assetWithMarketAndLatestPrice.expandedMarket().todaySessionStarts();
@@ -171,7 +178,8 @@ public class InvestmentIntradayAssetPriceService {
         return offsetDateTime.toLocalTime().plusMinutes(ThreadLocalRandom.current().nextInt(1, 15));
     }
 
-    private OASCreatePriceRequest createIntradayRequest(AssetWithMarketAndLatestPrice asset, Ohlc ohlc, Double previousClose,
+    private OASCreatePriceRequest createIntradayRequest(AssetWithMarketAndLatestPrice asset, Ohlc ohlc,
+        Double previousClose,
         OffsetDateTime dateTime) {
 
         return new OASCreatePriceRequest()
@@ -189,10 +197,8 @@ public class InvestmentIntradayAssetPriceService {
      * Deterministic randomised OHLC generator based on a previous close.
      *
      * <p>Algorithm constraints:
-     * - Total intraday range: 2–5% (implemented as 4–9 per mille in code).
-     * - Opening gap: ±0.1–0.3%.
-     * - Candle body: 0.2–1.2%.
-     * - Wicks are larger than body and distributed to respect direction.
+     * - Total intraday range: 2–5% (implemented as 4–9 per mille in code). - Opening gap: ±0.1–0.3%. - Candle body:
+     * 0.2–1.2%. - Wicks are larger than body and distributed to respect direction.
      *
      * @param previousClose the prior close price (must be positive)
      * @return a map with keys \"open\", \"high\", \"low\", \"close\" rounded to 6 decimal places
@@ -248,6 +254,8 @@ public class InvestmentIntradayAssetPriceService {
             .doubleValue();
     }
 
-    public record Ohlc(double open, double high, double low, double close) {}
+    public record Ohlc(double open, double high, double low, double close) {
+
+    }
 
 }
