@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>cursors</artifactId>
-    <version>9.5.0</version>
+    <version>9.5.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
