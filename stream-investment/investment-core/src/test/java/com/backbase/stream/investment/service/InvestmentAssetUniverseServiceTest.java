@@ -5,15 +5,15 @@ import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.Asset;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
-import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
-import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -32,16 +32,14 @@ class InvestmentAssetUniverseServiceTest {
     AssetUniverseApi assetUniverseApi;
     ApiClient apiClient;
     InvestmentRestAssetUniverseService investmentRestAssetUniverseService;
-    CustomIntegrationApiService customIntegrationApiService;
 
     @BeforeEach
     void setUp() {
         assetUniverseApi = Mockito.mock(AssetUniverseApi.class);
         apiClient = Mockito.mock(ApiClient.class);
         investmentRestAssetUniverseService = Mockito.mock(InvestmentRestAssetUniverseService.class);
-        customIntegrationApiService = Mockito.mock(CustomIntegrationApiService.class);
         service = new InvestmentAssetUniverseService(assetUniverseApi,
-            investmentRestAssetUniverseService, customIntegrationApiService);
+            investmentRestAssetUniverseService);
     }
 
     @Test
@@ -51,7 +49,7 @@ class InvestmentAssetUniverseServiceTest {
         Market marketUpdated = new Market().code("US").name("Usa Market Updated");
         Mockito.when(assetUniverseApi.getMarket("US")).thenReturn(Mono.just(market));
         Mockito.when(assetUniverseApi.createMarket(request)).thenReturn(Mono.just(market));
-        Mockito.when(assetUniverseApi.updateMarket("US",request)).thenReturn(Mono.just(marketUpdated));
+        Mockito.when(assetUniverseApi.updateMarket("US", request)).thenReturn(Mono.just(marketUpdated));
 
         StepVerifier.create(service.upsertMarket(request))
             .expectNext(marketUpdated)
@@ -91,11 +89,11 @@ class InvestmentAssetUniverseServiceTest {
 
     @Test
     void getOrCreateAsset_assetExists() {
-        OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
-            .isin("ABC123").market("US").currency("USD");
-        Asset asset = new Asset().isin("ABC123");
+        com.backbase.stream.investment.Asset req = createAsset();
+        com.backbase.stream.investment.Asset asset = createAsset();
         String assetId = "ABC123_US_USD";
-        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null)).thenReturn(Mono.just(asset));
+        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
+            .thenReturn(Mono.just(new Asset().isin("ABC123")));
 
         WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
         Mockito.when(apiClient.invokeAPI(
@@ -120,13 +118,20 @@ class InvestmentAssetUniverseServiceTest {
             .verifyComplete();
     }
 
+    private static com.backbase.stream.investment.Asset createAsset() {
+        com.backbase.stream.investment.Asset req = new com.backbase.stream.investment.Asset();
+        req.setIsin("ABC123");
+        req.setMarket("market");
+        req.setCurrency("USD");
+        return req;
+    }
+
     @Test
     void getOrCreateAsset_assetNotFound_createsAsset() {
-        OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
-            .isin("ABC123").market("US").currency("USD");
-        Asset createdAsset = new Asset().isin("ABC123");
+        com.backbase.stream.investment.Asset req = createAsset();
+        com.backbase.stream.investment.Asset createdAsset = createAsset();
         String assetId = "ABC123_US_USD";
-        File logo = null;
+        Resource logo = null;
 
         Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
             .thenReturn(Mono.error(WebClientResponseException.create(
@@ -154,15 +159,14 @@ class InvestmentAssetUniverseServiceTest {
         Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
             .thenReturn(Mono.just(createdAsset));
 
-        StepVerifier.create(service.getOrCreateAsset(req, logo))
+        StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
             .expectNext(createdAsset)
             .verifyComplete();
     }
 
     @Test
     void getOrCreateAsset_otherError_propagates() {
-        OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
-            .isin("ABC123").market("US").currency("USD");
+        com.backbase.stream.investment.Asset req = createAsset();
         String assetId = "ABC123_US_USD";
         Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
             .thenReturn(Mono.error(new RuntimeException("API error")));
@@ -192,8 +196,7 @@ class InvestmentAssetUniverseServiceTest {
 
     @Test
     void getOrCreateAsset_createAssetFails_propagates() {
-        OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
-            .isin("ABC123").market("US").currency("USD");
+        com.backbase.stream.investment.Asset req = createAsset();
         String assetId = "ABC123_US_USD";
         Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
             .thenReturn(Mono.error(WebClientResponseException.create(
@@ -235,8 +238,7 @@ class InvestmentAssetUniverseServiceTest {
 
     @Test
     void getOrCreateAsset_emptyMonoFromCreateAsset() {
-        OASAssetRequestDataRequest req = new OASAssetRequestDataRequest()
-            .isin("ABC123").market("US").currency("USD");
+        com.backbase.stream.investment.Asset req = createAsset();
         String assetId = "ABC123_US_USD";
         Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
             .thenReturn(Mono.error(WebClientResponseException.create(
