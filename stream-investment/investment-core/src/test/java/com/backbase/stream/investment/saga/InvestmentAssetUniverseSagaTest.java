@@ -383,6 +383,7 @@ class InvestmentAssetUniverseSagaTest {
             List.of("Technology"),
             "AAPL-001",
             null,
+            null,
             "Apple Inc. Stock",
             150.0
         );
@@ -399,6 +400,7 @@ class InvestmentAssetUniverseSagaTest {
             AssetTypeEnum.STOCK,
             List.of("Technology"),
             "MSFT-001",
+            null,
             null,
             "Microsoft Corp. Stock",
             200.0
