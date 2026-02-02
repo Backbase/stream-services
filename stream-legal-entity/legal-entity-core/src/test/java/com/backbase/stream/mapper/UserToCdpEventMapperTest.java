@@ -106,7 +106,7 @@ class UserToCdpEventMapperTest {
         user.setUserProfile(profile);
         assertThat(mapper.mapDateOfBirth(user)).isNull();
         profile.setPersonalInformation(new PersonalInformation());
-        assertThat(mapper.mapDateOfBirth(user));
+        assertThat(mapper.mapDateOfBirth(user)).isNull();
         profile.getPersonalInformation().setDateOfBirth("");
         assertThat(mapper.mapDateOfBirth(user)).isNull();
     }

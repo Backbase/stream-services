@@ -180,7 +180,7 @@ public interface UserToCdpEventMapper {
             || isNull(user.getUserProfile().getActive())) {
             return "ACTIVE";
         }
-        return user.getUserProfile().getActive() ? "ACTIVE" : "INACTIVE";
+        return Boolean.TRUE.equals(user.getUserProfile().getActive()) ? "ACTIVE" : "INACTIVE";
     }
 
     default String mapNationality(User user) {
@@ -195,7 +195,7 @@ public interface UserToCdpEventMapper {
     }
 
     default String getPrimaryEmail(User user) {
-        if (nonNull(user.getEmailAddress()) && nonNull(user.getEmailAddress().getAddress())) {
+        if (nonNull(user.getEmailAddress())) {
             return user.getEmailAddress().getAddress();
         } else if (nonNull(user.getUserProfile()) && nonNull(user.getUserProfile().getAdditionalEmails())) {
             return getPrimaryValueFromMultiValued(user.getUserProfile().getAdditionalEmails());
@@ -204,7 +204,7 @@ public interface UserToCdpEventMapper {
     }
 
     default String getPrimaryPhone(User user) {
-        if (nonNull(user.getMobileNumber()) && nonNull(user.getMobileNumber().getNumber())) {
+        if (nonNull(user.getMobileNumber())) {
             return user.getMobileNumber().getNumber();
         } else if (nonNull(user.getUserProfile()) && nonNull(user.getUserProfile().getAdditionalPhoneNumbers())) {
             return getPrimaryValueFromMultiValued(user.getUserProfile().getAdditionalPhoneNumbers());
@@ -346,18 +346,16 @@ public interface UserToCdpEventMapper {
 
     default List<ExternalId> mapUserToExternalIds(User user, String legalEntityInternalId, String legalEntityExternalId) {
         List<ExternalId> externalIds = new ArrayList<>();
+        externalIds.add(new ExternalId()
+            .source(SOURCE_CORE_BANKING_SYSTEM)
+            .type(TYPE_USER_ID)
+            .id(user.getExternalId())
+            .verified(true));
         if (nonNull(user.getInternalId())) {
             externalIds.add(new ExternalId()
                 .source(SOURCE_BACKBASE)
                 .type(TYPE_USER_ID)
                 .id(user.getInternalId())
-                .verified(true));
-        }
-        if (nonNull(user.getExternalId())) {
-            externalIds.add(new ExternalId()
-                .source(SOURCE_CORE_BANKING_SYSTEM)
-                .type(TYPE_USER_ID)
-                .id(user.getExternalId())
                 .verified(true));
         }
         if (nonNull(legalEntityInternalId)) {

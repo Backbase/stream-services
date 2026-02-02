@@ -27,8 +27,7 @@ class CdpConfigurationTest {
         CdpSaga cdpSaga = context.getBean(CdpSaga.class);
 
         // Assert
-        assertThat(cdpSaga).isNotNull();
-        assertThat(cdpSaga).isInstanceOf(CdpSaga.class);
+        assertThat(cdpSaga).isNotNull().isInstanceOf(CdpSaga.class);
         context.close();
     }
 
@@ -46,8 +45,7 @@ class CdpConfigurationTest {
         context.refresh();
 
         CdpSaga cdpSaga = context.getBean(CdpSaga.class);
-        assertThat(cdpSaga).isNotNull();
-        assertThat(cdpSaga).isInstanceOf(CdpSaga.class);
+        assertThat(cdpSaga).isNotNull().isInstanceOf(CdpSaga.class);
         context.close();
     }
 }
