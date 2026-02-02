@@ -1,7 +1,6 @@
 package com.backbase.stream.configuration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +10,7 @@ class CdpPropertiesTest {
     void testProperties() {
         CdpProperties properties = new CdpProperties(true, "testCategory");
 
-        assertTrue(properties.enabled());
-        assertEquals("testCategory", properties.defaultCustomerCategory());
+        assertThat(properties.enabled()).isTrue();
+        assertThat(properties.defaultCustomerCategory()).isEqualTo("testCategory");
     }
 }

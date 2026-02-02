@@ -1,8 +1,6 @@
 package com.backbase.stream.cdp;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,25 +41,40 @@ class CdpSagaTest {
     }
 
     @Test
+    void testExecuteTaskFailure() {
+        var task = createTask();
+        when(cdpServiceApi.ingestEvents(any()))
+            .thenReturn(Mono.error(new RuntimeException("Ingestion failed")));
+
+        try {
+            cdpSaga.executeTask(task).block();
+        } catch (Exception e) {
+            assertThat(e.getCause().getMessage()).isEqualTo("Ingestion failed");
+        }
+
+        verify(cdpServiceApi).ingestEvents(any());
+    }
+
+    @Test
     void isDisabledByDefault() {
         var saga = new CdpSaga(
             cdpServiceApi,
             null
         );
 
-        assertFalse(saga.isEnabled());
+        assertThat(saga.isEnabled()).isFalse();
     }
 
     @Test
     void defaultCustomerCategoryIsNullWhenSagaIsDisabled() {
         when(userKindSegmentationProperties.enabled()).thenReturn(false);
 
-        assertNull(cdpSaga.getDefaultCustomerCategory());
+        assertThat(cdpSaga.getDefaultCustomerCategory()).isNull();
     }
 
     @Test
     void rollbackReturnsNull() {
-        assertNull(cdpSaga.rollBack(createTask()));
+        assertThat(cdpSaga.rollBack(createTask())).isNull();
     }
 
     @Test
@@ -69,7 +82,7 @@ class CdpSagaTest {
         when(userKindSegmentationProperties.enabled()).thenReturn(true);
         when(userKindSegmentationProperties.defaultCustomerCategory()).thenReturn("RETAIL");
 
-        assertEquals("RETAIL", cdpSaga.getDefaultCustomerCategory());
+        assertThat(cdpSaga.getDefaultCustomerCategory()).isEqualTo("RETAIL");
     }
 
     private CdpTask createTask() {
