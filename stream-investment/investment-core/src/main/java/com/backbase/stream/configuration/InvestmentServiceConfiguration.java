@@ -112,9 +112,10 @@ public class InvestmentServiceConfiguration {
         InvestmentAssetUniverseService investmentAssetUniverseService,
         InvestmentAssetPriceService investmentAssetPriceService,
         InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService,
+        AsyncTaskService asyncTaskService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
         return new InvestmentAssetUniverseSaga(investmentAssetUniverseService, investmentAssetPriceService,
-            investmentIntradayAssetPriceService, coreConfigurationProperties);
+            investmentIntradayAssetPriceService, asyncTaskService, coreConfigurationProperties);
     }
 
     @Bean

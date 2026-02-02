@@ -1,6 +1,5 @@
 package com.backbase.stream.investment.service;
 
-import com.backbase.investment.api.service.ApiClient;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.Asset;
 import com.backbase.investment.api.service.v1.model.Market;
@@ -12,12 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -30,13 +25,11 @@ class InvestmentAssetUniverseServiceTest {
 
     InvestmentAssetUniverseService service;
     AssetUniverseApi assetUniverseApi;
-    ApiClient apiClient;
     InvestmentRestAssetUniverseService investmentRestAssetUniverseService;
 
     @BeforeEach
     void setUp() {
         assetUniverseApi = Mockito.mock(AssetUniverseApi.class);
-        apiClient = Mockito.mock(ApiClient.class);
         investmentRestAssetUniverseService = Mockito.mock(InvestmentRestAssetUniverseService.class);
         service = new InvestmentAssetUniverseService(assetUniverseApi,
             investmentRestAssetUniverseService);
@@ -91,30 +84,33 @@ class InvestmentAssetUniverseServiceTest {
     void getOrCreateAsset_assetExists() {
         com.backbase.stream.investment.Asset req = createAsset();
         com.backbase.stream.investment.Asset asset = createAsset();
-        String assetId = "ABC123_US_USD";
-        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
-            .thenReturn(Mono.just(new Asset().isin("ABC123")));
+        Asset existingAsset = new Asset()
+            .isin("ABC123")
+            .market("market")
+            .currency("USD");
 
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
+//        req.setIsin("ABC123");
+//        req.setMarket("market");
+//        req.setCurrency("USD");
+
+        Mockito.when(assetUniverseApi.getAsset(
+                ArgumentMatchers.anyString(),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any()))
+            .thenReturn(Mono.just(existingAsset));
+        Mockito.when(investmentRestAssetUniverseService.patchAsset(ArgumentMatchers.any(), ArgumentMatchers.any()))
             .thenReturn(Mono.just(asset));
+        Mockito.when(investmentRestAssetUniverseService.createAsset(
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any()))
+            .thenReturn(Mono.just(asset)); // This won't be called, but needed for switchIfEmpty evaluation
 
         StepVerifier.create(service.getOrCreateAsset(req, null))
-            .expectNext(asset)
+            .expectNextMatches(
+                asset1 -> asset1.getIsin().equals(req.getIsin()) && asset1.getMarket().equals(req.getMarket())
+                    && asset1.getCurrency()
+                    .equals(req.getCurrency()))
             .verifyComplete();
     }
 
@@ -130,10 +126,13 @@ class InvestmentAssetUniverseServiceTest {
     void getOrCreateAsset_assetNotFound_createsAsset() {
         com.backbase.stream.investment.Asset req = createAsset();
         com.backbase.stream.investment.Asset createdAsset = createAsset();
-        String assetId = "ABC123_US_USD";
-        Resource logo = null;
+        String assetId = "ABC123_market_USD";
 
-        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
+        Mockito.when(assetUniverseApi.getAsset(
+                ArgumentMatchers.eq(assetId),
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.isNull()))
             .thenReturn(Mono.error(WebClientResponseException.create(
                 HttpStatus.NOT_FOUND.value(),
                 "Not Found",
@@ -141,22 +140,9 @@ class InvestmentAssetUniverseServiceTest {
                 null,
                 StandardCharsets.UTF_8
             )));
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
+        Mockito.when(investmentRestAssetUniverseService.createAsset(
+                ArgumentMatchers.eq(req),
+                ArgumentMatchers.eq(Map.of())))
             .thenReturn(Mono.just(createdAsset));
 
         StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
@@ -167,27 +153,17 @@ class InvestmentAssetUniverseServiceTest {
     @Test
     void getOrCreateAsset_otherError_propagates() {
         com.backbase.stream.investment.Asset req = createAsset();
-        String assetId = "ABC123_US_USD";
-        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
+        String assetId = "ABC123_market_USD";
+        Mockito.when(assetUniverseApi.getAsset(
+                ArgumentMatchers.eq(assetId),
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.isNull()))
             .thenReturn(Mono.error(new RuntimeException("API error")));
-
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
-            .thenReturn(Mono.error(new RuntimeException("API error")));
+        Mockito.when(investmentRestAssetUniverseService.createAsset(
+                ArgumentMatchers.eq(req),
+                ArgumentMatchers.isNull()))
+            .thenReturn(Mono.empty()); // This won't be called, but needed for switchIfEmpty evaluation
 
         StepVerifier.create(service.getOrCreateAsset(req, null))
             .expectErrorMatches(e -> e instanceof RuntimeException && e.getMessage().equals("API error"))
@@ -197,8 +173,12 @@ class InvestmentAssetUniverseServiceTest {
     @Test
     void getOrCreateAsset_createAssetFails_propagates() {
         com.backbase.stream.investment.Asset req = createAsset();
-        String assetId = "ABC123_US_USD";
-        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
+        String assetId = "ABC123_market_USD";
+        Mockito.when(assetUniverseApi.getAsset(
+                ArgumentMatchers.eq(assetId),
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.isNull()))
             .thenReturn(Mono.error(WebClientResponseException.create(
                 HttpStatus.NOT_FOUND.value(),
                 "Not Found",
@@ -206,22 +186,9 @@ class InvestmentAssetUniverseServiceTest {
                 null,
                 StandardCharsets.UTF_8
             )));
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
+        Mockito.when(investmentRestAssetUniverseService.createAsset(
+                ArgumentMatchers.eq(req),
+                ArgumentMatchers.isNull()))
             .thenReturn(Mono.error(new RuntimeException("Create asset failed")));
 
         StepVerifier.create(service.getOrCreateAsset(req, null))
@@ -239,8 +206,12 @@ class InvestmentAssetUniverseServiceTest {
     @Test
     void getOrCreateAsset_emptyMonoFromCreateAsset() {
         com.backbase.stream.investment.Asset req = createAsset();
-        String assetId = "ABC123_US_USD";
-        Mockito.when(assetUniverseApi.getAsset(assetId, null, null, null))
+        String assetId = "ABC123_market_USD";
+        Mockito.when(assetUniverseApi.getAsset(
+                ArgumentMatchers.eq(assetId),
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.isNull()))
             .thenReturn(Mono.error(WebClientResponseException.create(
                 HttpStatus.NOT_FOUND.value(),
                 "Not Found",
@@ -248,22 +219,9 @@ class InvestmentAssetUniverseServiceTest {
                 null,
                 StandardCharsets.UTF_8
             )));
-        WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
-        Mockito.when(apiClient.invokeAPI(
-            ArgumentMatchers.anyString(),
-            ArgumentMatchers.eq(HttpMethod.POST),
-            ArgumentMatchers.anyMap(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.eq(req),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(),
-            ArgumentMatchers.any(ParameterizedTypeReference.class)
-        )).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ArgumentMatchers.any(ParameterizedTypeReference.class)))
+        Mockito.when(investmentRestAssetUniverseService.createAsset(
+                ArgumentMatchers.eq(req),
+                ArgumentMatchers.isNull()))
             .thenReturn(Mono.empty());
 
         StepVerifier.create(service.getOrCreateAsset(req, null))

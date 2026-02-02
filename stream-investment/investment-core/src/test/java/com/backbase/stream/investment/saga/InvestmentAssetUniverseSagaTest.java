@@ -18,6 +18,7 @@ import com.backbase.stream.investment.AssetPrice;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.RandomParam;
+import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
@@ -55,6 +56,7 @@ class InvestmentAssetUniverseSagaTest {
 
     @Mock
     private InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService;
+    private AsyncTaskService asyncTaskService;
 
     @Mock
     private InvestmentIngestionConfigurationProperties configurationProperties;
@@ -68,6 +70,7 @@ class InvestmentAssetUniverseSagaTest {
             assetUniverseService,
             investmentAssetPriceService,
             investmentIntradayAssetPriceService,
+            asyncTaskService,
             configurationProperties
         );
         // Enable asset universe by default

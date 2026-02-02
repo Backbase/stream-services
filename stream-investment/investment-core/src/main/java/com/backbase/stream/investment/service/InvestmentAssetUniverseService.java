@@ -228,24 +228,8 @@ public class InvestmentAssetUniverseService {
                 .map(c -> {
                     log.info("Asset category already exists for code: {}", assetCategoryEntry.getCode());
                     return investmentRestAssetUniverseService.patchAssetCategory(
-                            c.getUuid(),
-                            assetCategoryEntry, assetCategoryEntry.getImageResource())
-                        .doOnSuccess(updatedCategory -> {
-                            assetCategoryEntry.setUuid(updatedCategory.getUuid());
-                            log.info("Updated asset category: {}", updatedCategory);
-                        })
-                        .doOnError(error -> {
-                            if (error instanceof WebClientResponseException w) {
-                                log.error("Error updating asset category: {} : HTTP {} -> {}",
-                                    assetCategoryEntry.getCode(),
-                                    w.getStatusCode(), w.getResponseBodyAsString());
-                            } else {
-                                log.error("Error updating asset category: {} : {}",
-                                    assetCategoryEntry.getCode(),
-                                    error.getMessage(), error);
-                            }
-                        })
-                        .onErrorResume(e -> Mono.empty());
+                        c.getUuid(),
+                        assetCategoryEntry, assetCategoryEntry.getImageResource());
                 })
                 .orElseGet(() -> {
                     log.debug("No asset category exists for code: {}", assetCategoryEntry.getCode());
@@ -254,21 +238,22 @@ public class InvestmentAssetUniverseService {
                 .switchIfEmpty(
                     investmentRestAssetUniverseService
                         .createAssetCategory(assetCategoryEntry, assetCategoryEntry.getImageResource())
-                        .doOnSuccess(createdCategory -> {
-                            assetCategoryEntry.setUuid(createdCategory.getUuid());
-                            log.info("Created asset category : {}", createdCategory);
-                        })
-                        .doOnError(error -> {
-                            if (error instanceof WebClientResponseException w) {
-                                log.error("Error creating asset category: {} : HTTP {} -> {}",
-                                    assetCategoryEntry.getCode(),
-                                    w.getStatusCode(), w.getResponseBodyAsString());
-                            } else {
-                                log.error("Error creating asset category: {} : {}", assetCategoryEntry.getCode(),
-                                    error.getMessage(), error);
-                            }
-                        })
                 )
+                .doOnSuccess(updatedCategory -> {
+                    assetCategoryEntry.setUuid(updatedCategory.getUuid());
+                    log.info("Updated asset category: {}", updatedCategory);
+                })
+                .doOnError(error -> {
+                    if (error instanceof WebClientResponseException w) {
+                        log.error("Error updating asset category: {} : HTTP {} -> {}",
+                            assetCategoryEntry.getCode(),
+                            w.getStatusCode(), w.getResponseBodyAsString());
+                    } else {
+                        log.error("Error updating asset category: {} : {}",
+                            assetCategoryEntry.getCode(),
+                            error.getMessage(), error);
+                    }
+                })
                 .onErrorResume(e -> Mono.empty())
             );
     }

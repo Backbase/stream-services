@@ -26,7 +26,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -61,9 +60,9 @@ public class InvestmentRestNewsContentService {
         log.debug("Content upsert batch details: entries={}", contentEntries);
 
         return findEntriesNewContent(contentEntries).flatMap(this::upsertSingleEntry).doOnComplete(
-            () -> log.info("Content upsert batch completed successfully: totalEntriesProcessed={}",
-                contentEntries.size())).doOnError(
-            error -> log.error("Content upsert batch failed: totalEntries={}, errorType={}, errorMessage={}",
+                () -> log.info("Content upsert batch completed successfully: totalEntriesProcessed={}",
+                    contentEntries.size()))
+            .doOnError(error -> log.error("Content upsert batch failed: totalEntries={}, errorType={}, errorMessage={}",
                 contentEntries.size(), error.getClass().getSimpleName(), error.getMessage(), error)).then();
     }
 
@@ -78,27 +77,19 @@ public class InvestmentRestNewsContentService {
         log.debug("Processing content entry: title='{}', hasThumbnail={}", request.getTitle(),
             request.getThumbnailResource() != null);
 
-        return createNewEntry(request)
+        log.debug("Creating new content entry: title='{}', hasThumbnail={}", request.getTitle(),
+            request.getThumbnailResource() != null);
+        EntryCreateUpdateRequest createUpdateRequest = contentMapper.map(request);
+        log.debug("Content entry processing : {}", createUpdateRequest);
+        return Mono.defer(() -> Mono.just(contentApi.createContentEntry(createUpdateRequest)))
+            .flatMap(e -> addThumbnail(e, request.getThumbnailResource()))
             .doOnSuccess(
-                result -> log.info("Content entry processed successfully: title='{}', uuid={}", request.getTitle(),
-                    result.getUuid())
-            ).doOnError(throwable -> {
-                if (throwable instanceof WebClientResponseException ex) {
-                    log.error(
-                        "Content entry processing failed with API error: title='{}', httpStatus={}, errorResponse={}",
-                        request.getTitle(), ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
-                } else {
-                    log.error(
-                        "Content entry processing failed with unexpected error: title='{}', errorType={}, errorMessage={}",
-                        request.getTitle(), throwable.getClass().getSimpleName(), throwable.getMessage(), throwable);
-                }
-            })
-            .onErrorResume(error -> {
-                log.warn("Skipping failed content entry in batch: title='{}', decision=skip, reason={}",
-                    request.getTitle(),
-                    error.getMessage());
-                return Mono.empty();
-            });
+                created -> log.info("Content entry created successfully: title='{}', uuid={}, thumbnailAttached={}",
+                    request.getTitle(), created.getUuid(), request.getThumbnailResource() != null))
+            .doOnError(
+                error -> log.error("Content entry creation failed: title='{}', errorType={}, errorMessage={}",
+                    request.getTitle(), error.getClass().getSimpleName(), error.getMessage(), error))
+            .onErrorResume(error -> Mono.empty());
     }
 
     private Flux<MarketNewsEntry> findEntriesNewContent(List<MarketNewsEntry> contentEntries) {
@@ -128,28 +119,6 @@ public class InvestmentRestNewsContentService {
         return Flux.fromIterable(newEntries);
     }
 
-    /**
-     * Creates a new content entry.
-     *
-     * @param request The content data for the new entry
-     * @return Mono containing the created entry
-     */
-    private Mono<EntryCreateUpdate> createNewEntry(MarketNewsEntry request) {
-        log.debug("Creating new content entry: title='{}', hasThumbnail={}", request.getTitle(),
-            request.getThumbnailResource() != null);
-        EntryCreateUpdateRequest createUpdateRequest = contentMapper.map(request);
-        log.debug("Content entry processing : {}", createUpdateRequest);
-        return Mono.defer(() -> Mono.just(contentApi.createContentEntry(createUpdateRequest)))
-            .flatMap(e -> addThumbnail(e, request.getThumbnailResource()))
-            .doOnSuccess(
-                created -> log.info("Content entry created successfully: title='{}', uuid={}, thumbnailAttached={}",
-                    request.getTitle(), created.getUuid(), request.getThumbnailResource() != null))
-            .doOnError(
-                error -> log.error("Content entry creation failed: title='{}', errorType={}, errorMessage={}",
-                    request.getTitle(), error.getClass().getSimpleName(), error.getMessage(), error))
-            .onErrorResume(error -> Mono.empty());
-    }
-
     private Mono<EntryCreateUpdate> addThumbnail(EntryCreateUpdate entry, Resource thumbnail) {
         UUID uuid = entry.getUuid();
 
@@ -162,9 +131,9 @@ public class InvestmentRestNewsContentService {
             getFileNameForLog(thumbnail));
 
         return Mono.defer(() -> {
-                // create path and map variables
-                Map<String, Object> uriVariables = new HashMap<>();
-                uriVariables.put("uuid", uuid);
+            // create path and map variables
+            Map<String, Object> uriVariables = new HashMap<>();
+            uriVariables.put("uuid", uuid);
 
             MultiValueMap<String, String> localVarQueryParams = new LinkedMultiValueMap<>();
             HttpHeaders localVarHeaderParams = new HttpHeaders();

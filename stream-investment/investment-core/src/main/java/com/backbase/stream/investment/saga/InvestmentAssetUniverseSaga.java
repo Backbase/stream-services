@@ -6,6 +6,7 @@ import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.InvestmentAssetsTask;
+import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
@@ -60,6 +61,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
     private final InvestmentAssetUniverseService assetUniverseService;
     private final InvestmentAssetPriceService investmentAssetPriceService;
     private final InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService;
+    private final AsyncTaskService asyncTaskService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
 
     @Override
@@ -99,8 +101,9 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
     }
 
     private Mono<InvestmentAssetsTask> createIntradayPrices(InvestmentAssetsTask investmentTask) {
-        return investmentIntradayAssetPriceService.ingestIntradayPrices()
-            .map(investmentTask::setIntradayPriceTasks);
+        return asyncTaskService.checkPriceAsyncTasksFinished(investmentTask.getData().getPriceAsyncTasks())
+            .then(investmentIntradayAssetPriceService.ingestIntradayPrices()
+                .map(investmentTask::setIntradayPriceTasks));
     }
 
     /**
