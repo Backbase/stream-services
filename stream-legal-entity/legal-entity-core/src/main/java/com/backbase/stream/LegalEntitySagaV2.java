@@ -207,9 +207,14 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
             return Mono.just(streamTask);
         }
 
+        if (isNull(le.getInternalId())) {
+            return Mono.just(streamTask);
+        }
+
         log.info("Ingesting customers of LE {} into CDP", le.getExternalId());
 
         return Flux.fromStream(StreamUtils.nullableCollectionToStream(le.getUsers()))
+            .filter(user -> nonNull(user.getInternalId()))
             .map(user -> {
                 var task = new CdpTask();
                 CdpEvent cdpEvent = cdpEventMapper.mapUserToCdpEvent(
