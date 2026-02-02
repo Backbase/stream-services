@@ -255,7 +255,6 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
             .flatMap(assetUniverseService::upsertAssetCategory)
             .collectList()
             .map(assetCategories -> {
-                investmentTask.setInsertedAssetCategories(assetCategories);
                 investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
                     investmentTask.getId(),
                     RESULT_CREATED + " " + assetCategories.size() + " Investment Asset Categories");

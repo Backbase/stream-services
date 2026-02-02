@@ -1,11 +1,13 @@
 package com.backbase.stream.investment.service.resttemplate;
 
+import static com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService.getFileNameForLog;
+
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.v1.ContentApi;
 import com.backbase.investment.api.service.sync.v1.model.Entry;
 import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdate;
 import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest;
-import java.io.File;
+import com.backbase.stream.investment.model.MarketNewsEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +18,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -43,6 +46,7 @@ public class InvestmentRestNewsContentService {
     public static final int CONTENT_RETRIEVE_LIMIT = 100;
     private final ContentApi contentApi;
     private final ApiClient apiClient;
+    private final ContentMapper contentMapper = Mappers.getMapper(ContentMapper.class);
 
     /**
      * Upserts a list of content entries. For each entry, checks if content with the same title exists. If exists,
@@ -52,7 +56,7 @@ public class InvestmentRestNewsContentService {
      * @param contentEntries List of content entries to upsert
      * @return Mono that completes when all entries have been processed
      */
-    public Mono<Void> upsertContent(List<EntryCreateUpdateRequest> contentEntries) {
+    public Mono<Void> upsertContent(List<MarketNewsEntry> contentEntries) {
         log.info("Starting content upsert batch operation:, totalEntries={}", contentEntries.size());
         log.debug("Content upsert batch details: entries={}", contentEntries);
 
@@ -70,9 +74,9 @@ public class InvestmentRestNewsContentService {
      * @param request The content entry to upsert
      * @return Mono that completes when the entry has been processed
      */
-    private Mono<EntryCreateUpdate> upsertSingleEntry(EntryCreateUpdateRequest request) {
+    private Mono<EntryCreateUpdate> upsertSingleEntry(MarketNewsEntry request) {
         log.debug("Processing content entry: title='{}', hasThumbnail={}", request.getTitle(),
-            request.getThumbnail() != null);
+            request.getThumbnailResource() != null);
 
         return createNewEntry(request)
             .doOnSuccess(
@@ -97,9 +101,9 @@ public class InvestmentRestNewsContentService {
             });
     }
 
-    private Flux<EntryCreateUpdateRequest> findEntriesNewContent(List<EntryCreateUpdateRequest> contentEntries) {
-        Map<String, EntryCreateUpdateRequest> entryByTitle = contentEntries.stream()
-            .collect(Collectors.toMap(EntryCreateUpdateRequest::getTitle, Function.identity()));
+    private Flux<MarketNewsEntry> findEntriesNewContent(List<MarketNewsEntry> contentEntries) {
+        Map<String, MarketNewsEntry> entryByTitle = contentEntries.stream()
+            .collect(Collectors.toMap(MarketNewsEntry::getTitle, Function.identity()));
         log.debug("Filtering content entries: requestedTitles={}", entryByTitle.keySet());
 
         List<Entry> existsNews = contentApi.listContentEntries(null, CONTENT_RETRIEVE_LIMIT, 0, null, null, null, null)
@@ -112,14 +116,14 @@ public class InvestmentRestNewsContentService {
         }
 
         Set<String> existTitles = existsNews.stream().map(Entry::getTitle).collect(Collectors.toSet());
-        List<EntryCreateUpdateRequest> newEntries = contentEntries.stream()
+        List<MarketNewsEntry> newEntries = contentEntries.stream()
             .filter(c -> existTitles.stream().noneMatch(e -> c.getTitle().contains(e))).toList();
 
         log.info(
             "Content filtering completed: requestedEntries={}, existingEntriesFound={}, newEntriesToCreate={}, duplicatesSkipped={}",
             entryByTitle.size(), existsNews.size(), newEntries.size(), entryByTitle.size() - newEntries.size());
         log.debug("Filtered new content titles: newTitles={}",
-            newEntries.stream().map(EntryCreateUpdateRequest::getTitle).collect(Collectors.toList()));
+            newEntries.stream().map(MarketNewsEntry::getTitle).collect(Collectors.toList()));
 
         return Flux.fromIterable(newEntries);
     }
@@ -130,23 +134,23 @@ public class InvestmentRestNewsContentService {
      * @param request The content data for the new entry
      * @return Mono containing the created entry
      */
-    private Mono<EntryCreateUpdate> createNewEntry(EntryCreateUpdateRequest request) {
+    private Mono<EntryCreateUpdate> createNewEntry(MarketNewsEntry request) {
         log.debug("Creating new content entry: title='{}', hasThumbnail={}", request.getTitle(),
-            request.getThumbnail() != null);
-        File thumbnail = request.getThumbnail();
-        request.setThumbnail(null);
-        return Mono.defer(() -> Mono.just(contentApi.createContentEntry(request)))
-            .flatMap(e -> addThumbnail(e, thumbnail))
+            request.getThumbnailResource() != null);
+        EntryCreateUpdateRequest createUpdateRequest = contentMapper.map(request);
+        log.debug("Content entry processing : {}", createUpdateRequest);
+        return Mono.defer(() -> Mono.just(contentApi.createContentEntry(createUpdateRequest)))
+            .flatMap(e -> addThumbnail(e, request.getThumbnailResource()))
             .doOnSuccess(
                 created -> log.info("Content entry created successfully: title='{}', uuid={}, thumbnailAttached={}",
-                    request.getTitle(), created.getUuid(), thumbnail != null))
+                    request.getTitle(), created.getUuid(), request.getThumbnailResource() != null))
             .doOnError(
                 error -> log.error("Content entry creation failed: title='{}', errorType={}, errorMessage={}",
                     request.getTitle(), error.getClass().getSimpleName(), error.getMessage(), error))
             .onErrorResume(error -> Mono.empty());
     }
 
-    private Mono<EntryCreateUpdate> addThumbnail(EntryCreateUpdate entry, File thumbnail) {
+    private Mono<EntryCreateUpdate> addThumbnail(EntryCreateUpdate entry, Resource thumbnail) {
         UUID uuid = entry.getUuid();
 
         if (thumbnail == null) {
@@ -154,21 +158,20 @@ public class InvestmentRestNewsContentService {
             return Mono.just(entry);
         }
 
-        log.debug("Attaching thumbnail to content entry: uuid={}, thumbnailFile='{}', thumbnailSize={}", uuid,
-            thumbnail.getName(), thumbnail.length());
+        log.debug("Attaching thumbnail to content entry: uuid={}, thumbnailFile='{}'", uuid,
+            getFileNameForLog(thumbnail));
 
         return Mono.defer(() -> {
-            // create path and map variables
-            Map<String, Object> uriVariables = new HashMap<>();
-            uriVariables.put("uuid", uuid);
+                // create path and map variables
+                Map<String, Object> uriVariables = new HashMap<>();
+                uriVariables.put("uuid", uuid);
 
             MultiValueMap<String, String> localVarQueryParams = new LinkedMultiValueMap<>();
             HttpHeaders localVarHeaderParams = new HttpHeaders();
             MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<>();
             MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<>();
 
-            FileSystemResource value = new FileSystemResource(thumbnail);
-            localVarFormParams.add("thumbnail", value);
+            localVarFormParams.add("thumbnail", thumbnail);
 
             final String[] localVarAccepts = {"application/json"};
             final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
@@ -183,11 +186,13 @@ public class InvestmentRestNewsContentService {
                 localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
                 localVarAccept, localVarContentType, localVarAuthNames, localReturnType);
 
-            log.info("Thumbnail attached successfully: uuid={}, thumbnailFile='{}'", uuid, thumbnail.getName());
+            log.info("Thumbnail attached successfully: uuid={}, thumbnailFile='{}'", uuid,
+                getFileNameForLog(thumbnail));
             return Mono.just(entry);
         }).doOnError(error -> log.error(
             "Thumbnail attachment failed: uuid={}, thumbnailFile='{}', errorType={}, errorMessage={}", uuid,
-            thumbnail.getName(), error.getClass().getSimpleName(), error.getMessage(), error)).onErrorResume(error -> {
+            getFileNameForLog(thumbnail), error.getClass().getSimpleName(), error.getMessage(), error))
+        .onErrorResume(error -> {
             log.warn("Content entry created without thumbnail: uuid={}, reason={}", uuid, error.getMessage());
             return Mono.just(entry);
         });
