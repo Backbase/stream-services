@@ -1,0 +1,12 @@
+{
+  "arrangement": {
+    "externalArrangementId": "externalArrangementId",
+    "name": "Arrangement name",
+    "currency": "USD",
+    "additions":
+      {
+        "templateType": "checking",
+        "overdraftProtection": true
+      }
+  }
+}

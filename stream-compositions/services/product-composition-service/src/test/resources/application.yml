@@ -67,7 +67,17 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
-
+  api:
+    extensions:
+      classes:
+        com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem: additional-acc-data
+      property-sets:
+        additional-acc-data:
+          properties:
+            - property-name: templateType
+              type: string
+            - property-name: overdraftProtection
+              type: boolean
 logging:
   level:
     com.backbase.stream.compositions: DEBUG

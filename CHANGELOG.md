@@ -1,7 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [8.1.2](https://github.com/Backbase/stream-services/compare/7.8.0...8.0.0)
+## [8.1.3](https://github.com/Backbase/stream-services/compare/8.1.2...8.1.3)
+### Changed
+- Added dependency validation to stream-compositions services pom.xml to fix product validation issues for arrangements with additional properties.
+- Upgraded SSDK to 19.1.1 in stream-compositions services pom.xml to align with the rest of stream-services modules.
+
+## [8.1.2](https://github.com/Backbase/stream-services/compare/8.0.0...8.1.2)
 ### Changed
 - Update Transaction API to version 3 and adjust related models
 

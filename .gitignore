@@ -2,7 +2,7 @@
 **/target
 target
 
-/.idea/
+**/.idea/
 *.iml
 .project
 .settings
