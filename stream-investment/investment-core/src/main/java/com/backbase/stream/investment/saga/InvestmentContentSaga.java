@@ -8,6 +8,8 @@ import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsCon
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.StreamTask.State;
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -60,7 +62,8 @@ public class InvestmentContentSaga implements StreamTaskExecutor<InvestmentConte
             streamTask.getId(), streamTask.getName());
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
-        return upsertNewsContent(streamTask)
+        return upsertNewsTags(streamTask)
+            .flatMap(this::upsertNewsContent)
             .doOnSuccess(completedTask -> log.info(
                 "Successfully completed investment saga: taskId={}, taskName={}, state={}",
                 completedTask.getId(), completedTask.getName(), completedTask.getState()))
@@ -76,10 +79,16 @@ public class InvestmentContentSaga implements StreamTaskExecutor<InvestmentConte
     }
 
     private Mono<InvestmentContentTask> upsertNewsContent(InvestmentContentTask investmentContentTask) {
-        return investmentRestNewsContentService.upsertContent(investmentContentTask.getData().getMarketNews())
+        return investmentRestNewsContentService
+            .upsertContent(Objects.requireNonNullElse(investmentContentTask.getData().getMarketNews(), List.of()))
             .thenReturn(investmentContentTask);
     }
 
+    private Mono<InvestmentContentTask> upsertNewsTags(InvestmentContentTask investmentContentTask) {
+        return investmentRestNewsContentService
+            .upsertTags(Objects.requireNonNullElse(investmentContentTask.getData().getMarketNewsTags(), List.of()))
+            .thenReturn(investmentContentTask);
+    }
 
     /**
      * Rollback is not implemented for investment saga.
