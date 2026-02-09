@@ -82,7 +82,6 @@ public class InvestmentRestServiceApiConfiguration {
         return new InvestmentRestNewsContentService(restContentApi, restInvestmentApiClient);
     }
 
-
     @Bean
     public InvestmentRestAssetUniverseService investmentRestAssetUniverseService(AssetUniverseApi assetUniverseApi,
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {

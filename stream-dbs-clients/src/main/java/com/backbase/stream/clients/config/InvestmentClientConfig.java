@@ -6,6 +6,7 @@ import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.ContentApi;
+import com.backbase.investment.api.service.v1.CurrencyApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
@@ -111,6 +112,12 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public PaymentsApi paymentsApi(ApiClient investmentApiClient) {
         return new PaymentsApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CurrencyApi currencyApi(ApiClient investmentApiClient) {
+        return new CurrencyApi(investmentApiClient);
     }
 
     @Bean

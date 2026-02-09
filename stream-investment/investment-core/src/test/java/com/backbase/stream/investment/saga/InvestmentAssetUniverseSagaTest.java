@@ -21,6 +21,7 @@ import com.backbase.stream.investment.RandomParam;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
+import com.backbase.stream.investment.service.InvestmentCurrencyService;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import java.time.Duration;
 import java.util.Collections;
@@ -56,6 +57,7 @@ class InvestmentAssetUniverseSagaTest {
 
     @Mock
     private InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService;
+    private InvestmentCurrencyService investmentCurrencyService;
     private AsyncTaskService asyncTaskService;
 
     @Mock
@@ -70,6 +72,7 @@ class InvestmentAssetUniverseSagaTest {
             assetUniverseService,
             investmentAssetPriceService,
             investmentIntradayAssetPriceService,
+            investmentCurrencyService,
             asyncTaskService,
             configurationProperties
         );

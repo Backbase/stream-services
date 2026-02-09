@@ -134,7 +134,8 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/investment-service-api/investment-service-api-v1*.yaml</inputSpec>
+                            <!--                            <inputSpec>${project.build.directory}/yaml/investment-service-api/investment-service-api-v1*.yaml</inputSpec>-->
+                            <inputSpec>${project.build.directory}/yaml/investment-service-api/investment-beta-service-api-v0*-beta.yaml</inputSpec>
                             <apiPackage>com.backbase.investment.api.service.sync.v1</apiPackage>
                             <modelPackage>com.backbase.investment.api.service.sync.v1.model</modelPackage>
                             <enumNameMappings>

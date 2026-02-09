@@ -255,7 +255,9 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/investment-service-api/investment-service-api-v1*.yaml</inputSpec>
+                            <!--                            TODO: remove usage of beta api's -->
+                            <inputSpec>${project.build.directory}/yaml/investment-service-api/investment-beta-service-api-v0*-beta.yaml</inputSpec>
+                            <!--                        <inputSpec>${project.build.directory}/yaml/investment-service-api/investment-service-api-v1*.yaml</inputSpec>-->
                             <apiPackage>com.backbase.investment.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.investment.api.service.v1.model</modelPackage>
                             <enumNameMappings>

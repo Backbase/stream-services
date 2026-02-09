@@ -28,13 +28,13 @@ class InvestmentRestNewsContentServiceTest {
     void upsertContent_createsNewEntry_whenNotExists() {
         // Given
         EntryCreateUpdateRequest request = new EntryCreateUpdateRequest()
-                .title("New Article")
-                .excerpt("Excerpt")
-                .tags(List.of("tag1"));
+            .title("New Article")
+            .excerpt("Excerpt")
+            .tags(List.of("tag1"));
 
         PaginatedEntryList emptyList = new PaginatedEntryList()
-                .count(0)
-                .results(List.of());
+            .count(0)
+            .results(List.of());
 
         EntryCreateUpdate created = new EntryCreateUpdate();
 

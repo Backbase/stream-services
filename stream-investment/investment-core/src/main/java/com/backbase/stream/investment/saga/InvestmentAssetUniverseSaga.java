@@ -10,6 +10,7 @@ import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentCurrencyService;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.StreamTaskExecutor;
@@ -61,6 +62,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
     private final InvestmentAssetUniverseService assetUniverseService;
     private final InvestmentAssetPriceService investmentAssetPriceService;
     private final InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService;
+    private final InvestmentCurrencyService investmentCurrencyService;
     private final AsyncTaskService asyncTaskService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
 
@@ -73,7 +75,8 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
         }
         log.info("Starting investment asset universe saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
-        return upsertMarkets(streamTask)
+        return upsertCurrencies(streamTask)
+            .flatMap(this::upsertMarkets)
             .flatMap(this::upsertMarketSpecialDays)
             .flatMap(this::upsertAssetCategoryTypes)
             .flatMap(this::upsertAssetCategories)
@@ -94,18 +97,6 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
             .onErrorResume(throwable -> Mono.just(streamTask));
     }
 
-    private Mono<InvestmentAssetsTask> upsertPrices(InvestmentAssetsTask investmentTask) {
-        return investmentAssetPriceService.ingestPrices(investmentTask.getData().getAssets(), investmentTask.getData()
-                .getPriceByAsset())
-            .map(investmentTask::setPriceTasks);
-    }
-
-    private Mono<InvestmentAssetsTask> createIntradayPrices(InvestmentAssetsTask investmentTask) {
-        return asyncTaskService.checkPriceAsyncTasksFinished(investmentTask.getData().getPriceAsyncTasks())
-            .then(investmentIntradayAssetPriceService.ingestIntradayPrices()
-                .map(investmentTask::setIntradayPriceTasks));
-    }
-
     /**
      * Rollback is not implemented for investment saga.
      *
@@ -120,6 +111,54 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
         log.warn("Rollback requested for investment saga but not implemented: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
         return Mono.empty();
+    }
+
+    private Mono<InvestmentAssetsTask> upsertCurrencies(InvestmentAssetsTask investmentTask) {
+        InvestmentAssetData investmentData = investmentTask.getData();
+        int currencyCount = investmentData.getCurrencies() != null ? investmentData.getCurrencies().size() : 0;
+        log.info("Starting investment currency creation: taskId={}, currencies={}",
+            investmentTask.getId(), currencyCount);
+        // Log the start of market creation and set task state to IN_PROGRESS
+        investmentTask.info(INVESTMENT, OP_CREATE, null, investmentTask.getName(), investmentTask.getId(),
+            PROCESSING_PREFIX + currencyCount + " investment currencies");
+        investmentTask.setState(State.IN_PROGRESS);
+
+        if (currencyCount == 0) {
+            log.warn("No currencies to create for taskId={}", investmentTask.getId());
+            investmentTask.setState(State.COMPLETED);
+            return Mono.just(investmentTask);
+        }
+        return investmentCurrencyService.upsertCurrencies(investmentData.getCurrencies())
+            .map(currencies -> {
+                // Update the task with the created markets
+                // Log completion and set task state to COMPLETED
+                investmentTask.info(INVESTMENT, OP_CREATE, OP_UPSERT, investmentTask.getName(),
+                    investmentTask.getId(),
+                    OP_UPSERT + " " + currencies.size() + " Investment Currencies");
+                investmentTask.setState(State.COMPLETED);
+                log.info("Successfully processed all currencies: taskId={}, marketCount={}",
+                    investmentTask.getId(), currencies.size());
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error("Failed to create/upsert investment currencies: taskId={}, marketCount={}",
+                    investmentTask.getId(), currencyCount, throwable);
+                investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    "Failed to create investment currencies: " + throwable.getMessage());
+            });
+    }
+
+    private Mono<InvestmentAssetsTask> upsertPrices(InvestmentAssetsTask investmentTask) {
+        return investmentAssetPriceService.ingestPrices(investmentTask.getData().getAssets(), investmentTask.getData()
+                .getPriceByAsset())
+            .map(investmentTask::setPriceTasks);
+    }
+
+    private Mono<InvestmentAssetsTask> createIntradayPrices(InvestmentAssetsTask investmentTask) {
+        return asyncTaskService.checkPriceAsyncTasksFinished(investmentTask.getData().getPriceAsyncTasks())
+            .then(investmentIntradayAssetPriceService.ingestIntradayPrices()
+                .map(investmentTask::setIntradayPriceTasks));
     }
 
     public Mono<InvestmentAssetsTask> upsertMarkets(InvestmentAssetsTask investmentTask) {

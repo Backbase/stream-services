@@ -5,6 +5,7 @@ import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.ClientApi;
+import com.backbase.investment.api.service.v1.CurrencyApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
@@ -19,6 +20,7 @@ import com.backbase.stream.investment.service.CustomIntegrationApiService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentCurrencyService;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
@@ -97,6 +99,11 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    public InvestmentCurrencyService investmentCurrencyService(CurrencyApi currencyApi) {
+        return new InvestmentCurrencyService(currencyApi);
+    }
+
+    @Bean
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
         InvestmentPortfolioService investmentPortfolioService,
         InvestmentModelPortfolioService investmentModelPortfolioService,
@@ -112,10 +119,12 @@ public class InvestmentServiceConfiguration {
         InvestmentAssetUniverseService investmentAssetUniverseService,
         InvestmentAssetPriceService investmentAssetPriceService,
         InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService,
+        InvestmentCurrencyService investmentCurrencyService,
         AsyncTaskService asyncTaskService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
         return new InvestmentAssetUniverseSaga(investmentAssetUniverseService, investmentAssetPriceService,
-            investmentIntradayAssetPriceService, asyncTaskService, coreConfigurationProperties);
+            investmentIntradayAssetPriceService, investmentCurrencyService, asyncTaskService,
+            coreConfigurationProperties);
     }
 
     @Bean
