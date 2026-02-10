@@ -26,6 +26,7 @@ import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -131,8 +132,9 @@ public class InvestmentServiceConfiguration {
     @Bean
     public InvestmentContentSaga investmentContentSaga(
         InvestmentRestNewsContentService investmentRestNewsContentService,
+        InvestmentRestDocumentContentService investmentRestDocumentContentService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
-        return new InvestmentContentSaga(investmentRestNewsContentService, coreConfigurationProperties);
+        return new InvestmentContentSaga(investmentRestNewsContentService, investmentRestDocumentContentService, coreConfigurationProperties);
     }
 
 }

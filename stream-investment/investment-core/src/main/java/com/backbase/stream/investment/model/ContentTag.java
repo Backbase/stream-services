@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MarketNewsTag {
+public class ContentTag {
 
     private String code;
     private String value;

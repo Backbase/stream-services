@@ -10,7 +10,7 @@ import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateReques
 import com.backbase.investment.api.service.sync.v1.model.EntryTagRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedEntryTagRequest;
 import com.backbase.stream.investment.model.MarketNewsEntry;
-import com.backbase.stream.investment.model.MarketNewsTag;
+import com.backbase.stream.investment.model.ContentTag;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class InvestmentRestNewsContentService {
     private final ApiClient apiClient;
     private final ContentMapper contentMapper = Mappers.getMapper(ContentMapper.class);
 
-    public Mono<Void> upsertTags(List<MarketNewsTag> tagEntries) {
+    public Mono<Void> upsertTags(List<ContentTag> tagEntries) {
         log.info("Starting tag upsert batch operation: totalEntries={}", tagEntries.size());
         log.debug("Tag upsert batch details: entries={}", tagEntries);
 
@@ -75,7 +75,7 @@ public class InvestmentRestNewsContentService {
      * @param marketNewsTag The tag to upsert
      * @return Mono that completes with the tag when processed, or empty if validation fails
      */
-    private Mono<MarketNewsTag> upsertSingleTag(MarketNewsTag marketNewsTag) {
+    private Mono<ContentTag> upsertSingleTag(ContentTag marketNewsTag) {
         log.debug("Processing tag: code='{}', value='{}'", marketNewsTag.getCode(), marketNewsTag.getValue());
 
         // Validation
@@ -127,13 +127,13 @@ public class InvestmentRestNewsContentService {
     /**
      * Creates a new tag entry using the ContentApi.
      *
-     * @param marketNewsTag The tag to create an entry for
+     * @param contentTag The tag to create an entry for
      * @return Mono of the created tag
      */
-    private Mono<MarketNewsTag> createTagEntry(MarketNewsTag marketNewsTag) {
+    private Mono<ContentTag> createTagEntry(ContentTag contentTag) {
         EntryTagRequest request = new EntryTagRequest()
-            .code(marketNewsTag.getCode())
-            .value(marketNewsTag.getValue());
+            .code(contentTag.getCode())
+            .value(contentTag.getValue());
 
         return Mono.defer(() -> Mono.just(contentApi.contentEntryTagCreate(request)))
             .doOnSuccess(created -> log.info(
@@ -141,31 +141,31 @@ public class InvestmentRestNewsContentService {
                 created.getCode(), created.getValue()))
             .doOnError(error -> log.error(
                 "Tag entry creation failed: code='{}', value='{}', errorType={}, errorMessage={}",
-                marketNewsTag.getCode(), marketNewsTag.getValue(),
+                contentTag.getCode(), contentTag.getValue(),
                 error.getClass().getSimpleName(), error.getMessage(), error))
-            .thenReturn(marketNewsTag);
+            .thenReturn(contentTag);
     }
 
     /**
      * Patches an existing tag entry with updated values.
      *
-     * @param marketNewsTag The tag with updated values to patch
+     * @param contentTag The tag with updated values to patch
      * @return Mono of the patched tag
      */
-    private Mono<MarketNewsTag> patchTagEntry(MarketNewsTag marketNewsTag) {
+    private Mono<ContentTag> patchTagEntry(ContentTag contentTag) {
         PatchedEntryTagRequest request = new PatchedEntryTagRequest()
-            .code(marketNewsTag.getCode())
-            .value(marketNewsTag.getValue());
+            .code(contentTag.getCode())
+            .value(contentTag.getValue());
 
-        return Mono.defer(() -> Mono.just(contentApi.contentEntryTagPartialUpdate(marketNewsTag.getCode(), request)))
+        return Mono.defer(() -> Mono.just(contentApi.contentEntryTagPartialUpdate(contentTag.getCode(), request)))
             .doOnSuccess(patched -> log.info(
                 "Tag entry patched successfully: code='{}', value='{}'",
                 patched.getCode(), patched.getValue()))
             .doOnError(error -> log.error(
                 "Tag entry patch failed: code='{}', value='{}', errorType={}, errorMessage={}",
-                marketNewsTag.getCode(), marketNewsTag.getValue(),
+                contentTag.getCode(), contentTag.getValue(),
                 error.getClass().getSimpleName(), error.getMessage(), error))
-            .thenReturn(marketNewsTag);
+            .thenReturn(contentTag);
     }
 
 

@@ -3,6 +3,7 @@ package com.backbase.stream.configuration;
 import com.backbase.investment.api.service.sync.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.sync.v1.ContentApi;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,6 +81,12 @@ public class InvestmentRestServiceApiConfiguration {
     public InvestmentRestNewsContentService investmentNewsContentService(ContentApi restContentApi,
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
         return new InvestmentRestNewsContentService(restContentApi, restInvestmentApiClient);
+    }
+
+    @Bean
+    public InvestmentRestDocumentContentService investmentRestContentDocumentService(ContentApi restContentApi,
+        com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
+        return new InvestmentRestDocumentContentService(restContentApi, restInvestmentApiClient);
     }
 
     @Bean
