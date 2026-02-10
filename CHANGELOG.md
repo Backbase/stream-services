@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.6.0]
+### Added
+ - Implement for Document ingestion;
+ - Implement Document tags ingestion;
+ - add Content news tags upsert;
+ - add currencies upsert;
+
+### Changed
+ - use latest investment service api 1.3.0;
+ - move customization of specs into an investment package;
+
 ## [9.5.0]
 ### Added
  - investment service intraday generation and ingestion function
