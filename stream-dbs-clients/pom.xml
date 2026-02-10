@@ -107,14 +107,6 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.backbase.investment</groupId>
-                                    <artifactId>investment-service-api</artifactId>
-                                    <classifier>api</classifier>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>com.backbase.dbs.accesscontrol</groupId>
                                     <artifactId>access-control</artifactId>
                                     <classifier>api</classifier>
@@ -248,27 +240,6 @@
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>0.17.66</version>
                 <executions>
-                    <execution>
-                        <id>generate-investment-service-api-code</id>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <!--                            TODO: remove usage of beta api's -->
-                            <inputSpec>${project.build.directory}/yaml/investment-service-api/investment-beta-service-api-v0*-beta.yaml</inputSpec>
-                            <!--                        <inputSpec>${project.build.directory}/yaml/investment-service-api/investment-service-api-v1*.yaml</inputSpec>-->
-                            <apiPackage>com.backbase.investment.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.investment.api.service.v1.model</modelPackage>
-                            <enumNameMappings>
-                                <enumNameMapping>Etc/GMT-12=ETC_GMT_1222</enumNameMapping>
-                            </enumNameMappings>
-                            <configOptions>
-                                <openApiNullable>false</openApiNullable>
-                                <useBeanValidation>false</useBeanValidation>
-                            </configOptions>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>generate-accesscontrol-datagroup-service-api-v1-code</id>
                         <goals>

@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 public interface ContentMapper {
 
     @Mapping(target = "thumbnail", ignore = true)
+    @Mapping(target = "status", constant = "PUBLISHED")
     EntryCreateUpdateRequest map(MarketNewsEntry entry);
 
 }

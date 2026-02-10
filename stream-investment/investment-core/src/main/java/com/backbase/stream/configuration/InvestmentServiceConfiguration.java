@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Import;
 
 @Import({
     DbsApiClientsAutoConfiguration.class,
+    InvestmentClientConfig.class
 })
 @EnableConfigurationProperties({
     InvestmentIngestionConfigurationProperties.class
