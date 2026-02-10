@@ -9,12 +9,13 @@ import com.backbase.investment.api.service.sync.v1.model.OASDocumentResponse;
 import com.backbase.investment.api.service.sync.v1.model.PatchedDocumentTagRequest;
 import com.backbase.stream.investment.model.ContentDocumentEntry;
 import com.backbase.stream.investment.model.ContentTag;
+import com.backbase.stream.investment.model.UpsertPartition;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,11 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -138,8 +141,8 @@ public class InvestmentRestDocumentContentService {
         log.info("Starting document upsert batch operation: totalEntries={}", documents.size());
         log.debug("Document upsert batch details: entries={}", documents);
 
-        return findEntriesNewContent(documents)
-            .flatMap(this::insertDocument)
+        return findUpsertDocuments(documents)
+            .flatMap(this::upsertDocument)
             .doOnComplete(
                 () -> log.info("Document upsert batch completed successfully: totalEntriesProcessed={}",
                     documents.size()))
@@ -149,16 +152,22 @@ public class InvestmentRestDocumentContentService {
             .then();
     }
 
-    private Mono<ContentDocumentEntry> insertDocument(ContentDocumentEntry request) {
-        log.debug("Processing document entry: title='{}', hasDocument={}", request.getName(),
-            request.getResourceInPath() != null);
+    private Mono<ContentDocumentEntry> upsertDocument(UpsertPartition<UUID, ContentDocumentEntry> request) {
+        if (request.id() == null) {
+            return insertDocument(request.entity());
+        }
+        return patchDocument(request.id(), request.entity());
+    }
 
+    private Mono<ContentDocumentEntry> patchDocument(UUID uuid, ContentDocumentEntry request) {
+        log.debug("Patching document entry: title='{}', hasDocument={}", request.getName(),
+            request.getDocumentResource() != null);
         OASDocumentRequestDataRequest createDocumentRequest = contentMapper.map(request);
         log.debug("Document entry request mapped: {}", createDocumentRequest);
-        return Mono.defer(() -> Mono.just(createContentDocument(createDocumentRequest, request.getResourceInPath()))
+        return Mono.defer(() -> Mono.just(patchDocument(uuid, createDocumentRequest, request.getDocumentResource()))
             .doOnSuccess(
                 created -> log.info("Document entry created successfully: title='{}', uuid={}, documentAttached={}",
-                    request.getName(), created.getUuid(), request.getResourceInPath() != null))
+                    request.getName(), created.getUuid(), request.getDocumentResource() != null))
             .doOnError(
                 error -> log.error("Document entry creation failed: title='{}', errorType={}, errorMessage={}",
                     request.getName(), error.getClass().getSimpleName(), error.getMessage(), error))
@@ -166,31 +175,44 @@ public class InvestmentRestDocumentContentService {
             .thenReturn(request));
     }
 
-    private Flux<ContentDocumentEntry> findEntriesNewContent(List<ContentDocumentEntry> documents) {
-        Map<String, ContentDocumentEntry> entryByTitle = documents.stream()
-            .collect(Collectors.toMap(ContentDocumentEntry::getName, Function.identity()));
-        log.debug("Filtering document entries: requestedTitles={}", entryByTitle.keySet());
+    private Mono<ContentDocumentEntry> insertDocument(ContentDocumentEntry request) {
+        log.debug("Processing document entry: title='{}', hasDocument={}", request.getName(),
+            request.getDocumentResource() != null);
 
+        OASDocumentRequestDataRequest createDocumentRequest = contentMapper.map(request);
+        log.debug("Document entry request mapped: {}", createDocumentRequest);
+        return Mono.defer(() -> Mono.just(createContentDocument(createDocumentRequest, request.getDocumentResource()))
+            .doOnSuccess(
+                created -> log.info("Document entry created successfully: title='{}', uuid={}, documentAttached={}",
+                    request.getName(), created.getUuid(), request.getDocumentResource() != null))
+            .doOnError(
+                error -> log.error("Document entry creation failed: title='{}', errorType={}, errorMessage={}",
+                    request.getName(), error.getClass().getSimpleName(), error.getMessage(), error))
+            .onErrorResume(error -> Mono.empty())
+            .thenReturn(request));
+    }
+
+    private Flux<UpsertPartition<UUID, ContentDocumentEntry>> findUpsertDocuments(
+        List<ContentDocumentEntry> documents) {
         List<OASDocumentResponse> existsNews = contentApi.listContentDocuments(null, CONTENT_RETRIEVE_LIMIT, null, 0,
                 null, null)
             .getResults().stream().filter(Objects::nonNull).toList();
 
         if (existsNews.isEmpty()) {
-            log.info("No existing document found in system: requestedEntries={}, existingEntries=0, newEntries={}",
-                entryByTitle.size(), entryByTitle.size());
-            return Flux.fromIterable(entryByTitle.values());
+            log.info("No existing document found in system: newEntries={}",
+                documents.size());
+            return Flux.fromIterable(documents.stream()
+                .map(UpsertPartition::<UUID, ContentDocumentEntry>createPartition)
+                .toList());
         }
 
-        Set<String> existTitles = existsNews.stream().map(OASDocumentResponse::getName).collect(Collectors.toSet());
-        List<ContentDocumentEntry> newEntries = documents.stream()
-            .filter(c -> existTitles.stream().noneMatch(e -> c.getName().equals(e))).toList();
+        Map<String, UUID> existTitles = existsNews.stream()
+            .collect(Collectors.toMap(OASDocumentResponse::getName, OASDocumentResponse::getUuid,
+                (existing, replacement) -> existing));
 
-        log.info(
-            "Document filtering completed: requestedEntries={}, existingEntriesFound={}, "
-                + "newEntriesToCreate={}, duplicatesSkipped={}",
-            entryByTitle.size(), existsNews.size(), newEntries.size(), entryByTitle.size() - newEntries.size());
-        log.debug("Filtered new Document names: newTitles={}",
-            newEntries.stream().map(ContentDocumentEntry::getName).collect(Collectors.toList()));
+        List<UpsertPartition<UUID, ContentDocumentEntry>> newEntries = documents.stream()
+            .map(d -> new UpsertPartition<>(existTitles.get(d.getName()), d))
+            .toList();
 
         return Flux.fromIterable(newEntries);
     }
@@ -226,6 +248,50 @@ public class InvestmentRestDocumentContentService {
                 Collections.<String, Object>emptyMap(), new LinkedMultiValueMap<>(), null, localVarHeaderParams,
                 localVarCookieParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames,
                 localReturnType)
+            .getBody();
+    }
+
+    public OASDocumentResponse patchDocument(UUID uuid,
+        OASDocumentRequestDataRequest data, Resource document) throws RestClientException {
+
+        // verify the required parameter 'uuid' is set
+        if (uuid == null) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                "Missing the required parameter 'uuid' when calling patchContentDocument");
+        }
+
+        // create path and map variables
+        final Map<String, Object> uriVariables = new HashMap<String, Object>();
+        uriVariables.put("uuid", uuid.toString());
+
+        final MultiValueMap<String, String> localVarQueryParams = new LinkedMultiValueMap<String, String>();
+        final HttpHeaders localVarHeaderParams = new HttpHeaders();
+        final MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<String, String>();
+        final MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<String, Object>();
+
+        if (data != null) {
+            localVarFormParams.add("data", data);
+        }
+        if (document != null) {
+            localVarFormParams.add("path", document);
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        final String[] localVarContentTypes = {
+            "multipart/form-data"
+        };
+        final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+
+        String[] localVarAuthNames = new String[]{};
+
+        ParameterizedTypeReference<OASDocumentResponse> localReturnType = new ParameterizedTypeReference<OASDocumentResponse>() {
+        };
+        return apiClient.invokeAPI("/service-api/v2/content/documents/{uuid}/", HttpMethod.PATCH, uriVariables,
+                localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
+                localVarAccept, localVarContentType, localVarAuthNames, localReturnType)
             .getBody();
     }
 

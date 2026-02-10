@@ -24,7 +24,7 @@ public class ContentDocumentEntry {
     private List<ModelAsset> assets;
     @JsonProperty("extra_data")
     private Map<String, Object> extraData;
-    private String path;
-    private Resource resourceInPath;
+    private String document;
+    private Resource documentResource;
 
 }

@@ -2,9 +2,7 @@ package com.backbase.stream.investment.saga;
 
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentContentTask;
-import com.backbase.stream.investment.ModelAsset;
 import com.backbase.stream.investment.model.ContentDocumentEntry;
-import com.backbase.stream.investment.model.ContentTag;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
@@ -12,14 +10,10 @@ import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsCon
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.StreamTask.State;
-import java.io.File;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import reactor.core.publisher.Mono;
 
 /**
@@ -102,11 +96,6 @@ public class InvestmentContentSaga implements StreamTaskExecutor<InvestmentConte
     }
 
     private Mono<InvestmentContentTask> upsertDocumentTags(InvestmentContentTask investmentContentTask) {
-        // TODO: remove
-        List<ContentTag> selfTrading = List.of(
-            new ContentTag("self-trading", "Self Trading"),
-            new ContentTag("self-trading2", "Self Trading2")
-        );
         return investmentRestDocumentContentService
             .upsertContentTags(Objects.requireNonNullElse(investmentContentTask.getData().getDocumentTags(), List.of()))
             .thenReturn(investmentContentTask);
@@ -114,26 +103,6 @@ public class InvestmentContentSaga implements StreamTaskExecutor<InvestmentConte
 
     private Mono<InvestmentContentTask> upsertContentDocuments(InvestmentContentTask investmentContentTask) {
         List<ContentDocumentEntry> documents = investmentContentTask.getData().getDocuments();
-
-        // TODO: remove
-        //        Map<String, Object> isin1 = Map.of("isin", "LU1681047236", "market", "XETR", "currency", "EUR");
-        List<ModelAsset> isin2 = List.of(new ModelAsset("LU1681047236", "XETR", "EUR"));
-        File file = new File(
-            "/Users/r.kniazevych/work/backbase/BSJ/rnd-bootstrap-job/data/src/main/resources/non-modelbank/investment/content-documents/files/product_robo-advisor_en.pdf");
-        Resource fileSystemResource = new FileSystemResource(file);
-        List<ContentDocumentEntry> t1 = List.of(new ContentDocumentEntry(
-            "Test Document",
-            "A test document",
-            List.of("self-trading"),
-            isin2, Map.of("createdBy", "bootstrap-job"), "test", fileSystemResource)
-            ,
-            new ContentDocumentEntry(
-                "Test Document2",
-                "A test document",
-                List.of("self-trading"),
-                isin2, Map.of("createdBy", "bootstrap-job"), "test", fileSystemResource)
-        );
-
         return investmentRestDocumentContentService
             .upsertDocuments(Objects.requireNonNullElse(documents, List.of()))
             .thenReturn(investmentContentTask);
