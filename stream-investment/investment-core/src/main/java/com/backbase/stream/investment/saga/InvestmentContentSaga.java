@@ -2,12 +2,16 @@ package com.backbase.stream.investment.saga;
 
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentContentTask;
+import com.backbase.stream.investment.model.ContentDocumentEntry;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.StreamTask.State;
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -47,6 +51,7 @@ public class InvestmentContentSaga implements StreamTaskExecutor<InvestmentConte
     public static final String RESULT_FAILED = "failed";
 
     private final InvestmentRestNewsContentService investmentRestNewsContentService;
+    private final InvestmentRestDocumentContentService investmentRestDocumentContentService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
 
     @Override
@@ -60,26 +65,48 @@ public class InvestmentContentSaga implements StreamTaskExecutor<InvestmentConte
             streamTask.getId(), streamTask.getName());
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
-        return upsertNewsContent(streamTask)
+        return upsertNewsTags(streamTask)
+            .flatMap(this::upsertNewsContent)
+            .flatMap(this::upsertDocumentTags)
+            .flatMap(this::upsertContentDocuments)
             .doOnSuccess(completedTask -> log.info(
-                "Successfully completed investment saga: taskId={}, taskName={}, state={}",
+                "Successfully completed investment content saga: taskId={}, taskName={}, state={}",
                 completedTask.getId(), completedTask.getName(), completedTask.getState()))
             .doOnError(throwable -> {
-                log.error("Failed to execute investment saga: taskId={}, taskName={}",
+                log.error("Failed to execute investment content saga: taskId={}, taskName={}",
                     streamTask.getId(), streamTask.getName(), throwable);
                 streamTask.error(INVESTMENT, OP_UPSERT, RESULT_FAILED,
                     streamTask.getName(), streamTask.getId(),
-                    "Investment saga failed: " + throwable.getMessage());
+                    "Investment content saga failed: " + throwable.getMessage());
                 streamTask.setState(State.FAILED);
             })
             .onErrorResume(throwable -> Mono.just(streamTask));
     }
 
     private Mono<InvestmentContentTask> upsertNewsContent(InvestmentContentTask investmentContentTask) {
-        return investmentRestNewsContentService.upsertContent(investmentContentTask.getData().getMarketNews())
+        return investmentRestNewsContentService
+            .upsertContent(Objects.requireNonNullElse(investmentContentTask.getData().getMarketNews(), List.of()))
             .thenReturn(investmentContentTask);
     }
 
+    private Mono<InvestmentContentTask> upsertNewsTags(InvestmentContentTask investmentContentTask) {
+        return investmentRestNewsContentService
+            .upsertTags(Objects.requireNonNullElse(investmentContentTask.getData().getMarketNewsTags(), List.of()))
+            .thenReturn(investmentContentTask);
+    }
+
+    private Mono<InvestmentContentTask> upsertDocumentTags(InvestmentContentTask investmentContentTask) {
+        return investmentRestDocumentContentService
+            .upsertContentTags(Objects.requireNonNullElse(investmentContentTask.getData().getDocumentTags(), List.of()))
+            .thenReturn(investmentContentTask);
+    }
+
+    private Mono<InvestmentContentTask> upsertContentDocuments(InvestmentContentTask investmentContentTask) {
+        List<ContentDocumentEntry> documents = investmentContentTask.getData().getDocuments();
+        return investmentRestDocumentContentService
+            .upsertDocuments(Objects.requireNonNullElse(documents, List.of()))
+            .thenReturn(investmentContentTask);
+    }
 
     /**
      * Rollback is not implemented for investment saga.
