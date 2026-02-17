@@ -1,6 +1,7 @@
 package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.AssetCategoryType;
+import com.backbase.investment.api.service.v1.model.Currency;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
@@ -20,6 +21,7 @@ import lombok.EqualsAndHashCode;
 @Builder
 public class InvestmentAssetData {
 
+    private List<Currency> currencies;
     private List<Market> markets;
     private List<MarketSpecialDay> marketSpecialDays;
     private List<AssetCategoryType> assetCategoryTypes;
