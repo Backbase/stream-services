@@ -1,8 +1,10 @@
 package com.backbase.stream.investment.saga;
 
+import com.backbase.investment.api.service.v1.model.PortfolioTradingAccount;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
+import com.backbase.stream.investment.model.InvestmentPortfolioAccount;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
@@ -56,6 +58,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     public static final String RESULT_FAILED = "failed";
 
     private static final String INVESTMENT_PRODUCTS = "investment-products";
+    private static final String INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS = "investment-portfolio-trading-accounts";
     private static final String INVESTMENT_PORTFOLIO_MODELS = "investment-portfolio-models";
     private static final String INVESTMENT_PORTFOLIOS = "investment-portfolios";
     private static final String PROCESSING_PREFIX = "Processing ";
@@ -83,6 +86,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .flatMap(this::upsertInvestmentPortfolios)
             .flatMap(this::upsertInvestmentPortfolioDeposits)
             .flatMap(this::upsertPortfoliosAllocations)
+            .flatMap(this::upsertPortfolioTradingAccounts)
             .doOnSuccess(completedTask -> log.info(
                 "Successfully completed investment saga: taskId={}, taskName={}, state={}",
                 completedTask.getId(), completedTask.getName(), completedTask.getState()))
@@ -260,6 +264,36 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 investmentTask.error(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_FAILED,
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment products: " + throwable.getMessage());
+            });
+    }
+
+    private Mono<InvestmentTask> upsertPortfolioTradingAccounts(InvestmentTask investmentTask) {
+        List<PortfolioTradingAccount> portfolioTradingAccounts = investmentTask.getData().getPortfolioTradingAccounts();
+        List<InvestmentPortfolioAccount> investmentPortfolioAccounts = investmentTask.getData().getInvestmentPortfolioAccounts();
+        int accountsCount = portfolioTradingAccounts.size();
+
+        log.info("Starting investment portfolio trading accounts upsert: taskId={}, arrangementCount={}",
+            investmentTask.getId(), accountsCount);
+
+        investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, null, investmentTask.getName(),
+            investmentTask.getId(), PROCESSING_PREFIX + accountsCount + " investment portfolio trading accounts");
+
+        return investmentPortfolioService.upsertPortfolioTradingAccounts(portfolioTradingAccounts, investmentPortfolioAccounts)
+            .map(products -> {
+                investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_CREATED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    UPSERTED_PREFIX + products.size() + " investment portfolio trading accounts");
+                log.info("Successfully upserted all investment portfolio trading accounts: taskId={}, productCount={}",
+                    investmentTask.getId(), products.size());
+
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error("Failed to upsert investment portfolio trading accounts: taskId={}, arrangementCount={}",
+                    investmentTask.getId(), accountsCount, throwable);
+                investmentTask.error(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_FAILED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
             });
     }
 
