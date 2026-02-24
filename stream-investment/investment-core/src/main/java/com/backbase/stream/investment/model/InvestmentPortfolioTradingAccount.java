@@ -5,9 +5,10 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Account {
+public class InvestmentPortfolioTradingAccount {
+    private String portfolioExternalId;
+    private String accountId;
     private String accountExternalId;
     private Boolean isDefault;
     private Boolean isInternal;
-    private String productTypeExternalId;
 }

@@ -1,10 +1,9 @@
 package com.backbase.stream.investment.saga;
 
-import com.backbase.investment.api.service.v1.model.PortfolioTradingAccount;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
-import com.backbase.stream.investment.model.InvestmentPortfolioAccount;
+import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
@@ -268,9 +267,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     }
 
     private Mono<InvestmentTask> upsertPortfolioTradingAccounts(InvestmentTask investmentTask) {
-        List<PortfolioTradingAccount> portfolioTradingAccounts = investmentTask.getData().getPortfolioTradingAccounts();
-        List<InvestmentPortfolioAccount> investmentPortfolioAccounts = investmentTask.getData().getInvestmentPortfolioAccounts();
-        int accountsCount = portfolioTradingAccounts.size();
+        List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts = investmentTask.getData().getInvestmentPortfolioTradingAccounts();
+        int accountsCount = investmentPortfolioTradingAccounts.size();
 
         log.info("Starting investment portfolio trading accounts upsert: taskId={}, arrangementCount={}",
             investmentTask.getId(), accountsCount);
@@ -278,7 +276,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, null, investmentTask.getName(),
             investmentTask.getId(), PROCESSING_PREFIX + accountsCount + " investment portfolio trading accounts");
 
-        return investmentPortfolioService.upsertPortfolioTradingAccounts(portfolioTradingAccounts, investmentPortfolioAccounts)
+        return investmentPortfolioService.upsertPortfolioTradingAccounts(investmentPortfolioTradingAccounts)
             .map(products -> {
                 investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
