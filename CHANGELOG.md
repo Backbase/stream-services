@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.7.0]
+### Added
+ - Implement Portfolio Trading Account Creation;
+
 ## [9.6.0]
 ### Added
  - Implement for Document ingestion;
