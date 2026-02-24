@@ -710,7 +710,7 @@ public class InvestmentPortfolioService {
 
         return listExistingPortfolioTradingAccounts(request)
             .flatMap(existing -> patchExistingPortfolioTradingAccount(existing, request))
-            .switchIfEmpty(createPortfolioTradingAccount(request))
+            .switchIfEmpty(Mono.defer(() -> createPortfolioTradingAccount(request)))
             .doOnSuccess(account -> log.info(
                 "Successfully upserted portfolio trading account: uuid={}, externalAccountId={}",
                 account.getUuid(), request.getExternalAccountId()))
