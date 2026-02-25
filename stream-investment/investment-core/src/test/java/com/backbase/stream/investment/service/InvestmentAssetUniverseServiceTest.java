@@ -6,6 +6,7 @@ import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,8 @@ class InvestmentAssetUniverseServiceTest {
                 ArgumentMatchers.any(),
                 ArgumentMatchers.any()))
             .thenReturn(Mono.just(existingAsset));
-        Mockito.when(investmentRestAssetUniverseService.patchAsset(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        Mockito.when(investmentRestAssetUniverseService.patchAsset(ArgumentMatchers.any(), ArgumentMatchers.any(),
+                HashMap.newHashMap(1)))
             .thenReturn(Mono.just(asset));
         Mockito.when(investmentRestAssetUniverseService.createAsset(
                 ArgumentMatchers.any(),

@@ -3,6 +3,7 @@ package com.backbase.stream.investment.service;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
+import com.backbase.investment.api.service.v1.PortfolioTradingAccountsApi;
 import com.backbase.investment.api.service.v1.model.Deposit;
 import com.backbase.investment.api.service.v1.model.DepositRequest;
 import com.backbase.investment.api.service.v1.model.DepositTypeEnum;
@@ -10,11 +11,14 @@ import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRe
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PaginatedDepositList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
+import com.backbase.investment.api.service.v1.model.PaginatedPortfolioTradingAccountList;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
+import com.backbase.investment.api.service.v1.model.PortfolioTradingAccount;
+import com.backbase.investment.api.service.v1.model.PortfolioTradingAccountRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.Status08fEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
@@ -22,6 +26,7 @@ import com.backbase.stream.configuration.InvestmentIngestionConfigurationPropert
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,6 +74,7 @@ public class InvestmentPortfolioService {
     private final InvestmentProductsApi productsApi;
     private final PortfolioApi portfolioApi;
     private final PaymentsApi paymentsApi;
+    private final PortfolioTradingAccountsApi portfolioTradingAccountsApi;
     private final InvestmentIngestionConfigurationProperties config;
 
     public Mono<List<PortfolioList>> upsertPortfolios(List<InvestmentArrangement> investmentArrangements,
@@ -562,6 +568,294 @@ public class InvestmentPortfolioService {
                         portfolio.getUuid(), throwable);
                 }
             });
+    }
+
+    /**
+     * Upserts portfolio trading accounts derived from the provided investment portfolio accounts.
+     *
+     * <p>This method constructs {@link PortfolioTradingAccount} instances directly from
+     * {@link InvestmentPortfolioTradingAccount} data, resolving each account's portfolio UUID
+     * via the portfolio service before upserting.
+     *
+     * <p>Processing flow:
+     * <ol>
+     *   <li>Validates input list is not null or empty</li>
+     *   <li>For each investment portfolio account:
+     *     <ul>
+     *       <li>Resolves the portfolio UUID from {@code portfolioExternalId}</li>
+     *       <li>Constructs a {@link PortfolioTradingAccount} with all available fields</li>
+     *       <li>Creates or updates the trading account via the API</li>
+     *     </ul>
+     *   </li>
+     *   <li>Failed accounts are logged and skipped to prevent batch failures</li>
+     * </ol>
+     *
+     * @param investmentPortfolioTradingAccounts the source accounts containing all required field data
+     * @return Mono emitting a list of successfully upserted trading accounts, or an empty list if input is null/empty
+     */
+    public Mono<List<PortfolioTradingAccount>> upsertPortfolioTradingAccounts(
+        List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts) {
+
+        log.info("Upserting portfolio trading accounts: count={}",
+            investmentPortfolioTradingAccounts != null ? investmentPortfolioTradingAccounts.size() : 0);
+
+        if (investmentPortfolioTradingAccounts == null || investmentPortfolioTradingAccounts.isEmpty()) {
+            return Mono.just(List.of());
+        }
+
+        return Flux.fromIterable(investmentPortfolioTradingAccounts)
+            .flatMap(this::upsertSingleTradingAccount)
+            .collectList();
+    }
+
+    /**
+     * Upserts a single portfolio trading account derived from an investment portfolio account.
+     *
+     * <p>This method:
+     * <ol>
+     *   <li>Resolves the internal portfolio UUID from the account's {@code portfolioExternalId}</li>
+     *   <li>Builds a {@link PortfolioTradingAccountRequest} directly from the source account and resolved UUID</li>
+     *   <li>Creates or updates the trading account via the API</li>
+     * </ol>
+     *
+     * <p>Errors are logged and result in an empty Mono to prevent failing the entire batch.
+     *
+     * @param investmentPortfolioTradingAccount the source account containing all required field data
+     * @return Mono emitting the upserted trading account, or empty if processing fails
+     */
+    private Mono<PortfolioTradingAccount> upsertSingleTradingAccount(
+        InvestmentPortfolioTradingAccount investmentPortfolioTradingAccount) {
+
+        String externalAccountId = investmentPortfolioTradingAccount.getAccountExternalId();
+        log.debug("Processing trading account: externalAccountId={}", externalAccountId);
+
+        return fetchPortfolioInternalId(investmentPortfolioTradingAccount.getPortfolioExternalId())
+            .map(portfolioUuid -> buildTradingAccountRequest(investmentPortfolioTradingAccount, portfolioUuid))
+            .flatMap(this::upsertPortfolioTradingAccount)
+            .onErrorResume(throwable -> {
+                log.warn("Skipping trading account due to error: externalAccountId={}", externalAccountId, throwable);
+                return Mono.empty();
+            });
+    }
+
+    /**
+     * Fetches the internal portfolio UUID using the portfolio external ID.
+     *
+     * <p>Queries the portfolio service to retrieve the internal UUID
+     * corresponding to the given external ID.
+     *
+     * @param portfolioExternalId the external ID of the portfolio
+     * @return Mono emitting the resolved portfolio UUID
+     * @throws IllegalStateException if the portfolio cannot be found or multiple results are returned
+     */
+    private Mono<UUID> fetchPortfolioInternalId(String portfolioExternalId) {
+        if (portfolioExternalId == null) {
+            log.warn("Cannot fetch portfolio internal ID: portfolioExternalId is null");
+            return Mono.empty();
+        }
+
+        log.debug("Fetching portfolio internal ID: externalId={}", portfolioExternalId);
+
+        return listExistingPortfolios(portfolioExternalId)
+            .map(PortfolioList::getUuid)
+            .doOnSuccess(uuid -> log.debug("Resolved portfolio UUID={} for externalId={}",
+                uuid, portfolioExternalId))
+            .doOnError(throwable -> log.error(
+                "Failed to fetch portfolio internal ID: externalId={}",
+                portfolioExternalId, throwable));
+    }
+
+    /**
+     * Builds a {@link PortfolioTradingAccountRequest} directly from an {@link InvestmentPortfolioTradingAccount}
+     * and a resolved portfolio UUID, skipping the intermediate {@link PortfolioTradingAccount} domain object.
+     *
+     * <p>Maps the following fields:
+     * <ul>
+     *   <li>{@code accountExternalId} → {@code externalAccountId}</li>
+     *   <li>{@code isDefault} → {@code isDefault}</li>
+     *   <li>{@code isInternal} → {@code isInternal}</li>
+     *   <li>{@code productTypeExternalId} → {@code accountId}</li>
+     *   <li>resolved {@code portfolioUuid} → {@code portfolio}</li>
+     * </ul>
+     *
+     * @param investmentPortfolioTradingAccount the source account containing field data
+     * @param portfolioUuid the resolved internal portfolio UUID
+     * @return the constructed {@link PortfolioTradingAccountRequest}
+     */
+    private PortfolioTradingAccountRequest buildTradingAccountRequest(
+        InvestmentPortfolioTradingAccount investmentPortfolioTradingAccount, UUID portfolioUuid) {
+
+        return new PortfolioTradingAccountRequest()
+            .portfolio(portfolioUuid)
+            .accountId(investmentPortfolioTradingAccount.getAccountId())
+            .externalAccountId(investmentPortfolioTradingAccount.getAccountExternalId())
+            .isDefault(investmentPortfolioTradingAccount.getIsDefault())
+            .isInternal(investmentPortfolioTradingAccount.getIsInternal());
+    }
+
+    /**
+     * Upserts a portfolio trading account using the provided request.
+     *
+     * <p>Implementation of upsert pattern:
+     * <ol>
+     *   <li>Searches for an existing trading account by external account ID</li>
+     *   <li>If found, patches the existing account with the new values</li>
+     *   <li>If not found, creates a new trading account</li>
+     * </ol>
+     *
+     * @param request the trading account request containing all necessary fields
+     * @return Mono emitting the created or updated trading account
+     */
+    public Mono<PortfolioTradingAccount> upsertPortfolioTradingAccount(PortfolioTradingAccountRequest request) {
+
+        return listExistingPortfolioTradingAccounts(request)
+            .flatMap(existing -> patchExistingPortfolioTradingAccount(existing, request))
+            .switchIfEmpty(Mono.defer(() -> createPortfolioTradingAccount(request)))
+            .doOnSuccess(account -> log.info(
+                "Successfully upserted portfolio trading account: uuid={}, externalAccountId={}",
+                account.getUuid(), request.getExternalAccountId()))
+            .doOnError(throwable -> log.error(
+                "Failed to upsert portfolio trading account: externalAccountId={}",
+                request.getExternalAccountId(), throwable));
+    }
+
+    /**
+     * Patches an existing portfolio trading account with updated values.
+     *
+     * <p>If the patch operation fails (e.g., due to validation errors or conflicts),
+     * falls back to returning the existing account to preserve data integrity
+     * and prevent batch failures.
+     *
+     * @param existing the existing trading account to update
+     * @param request the request containing updated values
+     * @return Mono emitting the updated trading account, or the existing account if patch fails
+     */
+    private Mono<PortfolioTradingAccount> patchExistingPortfolioTradingAccount(
+        PortfolioTradingAccount existing,
+        PortfolioTradingAccountRequest request) {
+
+        String uuid = existing.getUuid().toString();
+        log.debug("Patching portfolio trading account: uuid={}, externalAccountId={}",
+            uuid, request.getExternalAccountId());
+
+        return portfolioTradingAccountsApi.patchPortfolioTradingAccount(uuid, request)
+            .doOnSuccess(updated -> log.info(
+                "Successfully patched portfolio trading account: uuid={}", updated.getUuid()))
+            .doOnError(throwable -> logPortfolioTradingAccountError("PATCH", "uuid", uuid, throwable))
+            .onErrorResume(WebClientResponseException.class, ex -> {
+                log.info("Using existing portfolio trading account due to patch failure: uuid={}", uuid);
+                return Mono.just(existing);
+            });
+    }
+
+    /**
+     * Creates a new portfolio trading account via the API.
+     *
+     * <p>Called during the upsert flow when no existing trading account is found.
+     *
+     * @param request the request containing all required trading account details
+     * @return Mono emitting the newly created trading account
+     */
+    public Mono<PortfolioTradingAccount> createPortfolioTradingAccount(PortfolioTradingAccountRequest request) {
+
+        return portfolioTradingAccountsApi.createPortfolioTradingAccount(request)
+            .doOnSuccess(account -> log.info(
+                "Created portfolio trading account: uuid={}, externalAccountId={}",
+                account.getUuid(), request.getExternalAccountId()))
+            .doOnError(throwable -> logPortfolioTradingAccountError(
+                "CREATE", "externalAccountId", request.getExternalAccountId(), throwable));
+    }
+
+    /**
+     * Lists existing portfolio trading accounts matching the external account ID in the request.
+     *
+     * <p>Validates the result to ensure data consistency:
+     * <ul>
+     *   <li>Returns empty if no matching account is found</li>
+     *   <li>Returns the single matching account if exactly one result is found</li>
+     *   <li>Returns an error if multiple accounts are found (indicates a data setup issue)</li>
+     * </ul>
+     *
+     * @param request the request containing the external account ID to search for
+     * @return Mono emitting the matching trading account, or empty if not found
+     * @throws IllegalStateException if more than one trading account is found with the same external account ID
+     */
+    private Mono<PortfolioTradingAccount> listExistingPortfolioTradingAccounts(
+        PortfolioTradingAccountRequest request) {
+
+        String externalAccountId = request.getExternalAccountId();
+
+        return portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                1, null, null, externalAccountId, null, null, null)
+            .doOnSuccess(accounts -> log.debug(
+                "List portfolio trading accounts query completed: externalAccountId={}, found={} results",
+                externalAccountId, accounts != null ? accounts.getResults().size() : 0))
+            .doOnError(throwable -> log.error(
+                "Failed to list existing portfolio trading accounts: externalAccountId={}",
+                externalAccountId, throwable))
+            .flatMap(accounts -> validateAndExtractPortfolioTradingAccount(accounts, externalAccountId));
+    }
+
+    /**
+     * Validates and extracts a single trading account from paginated search results.
+     *
+     * <p>Enforces data consistency:
+     * <ul>
+     *   <li>Returns empty for no results — expected for new accounts</li>
+     *   <li>Returns the account for exactly one result</li>
+     *   <li>Returns an error for multiple results — indicates a data setup issue</li>
+     * </ul>
+     *
+     * @param accounts the paginated list of trading accounts returned by the API
+     * @param externalAccountId the external account ID used in the search, for logging purposes
+     * @return Mono emitting the single matching trading account, or empty if no results found
+     * @throws IllegalStateException if multiple trading accounts are found with the same external account ID
+     */
+    private Mono<PortfolioTradingAccount> validateAndExtractPortfolioTradingAccount(
+        PaginatedPortfolioTradingAccountList accounts,
+        String externalAccountId) {
+
+        if (accounts == null || CollectionUtils.isEmpty(accounts.getResults())) {
+            log.info("No existing portfolio trading account found: externalAccountId={}", externalAccountId);
+            return Mono.empty();
+        }
+
+        int resultCount = accounts.getResults().size();
+        if (resultCount > 1) {
+            log.error("Data setup issue: Found {} portfolio trading accounts with externalAccountId={}, "
+                    + "expected at most 1. Please review trading account configuration.",
+                resultCount, externalAccountId);
+            return Mono.error(new IllegalStateException(
+                String.format("Data setup issue: Found %d portfolio trading accounts with externalAccountId=%s, "
+                        + "expected at most 1. Please review trading account configuration.",
+                    resultCount, externalAccountId)));
+        }
+
+        PortfolioTradingAccount existingAccount = accounts.getResults().getFirst();
+        log.info("Found existing portfolio trading account: uuid={}, externalAccountId={}",
+            existingAccount.getUuid(), externalAccountId);
+        return Mono.just(existingAccount);
+    }
+
+    /**
+     * Logs errors occurring during portfolio trading account operations.
+     *
+     * <p>Provides enhanced error context for {@link WebClientResponseException},
+     * including HTTP status code and response body. For other exceptions, logs
+     * basic error information.
+     *
+     * @param operation  a short description of the operation that failed (e.g., "PATCH", "CREATE")
+     * @param idLabel    the label for the identifier (e.g., "uuid", "externalAccountId")
+     * @param idValue    the value of the identifier
+     * @param throwable  the exception that occurred
+     */
+    private void logPortfolioTradingAccountError(String operation, String idLabel, String idValue, Throwable throwable) {
+        if (throwable instanceof WebClientResponseException ex) {
+            log.warn("Portfolio trading account {} failed: {}={}, status={}, body={}",
+                operation, idLabel, idValue, ex.getStatusCode(), ex.getResponseBodyAsString());
+        } else {
+            log.error("Portfolio trading account {} failed: {}={}", operation, idLabel, idValue, throwable);
+        }
     }
 
     /**

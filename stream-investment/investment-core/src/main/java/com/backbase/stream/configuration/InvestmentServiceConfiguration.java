@@ -11,6 +11,7 @@ import com.backbase.investment.api.service.v1.InvestmentApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
+import com.backbase.investment.api.service.v1.PortfolioTradingAccountsApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.investment.saga.InvestmentAssetUniverseSaga;
 import com.backbase.stream.investment.saga.InvestmentContentSaga;
@@ -59,10 +60,10 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
-        InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi,
+        InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi, PortfolioTradingAccountsApi portfolioTradingAccountsApi,
         InvestmentIngestionConfigurationProperties configurationProperties) {
         return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi,
-            configurationProperties);
+            portfolioTradingAccountsApi, configurationProperties);
     }
 
     @Bean

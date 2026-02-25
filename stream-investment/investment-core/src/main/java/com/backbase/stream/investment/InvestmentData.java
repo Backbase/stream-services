@@ -5,6 +5,7 @@ import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
+import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ public class InvestmentData {
     private List<PortfolioProduct> portfolioProducts;
     private InvestmentAssetData investmentAssetData;
     private List<PortfolioList> portfolios;
+    private List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {
         Map<String, List<UUID>> clientsByLeExternalId = new HashMap<>();
