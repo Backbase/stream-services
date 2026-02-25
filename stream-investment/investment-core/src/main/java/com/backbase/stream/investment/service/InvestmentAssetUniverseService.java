@@ -104,7 +104,7 @@ public class InvestmentAssetUniverseService {
             // If asset exists, log and return it
             .flatMap(a -> {
                 log.info("Asset already exists with Asset Identifier : {}", assetIdentifier);
-                return investmentRestAssetUniverseService.patchAsset(a, asset).thenReturn(a);
+                return investmentRestAssetUniverseService.patchAsset(a, asset, categoryIdByCode).thenReturn(a);
             })
             .map(assetMapper::map)
             // If Mono is empty (asset not found), create the asset

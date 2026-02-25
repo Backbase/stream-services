@@ -64,14 +64,14 @@ public class InvestmentRestAssetUniverseService {
     }
 
     public Mono<com.backbase.stream.investment.Asset> patchAsset(Asset existAsset,
-        com.backbase.stream.investment.Asset asset) {
+        com.backbase.stream.investment.Asset asset, Map<String, UUID> categoryIdByCode) {
         String assetUuid = existAsset.getUuid().toString();
 
         log.info(
             "Starting asset update: assetUuid={}, assetName='{}', logoFile='{}'",
             assetUuid, asset.getName(), asset.getLogo());
-
-        return Mono.defer(() -> Mono.just(patchAsset(assetUuid, null, asset.getLogoFile())))
+        OASAssetRequestDataRequest assetRequestDataRequest = assetMapper.mapAsset(asset, categoryIdByCode);
+        return Mono.defer(() -> Mono.just(patchAsset(assetUuid, assetRequestDataRequest, asset.getLogoFile())))
             .map(patchedAsset -> {
                 log.info(
                     "Logo attached successfully to asset:assetUuid={}, assetName='{}', logoFile='{}'", assetUuid,
