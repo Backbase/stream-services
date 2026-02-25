@@ -1,5 +1,6 @@
 package com.backbase.stream.investment.saga;
 
+import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
@@ -83,9 +84,9 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .flatMap(this::upsertClients)
             .flatMap(this::upsertInvestmentProducts)
             .flatMap(this::upsertInvestmentPortfolios)
+            .flatMap(this::upsertPortfolioTradingAccounts)
             .flatMap(this::upsertInvestmentPortfolioDeposits)
             .flatMap(this::upsertPortfoliosAllocations)
-            .flatMap(this::upsertPortfolioTradingAccounts)
             .doOnSuccess(completedTask -> log.info(
                 "Successfully completed investment saga: taskId={}, taskName={}, state={}",
                 completedTask.getId(), completedTask.getName(), completedTask.getState()))
@@ -137,6 +138,11 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                         data.getPortfolioProducts(),
                         investmentTask.getData().getInvestmentAssetData()))
                 .collectList()
+                .onErrorResume(throwable -> {
+                    log.error("Allocation generation failed: for portfolios:{} taskIds={}",
+                        data.getPortfolios().stream().map(PortfolioList::getUuid).toList(), investmentTask.getId(), throwable);
+                    return Mono.empty();
+                })
                 .map(o -> investmentTask)
             );
     }
