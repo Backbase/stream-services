@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## [9.6.0]
 ### Added
+- customer-data-platform (CDP) module for the customer profiles ingestion
  - Implement for Document ingestion;
  - Implement Document tags ingestion;
  - add Content news tags upsert;
