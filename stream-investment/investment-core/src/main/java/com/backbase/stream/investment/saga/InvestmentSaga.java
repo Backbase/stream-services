@@ -87,7 +87,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .flatMap(this::upsertPortfolioTradingAccounts)
             .flatMap(this::upsertInvestmentPortfolioDeposits)
             .flatMap(this::upsertPortfoliosAllocations)
-            .doOnSuccess(completedTask -> log.info(
+            .doOnNext(completedTask -> log.info(
                 "Successfully completed investment saga: taskId={}, taskName={}, state={}",
                 completedTask.getId(), completedTask.getName(), completedTask.getState()))
             .doOnError(throwable -> {
@@ -132,23 +132,23 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     private Mono<InvestmentTask> upsertPortfoliosAllocations(InvestmentTask investmentTask) {
         InvestmentData data = investmentTask.getData();
         return asyncTaskService.checkPriceAsyncTasksFinished(data.getPriceAsyncTasks())
-            .then(Flux.fromIterable(Objects.requireNonNullElse(data.getPortfolios(), List.of()))
+            .thenMany(Flux.fromIterable(Objects.requireNonNullElse(data.getPortfolios(), List.of()))
                 .flatMap(
                     p -> investmentPortfolioAllocationService.generateAllocations(p,
                         data.getPortfolioProducts(),
-                        investmentTask.getData().getInvestmentAssetData()))
-                .collectList()
-                .doOnError(throwable -> {
-                    log.error("Allocation generation failed for portfolios:{} taskId={}",
-                        data.getPortfolios().stream().map(PortfolioList::getUuid).toList(), investmentTask.getId(),
-                        throwable);
-                    investmentTask.error(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_FAILED,
-                        investmentTask.getName(), investmentTask.getId(),
-                        "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
-                })
-                .map(o -> investmentTask)
-            );
+                        investmentTask.getData().getInvestmentAssetData())))
+            .collectList()
+            .doOnError(throwable -> {
+                log.error("Allocation generation failed for portfolios:{} taskId={}",
+                    data.getPortfolios().stream().map(PortfolioList::getUuid).toList(), investmentTask.getId(),
+                    throwable);
+                investmentTask.error(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_FAILED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
+            })
+            .map(o -> investmentTask);
     }
+
 
     /**
      * Upserts investment portfolios for all investment arrangements.
@@ -287,15 +287,14 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             investmentTask.getId(), PROCESSING_PREFIX + accountsCount + " investment portfolio trading accounts");
 
         return investmentPortfolioService.upsertPortfolioTradingAccounts(investmentPortfolioTradingAccounts)
-            .map(products -> {
+            .doOnNext(products -> {
                 investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
                     UPSERTED_PREFIX + products.size() + " investment portfolio trading accounts");
                 log.info("Successfully upserted all investment portfolio trading accounts: taskId={}, productCount={}",
                     investmentTask.getId(), products.size());
-
-                return investmentTask;
             })
+            .thenReturn(investmentTask)
             .doOnError(throwable -> {
                 log.error("Failed to upsert investment portfolio trading accounts: taskId={}, arrangementCount={}",
                     investmentTask.getId(), accountsCount, throwable);
