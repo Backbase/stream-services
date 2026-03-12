@@ -15,6 +15,34 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+/**
+ * Saga orchestrating the complete investment content ingestion workflow.
+ *
+ * <p>This saga implements a multi-step process for ingesting investment content data:
+ * <ol>
+ *   <li>Upsert news tags - Creates or updates market news tags</li>
+ *   <li>Upsert news content - Creates or updates market news entries</li>
+ *   <li>Upsert document tags - Creates or updates content document tags</li>
+ *   <li>Upsert content documents - Creates or updates content document entries</li>
+ * </ol>
+ *
+ * <p>The saga uses idempotent operations to ensure safe re-execution and writes progress
+ * to the {@link com.backbase.stream.worker.model.StreamTask} history for observability.
+ * Each step builds upon the previous step's results, creating a complete content setup.
+ *
+ * <p>Design notes:
+ * <ul>
+ *   <li>All operations are idempotent (safe to retry)</li>
+ *   <li>Progress is tracked via StreamTask state and history</li>
+ *   <li>Failures are logged with complete context for debugging</li>
+ *   <li>All reactive operations include proper success and error handlers</li>
+ *   <li>Content ingestion can be disabled via {@link com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties}</li>
+ * </ul>
+ *
+ * @see InvestmentRestNewsContentService
+ * @see InvestmentRestDocumentContentService
+ * @see StreamTaskExecutor
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class InvestmentContentSaga implements StreamTaskExecutor<InvestmentContentTask> {
@@ -142,6 +170,15 @@ public class InvestmentContentSaga implements StreamTaskExecutor<InvestmentConte
             .thenReturn(investmentContentTask);
     }
 
+    /**
+     * Rollback is not implemented for investment saga.
+     *
+     * <p>Investment operations are idempotent and designed to be retried safely.
+     * Manual cleanup should be performed if necessary through the Investment Service API.
+     *
+     * @param streamTask the task to rollback
+     * @return null - rollback not implemented
+     */
     @Override
     public Mono<InvestmentContentTask> rollBack(InvestmentContentTask streamTask) {
         log.warn("Rollback requested for investment saga but not implemented: taskId={}, taskName={}",

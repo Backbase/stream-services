@@ -149,7 +149,6 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .map(o -> investmentTask);
     }
 
-
     /**
      * Upserts investment portfolios for all investment arrangements.
      *
