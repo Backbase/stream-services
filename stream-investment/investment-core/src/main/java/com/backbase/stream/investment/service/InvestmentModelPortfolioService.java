@@ -98,7 +98,7 @@ public class InvestmentModelPortfolioService {
 
         return listExistingModelPortfolios(modelName, riskLevel)
             .flatMap(pm -> patchModelPortfolio(pm.getUuid(), modelPortfolio))
-            .switchIfEmpty(createNewModelPortfolio(modelPortfolio))
+            .switchIfEmpty(Mono.defer(() -> createNewModelPortfolio(modelPortfolio)))
             .doOnSuccess(upserted -> log.info(
                 "Successfully upserted model portfolio: uuid={}, name={}, riskLevel={}",
                 upserted.getUuid(), upserted.getName(), upserted.getRiskLevel()))
@@ -167,7 +167,7 @@ public class InvestmentModelPortfolioService {
 
         log.info("Patch model portfolio: name={}, riskLevel={}",
             modelPortfolio.getName(), modelPortfolio.getRiskLevel());
-        log.debug("Patch model portfolio: iiud={}, object={}", uuid, modelPortfolio);
+        log.debug("Patch model portfolio: uuid={}, object={}", uuid, modelPortfolio);
         return customIntegrationApiService.patchModelPortfolioRequestCreation(uuid.toString(),
                 null, null, null, modelPortfolio, null)
             .doOnSuccess(created -> log.info(
@@ -192,7 +192,7 @@ public class InvestmentModelPortfolioService {
             log.error("Failed to {} model portfolio: name={}, riskLevel={}, status={}, body={}",
                 request, name, riskLevel, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
         } else {
-            log.error("Failed to {}} model portfolio: name={}, riskLevel={}", request,
+            log.error("Failed to {} model portfolio: name={}, riskLevel={}", request,
                 name, riskLevel, throwable);
         }
     }

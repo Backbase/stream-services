@@ -58,8 +58,10 @@ public class InvestmentAssetPriceService {
                         null, null, null, null,
                         asset.getIsin(), daysOfPrices + 1, asset.getMarket(), null, null)
                     .filter(Objects::nonNull)
-                    .map(PaginatedOASPriceList::getResults)
-                    .filter(Objects::nonNull)
+                    // Using mapNotNull to handle null values directly instead of map(...).filter(Objects::nonNull).
+                    // This avoids NullPointerException since Reactor's map() operator does not allow null values.
+                    // mapNotNull drops elements where getResults() is null, ensuring the pipeline completes normally.
+                    .mapNotNull(PaginatedOASPriceList::getResults)
                     .flatMap(prices -> {
                         RandomPriceParam priceParam = findPrice(priceByAsset, asset, getLastPrice(prices));
                         LocalDate lastDate =

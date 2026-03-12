@@ -71,10 +71,10 @@ public class InvestmentAssetUniverseService {
                     });
             })
             // If Mono is empty (market not found), create the market
-            .switchIfEmpty(assetUniverseApi.createMarket(marketRequest)
+            .switchIfEmpty(Mono.defer(() -> assetUniverseApi.createMarket(marketRequest)
                 .doOnSuccess(createdMarket -> log.info("Created market: {}", createdMarket))
                 .doOnError(error -> log.error("Error creating market: {}", error.getMessage(), error))
-            );
+            ));
     }
 
     /**
@@ -108,7 +108,7 @@ public class InvestmentAssetUniverseService {
             })
             .map(assetMapper::map)
             // If Mono is empty (asset not found), create the asset
-            .switchIfEmpty(investmentRestAssetUniverseService.createAsset(asset, categoryIdByCode)
+            .switchIfEmpty(Mono.defer(() -> investmentRestAssetUniverseService.createAsset(asset, categoryIdByCode)
                 .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
                 .doOnError(error -> {
                     if (error instanceof WebClientResponseException w) {
@@ -119,7 +119,7 @@ public class InvestmentAssetUniverseService {
                             error.getMessage(), error);
                     }
                 })
-            );
+            ));
     }
 
     /**
@@ -171,7 +171,7 @@ public class InvestmentAssetUniverseService {
                 }
             })
             // If Mono is empty (market special day not found), create the market special day
-            .switchIfEmpty(assetUniverseApi.createMarketSpecialDay(marketSpecialDayRequest)
+            .switchIfEmpty(Mono.defer(() -> assetUniverseApi.createMarketSpecialDay(marketSpecialDayRequest)
                 .doOnSuccess(
                     createdMarketSpecialDay -> log.info("Created market special day: {}", createdMarketSpecialDay))
                 .doOnError(error -> {
@@ -184,7 +184,7 @@ public class InvestmentAssetUniverseService {
                     }
 
                 })
-            );
+            ));
     }
 
     public Flux<com.backbase.stream.investment.Asset> createAssets(List<com.backbase.stream.investment.Asset> assets) {
@@ -236,8 +236,8 @@ public class InvestmentAssetUniverseService {
                     return Mono.empty();
                 })
                 .switchIfEmpty(
-                    investmentRestAssetUniverseService
-                        .createAssetCategory(assetCategoryEntry, assetCategoryEntry.getImageResource())
+                    Mono.defer(() -> investmentRestAssetUniverseService
+                        .createAssetCategory(assetCategoryEntry, assetCategoryEntry.getImageResource()))
                 )
                 .doOnSuccess(updatedCategory -> {
                     assetCategoryEntry.setUuid(updatedCategory.getUuid());
@@ -304,7 +304,7 @@ public class InvestmentAssetUniverseService {
                 }
             })
             .switchIfEmpty(
-                assetUniverseApi.createAssetCategoryType(assetCategoryTypeRequest)
+                Mono.defer(() -> assetUniverseApi.createAssetCategoryType(assetCategoryTypeRequest)
                     .doOnSuccess(createdType -> log.info("Created asset category type: {}", createdType))
                     .doOnError(error -> {
                         if (error instanceof WebClientResponseException w) {
@@ -316,7 +316,7 @@ public class InvestmentAssetUniverseService {
                                 assetCategoryTypeRequest.getCode(),
                                 error.getMessage(), error);
                         }
-                    })
+                    }))
             );
     }
 }
