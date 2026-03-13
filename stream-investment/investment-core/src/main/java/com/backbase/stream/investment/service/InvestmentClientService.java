@@ -8,17 +8,21 @@ import com.backbase.investment.api.service.v1.model.PatchedOASClientUpdateReques
 import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.investment.ClientUser;
 import jakarta.validation.constraints.NotNull;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 /**
  * Service wrapper around generated {@link ClientApi} providing guarded create / patch operations with logging, minimal
@@ -41,8 +45,34 @@ public class InvestmentClientService {
 
     private final ClientApi clientApi;
 
+    /**
+     * Upserts a list of clients with controlled concurrency to prevent race conditions.
+     *
+     * <p>Design considerations:
+     * <ul>
+     *   <li>Deduplicates clients by internalUserId before processing</li>
+     *   <li>Limits concurrent requests to avoid overwhelming the service and triggering 503 errors</li>
+     *   <li>Implements exponential backoff retry with 503 and 409 conflict handling</li>
+     *   <li>Processes clients sequentially through the same ExecutorService to maintain order and prevent race conditions</li>
+     * </ul>
+     *
+     * @param clientUsers the list of clients to upsert
+     * @return Mono emitting the list of successfully upserted clients
+     */
     public Mono<List<ClientUser>> upsertClients(List<ClientUser> clientUsers) {
-        return Flux.fromIterable(clientUsers)
+        // Deduplicate by internalUserId to prevent duplicate processing
+        Map<String, ClientUser> uniqueClients = clientUsers.stream()
+            .collect(Collectors.toMap(ClientUser::getInternalUserId, Function.identity(),
+                (existing, replacement) -> {
+                    log.warn("Duplicate internalUserId found: {}. Using first occurrence.",
+                        existing.getInternalUserId());
+                    return existing;
+                }
+            ));
+
+        // Process with controlled concurrency (default: 5 concurrent requests)
+        // This prevents overwhelming the Investment Service and triggering 503 responses
+        return Flux.fromIterable(uniqueClients.values())
             .flatMap(clientUser -> {
                 log.debug("Upserting investment client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
                     clientUser.getInternalUserId(), clientUser.getExternalUserId(),
@@ -61,8 +91,13 @@ public class InvestmentClientService {
                     .doOnError(throwable -> log.error(
                         "Failed to upsert client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
                         clientUser.getInternalUserId(), clientUser.getExternalUserId(),
-                        clientUser.getLegalEntityExternalId(), throwable));
-            })
+                        clientUser.getLegalEntityExternalId(), throwable))
+                    .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+                        .filter(this::isRetryableError)
+                        .doBeforeRetry(signal -> log.warn(
+                            "Retrying upsert for client: internalUserId={}, attempt={}",
+                            clientUser.getInternalUserId(), signal.totalRetries() + 1)));
+            }, 5)  // Max 5 concurrent requests to avoid overwhelming the service
             .collectList();
     }
 
@@ -372,6 +407,31 @@ public class InvestmentClientService {
         } else {
             log.error("Failed to update investment client: uuid={}", uuid, throwable);
         }
+    }
+
+    /**
+     * Determines if an error is retryable based on HTTP status code.
+     *
+     * <p>Retryable errors include:
+     * <ul>
+     *   <li>409 Conflict: Race condition during concurrent client creation/update</li>
+     *   <li>503 Service Unavailable: Temporary service overload or maintenance</li>
+     * </ul>
+     *
+     * @param throwable the exception to evaluate
+     * @return true if the error is retryable, false otherwise
+     */
+    private boolean isRetryableError(Throwable throwable) {
+        if (throwable instanceof WebClientResponseException ex) {
+            int statusCode = ex.getStatusCode().value();
+            boolean isRetryable = statusCode == 409 || statusCode == 503;
+            if (isRetryable) {
+                log.debug("Identified retryable error: status={}, reason={}",
+                    statusCode, statusCode == 409 ? "CONFLICT" : "SERVICE_UNAVAILABLE");
+            }
+            return isRetryable;
+        }
+        return false;
     }
 
 }

@@ -31,6 +31,17 @@ import org.springframework.web.reactive.function.client.WebClient.Builder;
 
 /**
  * Configuration for Investment service REST client (ClientApi).
+ *
+ * <p>This configuration creates the Investment API client with proper codec configuration.
+ *
+ * <p><strong>Note:</strong> Connection pooling, timeouts, and rate limiting are configured in
+ * {@link InvestmentWebClientConfiguration} which should be imported alongside this class.
+ * The WebClient connection pool prevents resource exhaustion and 503 errors by limiting:
+ * <ul>
+ *   <li>Maximum concurrent connections to 100 (configurable)</li>
+ *   <li>Connection acquisition timeout to 45 seconds</li>
+ *   <li>Read/Write timeouts to 30 seconds each</li>
+ * </ul>
  */
 @Configuration
 @ConditionalOnBean(InvestmentServiceConfiguration.class)

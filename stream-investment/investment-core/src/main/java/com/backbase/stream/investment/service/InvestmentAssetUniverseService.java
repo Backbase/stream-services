@@ -11,6 +11,7 @@ import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryList;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,20 +47,21 @@ public class InvestmentAssetUniverseService {
     public Mono<Market> upsertMarket(MarketRequest marketRequest) {
         log.debug("Creating market: {}", marketRequest);
         return assetUniverseApi.getMarket(marketRequest.getCode())
-            // If getMarket returns 404 NOT_FOUND, treat as "not found" and return Mono.empty()
             .onErrorResume(error -> {
                 if (error instanceof org.springframework.web.reactive.function.client.WebClientResponseException.NotFound) {
                     log.info("Market not found for code: {}", marketRequest.getCode());
                     return Mono.empty();
                 }
-                // Propagate other errors
                 return Mono.error(error);
             })
-            // If market exists, return it
             .flatMap(existingMarket -> {
                 log.info("Market already exists: {}", existingMarket.getCode());
                 log.debug("Market already exists: {}", existingMarket);
                 return assetUniverseApi.updateMarket(existingMarket.getCode(), marketRequest)
+                    .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+                        .filter(this::isRetryableError)
+                        .doBeforeRetry(signal -> log.warn("Retrying market update: code={}, attempt={}",
+                            marketRequest.getCode(), signal.totalRetries() + 1)))
                     .doOnSuccess(updatedMarket -> log.info("Updated market: {}", updatedMarket))
                     .doOnError(error -> {
                         if (error instanceof WebClientResponseException w) {
@@ -70,8 +73,11 @@ public class InvestmentAssetUniverseService {
                         }
                     });
             })
-            // If Mono is empty (market not found), create the market
             .switchIfEmpty(assetUniverseApi.createMarket(marketRequest)
+                .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+                    .filter(this::isRetryableError)
+                    .doBeforeRetry(signal -> log.warn("Retrying market create: code={}, attempt={}",
+                        marketRequest.getCode(), signal.totalRetries() + 1)))
                 .doOnSuccess(createdMarket -> log.info("Created market: {}", createdMarket))
                 .doOnError(error -> log.error("Error creating market: {}", error.getMessage(), error))
             );
@@ -151,6 +157,11 @@ public class InvestmentAssetUniverseService {
                         log.info("Market special day already exists for day: {}", marketSpecialDayRequest);
                         return assetUniverseApi.updateMarketSpecialDay(matchingSpecialDay.get().getUuid().toString(),
                                 marketSpecialDayRequest)
+                            .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+                                .filter(this::isRetryableError)
+                                .doBeforeRetry(signal -> log.warn(
+                                    "Retrying market special day update: date={}, attempt={}",
+                                    date, signal.totalRetries() + 1)))
                             .doOnSuccess(updatedMarketSpecialDay ->
                                 log.info("Updated market special day: {}", updatedMarketSpecialDay))
                             .doOnError(error -> {
@@ -172,6 +183,11 @@ public class InvestmentAssetUniverseService {
             })
             // If Mono is empty (market special day not found), create the market special day
             .switchIfEmpty(assetUniverseApi.createMarketSpecialDay(marketSpecialDayRequest)
+                .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+                    .filter(this::isRetryableError)
+                    .doBeforeRetry(signal -> log.warn(
+                        "Retrying market special day create: date={}, attempt={}",
+                        marketSpecialDayRequest.getDate(), signal.totalRetries() + 1)))
                 .doOnSuccess(
                     createdMarketSpecialDay -> log.info("Created market special day: {}", createdMarketSpecialDay))
                 .doOnError(error -> {
@@ -200,9 +216,52 @@ public class InvestmentAssetUniverseService {
                 Map<String, UUID> categoryIdByCode = categories.stream()
                     .collect(Collectors.toMap(com.backbase.investment.api.service.v1.model.AssetCategory::getCode,
                         com.backbase.investment.api.service.v1.model.AssetCategory::getUuid));
-                return Flux.fromIterable(assets)
-                    .flatMap(asset -> this.getOrCreateAsset(asset, categoryIdByCode));
+                // Deduplicate assets by key to prevent concurrent creation of the same asset
+                Map<String, com.backbase.stream.investment.Asset> uniqueAssets = assets.stream()
+                    .collect(Collectors.toMap(
+                        com.backbase.stream.investment.Asset::getKeyString,
+                        a -> a,
+                        (existing, replacement) -> {
+                            log.warn("Duplicate asset key found: {}. Using first occurrence.",
+                                existing.getKeyString());
+                            return existing;
+                        }
+                    ));
+                // Limit concurrency to 5 to prevent overwhelming the service and triggering 503 errors
+                return Flux.fromIterable(uniqueAssets.values())
+                    .flatMap(asset -> this.getOrCreateAsset(asset, categoryIdByCode)
+                        .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+                            .filter(this::isRetryableError)
+                            .doBeforeRetry(signal -> log.warn(
+                                "Retrying asset upsert: key={}, attempt={}",
+                                asset.getKeyString(), signal.totalRetries() + 1))),
+                        5);
             });
+    }
+
+    /**
+     * Determines whether an error is retryable based on HTTP status code.
+     *
+     * <p>Retryable errors:
+     * <ul>
+     *   <li>409 Conflict – race condition during concurrent creation</li>
+     *   <li>503 Service Unavailable – temporary service overload or maintenance</li>
+     * </ul>
+     *
+     * @param throwable the error to evaluate
+     * @return {@code true} if the error should trigger a retry
+     */
+    private boolean isRetryableError(Throwable throwable) {
+        if (throwable instanceof WebClientResponseException ex) {
+            int statusCode = ex.getStatusCode().value();
+            boolean retryable = statusCode == 409 || statusCode == 503;
+            if (retryable) {
+                log.debug("Identified retryable error: status={}, reason={}",
+                    statusCode, statusCode == 409 ? "CONFLICT" : "SERVICE_UNAVAILABLE");
+            }
+            return retryable;
+        }
+        return false;
     }
 
     /**
@@ -285,6 +344,11 @@ public class InvestmentAssetUniverseService {
                             assetCategoryTypeRequest.getCode());
                         return assetUniverseApi.updateAssetCategoryType(matchingType.get().getUuid().toString(),
                                 assetCategoryTypeRequest)
+                            .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+                                .filter(this::isRetryableError)
+                                .doBeforeRetry(signal -> log.warn(
+                                    "Retrying asset category type update: code={}, attempt={}",
+                                    assetCategoryTypeRequest.getCode(), signal.totalRetries() + 1)))
                             .doOnSuccess(updatedType -> log.info("Updated asset category type: {}", updatedType))
                             .doOnError(error -> {
                                 if (error instanceof WebClientResponseException w) {
@@ -305,6 +369,11 @@ public class InvestmentAssetUniverseService {
             })
             .switchIfEmpty(
                 assetUniverseApi.createAssetCategoryType(assetCategoryTypeRequest)
+                    .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+                        .filter(this::isRetryableError)
+                        .doBeforeRetry(signal -> log.warn(
+                            "Retrying asset category type create: code={}, attempt={}",
+                            assetCategoryTypeRequest.getCode(), signal.totalRetries() + 1)))
                     .doOnSuccess(createdType -> log.info("Created asset category type: {}", createdType))
                     .doOnError(error -> {
                         if (error instanceof WebClientResponseException w) {
@@ -313,8 +382,7 @@ public class InvestmentAssetUniverseService {
                                 w.getStatusCode(), w.getResponseBodyAsString());
                         } else {
                             log.error("Error creating asset category type: {} : {}",
-                                assetCategoryTypeRequest.getCode(),
-                                error.getMessage(), error);
+                                assetCategoryTypeRequest.getCode(), error.getMessage(), error);
                         }
                     })
             );
