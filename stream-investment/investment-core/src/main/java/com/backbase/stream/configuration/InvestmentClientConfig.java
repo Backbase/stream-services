@@ -13,6 +13,7 @@ import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.investment.api.service.v1.PortfolioTradingAccountsApi;
+import com.backbase.investment.api.service.v1.RiskAssessmentApi;
 import com.backbase.stream.clients.config.CompositeApiClientConfig;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -144,6 +145,12 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public CurrencyApi currencyApi(ApiClient investmentApiClient) {
         return new CurrencyApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RiskAssessmentApi riskAssessmentApi(ApiClient investmentApiClient) {
+        return new RiskAssessmentApi(investmentApiClient);
     }
 
     @Bean

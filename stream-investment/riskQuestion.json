@@ -1,0 +1,62 @@
+[
+  {
+    "code": "INVESTMENT_HORIZON",
+    "order": 1,
+    "description": "What is your investment horizon?",
+    "score": "8.333333"
+  },
+  {
+    "code": "INVESTMENT_AMOUNT",
+    "order": 2,
+    "description": "How much will you invest?",
+    "score": "8.333333"
+  },
+  {
+    "code": "ASSETS_TRADED",
+    "order": 3,
+    "description": "In the past 5 years, what have you invested in?",
+    "score": "6.250000"
+  },
+  {
+    "code": "MARKET_DROP",
+    "order": 4,
+    "description": "The value of your investment drops. What do you do?",
+    "score": "20.830000"
+  },
+  {
+    "code": "LOSS_TOLERANCE",
+    "order": 5,
+    "description": "How much loss are you comfortable with?",
+    "score": "20.830000"
+  },
+  {
+    "code": "MONTHLY_INCOME",
+    "order": 6,
+    "description": "What is your gross monthly income?",
+    "score": "8.333333"
+  },
+  {
+    "code": "MONTHLY_EXPENSES",
+    "order": 7,
+    "description": "What is your monthly expenditure?",
+    "score": "0.000000"
+  },
+  {
+    "code": "SOURCE_OF_FUNDS",
+    "order": 8,
+    "description": "What is the source of the investment money?",
+    "score": "0.000000"
+  },
+  {
+    "code": "EMPLOYMENT_STATUS",
+    "order": 9,
+    "description": "What is your employment status?",
+    "score": "0.000000"
+  },
+  {
+    "code": "INDUSTRY_TYPE",
+    "order": 10,
+    "description": "Which industry do you work in?",
+    "score": "0.000000"
+  }
+]
