@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -112,7 +111,9 @@ public class InvestmentPortfolioService {
      */
     public Mono<List<PortfolioProduct>> upsertInvestmentProducts(InvestmentData investmentData,
         List<InvestmentArrangement> investmentArrangements) {
-        Objects.requireNonNull(investmentArrangements, "InvestmentArrangement must not be null");
+        if (investmentArrangements == null) {
+            return Mono.error(new NullPointerException("InvestmentArrangement must not be null"));
+        }
 
         return Flux.fromIterable(investmentArrangements)
             .flatMap(investmentArrangement -> {
@@ -235,7 +236,9 @@ public class InvestmentPortfolioService {
      */
     public Mono<PortfolioList> upsertInvestmentPortfolios(InvestmentArrangement investmentArrangement,
         Map<String, List<UUID>> clientsByLeExternalId) {
-        Objects.requireNonNull(investmentArrangement, "InvestmentArrangement must not be null");
+        if (investmentArrangement == null) {
+            return Mono.error(new NullPointerException("InvestmentArrangement must not be null"));
+        }
 
         String externalId = investmentArrangement.getExternalId();
         String arrangementName = investmentArrangement.getName();

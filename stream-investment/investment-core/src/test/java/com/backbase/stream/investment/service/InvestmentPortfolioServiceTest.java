@@ -1,6 +1,5 @@
 package com.backbase.stream.investment.service;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -663,8 +662,9 @@ class InvestmentPortfolioServiceTest {
         @Test
         @DisplayName("null arrangement — throws NullPointerException immediately")
         void upsertInvestmentPortfolios_nullArrangement_throwsNullPointerException() {
-            assertThrows(NullPointerException.class,
-                () -> service.upsertInvestmentPortfolios(null, Map.of()).subscribe());
+            StepVerifier.create(service.upsertInvestmentPortfolios(null, Map.of()))
+                .expectError(NullPointerException.class)
+                .verify();
         }
     }
 
@@ -1120,8 +1120,9 @@ class InvestmentPortfolioServiceTest {
         @DisplayName("null arrangements list — throws NullPointerException immediately")
         void upsertInvestmentProducts_nullArrangements_throwsNullPointerException() {
             InvestmentData investmentData = Mockito.mock(InvestmentData.class);
-            assertThrows(NullPointerException.class,
-                () -> service.upsertInvestmentProducts(investmentData, null).subscribe());
+            StepVerifier.create(service.upsertInvestmentProducts(investmentData, null))
+                .expectError(NullPointerException.class)
+                .verify();
         }
     }
 
