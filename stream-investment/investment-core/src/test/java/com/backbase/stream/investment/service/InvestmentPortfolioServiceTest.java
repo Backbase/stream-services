@@ -1,8 +1,15 @@
 package com.backbase.stream.investment.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PaymentsApi;
@@ -281,7 +288,7 @@ class InvestmentPortfolioServiceTest {
 
             // Act & Assert
             StepVerifier.create(service.upsertPortfolioTradingAccount(request))
-                .expectErrorMatches(e -> e instanceof IllegalStateException)
+                .expectErrorMatches(IllegalStateException.class::isInstance)
                 .verify();
         }
     }
@@ -398,7 +405,7 @@ class InvestmentPortfolioServiceTest {
             // Act & Assert
             StepVerifier.create(service.upsertPortfolioTradingAccounts(input))
                 .expectNextMatches(list -> list.size() == 1
-                    && createdUuid.equals(list.get(0).getUuid()))
+                    && createdUuid.equals(list.getFirst().getUuid()))
                 .verifyComplete();
         }
 
@@ -649,7 +656,7 @@ class InvestmentPortfolioServiceTest {
 
             // Act & Assert
             StepVerifier.create(service.upsertInvestmentPortfolios(arrangement, Map.of()))
-                .expectErrorMatches(e -> e instanceof IllegalStateException)
+                .expectErrorMatches(IllegalStateException.class::isInstance)
                 .verify();
         }
 
@@ -657,7 +664,7 @@ class InvestmentPortfolioServiceTest {
         @DisplayName("null arrangement — throws NullPointerException immediately")
         void upsertInvestmentPortfolios_nullArrangement_throwsNullPointerException() {
             assertThrows(NullPointerException.class,
-                () -> service.upsertInvestmentPortfolios(null, Map.of()));
+                () -> service.upsertInvestmentPortfolios(null, Map.of()).subscribe());
         }
     }
 
@@ -912,7 +919,7 @@ class InvestmentPortfolioServiceTest {
 
             // Act & Assert
             StepVerifier.create(service.upsertInvestmentProducts(investmentData, List.of(arrangement)))
-                .expectErrorMatches(e -> e instanceof IllegalStateException)
+                .expectErrorMatches(IllegalStateException.class::isInstance)
                 .verify();
         }
 
@@ -947,7 +954,7 @@ class InvestmentPortfolioServiceTest {
             // Act & Assert
             StepVerifier.create(service.upsertInvestmentProducts(investmentData, List.of(arrangement)))
                 .expectNextMatches(products -> products.size() == 1
-                    && productUuid.equals(products.get(0).getUuid()))
+                    && productUuid.equals(products.getFirst().getUuid()))
                 .verifyComplete();
 
             verify(productsApi).patchPortfolioProduct(
@@ -981,7 +988,7 @@ class InvestmentPortfolioServiceTest {
             // Act & Assert
             StepVerifier.create(service.upsertInvestmentProducts(investmentData, List.of(arrangement)))
                 .expectNextMatches(products -> products.size() == 1
-                    && newProductUuid.equals(products.get(0).getUuid()))
+                    && newProductUuid.equals(products.getFirst().getUuid()))
                 .verifyComplete();
 
             verify(productsApi).createPortfolioProduct(any(), any(), isNull(), isNull());
@@ -1020,7 +1027,7 @@ class InvestmentPortfolioServiceTest {
             // Act & Assert
             StepVerifier.create(service.upsertInvestmentProducts(investmentData, List.of(arrangement)))
                 .expectNextMatches(products -> products.size() == 1
-                    && newProductUuid.equals(products.get(0).getUuid()))
+                    && newProductUuid.equals(products.getFirst().getUuid()))
                 .verifyComplete();
 
             verify(productsApi).createPortfolioProduct(any(), any(), isNull(), isNull());
@@ -1039,7 +1046,7 @@ class InvestmentPortfolioServiceTest {
 
             // Act & Assert
             StepVerifier.create(service.upsertInvestmentProducts(investmentData, List.of(arrangement)))
-                .expectErrorMatches(e -> e instanceof IllegalStateException)
+                .expectErrorMatches(IllegalStateException.class::isInstance)
                 .verify();
         }
 
@@ -1103,7 +1110,7 @@ class InvestmentPortfolioServiceTest {
             // Act & Assert
             StepVerifier.create(service.upsertInvestmentProducts(investmentData, List.of(arrangement)))
                 .expectNextMatches(products -> products.size() == 1
-                    && productUuid.equals(products.get(0).getUuid()))
+                    && productUuid.equals(products.getFirst().getUuid()))
                 .verifyComplete();
 
             verify(productsApi, never()).createPortfolioProduct(any(), any(), any(), any());
@@ -1114,7 +1121,7 @@ class InvestmentPortfolioServiceTest {
         void upsertInvestmentProducts_nullArrangements_throwsNullPointerException() {
             InvestmentData investmentData = Mockito.mock(InvestmentData.class);
             assertThrows(NullPointerException.class,
-                () -> service.upsertInvestmentProducts(investmentData, null));
+                () -> service.upsertInvestmentProducts(investmentData, null).subscribe());
         }
     }
 

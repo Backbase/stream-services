@@ -96,7 +96,7 @@ class InvestmentAssetUniverseServiceTest {
             Market updated = new Market().code("US").name("US Market Updated");
 
             when(assetUniverseApi.getMarket("US")).thenReturn(Mono.just(existing));
-            when(assetUniverseApi.updateMarket(eq("US"), eq(request))).thenReturn(Mono.just(updated));
+            when(assetUniverseApi.updateMarket("US", request)).thenReturn(Mono.just(updated));
             when(assetUniverseApi.createMarket(any())).thenReturn(Mono.empty()); // switchIfEmpty fallback
 
             // Act & Assert
@@ -104,7 +104,7 @@ class InvestmentAssetUniverseServiceTest {
                 .expectNext(updated)
                 .verifyComplete();
 
-            verify(assetUniverseApi).updateMarket(eq("US"), eq(request));
+            verify(assetUniverseApi).updateMarket("US", request);
             verify(assetUniverseApi, never()).createMarket(any());
         }
 
@@ -153,7 +153,7 @@ class InvestmentAssetUniverseServiceTest {
             Market existing = new Market().code("US").name("US Market");
 
             when(assetUniverseApi.getMarket("US")).thenReturn(Mono.just(existing));
-            when(assetUniverseApi.updateMarket(eq("US"), eq(request)))
+            when(assetUniverseApi.updateMarket("US", request))
                 .thenReturn(Mono.error(new RuntimeException("update failed")));
             when(assetUniverseApi.createMarket(any())).thenReturn(Mono.empty()); // switchIfEmpty fallback
 
@@ -213,11 +213,11 @@ class InvestmentAssetUniverseServiceTest {
                     .currency("USD");
             com.backbase.stream.investment.Asset patchedAsset = buildAsset();
 
-            when(assetUniverseApi.getAsset(eq("ABC123_market_USD"), isNull(), isNull(), isNull()))
+            when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
                 .thenReturn(Mono.just(existingApiAsset));
             when(investmentRestAssetUniverseService.patchAsset(eq(existingApiAsset), eq(req), any()))
                 .thenReturn(Mono.just(patchedAsset));
-            when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty()); // switchIfEmpty fallback
+            when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert
             StepVerifier.create(service.getOrCreateAsset(req, null))
@@ -237,9 +237,9 @@ class InvestmentAssetUniverseServiceTest {
             com.backbase.stream.investment.Asset req = buildAsset();
             com.backbase.stream.investment.Asset created = buildAsset();
 
-            when(assetUniverseApi.getAsset(eq("ABC123_market_USD"), isNull(), isNull(), isNull()))
+            when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
                 .thenReturn(Mono.error(notFound()));
-            when(investmentRestAssetUniverseService.createAsset(eq(req), eq(Map.of())))
+            when(investmentRestAssetUniverseService.createAsset(req, Map.of()))
                 .thenReturn(Mono.just(created));
 
             // Act & Assert
@@ -247,7 +247,7 @@ class InvestmentAssetUniverseServiceTest {
                 .expectNext(created)
                 .verifyComplete();
 
-            verify(investmentRestAssetUniverseService).createAsset(eq(req), eq(Map.of()));
+            verify(investmentRestAssetUniverseService).createAsset(req, Map.of());
             verify(investmentRestAssetUniverseService, never())
                 .patchAsset(
                     any(com.backbase.investment.api.service.v1.model.Asset.class),
@@ -263,7 +263,7 @@ class InvestmentAssetUniverseServiceTest {
 
             when(assetUniverseApi.getAsset(anyString(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.error(new RuntimeException("API error")));
-            when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty()); // switchIfEmpty fallback
+            when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert
             StepVerifier.create(service.getOrCreateAsset(req, null))
@@ -286,7 +286,7 @@ class InvestmentAssetUniverseServiceTest {
 
             when(assetUniverseApi.getAsset(anyString(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.error(notFound()));
-            when(investmentRestAssetUniverseService.createAsset(eq(req), isNull()))
+            when(investmentRestAssetUniverseService.createAsset(req, null))
                 .thenReturn(Mono.error(new RuntimeException("create failed")));
 
             // Act & Assert
@@ -303,7 +303,7 @@ class InvestmentAssetUniverseServiceTest {
 
             when(assetUniverseApi.getAsset(anyString(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.error(notFound()));
-            when(investmentRestAssetUniverseService.createAsset(eq(req), isNull()))
+            when(investmentRestAssetUniverseService.createAsset(req, null))
                 .thenReturn(Mono.empty());
 
             // Act & Assert
@@ -352,7 +352,7 @@ class InvestmentAssetUniverseServiceTest {
 
             when(assetUniverseApi.listMarketSpecialDay(date, date, 100, 0))
                 .thenReturn(Mono.just(buildMarketSpecialDayPage(List.of(existing))));
-            when(assetUniverseApi.updateMarketSpecialDay(eq(existingUuid.toString()), eq(request)))
+            when(assetUniverseApi.updateMarketSpecialDay(existingUuid.toString(), request))
                 .thenReturn(Mono.just(updated));
             when(assetUniverseApi.createMarketSpecialDay(any())).thenReturn(Mono.empty()); // switchIfEmpty fallback
 
@@ -361,7 +361,7 @@ class InvestmentAssetUniverseServiceTest {
                 .expectNext(updated)
                 .verifyComplete();
 
-            verify(assetUniverseApi).updateMarketSpecialDay(eq(existingUuid.toString()), eq(request));
+            verify(assetUniverseApi).updateMarketSpecialDay(existingUuid.toString(), request);
             verify(assetUniverseApi, never()).createMarketSpecialDay(any());
         }
 
@@ -420,7 +420,7 @@ class InvestmentAssetUniverseServiceTest {
 
             when(assetUniverseApi.listMarketSpecialDay(date, date, 100, 0))
                 .thenReturn(Mono.just(buildMarketSpecialDayPage(List.of(existing))));
-            when(assetUniverseApi.updateMarketSpecialDay(eq(existingUuid.toString()), eq(request)))
+            when(assetUniverseApi.updateMarketSpecialDay(existingUuid.toString(), request))
                 .thenReturn(Mono.error(new RuntimeException("update failed")));
             when(assetUniverseApi.createMarketSpecialDay(any())).thenReturn(Mono.empty()); // switchIfEmpty fallback
 
@@ -496,16 +496,16 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(buildAssetCategoryPage(List.of(existingCategory))));
 
             AssetCategory patchedCategory = buildSyncAssetCategory(existingUuid);
-            when(investmentRestAssetUniverseService.patchAssetCategory(eq(existingUuid), eq(entry), isNull()))
+            when(investmentRestAssetUniverseService.patchAssetCategory(existingUuid, entry, null))
                 .thenReturn(Mono.just(patchedCategory));
-            when(investmentRestAssetUniverseService.createAssetCategory(any(), any())).thenReturn(Mono.empty()); // switchIfEmpty fallback
+            when(investmentRestAssetUniverseService.createAssetCategory(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert
             StepVerifier.create(service.upsertAssetCategory(entry))
                 .expectNextMatches(result -> existingUuid.equals(result.getUuid()))
                 .verifyComplete();
 
-            verify(investmentRestAssetUniverseService).patchAssetCategory(eq(existingUuid), eq(entry), isNull());
+            verify(investmentRestAssetUniverseService).patchAssetCategory(existingUuid, entry, null);
             verify(investmentRestAssetUniverseService, never()).createAssetCategory(any(), any());
         }
 
@@ -523,7 +523,7 @@ class InvestmentAssetUniverseServiceTest {
 
             UUID newUuid = UUID.randomUUID();
             AssetCategory created = buildSyncAssetCategory(newUuid);
-            when(investmentRestAssetUniverseService.createAssetCategory(eq(entry), isNull()))
+            when(investmentRestAssetUniverseService.createAssetCategory(entry, null))
                 .thenReturn(Mono.just(created));
 
             // Act & Assert
@@ -531,7 +531,7 @@ class InvestmentAssetUniverseServiceTest {
                 .expectNextMatches(result -> newUuid.equals(result.getUuid()))
                 .verifyComplete();
 
-            verify(investmentRestAssetUniverseService).createAssetCategory(eq(entry), isNull());
+            verify(investmentRestAssetUniverseService).createAssetCategory(entry, null);
             verify(investmentRestAssetUniverseService, never()).patchAssetCategory(any(), any(), any());
         }
 
@@ -546,7 +546,7 @@ class InvestmentAssetUniverseServiceTest {
 
             UUID newUuid = UUID.randomUUID();
             AssetCategory created = buildSyncAssetCategory(newUuid);
-            when(investmentRestAssetUniverseService.createAssetCategory(eq(entry), isNull()))
+            when(investmentRestAssetUniverseService.createAssetCategory(entry, null))
                 .thenReturn(Mono.just(created));
 
             // Act & Assert
@@ -554,7 +554,7 @@ class InvestmentAssetUniverseServiceTest {
                 .expectNextMatches(result -> newUuid.equals(result.getUuid()))
                 .verifyComplete();
 
-            verify(investmentRestAssetUniverseService).createAssetCategory(eq(entry), isNull());
+            verify(investmentRestAssetUniverseService).createAssetCategory(entry, null);
         }
 
         @Test
@@ -568,9 +568,9 @@ class InvestmentAssetUniverseServiceTest {
                 buildApiAssetCategory(existingUuid, "EQUITY");
             when(assetUniverseApi.listAssetCategories(eq("EQUITY"), eq(100), any(), eq(0), any(), any()))
                 .thenReturn(Mono.just(buildAssetCategoryPage(List.of(existingCategory))));
-            when(investmentRestAssetUniverseService.patchAssetCategory(eq(existingUuid), eq(entry), isNull()))
+            when(investmentRestAssetUniverseService.patchAssetCategory(existingUuid, entry, null))
                 .thenReturn(Mono.error(new RuntimeException("patch failed")));
-            when(investmentRestAssetUniverseService.createAssetCategory(any(), any())).thenReturn(Mono.empty()); // switchIfEmpty fallback (not actually called on error)
+            when(investmentRestAssetUniverseService.createAssetCategory(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert — onErrorResume returns Mono.empty()
             StepVerifier.create(service.upsertAssetCategory(entry))
@@ -585,7 +585,7 @@ class InvestmentAssetUniverseServiceTest {
 
             when(assetUniverseApi.listAssetCategories(eq("EQUITY"), eq(100), any(), eq(0), any(), any()))
                 .thenReturn(Mono.just(buildAssetCategoryPage(List.of())));
-            when(investmentRestAssetUniverseService.createAssetCategory(eq(entry), isNull()))
+            when(investmentRestAssetUniverseService.createAssetCategory(entry, null))
                 .thenReturn(Mono.error(new RuntimeException("create failed")));
 
             // Act & Assert — onErrorResume returns Mono.empty()
@@ -606,7 +606,7 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(buildAssetCategoryPage(List.of(existingCategory))));
 
             AssetCategory patchedCategory = buildSyncAssetCategory(existingUuid);
-            when(investmentRestAssetUniverseService.patchAssetCategory(eq(existingUuid), eq(entry), isNull()))
+            when(investmentRestAssetUniverseService.patchAssetCategory(existingUuid, entry, null))
                 .thenReturn(Mono.just(patchedCategory));
 
             // Act & Assert
@@ -661,11 +661,11 @@ class InvestmentAssetUniverseServiceTest {
             AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector");
 
             AssetCategoryType existingType = buildAssetCategoryType(existingUuid, "SECTOR", "Sector");
-            when(assetUniverseApi.listAssetCategoryTypes(eq("SECTOR"), eq(100), eq("Sector"), eq(0)))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
                 .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of(existingType))));
 
             AssetCategoryType updated = buildAssetCategoryType(existingUuid, "SECTOR", "Sector Updated");
-            when(assetUniverseApi.updateAssetCategoryType(eq(existingUuid.toString()), eq(request)))
+            when(assetUniverseApi.updateAssetCategoryType(existingUuid.toString(), request))
                 .thenReturn(Mono.just(updated));
 
             // Act & Assert
@@ -673,7 +673,7 @@ class InvestmentAssetUniverseServiceTest {
                 .expectNextMatches(result -> "SECTOR".equals(result.getCode()))
                 .verifyComplete();
 
-            verify(assetUniverseApi).updateAssetCategoryType(eq(existingUuid.toString()), eq(request));
+            verify(assetUniverseApi).updateAssetCategoryType(existingUuid.toString(), request);
             verify(assetUniverseApi, never()).createAssetCategoryType(any());
         }
 
@@ -685,7 +685,7 @@ class InvestmentAssetUniverseServiceTest {
 
             PaginatedAssetCategoryTypeList page = new PaginatedAssetCategoryTypeList();
             page.setResults(null);
-            when(assetUniverseApi.listAssetCategoryTypes(eq("SECTOR"), eq(100), eq("Sector"), eq(0)))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
                 .thenReturn(Mono.just(page));
 
             AssetCategoryType created = buildAssetCategoryType(UUID.randomUUID(), "SECTOR", "Sector");
@@ -706,7 +706,7 @@ class InvestmentAssetUniverseServiceTest {
             // Arrange
             AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector");
 
-            when(assetUniverseApi.listAssetCategoryTypes(eq("SECTOR"), eq(100), eq("Sector"), eq(0)))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
                 .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of())));
 
             AssetCategoryType created = buildAssetCategoryType(UUID.randomUUID(), "SECTOR", "Sector");
@@ -729,7 +729,7 @@ class InvestmentAssetUniverseServiceTest {
 
             // Different code in the results
             AssetCategoryType other = buildAssetCategoryType(UUID.randomUUID(), "INDUSTRY", "Industry");
-            when(assetUniverseApi.listAssetCategoryTypes(eq("SECTOR"), eq(100), eq("Sector"), eq(0)))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
                 .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of(other))));
 
             AssetCategoryType created = buildAssetCategoryType(UUID.randomUUID(), "SECTOR", "Sector");
@@ -752,9 +752,9 @@ class InvestmentAssetUniverseServiceTest {
             AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector");
 
             AssetCategoryType existingType = buildAssetCategoryType(existingUuid, "SECTOR", "Sector");
-            when(assetUniverseApi.listAssetCategoryTypes(eq("SECTOR"), eq(100), eq("Sector"), eq(0)))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
                 .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of(existingType))));
-            when(assetUniverseApi.updateAssetCategoryType(eq(existingUuid.toString()), eq(request)))
+            when(assetUniverseApi.updateAssetCategoryType(existingUuid.toString(), request))
                 .thenReturn(Mono.error(new RuntimeException("update failed")));
 
             // switchIfEmpty path stubbed so the mono completes rather than hanging
@@ -771,7 +771,7 @@ class InvestmentAssetUniverseServiceTest {
             // Arrange
             AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector");
 
-            when(assetUniverseApi.listAssetCategoryTypes(eq("SECTOR"), eq(100), eq("Sector"), eq(0)))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
                 .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of())));
             when(assetUniverseApi.createAssetCategoryType(request))
                 .thenReturn(Mono.error(new RuntimeException("create failed")));
@@ -972,3 +972,6 @@ class InvestmentAssetUniverseServiceTest {
         return page;
     }
 }
+
+
+
