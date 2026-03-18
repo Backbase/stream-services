@@ -9,7 +9,6 @@ import com.backbase.investment.api.service.v1.model.DepositRequest;
 import com.backbase.investment.api.service.v1.model.DepositTypeEnum;
 import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRequest;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
-import com.backbase.investment.api.service.v1.model.PaginatedDepositList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioTradingAccountList;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
@@ -35,7 +34,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -113,7 +111,9 @@ public class InvestmentPortfolioService {
      */
     public Mono<List<PortfolioProduct>> upsertInvestmentProducts(InvestmentData investmentData,
         List<InvestmentArrangement> investmentArrangements) {
-        Objects.requireNonNull(investmentArrangements, "InvestmentArrangement must not be null");
+        if (investmentArrangements == null) {
+            return Mono.error(new NullPointerException("InvestmentArrangement must not be null"));
+        }
 
         return Flux.fromIterable(investmentArrangements)
             .flatMap(investmentArrangement -> {
@@ -153,9 +153,13 @@ public class InvestmentPortfolioService {
             .flatMapIterable(this::distinctProducts)
             .flatMap(p -> listExistingPortfolioProducts(p)
                 .flatMap(
-                    existingProduct -> updateExistingPortfolioProduct(existingProduct, p,
-                        investmentData))
-                .switchIfEmpty(createPortfolioProductWithModel(p, investmentData))
+                    existingProduct -> updateExistingPortfolioProduct(existingProduct, p, investmentData)
+                        .onErrorResume(WebClientResponseException.class, ex -> {
+                            log.info("Using existing product data due to patch failure: uuid={}", existingProduct.getUuid());
+                            return Mono.just(existingProduct);
+                        })
+                )
+                .switchIfEmpty(Mono.defer(() -> createPortfolioProductWithModel(p, investmentData)))
                 .doOnSuccess(product -> log.info(
                     "Successfully upserted portfolio product: engine={}, productType={}, model={}",
                     product.getAdviceEngine(), product.getProductType(),
@@ -232,7 +236,9 @@ public class InvestmentPortfolioService {
      */
     public Mono<PortfolioList> upsertInvestmentPortfolios(InvestmentArrangement investmentArrangement,
         Map<String, List<UUID>> clientsByLeExternalId) {
-        Objects.requireNonNull(investmentArrangement, "InvestmentArrangement must not be null");
+        if (investmentArrangement == null) {
+            return Mono.error(new NullPointerException("InvestmentArrangement must not be null"));
+        }
 
         String externalId = investmentArrangement.getExternalId();
         String arrangementName = investmentArrangement.getName();
@@ -241,7 +247,7 @@ public class InvestmentPortfolioService {
 
         return listExistingPortfolios(externalId)
             .flatMap(p -> patchPortfolio(p, investmentArrangement, clientsByLeExternalId))
-            .switchIfEmpty(createNewPortfolio(investmentArrangement, clientsByLeExternalId))
+            .switchIfEmpty(Mono.defer(() -> createNewPortfolio(investmentArrangement, clientsByLeExternalId)))
             .doOnSuccess(portfolio -> log.info(
                 "Successfully upserted investment portfolio: externalId={}, name={}, portfolioUuid={}",
                 externalId, arrangementName,
@@ -523,18 +529,19 @@ public class InvestmentPortfolioService {
         return paymentsApi.listDeposits(null, null, null, null, null,
                 null, portfolio.getUuid(), null, null, null)
             .filter(Objects::nonNull)
-            .map(PaginatedDepositList::getResults)
-            .filter(Objects::nonNull)
-            .filter(Predicate.not(CollectionUtils::isEmpty))
+            // Use flatMap with Mono.justOrEmpty() to safely handle null results without NPE,
+            // ensuring switchIfEmpty fallback triggers for both null and empty deposit lists.
+            .flatMap(paginatedResult ->
+                Mono.justOrEmpty(paginatedResult.getResults())
+                    .filter(list -> !list.isEmpty()))
             .flatMap(deposits -> {
-                Double deposit = deposits.stream().map(Deposit::getAmount).reduce(0d, Double::sum);
-                double additionalDeposit = defaultAmount - deposit;
-                if (additionalDeposit > 0) {
-                    return createDeposit(portfolio, additionalDeposit);
-                }
-                return Mono.just(deposits.getLast());
+                double deposited = deposits.stream().mapToDouble(Deposit::getAmount).sum();
+                double remaining = defaultAmount - deposited;
+                return remaining > 0
+                    ? createDeposit(portfolio, remaining)
+                    : Mono.just(deposits.getLast());
             })
-            .switchIfEmpty(createDeposit(portfolio, defaultAmount))
+            .switchIfEmpty(Mono.defer(() -> createDeposit(portfolio, defaultAmount)))
             .onErrorResume(ex -> Mono.just(new Deposit()
                     .portfolio(portfolio.getUuid())
                     .amount(defaultAmount)

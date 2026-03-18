@@ -164,7 +164,7 @@ public class InvestmentRestDocumentContentService {
             request.getDocumentResource() != null);
         OASDocumentRequestDataRequest createDocumentRequest = contentMapper.map(request);
         log.debug("Document entry request mapped: {}", createDocumentRequest);
-        return Mono.defer(() -> Mono.just(patchDocument(uuid, createDocumentRequest, request.getDocumentResource()))
+        return Mono.defer(() -> Mono.fromCallable(() -> patchDocument(uuid, createDocumentRequest, request.getDocumentResource()))
             .doOnSuccess(
                 created -> log.info("Document entry created successfully: title='{}', uuid={}, documentAttached={}",
                     request.getName(), created.getUuid(), request.getDocumentResource() != null))
@@ -181,7 +181,7 @@ public class InvestmentRestDocumentContentService {
 
         OASDocumentRequestDataRequest createDocumentRequest = contentMapper.map(request);
         log.debug("Document entry request mapped: {}", createDocumentRequest);
-        return Mono.defer(() -> Mono.just(createContentDocument(createDocumentRequest, request.getDocumentResource()))
+        return Mono.defer(() -> Mono.fromCallable(() -> createContentDocument(createDocumentRequest, request.getDocumentResource()))
             .doOnSuccess(
                 created -> log.info("Document entry created successfully: title='{}', uuid={}, documentAttached={}",
                     request.getName(), created.getUuid(), request.getDocumentResource() != null))
