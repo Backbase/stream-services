@@ -18,19 +18,33 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.text.DateFormat;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
+import reactor.netty.http.client.HttpClient;
 
 /**
  * Configuration for Investment service REST client (ClientApi).
+ *
+ * <p>This configuration creates the Investment API client with proper codec configuration.
+ *
+ * <p><strong>Note:</strong> Connection pooling, timeouts, and rate limiting are configured in
+ * {@link InvestmentWebClientConfiguration} which should be imported alongside this class.
+ * The WebClient connection pool prevents resource exhaustion and 503 errors by limiting:
+ * <ul>
+ *   <li>Maximum concurrent connections to 100 (configurable)</li>
+ *   <li>Connection acquisition timeout to 45 seconds</li>
+ *   <li>Read/Write timeouts to 30 seconds each</li>
+ * </ul>
  */
 @Configuration
 @ConditionalOnBean(InvestmentServiceConfiguration.class)
@@ -48,7 +62,9 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ApiClient investmentApiClient(WebClient interServiceWebClient, ObjectMapper objectMapper,
+    public ApiClient investmentApiClient(WebClient interServiceWebClient,
+        @Qualifier("investmentHttpClient") HttpClient investmentHttpClient,
+        ObjectMapper objectMapper,
         DateFormat dateFormat) {
         ObjectMapper mapper = objectMapper.copy();
         mapper.setSerializationInclusion(Include.NON_EMPTY);

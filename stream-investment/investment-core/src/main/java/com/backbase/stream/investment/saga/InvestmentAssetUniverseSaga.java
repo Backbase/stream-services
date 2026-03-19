@@ -9,7 +9,6 @@ import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
-import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentCurrencyService;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
@@ -43,7 +42,6 @@ import reactor.core.publisher.Mono;
  *   <li>All reactive operations include proper success and error handlers</li>
  * </ul>
  *
- * @see InvestmentClientService
  * @see InvestmentPortfolioService
  * @see StreamTaskExecutor
  */
@@ -186,7 +184,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
                     .sessionStart(market.getSessionStart())
                     .sessionEnd(market.getSessionEnd())
                     .timeZone(market.getTimeZone())
-            ))
+            ), 5)  // Limit concurrency to prevent 503 errors
             .collectList() // Collect all created/retrieved markets into a list
             .map(markets -> {
                 // Update the task with the created markets
@@ -244,7 +242,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
                     .sessionStart(marketSpecialDay.getSessionStart())
                     .sessionEnd(marketSpecialDay.getSessionEnd())
                     .description(marketSpecialDay.getDescription())
-            ))
+            ), 5)  // Limit concurrency to prevent 503 errors
             .collectList() // Collect all created/retrieved market special days into a list
             .map(marketSpecialDays -> {
                 // Update the task with the created market special days
@@ -294,7 +292,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
         }
 
         return Flux.fromIterable(investmentData.getAssetCategories())
-            .flatMap(assetUniverseService::upsertAssetCategory)
+            .flatMap(assetUniverseService::upsertAssetCategory, 5)  // Limit concurrency to prevent 503 errors
             .collectList()
             .map(assetCategories -> {
                 investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
@@ -337,7 +335,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
                     .name(assetCategoryType.getName())
                     .code(assetCategoryType.getCode());
                 return assetUniverseService.upsertAssetCategoryType(request);
-            })
+            }, 5)  // Limit concurrency to prevent 503 errors
             .collectList()
             .map(assetCategoryTypes -> {
                 investmentTask.setAssetCategoryTypes(assetCategoryTypes);
