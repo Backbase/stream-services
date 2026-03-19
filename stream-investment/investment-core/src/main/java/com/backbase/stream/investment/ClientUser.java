@@ -13,7 +13,7 @@ public class ClientUser {
     private UUID investmentClientId;
     private String internalUserId;
     private String externalUserId;
-    private String legalEntityExternalId;
+    private String legalEntityId;
 
 
 }

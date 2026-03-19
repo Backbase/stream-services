@@ -105,7 +105,7 @@ public class InvestmentPortfolioService {
      *   <li>Updates the arrangement with the product UUID</li>
      * </ol>
      *
-     * @param investmentArrangement the investment arrangement to associate with the product (must not be null)
+     * @param investmentArrangements the investment arrangement to associate with the product (must not be null)
      * @return Mono emitting the created or updated portfolio product
      * @throws NullPointerException if investmentArrangement is null
      */
@@ -206,10 +206,6 @@ public class InvestmentPortfolioService {
 
     private static List<ModelPortfolio> findModelUuid(InvestmentData investmentData, String externalId,
         ProductTypeEnum productType) {
-//        Map<String, List<UUID>> modelsByArrangementExternalId = investmentData.getModelsByArrangementExternalId();
-//        Optional<List<UUID>> modelUuid = modelsByArrangementExternalId.keySet().stream()
-//            .filter(a -> a.endsWith(externalId)).findAny()
-//            .map(modelsByArrangementExternalId::get);
         return investmentData.getModelPortfolios().stream()
             .filter(p -> p.getProductTypeEnum() == productType)
             .toList();
@@ -230,12 +226,12 @@ public class InvestmentPortfolioService {
      * from the arrangement to client UUIDs via the provided lookup map.
      *
      * @param investmentArrangement the investment arrangement containing portfolio details (must not be null)
-     * @param clientsByLeExternalId map of legal entity external ID to client UUIDs for associations
+     * @param clientsByLeId map of legal entity ID to client UUIDs for associations
      * @return Mono emitting the created or existing portfolio
      * @throws NullPointerException if investmentArrangement is null
      */
     public Mono<PortfolioList> upsertInvestmentPortfolios(InvestmentArrangement investmentArrangement,
-        Map<String, List<UUID>> clientsByLeExternalId) {
+        Map<String, List<UUID>> clientsByLeId) {
         if (investmentArrangement == null) {
             return Mono.error(new NullPointerException("InvestmentArrangement must not be null"));
         }
@@ -246,8 +242,8 @@ public class InvestmentPortfolioService {
         log.info("Upserting investment portfolio: externalId={}, name={}", externalId, arrangementName);
 
         return listExistingPortfolios(externalId)
-            .flatMap(p -> patchPortfolio(p, investmentArrangement, clientsByLeExternalId))
-            .switchIfEmpty(Mono.defer(() -> createNewPortfolio(investmentArrangement, clientsByLeExternalId)))
+            .flatMap(p -> patchPortfolio(p, investmentArrangement, clientsByLeId))
+            .switchIfEmpty(Mono.defer(() -> createNewPortfolio(investmentArrangement, clientsByLeId)))
             .doOnSuccess(portfolio -> log.info(
                 "Successfully upserted investment portfolio: externalId={}, name={}, portfolioUuid={}",
                 externalId, arrangementName,
@@ -259,10 +255,10 @@ public class InvestmentPortfolioService {
 
     private Mono<PortfolioList> patchPortfolio(
         PortfolioList existingProduct, InvestmentArrangement investmentArrangement,
-        Map<String, List<UUID>> clientsByLeExternalId) {
+        Map<String, List<UUID>> clientsByLeId) {
 
         String uuid = existingProduct.getUuid().toString();
-        List<UUID> associatedClients = getClients(investmentArrangement, clientsByLeExternalId);
+        List<UUID> associatedClients = getClients(investmentArrangement, clientsByLeId);
 
         PatchedPortfolioUpdateRequest patchedPortfolioUpdateRequest = new PatchedPortfolioUpdateRequest()
             .product(investmentArrangement.getInvestmentProductId())
@@ -341,12 +337,12 @@ public class InvestmentPortfolioService {
      * Creates a new investment portfolio with associated clients.
      *
      * @param investmentArrangement the arrangement containing portfolio details
-     * @param clientsByLeExternalId map to resolve client UUIDs from legal entity external IDs
+     * @param clientsByLeId map to resolve client UUIDs from legal entity IDs
      * @return Mono emitting the newly created portfolio
      */
     private Mono<PortfolioList> createNewPortfolio(InvestmentArrangement investmentArrangement,
-        Map<String, List<UUID>> clientsByLeExternalId) {
-        List<UUID> associatedClients = getClients(investmentArrangement, clientsByLeExternalId);
+        Map<String, List<UUID>> clientsByLeId) {
+        List<UUID> associatedClients = getClients(investmentArrangement, clientsByLeId);
 
         log.info("Creating new investment portfolio: externalId={}, name={}, clientCount={}",
             investmentArrangement.getExternalId(), investmentArrangement.getName(), associatedClients.size());
@@ -376,28 +372,17 @@ public class InvestmentPortfolioService {
      * using the provided lookup map. It filters out null values and ensures distinct results.
      *
      * @param investmentArrangement the arrangement containing legal entity external IDs
-     * @param clientsByLeExternalId map of legal entity external ID to client UUIDs
+     * @param clientsByLeId map of legal entity ID to client UUIDs
      * @return distinct list of client UUIDs associated with the arrangement's legal entities
      */
     private static List<UUID> getClients(InvestmentArrangement investmentArrangement,
-        Map<String, List<UUID>> clientsByLeExternalId) {
-        return investmentArrangement.getLegalEntityExternalIds().stream()
-            .map(clientsByLeExternalId::get)
+        Map<String, List<UUID>> clientsByLeId) {
+        return investmentArrangement.getLegalEntityIds().stream()
+            .map(clientsByLeId::get)
             .filter(Objects::nonNull)
             .flatMap(Collection::stream)
             .distinct()
             .toList();
-    }
-
-    private Mono<PortfolioProduct> listExistingPortfolioProducts(PortfolioProduct portfolioProduct,
-        InvestmentData investmentData) {
-        Integer modelPortfolioRiskLower = null;
-        ProductTypeEnum productType = portfolioProduct.getProductType();
-        if (ProductTypeEnum.SELF_TRADING != productType) {
-            modelPortfolioRiskLower = portfolioProduct.getModelPortfolio().getRiskLevel();
-        }
-        return Mono.justOrEmpty(investmentData.findPortfolioProduct(productType, modelPortfolioRiskLower))
-            .switchIfEmpty(listExistingPortfolioProducts(productType, modelPortfolioRiskLower));
     }
 
     private Mono<PortfolioProduct> listExistingPortfolioProducts(PortfolioProduct portfolioProduct) {

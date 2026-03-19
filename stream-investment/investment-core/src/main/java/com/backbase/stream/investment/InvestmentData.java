@@ -1,10 +1,8 @@
 package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.GroupResult;
-import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
-import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +32,7 @@ public class InvestmentData {
     public Map<String, List<UUID>> getClientsByLeExternalId() {
         Map<String, List<UUID>> clientsByLeExternalId = new HashMap<>();
         clientUsers.forEach(
-            c -> clientsByLeExternalId.computeIfAbsent(c.getLegalEntityExternalId(), l -> new ArrayList<>())
+            c -> clientsByLeExternalId.computeIfAbsent(c.getLegalEntityId(), l -> new ArrayList<>())
                 .add(c.getInvestmentClientId()));
         return clientsByLeExternalId;
     }
@@ -50,15 +48,6 @@ public class InvestmentData {
         if (portfolioProducts.stream().noneMatch(p -> p.getUuid().equals(portfolioProduct.getUuid()))) {
             portfolioProducts.add(portfolioProduct);
         }
-    }
-
-    public Optional<PortfolioProduct> findPortfolioProduct(ProductTypeEnum productType, Integer riskLevel) {
-        return Optional.ofNullable(portfolioProducts)
-            .flatMap(ps -> ps.stream()
-                .filter(p -> p.getProductType().equals(productType)
-                    && Optional.ofNullable(p.getModelPortfolio()).map(InvestorModelPortfolio::getRiskLevel)
-                    .map(risk -> risk <= riskLevel).orElse(false))
-                .findAny());
     }
 
     public List<GroupResult> getPriceAsyncTasks() {

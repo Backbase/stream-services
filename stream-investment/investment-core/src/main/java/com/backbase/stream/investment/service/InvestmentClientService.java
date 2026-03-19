@@ -46,7 +46,7 @@ public class InvestmentClientService {
             .flatMap(clientUser -> {
                 log.debug("Upserting investment client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
                     clientUser.getInternalUserId(), clientUser.getExternalUserId(),
-                    clientUser.getLegalEntityExternalId());
+                    clientUser.getLegalEntityId());
 
                 ClientCreateRequest request = new ClientCreateRequest()
                     .internalUserId(clientUser.getInternalUserId())
@@ -54,14 +54,14 @@ public class InvestmentClientService {
                     .putExtraDataItem("user_external_id", clientUser.getExternalUserId())
                     .putExtraDataItem("keycloak_username", clientUser.getExternalUserId());
 
-                return upsertClient(request, clientUser.getLegalEntityExternalId())
+                return upsertClient(request, clientUser.getLegalEntityId())
                     .doOnSuccess(upsertedClient -> log.debug(
                         "Successfully upserted client: investmentClientId={}, internalUserId={}",
                         upsertedClient.getInvestmentClientId(), upsertedClient.getInternalUserId()))
                     .doOnError(throwable -> log.error(
                         "Failed to upsert client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
                         clientUser.getInternalUserId(), clientUser.getExternalUserId(),
-                        clientUser.getLegalEntityExternalId(), throwable));
+                        clientUser.getLegalEntityId(), throwable));
             })
             .collectList();
     }
@@ -101,7 +101,7 @@ public class InvestmentClientService {
                 "Successfully upserted investment client: investmentClientId={}, internalUserId={}, "
                     + "externalUserId={}, legalEntityExternalId={}",
                 clientUser.getInvestmentClientId(), clientUser.getInternalUserId(),
-                clientUser.getExternalUserId(), clientUser.getLegalEntityExternalId()))
+                clientUser.getExternalUserId(), clientUser.getLegalEntityId()))
             .doOnError(throwable -> log.error(
                 "Failed to upsert investment client: internalUserId={}, userExternalId={}, legalEntityExternalId={}",
                 internalUserId, userExternalId, legalEntityExternalId, throwable));
@@ -220,16 +220,16 @@ public class InvestmentClientService {
      * @param investmentClientId    the investment client UUID
      * @param internalUserId        the internal user ID
      * @param externalUserId        the external user ID
-     * @param legalEntityExternalId the legal entity external ID
+     * @param legalEntityId the legal entity external ID
      * @return constructed ClientUser instance
      */
     private ClientUser buildClientUser(UUID investmentClientId, String internalUserId,
-        String externalUserId, String legalEntityExternalId) {
+        String externalUserId, String legalEntityId) {
         return ClientUser.builder()
             .investmentClientId(investmentClientId)
             .internalUserId(internalUserId)
             .externalUserId(externalUserId)
-            .legalEntityExternalId(legalEntityExternalId)
+            .legalEntityId(legalEntityId)
             .build();
     }
 

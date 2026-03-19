@@ -18,6 +18,6 @@ public class InvestmentArrangement {
     private String currency;
 
     private UUID investmentProductId;
-    private List<String> legalEntityExternalIds;
+    private List<String> legalEntityIds;
 
 }
