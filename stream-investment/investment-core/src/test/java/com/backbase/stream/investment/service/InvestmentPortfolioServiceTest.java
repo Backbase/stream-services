@@ -1167,7 +1167,7 @@ class InvestmentPortfolioServiceTest {
         when(arrangement.getExternalId()).thenReturn(externalId);
         when(arrangement.getName()).thenReturn(name);
         when(arrangement.getInvestmentProductId()).thenReturn(productId);
-        when(arrangement.getLegalEntityExternalIds()).thenReturn(List.of(legalEntityExternalId));
+        when(arrangement.getLegalEntityIds()).thenReturn(List.of(legalEntityExternalId));
         when(arrangement.getCurrency()).thenReturn("EUR");
         when(arrangement.getInternalId()).thenReturn(null);
         return arrangement;
@@ -1183,7 +1183,7 @@ class InvestmentPortfolioServiceTest {
         when(arrangement.getExternalId()).thenReturn(externalId);
         when(arrangement.getName()).thenReturn(name);
         when(arrangement.getProductTypeExternalId()).thenReturn(productTypeValue);
-        when(arrangement.getLegalEntityExternalIds()).thenReturn(List.of());
+        when(arrangement.getLegalEntityIds()).thenReturn(List.of());
         when(arrangement.getCurrency()).thenReturn("EUR");
         when(arrangement.getInternalId()).thenReturn(null);
         return arrangement;

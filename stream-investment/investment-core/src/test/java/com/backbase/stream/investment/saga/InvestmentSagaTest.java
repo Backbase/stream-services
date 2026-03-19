@@ -47,7 +47,7 @@ class InvestmentSagaTest {
     private static final String PORTFOLIO_EXTERNAL_ID = "some-portfolio-external-id";
     private static final String ACCOUNT_ID = "some-account-id";
     private static final String ACCOUNT_EXTERNAL_ID = "some-account-external-id";
-    private static final String LE_EXTERNAL_ID = "some-le-external-id";
+    private static final String LE_INTERNAL_ID = "some-le-internal-id";
 
     @Mock
     private InvestmentClientService clientService;
@@ -467,7 +467,7 @@ class InvestmentSagaTest {
             .saExternalId(SA_EXTERNAL_ID)
             .clientUsers(List.of(ClientUser.builder()
                 .investmentClientId(UUID.randomUUID())
-                .legalEntityExternalId(LE_EXTERNAL_ID)
+                .legalEntityId(LE_INTERNAL_ID)
                 .build()))
             .investmentArrangements(List.of(InvestmentArrangement.builder()
                 .externalId(ARRANGEMENT_EXTERNAL_ID)
