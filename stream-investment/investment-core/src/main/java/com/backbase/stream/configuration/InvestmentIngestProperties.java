@@ -36,9 +36,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "backbase.bootstrap.ingestions.investment.service")
 public class InvestmentIngestProperties {
 
+    public static final double DEFAULT_INIT_CASH = 10_000d;
+
     private PortfolioConfig portfolio = new PortfolioConfig();
     private AllocationConfig allocation = new AllocationConfig();
     private DepositConfig deposit = new DepositConfig();
+    private AssetConfig asset = new AssetConfig();
 
     // -------------------------------------------------------------------------
     // Portfolio
@@ -56,8 +59,8 @@ public class InvestmentIngestProperties {
         private String defaultCurrency = "EUR";
 
         /**
-         * How many months into the past the portfolio's {@code activated} timestamp is set.
-         * A value of {@code 1} means the portfolio is considered to have been activated 1 month ago.
+         * How many months into the past the portfolio's {@code activated} timestamp is set. A value of {@code 1} means
+         * the portfolio is considered to have been activated 1 month ago.
          */
         private int activationPastMonths = 1;
     }
@@ -73,11 +76,13 @@ public class InvestmentIngestProperties {
     public static class AllocationConfig {
 
         /**
-         * The allocation-asset expansion key sent when listing or managing portfolio products.
-         * Changing this value allows switching between different allocation-asset model definitions
-         * without a code change.
+         * The allocation-asset expansion key sent when listing or managing portfolio products. Changing this value
+         * allows switching between different allocation-asset model definitions without a code change.
          */
         private String modelPortfolioAllocationAsset = "model_portfolio.allocation.asset";
+        private int allocationConcurrency = 5;
+
+        private double defaultAmount = DEFAULT_INIT_CASH;
     }
 
     // -------------------------------------------------------------------------
@@ -91,16 +96,35 @@ public class InvestmentIngestProperties {
     public static class DepositConfig {
 
         /**
-         * The payment provider identifier sent with every deposit request.
-         * Set this to the real provider name for non-mock environments.
+         * The payment provider identifier sent with every deposit request. Set this to the real provider name for
+         * non-mock environments.
          */
         private String provider = null;
 
         /**
-         * The monetary amount used as the initial seed deposit when no previous deposit exists
-         * or when the current deposited total is below this threshold.
+         * The monetary amount used as the initial seed deposit when no previous deposit exists or when the current
+         * deposited total is below this threshold.
          */
-        private double defaultAmount = 10_000d;
+        private double defaultAmount = DEFAULT_INIT_CASH;
     }
+
+    // -------------------------------------------------------------------------
+    // Deposit
+    // -------------------------------------------------------------------------
+
+    /**
+     * Settings that govern the automatic seed deposit created for new portfolios.
+     */
+    @Data
+    public static class AssetConfig {
+
+        private boolean ingestImages = true;
+        private int marketConcurrency = 5;
+        private int marketSpecialDayConcurrency = 5;
+        private int assetCategoryConcurrency = 5;
+        private int assetCategoryTypeConcurrency = 5;
+
+    }
+
 }
 

@@ -90,9 +90,10 @@ public class InvestmentRestServiceApiConfiguration {
     }
 
     @Bean
-    public InvestmentRestAssetUniverseService investmentRestAssetUniverseService(AssetUniverseApi assetUniverseApi,
-        com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
-        return new InvestmentRestAssetUniverseService(assetUniverseApi, restInvestmentApiClient);
+    public InvestmentRestAssetUniverseService investmentRestAssetUniverseService(
+        com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient,
+        InvestmentIngestProperties portfolioProperties) {
+        return new InvestmentRestAssetUniverseService(restInvestmentApiClient, portfolioProperties);
     }
 
 }

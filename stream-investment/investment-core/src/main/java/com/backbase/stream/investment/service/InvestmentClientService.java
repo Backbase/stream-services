@@ -104,7 +104,8 @@ public class InvestmentClientService {
                         clientUser.getInternalUserId(), clientUser.getExternalUserId(),
                         clientUser.getLegalEntityId(), throwable));
 
-            }, 5) // Max 5 concurrent requests to avoid overwhelming the service
+            }, 5)
+            // Max 5 concurrent requests to avoid overwhelming the service
             .collectList();
     }
 

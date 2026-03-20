@@ -22,6 +22,7 @@ import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.StatusA7dEnum;
+import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentAssetData;
@@ -75,6 +76,7 @@ public class InvestmentPortfolioAllocationService {
     private final AssetUniverseApi assetUniverseApi;
     private final InvestmentApi investmentApi;
     private final CustomIntegrationApiService customIntegrationApiService;
+    private final InvestmentIngestProperties ingestProperties;
 
     public Mono<Void> removeAllocations(PortfolioList portfolio) {
         String portfolioUuid = portfolio.getUuid().toString();
@@ -114,7 +116,7 @@ public class InvestmentPortfolioAllocationService {
                                 lastValuation.getCashActive(), lastValuation.getTradeTotal());
                         }).switchIfEmpty(
                             orderPositions(portfolio.getUuid(), workDays(startDay, endDay), m, priceDayByAssetKey,
-                                10_000d)
+                                ingestProperties.getAllocation().getDefaultAmount())
                                 .flatMap(dp -> generateAllocations(priceDayByAssetKey, dp)))
                         .flatMap(allocations -> this.upsertAllocations(portfolio.getUuid().toString(), allocations)));
             })
@@ -142,7 +144,8 @@ public class InvestmentPortfolioAllocationService {
         List<OASAllocationPositionCreateRequest> portfolioPositions = List.copyOf(dayPositions.getSecond());
 
         double totalTrade = calculateTrades(portfolioPositions);
-        double initialCash = 10_000d;
+
+        double initialCash = ingestProperties.getAllocation().getDefaultAmount();
         double cash = initialCash - totalTrade;
         return Mono.just(generateAllocations(priceDayByAssetKey, dayPositions, initialCash, cash, totalTrade));
     }
@@ -150,7 +153,9 @@ public class InvestmentPortfolioAllocationService {
     private Mono<List<OASPortfolioAllocation>> upsertAllocations(String portfolioId,
         List<OASAllocationCreateRequest> allocations) {
         return Flux.fromIterable(allocations)
-            .flatMap(a -> customIntegrationApiService.createPortfolioAllocation(portfolioId, a, null, null, null), 5)
+            .flatMap(a -> customIntegrationApiService.createPortfolioAllocation(portfolioId, a, null, null, null),
+                ingestProperties.getAllocation().getAllocationConcurrency())
+
             .collectList().doOnSuccess(
                 created -> log.info("Successfully upserted investment portfolio allocation: count {}", created.size()))
             .doOnError(throwable -> {
@@ -213,7 +218,8 @@ public class InvestmentPortfolioAllocationService {
                                         .method(Method570Enum.MARKET)
                                         .completed(startDay.atTime(LocalTime.MIDNIGHT).atOffset(ZoneOffset.UTC))
                                         .currency(currency(p.getAsset())).shares(roundPrice(p.getShares()))
-                                        .priceAvg(roundPrice(p.getPrice())), null, null, null).doOnSuccess(
+                                        .priceAvg(roundPrice(p.getPrice())), null, null, null)
+                                .doOnSuccess(
                                     created -> log.info("Successfully upserted investment portfolio allocation"))
                                 .doOnError(throwable -> {
                                     if (throwable instanceof WebClientResponseException ex) {
@@ -241,8 +247,9 @@ public class InvestmentPortfolioAllocationService {
             ModelAsset asset = a.asset();
             return Objects.requireNonNull(
                 assetUniverseApi.listAssetClosePrices(asset.getCurrency(), startDat, endDay, null, null, null, null,
-                    asset.getIsin(), null, asset.getMarket(), null, null).map(PaginatedOASPriceList::getResults).map(
-                    l -> Map.of(asset.getKeyString(), l.stream()
+                        asset.getIsin(), null, asset.getMarket(), null, null)
+                    .map(PaginatedOASPriceList::getResults)
+                    .map(l -> Map.of(asset.getKeyString(), l.stream()
                         .collect(Collectors.toMap(dp -> dp.getDatetime().toLocalDate(), OASPrice::getAmount)))));
         }).collectList().map(maps -> {
             Map<String, Map<LocalDate, Double>> dayPriceByAssetKey = new HashMap<>();
@@ -260,7 +267,8 @@ public class InvestmentPortfolioAllocationService {
                     new ModelAsset(a.getAsset().getIsin(), a.getAsset().getMarket(), a.getAsset().getCurrency()),
                     a.getWeight())).toList()).build()).orElse(ModelPortfolio.builder().cashWeight(0.6).allocations(
                     assetByUuid.values().stream().limit(2)
-                        .map(a -> new Allocation(new ModelAsset(a.getIsin(), a.getMarket(), a.getCurrency()), 0.2)).toList())
+                        .map(a -> new Allocation(new ModelAsset(a.getIsin(), a.getMarket(), a.getCurrency()), 0.2))
+                        .toList())
                 .build()));
     }
 
