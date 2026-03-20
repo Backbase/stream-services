@@ -150,7 +150,7 @@ public class InvestmentPortfolioAllocationService {
     private Mono<List<OASPortfolioAllocation>> upsertAllocations(String portfolioId,
         List<OASAllocationCreateRequest> allocations) {
         return Flux.fromIterable(allocations)
-            .flatMap(a -> customIntegrationApiService.createPortfolioAllocation(portfolioId, a, null, null, null))
+            .flatMap(a -> customIntegrationApiService.createPortfolioAllocation(portfolioId, a, null, null, null), 5)
             .collectList().doOnSuccess(
                 created -> log.info("Successfully upserted investment portfolio allocation: count {}", created.size()))
             .doOnError(throwable -> {

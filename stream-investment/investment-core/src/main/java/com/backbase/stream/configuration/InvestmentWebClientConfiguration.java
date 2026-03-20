@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.netty.http.client.HttpClient;
@@ -22,27 +23,16 @@ import reactor.netty.resources.ConnectionProvider;
  *   <li>Indefinite hangs from missing timeouts</li>
  * </ul>
  *
+ * <p>All tunable values are externalized via {@link InvestmentWebClientProperties} and can be
+ * overridden through {@code application.yml} without recompiling.
+ *
  * <p>All beans are explicitly named so they are unambiguous and never accidentally
  * replaced by Spring Boot auto-configuration or another generic bean of the same type.
  */
 @Slf4j
 @Configuration
+@EnableConfigurationProperties(InvestmentWebClientProperties.class)
 public class InvestmentWebClientConfiguration {
-
-    // Connection pool configuration constants.
-    // MAX_CONNECTIONS=20 limits the number of open TCP connections to the Investment service,
-    // preventing it from being overwhelmed (which causes 503 responses).
-    // MAX_PENDING_ACQUIRES=100 bounds the in-memory queue so that callers receive a fast
-    // failure rather than accumulating an unbounded backlog.
-    private static final int MAX_CONNECTIONS = 20;
-    private static final long MAX_IDLE_TIME_MINUTES = 5;
-    private static final int MAX_PENDING_ACQUIRES = 100;
-    private static final long PENDING_ACQUIRE_TIMEOUT_MILLIS = 45_000;
-
-    // Timeout configuration constants (in seconds)
-    private static final int CONNECT_TIMEOUT_SECONDS = 10;
-    private static final int READ_TIMEOUT_SECONDS = 30;
-    private static final int WRITE_TIMEOUT_SECONDS = 30;
 
     /**
      * Dedicated {@link ConnectionProvider} for the Investment service client pool.
@@ -51,22 +41,23 @@ public class InvestmentWebClientConfiguration {
      * avoids silently falling back to Spring Boot's auto-configured shared pool when one already exists
      * in the application context.
      *
+     * @param props investment HTTP-client configuration properties
      * @return investment-specific ConnectionProvider
      */
     @Bean("investmentConnectionProvider")
-    public ConnectionProvider investmentConnectionProvider() {
+    public ConnectionProvider investmentConnectionProvider(InvestmentWebClientProperties props) {
         ConnectionProvider provider = ConnectionProvider.builder("investment-client-pool")
-            .maxConnections(MAX_CONNECTIONS)
-            .maxIdleTime(Duration.ofMinutes(MAX_IDLE_TIME_MINUTES))
-            .maxLifeTime(Duration.ofMinutes(30))
-            .pendingAcquireMaxCount(MAX_PENDING_ACQUIRES)
-            .pendingAcquireTimeout(Duration.ofMillis(PENDING_ACQUIRE_TIMEOUT_MILLIS))
-            .evictInBackground(Duration.ofSeconds(120))
+            .maxConnections(props.getMaxConnections())
+            .maxIdleTime(Duration.ofMinutes(props.getMaxIdleTimeMinutes()))
+            .maxLifeTime(Duration.ofMinutes(props.getMaxLifeTimeMinutes()))
+            .pendingAcquireMaxCount(props.getMaxPendingAcquires())
+            .pendingAcquireTimeout(Duration.ofMillis(props.getPendingAcquireTimeoutMillis()))
+            .evictInBackground(Duration.ofSeconds(props.getEvictInBackgroundSeconds()))
             .build();
 
         log.info("Configured investment ConnectionProvider: maxConnections={}, maxIdleTime={}min,"
                 + " pendingAcquireMaxCount={}",
-            MAX_CONNECTIONS, MAX_IDLE_TIME_MINUTES, MAX_PENDING_ACQUIRES);
+            props.getMaxConnections(), props.getMaxIdleTimeMinutes(), props.getMaxPendingAcquires());
 
         return provider;
     }
@@ -84,20 +75,21 @@ public class InvestmentWebClientConfiguration {
      * </ul>
      *
      * @param connectionProvider the investment-specific connection provider
+     * @param props              investment HTTP-client configuration properties
      * @return configured HttpClient
      */
     @Bean("investmentHttpClient")
     public HttpClient investmentHttpClient(
-        @Qualifier("investmentConnectionProvider") ConnectionProvider connectionProvider) {
+        @Qualifier("investmentConnectionProvider") ConnectionProvider connectionProvider,
+        InvestmentWebClientProperties props) {
         return HttpClient.create(connectionProvider)
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT_SECONDS * 1000)
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, props.getConnectTimeoutSeconds() * 1000)
             .option(ChannelOption.SO_KEEPALIVE, true)
             .option(ChannelOption.TCP_NODELAY, true)
-            .responseTimeout(Duration.ofSeconds(READ_TIMEOUT_SECONDS))
+            .responseTimeout(Duration.ofSeconds(props.getReadTimeoutSeconds()))
             .doOnConnected(connection -> connection
-                .addHandlerLast(new ReadTimeoutHandler(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS))
-                .addHandlerLast(new WriteTimeoutHandler(WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS)));
+                .addHandlerLast(new ReadTimeoutHandler(props.getReadTimeoutSeconds(), TimeUnit.SECONDS))
+                .addHandlerLast(new WriteTimeoutHandler(props.getWriteTimeoutSeconds(), TimeUnit.SECONDS)));
     }
 
 }
-
