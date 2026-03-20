@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.sync.v1.model.AssetCategory;
+import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import java.util.Map;
@@ -32,7 +33,7 @@ import reactor.test.StepVerifier;
 class InvestmentRestAssetUniverseServiceTest {
 
     @Mock
-    private AssetUniverseApi assetUniverseApi;
+    private InvestmentIngestProperties ingestProperties;
 
     @Mock
     private ApiClient apiClient;
@@ -41,7 +42,7 @@ class InvestmentRestAssetUniverseServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new InvestmentRestAssetUniverseService(assetUniverseApi, apiClient);
+        service = new InvestmentRestAssetUniverseService(apiClient, ingestProperties);
     }
 
     // -----------------------------------------------------------------------

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.investment.api.service.v1.model.AssetTypeEnum;
 import com.backbase.investment.api.service.v1.model.GroupResult;
+import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.AssetPrice;
@@ -102,6 +103,9 @@ class InvestmentAssetUniverseSagaTest {
     @Mock
     private InvestmentIngestionConfigurationProperties configurationProperties;
 
+    @Mock
+    private InvestmentIngestProperties ingestProperties;
+
     private InvestmentAssetUniverseSaga saga;
 
     /**
@@ -119,7 +123,8 @@ class InvestmentAssetUniverseSagaTest {
             investmentIntradayAssetPriceService,
             investmentCurrencyService,
             asyncTaskService,
-            configurationProperties
+            configurationProperties,
+            ingestProperties
         );
     }
 

@@ -15,11 +15,13 @@ import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 @EqualsAndHashCode
 @Data
 @Builder
-public class InvestmentAssetData {
+@Slf4j
+public class InvestmentAssetData implements InvestmentDataValue {
 
     private List<Currency> currencies;
     private List<Market> markets;
@@ -40,6 +42,16 @@ public class InvestmentAssetData {
         return Objects.requireNonNullElse(assets, List.<Asset>of()).stream()
             .collect(Collectors.toMap(Asset::getUuid, Function.identity()));
 
+    }
+
+    @Override
+    public long getTotalProcessedValues() {
+        log.debug(
+            "Calculating total processed values: currencies={}, markets={}, marketSpecialDays={}, assetCategoryTypes={}, assetCategories={}, assets={}, assetPrices={}",
+            getSize(currencies), getSize(markets), getSize(marketSpecialDays), getSize(assetCategoryTypes),
+            getSize(assetCategories), getSize(assets), getSize(assetPrices));
+        return getSize(currencies) + getSize(markets) + getSize(marketSpecialDays) + getSize(assetCategoryTypes)
+            + getSize(assetCategories) + getSize(assets) + getSize(assetPrices);
     }
 
 }

@@ -1,12 +1,12 @@
 package com.backbase.stream.investment.service.resttemplate;
 
 import com.backbase.investment.api.service.sync.ApiClient;
-import com.backbase.investment.api.service.sync.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.sync.v1.model.AssetCategory;
 import com.backbase.investment.api.service.sync.v1.model.AssetCategoryRequest;
 import com.backbase.investment.api.service.sync.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedAssetCategoryRequest;
 import com.backbase.investment.api.service.v1.model.Asset;
+import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,8 +33,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentRestAssetUniverseService {
 
-    private final AssetUniverseApi assetUniverseApi;
     private final ApiClient apiClient;
+    private final InvestmentIngestProperties ingestProperties;
     private final RestTemplateAssetMapper assetMapper = Mappers.getMapper(RestTemplateAssetMapper.class);
 
     public Mono<com.backbase.stream.investment.Asset> createAsset(com.backbase.stream.investment.Asset asset,
@@ -99,7 +99,7 @@ public class InvestmentRestAssetUniverseService {
         if (data != null) {
             localVarFormParams.add("data", data);
         }
-        if (logo != null) {
+        if (ingestProperties.getAsset().isIngestImages() && logo != null) {
             localVarFormParams.add("logo", logo);
         }
 
@@ -145,7 +145,7 @@ public class InvestmentRestAssetUniverseService {
         if (data != null) {
             localVarFormParams.add("data", data);
         }
-        if (logo != null) {
+        if (ingestProperties.getAsset().isIngestImages() && logo != null) {
             localVarFormParams.add("logo", logo);
         }
 
@@ -197,7 +197,9 @@ public class InvestmentRestAssetUniverseService {
             final MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<String, String>();
             final MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<String, Object>();
 
-            localVarFormParams.add("image", logo);
+            if (ingestProperties.getAsset().isIngestImages()) {
+                localVarFormParams.add("image", logo);
+            }
 
             final String[] localVarAccepts = {"application/json"};
             final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
@@ -268,7 +270,9 @@ public class InvestmentRestAssetUniverseService {
                 .ifPresent(v -> localVarFormParams.add("excerpt", v));
             Optional.ofNullable(assetCategoryPatch.getDescription())
                 .ifPresent(v -> localVarFormParams.add("description", v));
-            Optional.ofNullable(image).ifPresent(v -> localVarFormParams.add("image", v));
+            if (ingestProperties.getAsset().isIngestImages()) {
+                Optional.ofNullable(image).ifPresent(v -> localVarFormParams.add("image", v));
+            }
 
             final String[] localVarAccepts = {
                 "application/json"
@@ -331,7 +335,9 @@ public class InvestmentRestAssetUniverseService {
                 .ifPresent(v -> localVarFormParams.add("excerpt", v));
             Optional.ofNullable(assetCategoryRequest.getDescription())
                 .ifPresent(v -> localVarFormParams.add("description", v));
-            Optional.ofNullable(image).ifPresent(v -> localVarFormParams.add("image", v));
+            if (ingestProperties.getAsset().isIngestImages()) {
+                Optional.ofNullable(image).ifPresent(v -> localVarFormParams.add("image", v));
+            }
 
             final String[] localVarAccepts = {
                 "application/json"
@@ -352,6 +358,7 @@ public class InvestmentRestAssetUniverseService {
                     localVarAccept, localVarContentType, localVarAuthNames, localReturnType)
                 .getBody());
         });
+
     }
 
 }

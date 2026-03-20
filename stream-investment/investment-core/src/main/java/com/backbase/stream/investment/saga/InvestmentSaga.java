@@ -4,6 +4,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
@@ -140,7 +141,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .collectList()
             .doOnError(throwable -> {
                 log.error("Allocation generation failed for portfolios:{} taskId={}",
-                    data.getPortfolios().stream().map(PortfolioList::getUuid).toList(), investmentTask.getId(),
+                    data.getPortfolios().stream().map(InvestmentPortfolio::getPortfolio).map(PortfolioList::getUuid)
+                        .toList(), investmentTask.getId(),
                     throwable);
                 investmentTask.error(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_FAILED,
                     investmentTask.getName(), investmentTask.getId(),

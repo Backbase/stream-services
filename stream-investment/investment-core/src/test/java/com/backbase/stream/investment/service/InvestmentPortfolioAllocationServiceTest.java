@@ -27,10 +27,12 @@ import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.RelatedAssetSerializerWithAssetCategories;
+import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.ModelAsset;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -67,6 +69,7 @@ class InvestmentPortfolioAllocationServiceTest {
     private InvestmentApi investmentApi;
     private CustomIntegrationApiService customIntegrationApiService;
     private InvestmentPortfolioAllocationService service;
+    private InvestmentIngestProperties ingestProperties;
 
     @BeforeEach
     void setUp() {
@@ -74,8 +77,9 @@ class InvestmentPortfolioAllocationServiceTest {
         assetUniverseApi = mock(AssetUniverseApi.class);
         investmentApi = mock(InvestmentApi.class);
         customIntegrationApiService = mock(CustomIntegrationApiService.class);
+        ingestProperties = new InvestmentIngestProperties();
         service = new InvestmentPortfolioAllocationService(
-            allocationsApi, assetUniverseApi, investmentApi, customIntegrationApiService);
+            allocationsApi, assetUniverseApi, investmentApi, customIntegrationApiService, ingestProperties);
     }
 
     // =========================================================================
@@ -371,7 +375,7 @@ class InvestmentPortfolioAllocationServiceTest {
 
     /**
      * Tests for
-     * {@link InvestmentPortfolioAllocationService#generateAllocations(PortfolioList, List, InvestmentAssetData)}.
+     * {@link InvestmentPortfolioAllocationService#generateAllocations(InvestmentPortfolio, List, InvestmentAssetData)}.
      *
      * <p>Covers:
      * <ul>
@@ -391,6 +395,7 @@ class InvestmentPortfolioAllocationServiceTest {
             // Arrange
             UUID portfolioUuid = UUID.randomUUID();
             PortfolioList portfolio = buildPortfolioList(portfolioUuid);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
             when(portfolio.getProduct()).thenReturn(UUID.randomUUID());
             when(portfolio.getActivated()).thenReturn(OffsetDateTime.now().minusMonths(6));
 
@@ -406,7 +411,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .build();
 
             // Act & Assert
-            StepVerifier.create(service.generateAllocations(portfolio, List.of(nonMatchingProduct), assetData))
+            StepVerifier.create(service.generateAllocations(investmentPortfolio, List.of(nonMatchingProduct), assetData))
                 .verifyComplete();
         }
 
@@ -419,6 +424,7 @@ class InvestmentPortfolioAllocationServiceTest {
             UUID modelUuid = UUID.randomUUID();
 
             PortfolioList portfolio = buildPortfolioList(portfolioUuid);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
             when(portfolio.getProduct()).thenReturn(productUuid);
             when(portfolio.getActivated()).thenReturn(OffsetDateTime.now().minusMonths(2));
 
@@ -466,7 +472,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .build();
 
             // Act & Assert — one allocation created per work day from priceDay to today
-            StepVerifier.create(service.generateAllocations(portfolio, List.of(portfolioProduct), assetData))
+            StepVerifier.create(service.generateAllocations(investmentPortfolio, List.of(portfolioProduct), assetData))
                 .expectNextMatches(result -> !result.isEmpty())
                 .verifyComplete();
 
@@ -483,6 +489,7 @@ class InvestmentPortfolioAllocationServiceTest {
             UUID modelUuid = UUID.randomUUID();
 
             PortfolioList portfolio = buildPortfolioList(portfolioUuid);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
             when(portfolio.getProduct()).thenReturn(productUuid);
             when(portfolio.getActivated()).thenReturn(OffsetDateTime.now().minusMonths(2));
 
@@ -523,7 +530,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .build();
 
             // Act & Assert
-            StepVerifier.create(service.generateAllocations(portfolio, List.of(portfolioProduct), assetData))
+            StepVerifier.create(service.generateAllocations(investmentPortfolio, List.of(portfolioProduct), assetData))
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
 
@@ -538,6 +545,7 @@ class InvestmentPortfolioAllocationServiceTest {
             UUID portfolioUuid = UUID.randomUUID();
 
             PortfolioList portfolio = buildPortfolioList(portfolioUuid);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
             when(portfolio.getProduct()).thenReturn(UUID.randomUUID());
             when(portfolio.getActivated()).thenReturn(OffsetDateTime.now().minusMonths(2));
 
@@ -597,7 +605,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .build();
 
             // Act & Assert
-            StepVerifier.create(service.generateAllocations(portfolio, List.of(nonMatchingProduct), assetData))
+            StepVerifier.create(service.generateAllocations(investmentPortfolio, List.of(nonMatchingProduct), assetData))
                 .expectNextMatches(result -> !result.isEmpty())
                 .verifyComplete();
 
