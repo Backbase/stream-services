@@ -1,6 +1,7 @@
 package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.PortfolioList;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;
 import lombok.Data;
@@ -26,7 +27,7 @@ public class InvestmentTask extends StreamTask implements InvestmentDataValue {
         data.setClientUsers(clients);
     }
 
-    public void setPortfolios(List<PortfolioList> portfolios) {
+    public void setPortfolios(List<InvestmentPortfolio> portfolios) {
         data.setPortfolios(portfolios);
     }
 

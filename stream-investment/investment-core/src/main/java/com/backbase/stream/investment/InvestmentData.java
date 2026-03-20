@@ -1,8 +1,8 @@
 package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.GroupResult;
-import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ public class InvestmentData implements InvestmentDataValue {
     private List<ModelPortfolio> modelPortfolios;
     private List<PortfolioProduct> portfolioProducts;
     private InvestmentAssetData investmentAssetData;
-    private List<PortfolioList> portfolios;
+    private List<InvestmentPortfolio> portfolios;
     private List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {

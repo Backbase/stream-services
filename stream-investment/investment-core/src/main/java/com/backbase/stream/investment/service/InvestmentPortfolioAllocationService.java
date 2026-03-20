@@ -28,6 +28,7 @@ import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.ModelAsset;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -86,8 +87,11 @@ public class InvestmentPortfolioAllocationService {
             .flatMap(v -> Mono.empty());
     }
 
-    public Mono<List<OASPortfolioAllocation>> generateAllocations(PortfolioList portfolio,
+    public Mono<List<OASPortfolioAllocation>> generateAllocations(InvestmentPortfolio investmentPortfolio,
         List<PortfolioProduct> portfolioProducts, InvestmentAssetData investmentAssetData) {
+        PortfolioList portfolio = investmentPortfolio.getPortfolio();
+        double initAmount = investmentPortfolio.getInitialCashOrDefault(
+            ingestProperties.getAllocation().getDefaultAmount());
         return getPortfolioModel(portfolio, portfolioProducts, investmentAssetData.getAssetByUuid())
             .flatMap(m -> {
                 LocalDate endDay = LocalDate.now();
@@ -116,8 +120,8 @@ public class InvestmentPortfolioAllocationService {
                                 lastValuation.getCashActive(), lastValuation.getTradeTotal());
                         }).switchIfEmpty(
                             orderPositions(portfolio.getUuid(), workDays(startDay, endDay), m, priceDayByAssetKey,
-                                ingestProperties.getAllocation().getDefaultAmount())
-                                .flatMap(dp -> generateAllocations(priceDayByAssetKey, dp)))
+                                initAmount)
+                                .flatMap(dp -> generateAllocations(priceDayByAssetKey, dp, initAmount)))
                         .flatMap(allocations -> this.upsertAllocations(portfolio.getUuid().toString(), allocations)));
             })
             .onErrorResume(ex -> Mono.empty());
@@ -139,13 +143,12 @@ public class InvestmentPortfolioAllocationService {
 
     private Mono<List<OASAllocationCreateRequest>> generateAllocations(
         Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
-        Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>> dayPositions) {
+        Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>> dayPositions, double initialCash) {
 
         List<OASAllocationPositionCreateRequest> portfolioPositions = List.copyOf(dayPositions.getSecond());
 
         double totalTrade = calculateTrades(portfolioPositions);
 
-        double initialCash = ingestProperties.getAllocation().getDefaultAmount();
         double cash = initialCash - totalTrade;
         return Mono.just(generateAllocations(priceDayByAssetKey, dayPositions, initialCash, cash, totalTrade));
     }

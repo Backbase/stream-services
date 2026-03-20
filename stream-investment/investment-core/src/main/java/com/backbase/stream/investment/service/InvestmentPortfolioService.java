@@ -25,7 +25,9 @@ import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,7 +74,7 @@ public class InvestmentPortfolioService {
     private final PortfolioTradingAccountsApi portfolioTradingAccountsApi;
     private final InvestmentIngestProperties config;
 
-    public Mono<List<PortfolioList>> upsertPortfolios(List<InvestmentArrangement> investmentArrangements,
+    public Mono<List<InvestmentPortfolio>> upsertPortfolios(List<InvestmentArrangement> investmentArrangements,
         Map<String, List<UUID>> clientsByLeExternalId) {
         return Flux.fromIterable(investmentArrangements)
             .flatMap(arrangement -> {
@@ -80,9 +82,14 @@ public class InvestmentPortfolioService {
                     arrangement.getExternalId(), arrangement.getName(), arrangement.getInvestmentProductId());
 
                 return upsertInvestmentPortfolios(arrangement, clientsByLeExternalId)
-                    .doOnSuccess(portfolio -> log.debug(
+                    .map(p -> InvestmentPortfolio
+                        .builder()
+                        .portfolio(p)
+                        .initialCash(arrangement.getInitialCash())
+                        .build())
+                    .doOnSuccess(ip -> log.debug(
                         "Successfully upserted investment portfolio: portfolioUuid={}, externalId={}, name={}",
-                        portfolio.getUuid(), portfolio.getExternalId(), portfolio.getName()))
+                        ip.getPortfolio().getUuid(), ip.getPortfolio().getExternalId(), ip.getPortfolio().getName()))
                     .doOnError(throwable -> log.error(
                         "Failed to upsert investment portfolio: arrangementExternalId={}, arrangementName={}",
                         arrangement.getExternalId(), arrangement.getName(), throwable));
@@ -152,7 +159,8 @@ public class InvestmentPortfolioService {
                 .flatMap(
                     existingProduct -> updateExistingPortfolioProduct(existingProduct, p, investmentData)
                         .onErrorResume(WebClientResponseException.class, ex -> {
-                            log.info("Using existing product data due to patch failure: uuid={}", existingProduct.getUuid());
+                            log.info("Using existing product data due to patch failure: uuid={}",
+                                existingProduct.getUuid());
                             return Mono.just(existingProduct);
                         })
                 )
@@ -223,7 +231,7 @@ public class InvestmentPortfolioService {
      * from the arrangement to client UUIDs via the provided lookup map.
      *
      * @param investmentArrangement the investment arrangement containing portfolio details (must not be null)
-     * @param clientsByLeId map of legal entity ID to client UUIDs for associations
+     * @param clientsByLeId         map of legal entity ID to client UUIDs for associations
      * @return Mono emitting the created or existing portfolio
      * @throws NullPointerException if investmentArrangement is null
      */
@@ -334,7 +342,7 @@ public class InvestmentPortfolioService {
      * Creates a new investment portfolio with associated clients.
      *
      * @param investmentArrangement the arrangement containing portfolio details
-     * @param clientsByLeId map to resolve client UUIDs from legal entity IDs
+     * @param clientsByLeId         map to resolve client UUIDs from legal entity IDs
      * @return Mono emitting the newly created portfolio
      */
     private Mono<PortfolioList> createNewPortfolio(InvestmentArrangement investmentArrangement,
@@ -350,7 +358,8 @@ public class InvestmentPortfolioService {
             .externalId(investmentArrangement.getExternalId())
             .name(investmentArrangement.getName())
             .clients(associatedClients)
-            .currency(Optional.ofNullable(investmentArrangement.getCurrency()).orElse(config.getPortfolio().getDefaultCurrency()))
+            .currency(Optional.ofNullable(investmentArrangement.getCurrency())
+                .orElse(config.getPortfolio().getDefaultCurrency()))
             .status(StatusA3dEnum.ACTIVE)
             .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()));
 
@@ -369,7 +378,7 @@ public class InvestmentPortfolioService {
      * using the provided lookup map. It filters out null values and ensures distinct results.
      *
      * @param investmentArrangement the arrangement containing legal entity external IDs
-     * @param clientsByLeId map of legal entity ID to client UUIDs
+     * @param clientsByLeId         map of legal entity ID to client UUIDs
      * @return distinct list of client UUIDs associated with the arrangement's legal entities
      */
     private static List<UUID> getClients(InvestmentArrangement investmentArrangement,
@@ -392,7 +401,8 @@ public class InvestmentPortfolioService {
     }
 
     private Mono<PortfolioProduct> listExistingPortfolioProducts(ProductTypeEnum productType, Integer riskLevel) {
-        return productsApi.listPortfolioProducts(List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null,
+        return productsApi.listPortfolioProducts(List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
+                null, null,
                 1, null, null, riskLevel, null, null, "-model_portfolio__risk_level",
                 List.of(productType.getValue()))
             .doOnSuccess(products -> log.debug(
@@ -449,7 +459,8 @@ public class InvestmentPortfolioService {
         log.debug("Attempting to patch existing portfolio product: uuid={}, productType={}",
             productUuid, portfolioProduct.getProductType());
 
-        return productsApi.patchPortfolioProduct(productUuid.toString(), List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
+        return productsApi.patchPortfolioProduct(productUuid.toString(),
+                List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
                 null, null, patch)
             .doOnSuccess(updated -> {
                 log.info("Successfully patched existing investment product: uuid={}", updated.getUuid());
@@ -492,7 +503,8 @@ public class InvestmentPortfolioService {
             .modelPortfolio(modelPortfolioUuid)
             .productType(portfolioProduct.getProductType());
 
-        return productsApi.createPortfolioProduct(request, List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null)
+        return productsApi.createPortfolioProduct(request,
+                List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null)
             .retry(2)
             .retryWhen(reactor.util.retry.Retry.fixedDelay(1, java.time.Duration.ofSeconds(1)))
             .doOnSuccess(created -> {
@@ -504,8 +516,9 @@ public class InvestmentPortfolioService {
             .doOnError(throwable -> logPortfolioProductCreationError(productType, throwable));
     }
 
-    public Mono<Deposit> upsertDeposits(PortfolioList portfolio) {
-        double defaultAmount = config.getDeposit().getDefaultAmount();
+    public Mono<Deposit> upsertDeposits(InvestmentPortfolio investmentPortfolio) {
+        PortfolioList portfolio = investmentPortfolio.getPortfolio();
+        double initAmount = investmentPortfolio.getInitialCashOrDefault(config.getDeposit().getDefaultAmount());
         return paymentsApi.listDeposits(null, null, null, null, null,
                 null, portfolio.getUuid(), null, null, null)
             .filter(Objects::nonNull)
@@ -516,15 +529,15 @@ public class InvestmentPortfolioService {
                     .filter(list -> !list.isEmpty()))
             .flatMap(deposits -> {
                 double deposited = deposits.stream().mapToDouble(Deposit::getAmount).sum();
-                double remaining = defaultAmount - deposited;
+                double remaining = initAmount - deposited;
                 return remaining > 0
                     ? createDeposit(portfolio, remaining)
                     : Mono.just(deposits.getLast());
             })
-            .switchIfEmpty(Mono.defer(() -> createDeposit(portfolio, defaultAmount)))
+            .switchIfEmpty(Mono.defer(() -> createDeposit(portfolio, initAmount)))
             .onErrorResume(ex -> Mono.just(new Deposit()
                     .portfolio(portfolio.getUuid())
-                    .amount(defaultAmount)
+                    .amount(initAmount)
                     .completedAt(portfolio.getActivated().plusDays(2))
                 )
             );
@@ -561,8 +574,8 @@ public class InvestmentPortfolioService {
      * Upserts portfolio trading accounts derived from the provided investment portfolio accounts.
      *
      * <p>This method constructs {@link PortfolioTradingAccount} instances directly from
-     * {@link InvestmentPortfolioTradingAccount} data, resolving each account's portfolio UUID
-     * via the portfolio service before upserting.
+     * {@link InvestmentPortfolioTradingAccount} data, resolving each account's portfolio UUID via the portfolio service
+     * before upserting.
      *
      * <p>Processing flow:
      * <ol>
@@ -653,8 +666,8 @@ public class InvestmentPortfolioService {
     }
 
     /**
-     * Builds a {@link PortfolioTradingAccountRequest} directly from an {@link InvestmentPortfolioTradingAccount}
-     * and a resolved portfolio UUID, skipping the intermediate {@link PortfolioTradingAccount} domain object.
+     * Builds a {@link PortfolioTradingAccountRequest} directly from an {@link InvestmentPortfolioTradingAccount} and a
+     * resolved portfolio UUID, skipping the intermediate {@link PortfolioTradingAccount} domain object.
      *
      * <p>Maps the following fields:
      * <ul>
@@ -666,7 +679,7 @@ public class InvestmentPortfolioService {
      * </ul>
      *
      * @param investmentPortfolioTradingAccount the source account containing field data
-     * @param portfolioUuid the resolved internal portfolio UUID
+     * @param portfolioUuid                     the resolved internal portfolio UUID
      * @return the constructed {@link PortfolioTradingAccountRequest}
      */
     private PortfolioTradingAccountRequest buildTradingAccountRequest(
@@ -710,11 +723,10 @@ public class InvestmentPortfolioService {
      * Patches an existing portfolio trading account with updated values.
      *
      * <p>If the patch operation fails (e.g., due to validation errors or conflicts),
-     * falls back to returning the existing account to preserve data integrity
-     * and prevent batch failures.
+     * falls back to returning the existing account to preserve data integrity and prevent batch failures.
      *
      * @param existing the existing trading account to update
-     * @param request the request containing updated values
+     * @param request  the request containing updated values
      * @return Mono emitting the updated trading account, or the existing account if patch fails
      */
     private Mono<PortfolioTradingAccount> patchExistingPortfolioTradingAccount(
@@ -793,7 +805,7 @@ public class InvestmentPortfolioService {
      *   <li>Returns an error for multiple results — indicates a data setup issue</li>
      * </ul>
      *
-     * @param accounts the paginated list of trading accounts returned by the API
+     * @param accounts          the paginated list of trading accounts returned by the API
      * @param externalAccountId the external account ID used in the search, for logging purposes
      * @return Mono emitting the single matching trading account, or empty if no results found
      * @throws IllegalStateException if multiple trading accounts are found with the same external account ID
@@ -828,15 +840,15 @@ public class InvestmentPortfolioService {
      * Logs errors occurring during portfolio trading account operations.
      *
      * <p>Provides enhanced error context for {@link WebClientResponseException},
-     * including HTTP status code and response body. For other exceptions, logs
-     * basic error information.
+     * including HTTP status code and response body. For other exceptions, logs basic error information.
      *
-     * @param operation  a short description of the operation that failed (e.g., "PATCH", "CREATE")
-     * @param idLabel    the label for the identifier (e.g., "uuid", "externalAccountId")
-     * @param idValue    the value of the identifier
-     * @param throwable  the exception that occurred
+     * @param operation a short description of the operation that failed (e.g., "PATCH", "CREATE")
+     * @param idLabel   the label for the identifier (e.g., "uuid", "externalAccountId")
+     * @param idValue   the value of the identifier
+     * @param throwable the exception that occurred
      */
-    private void logPortfolioTradingAccountError(String operation, String idLabel, String idValue, Throwable throwable) {
+    private void logPortfolioTradingAccountError(String operation, String idLabel, String idValue,
+        Throwable throwable) {
         if (throwable instanceof WebClientResponseException ex) {
             log.warn("Portfolio trading account {} failed: {}={}, status={}, body={}",
                 operation, idLabel, idValue, ex.getStatusCode(), ex.getResponseBodyAsString());
