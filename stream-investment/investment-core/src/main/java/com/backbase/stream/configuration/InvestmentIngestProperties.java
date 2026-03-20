@@ -94,7 +94,7 @@ public class InvestmentIngestProperties {
          * The payment provider identifier sent with every deposit request.
          * Set this to the real provider name for non-mock environments.
          */
-        private String provider = "mock";
+        private String provider = null;
 
         /**
          * The monetary amount used as the initial seed deposit when no previous deposit exists
