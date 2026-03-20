@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class InvestmentTask extends StreamTask {
+public class InvestmentTask extends StreamTask implements InvestmentDataValue {
 
     private final InvestmentData data;
 
@@ -28,6 +28,10 @@ public class InvestmentTask extends StreamTask {
 
     public void setPortfolios(List<PortfolioList> portfolios) {
         data.setPortfolios(portfolios);
+    }
+
+    public long getTotalProcessedValues() {
+        return data.getTotalProcessedValues();
     }
 
 }

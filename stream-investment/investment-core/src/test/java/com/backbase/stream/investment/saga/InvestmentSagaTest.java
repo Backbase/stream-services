@@ -41,8 +41,6 @@ import reactor.test.StepVerifier;
  */
 class InvestmentSagaTest {
 
-    private static final String SA_NAME = "some-sa-name";
-    private static final String SA_EXTERNAL_ID = "some-sa-external-id";
     private static final String ARRANGEMENT_EXTERNAL_ID = "some-arrangement-id";
     private static final String PORTFOLIO_EXTERNAL_ID = "some-portfolio-external-id";
     private static final String ACCOUNT_ID = "some-account-id";
@@ -436,8 +434,6 @@ class InvestmentSagaTest {
 
     private InvestmentTask createMinimalTask() {
         return new InvestmentTask("minimal-task", InvestmentData.builder()
-            .saName(SA_NAME)
-            .saExternalId(SA_EXTERNAL_ID)
             .clientUsers(Collections.emptyList())
             .investmentArrangements(Collections.emptyList())
             .modelPortfolios(Collections.emptyList())
@@ -448,8 +444,6 @@ class InvestmentSagaTest {
 
     private InvestmentTask createTaskWithModelPortfolios() {
         return new InvestmentTask("model-portfolio-task", InvestmentData.builder()
-            .saName(SA_NAME)
-            .saExternalId(SA_EXTERNAL_ID)
             .clientUsers(Collections.emptyList())
             .investmentArrangements(Collections.emptyList())
             .modelPortfolios(List.of(ModelPortfolio.builder()
@@ -463,8 +457,6 @@ class InvestmentSagaTest {
 
     private InvestmentTask createFullTask() {
         return new InvestmentTask("full-task", InvestmentData.builder()
-            .saName(SA_NAME)
-            .saExternalId(SA_EXTERNAL_ID)
             .clientUsers(List.of(ClientUser.builder()
                 .investmentClientId(UUID.randomUUID())
                 .legalEntityId(LE_INTERNAL_ID)

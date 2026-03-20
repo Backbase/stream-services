@@ -41,7 +41,8 @@ import org.springframework.context.annotation.Import;
     InvestmentClientConfig.class
 })
 @EnableConfigurationProperties({
-    InvestmentIngestionConfigurationProperties.class
+    InvestmentIngestionConfigurationProperties.class,
+    InvestmentIngestProperties.class
 })
 @RequiredArgsConstructor
 @Configuration
@@ -61,9 +62,9 @@ public class InvestmentServiceConfiguration {
     @Bean
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
         InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi, PortfolioTradingAccountsApi portfolioTradingAccountsApi,
-        InvestmentIngestionConfigurationProperties configurationProperties) {
+        InvestmentIngestProperties portfolioProperties) {
         return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi,
-            portfolioTradingAccountsApi, configurationProperties);
+            portfolioTradingAccountsApi, portfolioProperties);
     }
 
     @Bean

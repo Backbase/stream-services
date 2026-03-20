@@ -13,14 +13,14 @@ import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 @EqualsAndHashCode
 @Data
 @Builder
-public class InvestmentData {
+@Slf4j
+public class InvestmentData implements InvestmentDataValue {
 
-    private String saName;
-    private String saExternalId;
     private List<ClientUser> clientUsers;
     private List<InvestmentArrangement> investmentArrangements;
     private List<ModelPortfolio> modelPortfolios;
@@ -53,4 +53,14 @@ public class InvestmentData {
     public List<GroupResult> getPriceAsyncTasks() {
         return Optional.ofNullable(investmentAssetData).map(InvestmentAssetData::getPriceAsyncTasks).orElse(List.of());
     }
+
+    public long getTotalProcessedValues() {
+        log.debug(
+            "Calculating total processed values: portfolios={}, portfolioProducts={}, modelPortfolios={}, clientUsers={}, investmentPortfolioTradingAccounts={}",
+            getSize(portfolios), getSize(portfolioProducts), getSize(modelPortfolios), getSize(clientUsers),
+            getSize(investmentPortfolioTradingAccounts));
+        return getSize(portfolios) + getSize(portfolioProducts) + getSize(modelPortfolios) + getSize(clientUsers)
+            + getSize(investmentPortfolioTradingAccounts);
+    }
+
 }

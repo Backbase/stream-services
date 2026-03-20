@@ -21,7 +21,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioTradingAccountReque
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.Status08fEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
-import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
+import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
@@ -66,14 +66,11 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentPortfolioService {
 
-    private static final String DEFAULT_CURRENCY = "EUR";
-    private static final String MODEL_PORTFOLIO_ALLOCATION_ASSET = "model_portfolio.allocation.asset";
-
     private final InvestmentProductsApi productsApi;
     private final PortfolioApi portfolioApi;
     private final PaymentsApi paymentsApi;
     private final PortfolioTradingAccountsApi portfolioTradingAccountsApi;
-    private final InvestmentIngestionConfigurationProperties config;
+    private final InvestmentIngestProperties config;
 
     public Mono<List<PortfolioList>> upsertPortfolios(List<InvestmentArrangement> investmentArrangements,
         Map<String, List<UUID>> clientsByLeExternalId) {
@@ -266,7 +263,7 @@ public class InvestmentPortfolioService {
             .name(investmentArrangement.getName())
             .clients(associatedClients)
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusMonths(config.getPortfolioActivationPastMonths()));
+            .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()));
 
         log.debug("Attempting to patch existing portfolio: uuid={}, externalId={}",
             uuid, investmentArrangement.getExternalId());
@@ -353,9 +350,9 @@ public class InvestmentPortfolioService {
             .externalId(investmentArrangement.getExternalId())
             .name(investmentArrangement.getName())
             .clients(associatedClients)
-            .currency(Optional.ofNullable(investmentArrangement.getCurrency()).orElse(DEFAULT_CURRENCY))
+            .currency(Optional.ofNullable(investmentArrangement.getCurrency()).orElse(config.getPortfolio().getDefaultCurrency()))
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusMonths(config.getPortfolioActivationPastMonths()));
+            .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()));
 
         return portfolioApi.createPortfolio(request, null, null, null)
             .doOnSuccess(created -> log.info(
@@ -395,7 +392,7 @@ public class InvestmentPortfolioService {
     }
 
     private Mono<PortfolioProduct> listExistingPortfolioProducts(ProductTypeEnum productType, Integer riskLevel) {
-        return productsApi.listPortfolioProducts(List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET), null, null,
+        return productsApi.listPortfolioProducts(List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null,
                 1, null, null, riskLevel, null, null, "-model_portfolio__risk_level",
                 List.of(productType.getValue()))
             .doOnSuccess(products -> log.debug(
@@ -432,10 +429,9 @@ public class InvestmentPortfolioService {
      * Updates an existing portfolio product by patching it. Falls back to the original product if the patch operation
      * fails.
      *
-     * @param investmentArrangement the arrangement to update with product UUID
-     * @param existingProduct       the existing product to update
-     * @param portfolioProduct      the template product containing desired values
-     * @param investmentData
+     * @param existingProduct  the existing product to update
+     * @param portfolioProduct the template product containing desired values
+     * @param investmentData   the investment data context used to register the updated product
      * @return Mono emitting the updated product
      */
     private Mono<PortfolioProduct> updateExistingPortfolioProduct(PortfolioProduct existingProduct,
@@ -453,7 +449,7 @@ public class InvestmentPortfolioService {
         log.debug("Attempting to patch existing portfolio product: uuid={}, productType={}",
             productUuid, portfolioProduct.getProductType());
 
-        return productsApi.patchPortfolioProduct(productUuid.toString(), List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET),
+        return productsApi.patchPortfolioProduct(productUuid.toString(), List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
                 null, null, patch)
             .doOnSuccess(updated -> {
                 log.info("Successfully patched existing investment product: uuid={}", updated.getUuid());
@@ -478,9 +474,8 @@ public class InvestmentPortfolioService {
     /**
      * Creates a portfolio product with an optional model portfolio UUID.
      *
-     * @param investmentArrangement the arrangement to update with product UUID
-     * @param portfolioProduct      the portfolio product template
-     * @param investmentData
+     * @param portfolioProduct the portfolio product template
+     * @param investmentData   the investment data context used to register the created product
      * @return Mono emitting the newly created portfolio product
      */
     private Mono<PortfolioProduct> createPortfolioProductWithModel(PortfolioProduct portfolioProduct,
@@ -497,7 +492,7 @@ public class InvestmentPortfolioService {
             .modelPortfolio(modelPortfolioUuid)
             .productType(portfolioProduct.getProductType());
 
-        return productsApi.createPortfolioProduct(request, List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET), null, null)
+        return productsApi.createPortfolioProduct(request, List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null)
             .retry(2)
             .retryWhen(reactor.util.retry.Retry.fixedDelay(1, java.time.Duration.ofSeconds(1)))
             .doOnSuccess(created -> {
@@ -510,7 +505,7 @@ public class InvestmentPortfolioService {
     }
 
     public Mono<Deposit> upsertDeposits(PortfolioList portfolio) {
-        double defaultAmount = 10_000d;
+        double defaultAmount = config.getDeposit().getDefaultAmount();
         return paymentsApi.listDeposits(null, null, null, null, null,
                 null, portfolio.getUuid(), null, null, null)
             .filter(Objects::nonNull)
@@ -539,7 +534,7 @@ public class InvestmentPortfolioService {
     private Mono<Deposit> createDeposit(PortfolioList portfolio, double defaultAmount) {
         return paymentsApi.createDeposit(new DepositRequest()
                 .portfolio(portfolio.getUuid())
-                .provider("mock")
+                .provider(config.getDeposit().getProvider())
                 .reason(UUID.randomUUID().toString())
                 .status(Status08fEnum.COMPLETED)
                 .transactedAt(portfolio.getActivated().plusDays(1))
