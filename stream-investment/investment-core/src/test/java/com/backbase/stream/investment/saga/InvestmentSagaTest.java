@@ -15,6 +15,7 @@ import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
@@ -371,7 +372,7 @@ class InvestmentSagaTest {
             when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
                 .thenReturn(Mono.just(List.of(new PortfolioProduct())));
             when(investmentPortfolioService.upsertPortfolios(any(), any()))
-                .thenReturn(Mono.just(List.of(new PortfolioList())));
+                .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
             when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
                 .thenReturn(Mono.error(new RuntimeException("Trading account upsert failure")));
 
@@ -412,7 +413,7 @@ class InvestmentSagaTest {
             when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
                 .thenReturn(Mono.just(List.of(new PortfolioProduct())));
             when(investmentPortfolioService.upsertPortfolios(any(), any()))
-                .thenReturn(Mono.just(List.of(new PortfolioList())));
+                .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
             when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
                 .thenReturn(Mono.empty());
             when(investmentPortfolioService.upsertDeposits(any()))
@@ -475,7 +476,7 @@ class InvestmentSagaTest {
                 .isDefault(true)
                 .isInternal(false)
                 .build()))
-            .portfolios(List.of(new PortfolioList()))
+            .portfolios(List.of(InvestmentPortfolio.builder().portfolio(new PortfolioList()).build()))
             .build());
     }
 
@@ -487,7 +488,7 @@ class InvestmentSagaTest {
         when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
             .thenReturn(Mono.just(List.of(new PortfolioProduct())));
         when(investmentPortfolioService.upsertPortfolios(any(), any()))
-            .thenReturn(Mono.just(List.of(new PortfolioList())));
+            .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
         when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
             .thenReturn(Mono.empty());
         when(investmentPortfolioService.upsertDeposits(any()))
