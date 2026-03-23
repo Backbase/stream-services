@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class InvestmentContentTask extends StreamTask {
+public class InvestmentContentTask extends StreamTask implements InvestmentDataValue {
 
     private final InvestmentContentData data;
 
@@ -18,6 +18,11 @@ public class InvestmentContentTask extends StreamTask {
     @Override
     public String getName() {
         return "investment-content";
+    }
+
+    @Override
+    public long getTotalProcessedValues() {
+        return data.getTotalProcessedValues();
     }
 
 }

@@ -15,6 +15,7 @@ import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
@@ -41,13 +42,11 @@ import reactor.test.StepVerifier;
  */
 class InvestmentSagaTest {
 
-    private static final String SA_NAME = "some-sa-name";
-    private static final String SA_EXTERNAL_ID = "some-sa-external-id";
     private static final String ARRANGEMENT_EXTERNAL_ID = "some-arrangement-id";
     private static final String PORTFOLIO_EXTERNAL_ID = "some-portfolio-external-id";
     private static final String ACCOUNT_ID = "some-account-id";
     private static final String ACCOUNT_EXTERNAL_ID = "some-account-external-id";
-    private static final String LE_EXTERNAL_ID = "some-le-external-id";
+    private static final String LE_INTERNAL_ID = "some-le-internal-id";
 
     @Mock
     private InvestmentClientService clientService;
@@ -373,7 +372,7 @@ class InvestmentSagaTest {
             when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
                 .thenReturn(Mono.just(List.of(new PortfolioProduct())));
             when(investmentPortfolioService.upsertPortfolios(any(), any()))
-                .thenReturn(Mono.just(List.of(new PortfolioList())));
+                .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
             when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
                 .thenReturn(Mono.error(new RuntimeException("Trading account upsert failure")));
 
@@ -414,7 +413,7 @@ class InvestmentSagaTest {
             when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
                 .thenReturn(Mono.just(List.of(new PortfolioProduct())));
             when(investmentPortfolioService.upsertPortfolios(any(), any()))
-                .thenReturn(Mono.just(List.of(new PortfolioList())));
+                .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
             when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
                 .thenReturn(Mono.empty());
             when(investmentPortfolioService.upsertDeposits(any()))
@@ -436,8 +435,6 @@ class InvestmentSagaTest {
 
     private InvestmentTask createMinimalTask() {
         return new InvestmentTask("minimal-task", InvestmentData.builder()
-            .saName(SA_NAME)
-            .saExternalId(SA_EXTERNAL_ID)
             .clientUsers(Collections.emptyList())
             .investmentArrangements(Collections.emptyList())
             .modelPortfolios(Collections.emptyList())
@@ -448,8 +445,6 @@ class InvestmentSagaTest {
 
     private InvestmentTask createTaskWithModelPortfolios() {
         return new InvestmentTask("model-portfolio-task", InvestmentData.builder()
-            .saName(SA_NAME)
-            .saExternalId(SA_EXTERNAL_ID)
             .clientUsers(Collections.emptyList())
             .investmentArrangements(Collections.emptyList())
             .modelPortfolios(List.of(ModelPortfolio.builder()
@@ -463,11 +458,9 @@ class InvestmentSagaTest {
 
     private InvestmentTask createFullTask() {
         return new InvestmentTask("full-task", InvestmentData.builder()
-            .saName(SA_NAME)
-            .saExternalId(SA_EXTERNAL_ID)
             .clientUsers(List.of(ClientUser.builder()
                 .investmentClientId(UUID.randomUUID())
-                .legalEntityExternalId(LE_EXTERNAL_ID)
+                .legalEntityId(LE_INTERNAL_ID)
                 .build()))
             .investmentArrangements(List.of(InvestmentArrangement.builder()
                 .externalId(ARRANGEMENT_EXTERNAL_ID)
@@ -483,7 +476,7 @@ class InvestmentSagaTest {
                 .isDefault(true)
                 .isInternal(false)
                 .build()))
-            .portfolios(List.of(new PortfolioList()))
+            .portfolios(List.of(InvestmentPortfolio.builder().portfolio(new PortfolioList()).build()))
             .build());
     }
 
@@ -495,7 +488,7 @@ class InvestmentSagaTest {
         when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
             .thenReturn(Mono.just(List.of(new PortfolioProduct())));
         when(investmentPortfolioService.upsertPortfolios(any(), any()))
-            .thenReturn(Mono.just(List.of(new PortfolioList())));
+            .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
         when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
             .thenReturn(Mono.empty());
         when(investmentPortfolioService.upsertDeposits(any()))

@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.8.0]
+### Changed
+- Create investment data based on exists entries in system
+  - do not rely on LE on yaml config
+- Improve logging for investment data creation based on existing entries in system
+- Improve concurrent request number to investment service
+  - add configs properties to handle concurrent request number by model type
+- Improve data use
+  - Use available balance of arrangement for Portfolio setup. Use as initial cash
+ 
+
 ## [9.7.0]
 ### Added
  - Implement Portfolio Trading Account Creation;

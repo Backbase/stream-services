@@ -1,6 +1,7 @@
 package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.PortfolioList;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;
 import lombok.Data;
@@ -8,7 +9,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class InvestmentTask extends StreamTask {
+public class InvestmentTask extends StreamTask implements InvestmentDataValue {
 
     private final InvestmentData data;
 
@@ -26,8 +27,12 @@ public class InvestmentTask extends StreamTask {
         data.setClientUsers(clients);
     }
 
-    public void setPortfolios(List<PortfolioList> portfolios) {
+    public void setPortfolios(List<InvestmentPortfolio> portfolios) {
         data.setPortfolios(portfolios);
+    }
+
+    public long getTotalProcessedValues() {
+        return data.getTotalProcessedValues();
     }
 
 }

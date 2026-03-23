@@ -26,10 +26,11 @@ import com.backbase.investment.api.service.v1.model.PortfolioTradingAccount;
 import com.backbase.investment.api.service.v1.model.PortfolioTradingAccountRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
-import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
+import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
@@ -69,7 +70,7 @@ class InvestmentPortfolioServiceTest {
     private PortfolioApi portfolioApi;
     private PaymentsApi paymentsApi;
     private PortfolioTradingAccountsApi portfolioTradingAccountsApi;
-    private InvestmentIngestionConfigurationProperties config;
+    private InvestmentIngestProperties config;
     private InvestmentPortfolioService service;
 
     @BeforeEach
@@ -78,8 +79,7 @@ class InvestmentPortfolioServiceTest {
         portfolioApi = Mockito.mock(PortfolioApi.class);
         paymentsApi = Mockito.mock(PaymentsApi.class);
         portfolioTradingAccountsApi = Mockito.mock(PortfolioTradingAccountsApi.class);
-        config = Mockito.mock(InvestmentIngestionConfigurationProperties.class);
-        when(config.getPortfolioActivationPastMonths()).thenReturn(6);
+        config = new InvestmentIngestProperties();
         service = new InvestmentPortfolioService(
             productsApi, portfolioApi, paymentsApi, portfolioTradingAccountsApi, config);
     }
@@ -746,7 +746,7 @@ class InvestmentPortfolioServiceTest {
     // =========================================================================
 
     /**
-     * Tests for {@link InvestmentPortfolioService#upsertDeposits(PortfolioList)}.
+     * Tests for {@link InvestmentPortfolioService#upsertDeposits(InvestmentPortfolio)}.
      *
      * <p>Covers:
      * <ul>
@@ -768,6 +768,7 @@ class InvestmentPortfolioServiceTest {
             UUID portfolioUuid = UUID.randomUUID();
             PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-DEP-001",
                 OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
 
             when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
@@ -779,7 +780,7 @@ class InvestmentPortfolioServiceTest {
                 .thenReturn(Mono.just(created));
 
             // Act & Assert
-            StepVerifier.create(service.upsertDeposits(portfolio))
+            StepVerifier.create(service.upsertDeposits(investmentPortfolio))
                 .expectNextMatches(d -> Double.valueOf(10_000d).equals(d.getAmount()))
                 .verifyComplete();
 
@@ -793,6 +794,7 @@ class InvestmentPortfolioServiceTest {
             UUID portfolioUuid = UUID.randomUUID();
             PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-DEP-002",
                 OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
 
             Deposit existingDeposit = Mockito.mock(Deposit.class);
             when(existingDeposit.getAmount()).thenReturn(4_000d);
@@ -807,7 +809,7 @@ class InvestmentPortfolioServiceTest {
                 .thenReturn(Mono.just(topUpDeposit));
 
             // Act & Assert
-            StepVerifier.create(service.upsertDeposits(portfolio))
+            StepVerifier.create(service.upsertDeposits(investmentPortfolio))
                 .expectNextMatches(d -> Double.valueOf(6_000d).equals(d.getAmount()))
                 .verifyComplete();
 
@@ -821,6 +823,7 @@ class InvestmentPortfolioServiceTest {
             UUID portfolioUuid = UUID.randomUUID();
             PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-DEP-003",
                 OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
 
             Deposit existingDeposit = Mockito.mock(Deposit.class);
             when(existingDeposit.getAmount()).thenReturn(10_000d);
@@ -832,7 +835,7 @@ class InvestmentPortfolioServiceTest {
             Deposit fallbackDeposit = Mockito.mock(Deposit.class);
             when(paymentsApi.createDeposit(any())).thenReturn(Mono.just(fallbackDeposit));
             // Act & Assert
-            StepVerifier.create(service.upsertDeposits(portfolio))
+            StepVerifier.create(service.upsertDeposits(investmentPortfolio))
                 .expectNextMatches(d -> Double.valueOf(10_000d).equals(d.getAmount()))
                 .verifyComplete();
 
@@ -846,6 +849,7 @@ class InvestmentPortfolioServiceTest {
             UUID portfolioUuid = UUID.randomUUID();
             PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-DEP-NULL",
                 OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
 
             when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
@@ -857,7 +861,7 @@ class InvestmentPortfolioServiceTest {
                 .thenReturn(Mono.just(created));
 
             // Act & Assert
-            StepVerifier.create(service.upsertDeposits(portfolio))
+            StepVerifier.create(service.upsertDeposits(investmentPortfolio))
                 .expectNextMatches(d -> Double.valueOf(10_000d).equals(d.getAmount()))
                 .verifyComplete();
 
@@ -871,13 +875,14 @@ class InvestmentPortfolioServiceTest {
             UUID portfolioUuid = UUID.randomUUID();
             OffsetDateTime activated = OffsetDateTime.now().minusMonths(6);
             PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-DEP-ERR", activated);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
 
             when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.error(new RuntimeException("API unavailable")));
 
             // Act & Assert
-            StepVerifier.create(service.upsertDeposits(portfolio))
+            StepVerifier.create(service.upsertDeposits(investmentPortfolio))
                 .expectNextMatches(d -> portfolioUuid.equals(d.getPortfolio())
                     && d.getAmount() == 10_000d)
                 .verifyComplete();
@@ -1167,7 +1172,7 @@ class InvestmentPortfolioServiceTest {
         when(arrangement.getExternalId()).thenReturn(externalId);
         when(arrangement.getName()).thenReturn(name);
         when(arrangement.getInvestmentProductId()).thenReturn(productId);
-        when(arrangement.getLegalEntityExternalIds()).thenReturn(List.of(legalEntityExternalId));
+        when(arrangement.getLegalEntityIds()).thenReturn(List.of(legalEntityExternalId));
         when(arrangement.getCurrency()).thenReturn("EUR");
         when(arrangement.getInternalId()).thenReturn(null);
         return arrangement;
@@ -1183,7 +1188,7 @@ class InvestmentPortfolioServiceTest {
         when(arrangement.getExternalId()).thenReturn(externalId);
         when(arrangement.getName()).thenReturn(name);
         when(arrangement.getProductTypeExternalId()).thenReturn(productTypeValue);
-        when(arrangement.getLegalEntityExternalIds()).thenReturn(List.of());
+        when(arrangement.getLegalEntityIds()).thenReturn(List.of());
         when(arrangement.getCurrency()).thenReturn("EUR");
         when(arrangement.getInternalId()).thenReturn(null);
         return arrangement;

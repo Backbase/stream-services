@@ -1,5 +1,6 @@
 package com.backbase.stream.investment;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
@@ -16,8 +17,9 @@ public class InvestmentArrangement {
     private String externalUserId;
     private String productTypeExternalId;
     private String currency;
+    private BigDecimal initialCash;
 
     private UUID investmentProductId;
-    private List<String> legalEntityExternalIds;
+    private List<String> legalEntityIds;
 
 }

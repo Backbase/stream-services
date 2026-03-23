@@ -41,7 +41,8 @@ import org.springframework.context.annotation.Import;
     InvestmentClientConfig.class
 })
 @EnableConfigurationProperties({
-    InvestmentIngestionConfigurationProperties.class
+    InvestmentIngestionConfigurationProperties.class,
+    InvestmentIngestProperties.class
 })
 @RequiredArgsConstructor
 @Configuration
@@ -61,9 +62,9 @@ public class InvestmentServiceConfiguration {
     @Bean
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
         InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi, PortfolioTradingAccountsApi portfolioTradingAccountsApi,
-        InvestmentIngestionConfigurationProperties configurationProperties) {
+        InvestmentIngestProperties portfolioProperties) {
         return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi,
-            portfolioTradingAccountsApi, configurationProperties);
+            portfolioTradingAccountsApi, portfolioProperties);
     }
 
     @Bean
@@ -96,9 +97,9 @@ public class InvestmentServiceConfiguration {
     @Bean
     public InvestmentPortfolioAllocationService investmentPortfolioAllocationService(AllocationsApi allocationsApi,
         AssetUniverseApi assetUniverseApi, InvestmentApi investmentApi,
-        CustomIntegrationApiService customIntegrationApiService) {
+        CustomIntegrationApiService customIntegrationApiService, InvestmentIngestProperties portfolioProperties) {
         return new InvestmentPortfolioAllocationService(allocationsApi, assetUniverseApi, investmentApi,
-            customIntegrationApiService);
+            customIntegrationApiService, portfolioProperties);
     }
 
     @Bean
@@ -124,10 +125,11 @@ public class InvestmentServiceConfiguration {
         InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService,
         InvestmentCurrencyService investmentCurrencyService,
         AsyncTaskService asyncTaskService,
-        InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
+        InvestmentIngestionConfigurationProperties coreConfigurationProperties,
+        InvestmentIngestProperties portfolioProperties) {
         return new InvestmentAssetUniverseSaga(investmentAssetUniverseService, investmentAssetPriceService,
             investmentIntradayAssetPriceService, investmentCurrencyService, asyncTaskService,
-            coreConfigurationProperties);
+            coreConfigurationProperties, portfolioProperties);
     }
 
     @Bean

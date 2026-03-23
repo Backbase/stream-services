@@ -8,19 +8,20 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.backbase.investment.api.service.v1.model.AssetCategoryType;
 import com.backbase.investment.api.service.v1.model.AssetTypeEnum;
+import com.backbase.investment.api.service.v1.model.Currency;
 import com.backbase.investment.api.service.v1.model.GroupResult;
+import com.backbase.investment.api.service.v1.model.Market;
+import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
+import com.backbase.stream.configuration.InvestmentIngestProperties;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.AssetPrice;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.InvestmentAssetsTask;
-import com.backbase.investment.api.service.v1.model.AssetCategoryType;
-import com.backbase.investment.api.service.v1.model.Currency;
-import com.backbase.investment.api.service.v1.model.Market;
-import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
-import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.RandomParam;
+import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
@@ -66,7 +67,7 @@ import reactor.test.StepVerifier;
  *       class can focus solely on its own stage under test.</li>
  *   <li>Error recovery is verified via the saga's {@code onErrorResume} handler, which
  *       always emits the task with {@link State#FAILED} instead of propagating the error
- *       signal — therefore {@link StepVerifier#verifyComplete()} is always used, never
+ *       signal — therefore {@link reactor.test.StepVerifier.LastStep#verifyComplete()} is always used, never
  *       {@code verifyError()}.</li>
  *   <li>All reactive assertions use Project Reactor's {@link StepVerifier}.</li>
  * </ul>
@@ -102,6 +103,9 @@ class InvestmentAssetUniverseSagaTest {
     @Mock
     private InvestmentIngestionConfigurationProperties configurationProperties;
 
+    @Mock
+    private InvestmentIngestProperties ingestProperties;
+
     private InvestmentAssetUniverseSaga saga;
 
     /**
@@ -113,13 +117,17 @@ class InvestmentAssetUniverseSagaTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(configurationProperties.isAssetUniverseEnabled()).thenReturn(true);
+        // Provide real AssetConfig so concurrency values are non-null when the saga calls
+        // ingestProperties.getAsset().getMarketConcurrency() / getAssetCategoryConcurrency() / etc.
+        when(ingestProperties.getAsset()).thenReturn(new InvestmentIngestProperties.AssetConfig());
         saga = new InvestmentAssetUniverseSaga(
             assetUniverseService,
             investmentAssetPriceService,
             investmentIntradayAssetPriceService,
             investmentCurrencyService,
             asyncTaskService,
-            configurationProperties
+            configurationProperties,
+            ingestProperties
         );
     }
 

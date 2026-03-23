@@ -1,10 +1,8 @@
 package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.GroupResult;
-import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
-import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
-import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
+import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,26 +13,26 @@ import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 @EqualsAndHashCode
 @Data
 @Builder
-public class InvestmentData {
+@Slf4j
+public class InvestmentData implements InvestmentDataValue {
 
-    private String saName;
-    private String saExternalId;
     private List<ClientUser> clientUsers;
     private List<InvestmentArrangement> investmentArrangements;
     private List<ModelPortfolio> modelPortfolios;
     private List<PortfolioProduct> portfolioProducts;
     private InvestmentAssetData investmentAssetData;
-    private List<PortfolioList> portfolios;
+    private List<InvestmentPortfolio> portfolios;
     private List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {
         Map<String, List<UUID>> clientsByLeExternalId = new HashMap<>();
         clientUsers.forEach(
-            c -> clientsByLeExternalId.computeIfAbsent(c.getLegalEntityExternalId(), l -> new ArrayList<>())
+            c -> clientsByLeExternalId.computeIfAbsent(c.getLegalEntityId(), l -> new ArrayList<>())
                 .add(c.getInvestmentClientId()));
         return clientsByLeExternalId;
     }
@@ -52,16 +50,17 @@ public class InvestmentData {
         }
     }
 
-    public Optional<PortfolioProduct> findPortfolioProduct(ProductTypeEnum productType, Integer riskLevel) {
-        return Optional.ofNullable(portfolioProducts)
-            .flatMap(ps -> ps.stream()
-                .filter(p -> p.getProductType().equals(productType)
-                    && Optional.ofNullable(p.getModelPortfolio()).map(InvestorModelPortfolio::getRiskLevel)
-                    .map(risk -> risk <= riskLevel).orElse(false))
-                .findAny());
-    }
-
     public List<GroupResult> getPriceAsyncTasks() {
         return Optional.ofNullable(investmentAssetData).map(InvestmentAssetData::getPriceAsyncTasks).orElse(List.of());
     }
+
+    public long getTotalProcessedValues() {
+        log.debug(
+            "Calculating total processed values: portfolios={}, portfolioProducts={}, modelPortfolios={}, clientUsers={}, investmentPortfolioTradingAccounts={}",
+            getSize(portfolios), getSize(portfolioProducts), getSize(modelPortfolios), getSize(clientUsers),
+            getSize(investmentPortfolioTradingAccounts));
+        return getSize(portfolios) + getSize(portfolioProducts) + getSize(modelPortfolios) + getSize(clientUsers)
+            + getSize(investmentPortfolioTradingAccounts);
+    }
+
 }

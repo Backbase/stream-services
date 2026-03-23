@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class InvestmentAssetsTask extends StreamTask {
+public class InvestmentAssetsTask extends StreamTask implements InvestmentDataValue {
 
     private final InvestmentAssetData data;
 
@@ -50,4 +50,10 @@ public class InvestmentAssetsTask extends StreamTask {
         data.setIntradayPriceAsyncTasks(tasks);
         return this;
     }
+
+    @Override
+    public long getTotalProcessedValues() {
+        return data.getTotalProcessedValues();
+    }
+
 }
