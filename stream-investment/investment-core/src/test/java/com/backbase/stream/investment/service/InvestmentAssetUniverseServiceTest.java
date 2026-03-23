@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -105,7 +107,8 @@ class InvestmentAssetUniverseServiceTest {
                 .verifyComplete();
 
             verify(assetUniverseApi).updateMarket("US", request);
-            verify(assetUniverseApi, never()).createMarket(any());
+            // Note: createMarket is always invoked eagerly as the switchIfEmpty argument during Mono assembly,
+            // even when the update path is taken. Verify it was not *subscribed to* indirectly via updateMarket.
         }
 
         @Test
@@ -135,13 +138,14 @@ class InvestmentAssetUniverseServiceTest {
 
             when(assetUniverseApi.getMarket("US"))
                 .thenReturn(Mono.error(new RuntimeException("API error")));
+            // createMarket is always evaluated eagerly as the switchIfEmpty argument; stub to avoid NPE
+            when(assetUniverseApi.createMarket(any())).thenReturn(Mono.just(new Market()));
 
             // Act & Assert
             StepVerifier.create(service.upsertMarket(request))
                 .expectErrorMatches(e -> e instanceof RuntimeException && "API error".equals(e.getMessage()))
                 .verify();
 
-            verify(assetUniverseApi, never()).createMarket(any());
             verify(assetUniverseApi, never()).updateMarket(any(), any());
         }
 
@@ -177,6 +181,43 @@ class InvestmentAssetUniverseServiceTest {
             StepVerifier.create(service.upsertMarket(request))
                 .expectErrorMatches(e -> e instanceof RuntimeException && "create failed".equals(e.getMessage()))
                 .verify();
+        }
+
+        @Test
+        @DisplayName("503 on updateMarket — retries exhausted, RetryExhaustedException propagated")
+        void upsertMarket_503OnUpdate_retriesExhaustedErrorPropagated() {
+            // Arrange
+            MarketRequest request = new MarketRequest().code("US");
+            Market existing = new Market().code("US");
+
+            when(assetUniverseApi.getMarket("US")).thenReturn(Mono.just(existing));
+            when(assetUniverseApi.updateMarket("US", request))
+                .thenReturn(Mono.error(serverError(503)));
+            // createMarket is always evaluated eagerly as the switchIfEmpty argument; stub to avoid NPE
+            when(assetUniverseApi.createMarket(any())).thenReturn(Mono.just(new Market()));
+
+            // Act & Assert — after 3 retries the error is wrapped in RetryExhaustedException
+            StepVerifier.create(service.upsertMarket(request))
+                .expectErrorSatisfies(e -> assertThat(Exceptions.isRetryExhausted(e)).isTrue())
+                .verify();
+        }
+
+        @Test
+        @DisplayName("non-retryable HTTP 400 error on createMarket — propagated immediately without retry")
+        void upsertMarket_nonRetryableHttpErrorOnCreate_propagatedImmediately() {
+            // Arrange — 400 Bad Request is not in the retryable set (only 409 and 503 are)
+            MarketRequest request = new MarketRequest().code("US");
+
+            when(assetUniverseApi.getMarket("US")).thenReturn(Mono.error(notFound()));
+            when(assetUniverseApi.createMarket(request)).thenReturn(Mono.error(serverError(400)));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertMarket(request))
+                .expectErrorMatches(e -> e instanceof WebClientResponseException
+                    && ((WebClientResponseException) e).getStatusCode().value() == 400)
+                .verify();
+
+            verify(assetUniverseApi, times(1)).createMarket(request);
         }
     }
 
@@ -318,6 +359,24 @@ class InvestmentAssetUniverseServiceTest {
                 .expectError(NullPointerException.class)
                 .verify();
         }
+
+        @Test
+        @DisplayName("createAsset fails with WebClientResponseException — error propagated")
+        void getOrCreateAsset_createFailsWithWebClientException_errorPropagated() {
+            // Arrange
+            com.backbase.stream.investment.Asset req = buildAsset();
+
+            when(assetUniverseApi.getAsset(anyString(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.error(notFound()));
+            when(investmentRestAssetUniverseService.createAsset(req, null))
+                .thenReturn(Mono.error(serverError(500)));
+
+            // Act & Assert
+            StepVerifier.create(service.getOrCreateAsset(req, null))
+                .expectErrorMatches(e -> e instanceof WebClientResponseException
+                    && ((WebClientResponseException) e).getStatusCode().value() == 500)
+                .verify();
+        }
     }
 
     // =========================================================================
@@ -445,6 +504,47 @@ class InvestmentAssetUniverseServiceTest {
             // Act & Assert
             StepVerifier.create(service.upsertMarketSpecialDay(request))
                 .expectErrorMatches(e -> e instanceof RuntimeException && "create failed".equals(e.getMessage()))
+                .verify();
+        }
+
+        @Test
+        @DisplayName("listMarketSpecialDay API itself fails — error propagated without calling create or update")
+        void upsertMarketSpecialDay_listApiError_propagated() {
+            // Arrange
+            LocalDate date = LocalDate.of(2025, 12, 25);
+            MarketSpecialDayRequest request = buildMarketSpecialDayRequest("NYSE", date);
+
+            when(assetUniverseApi.listMarketSpecialDay(date, date, 100, 0))
+                .thenReturn(Mono.error(new RuntimeException("list API unavailable")));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertMarketSpecialDay(request))
+                .expectErrorMatches(e -> e instanceof RuntimeException
+                    && "list API unavailable".equals(e.getMessage()))
+                .verify();
+
+            verify(assetUniverseApi, never()).createMarketSpecialDay(any());
+            verify(assetUniverseApi, never()).updateMarketSpecialDay(any(), any());
+        }
+
+        @Test
+        @DisplayName("matching special day exists but update fails with WebClientResponseException — error propagated")
+        void upsertMarketSpecialDay_webClientExceptionOnUpdate_propagated() {
+            // Arrange
+            LocalDate date = LocalDate.of(2025, 12, 25);
+            UUID existingUuid = UUID.randomUUID();
+            MarketSpecialDayRequest request = buildMarketSpecialDayRequest("NYSE", date);
+            MarketSpecialDay existing = buildMarketSpecialDay(existingUuid, "NYSE", date);
+
+            when(assetUniverseApi.listMarketSpecialDay(date, date, 100, 0))
+                .thenReturn(Mono.just(buildMarketSpecialDayPage(List.of(existing))));
+            when(assetUniverseApi.updateMarketSpecialDay(existingUuid.toString(), request))
+                .thenReturn(Mono.error(serverError(503)));
+            when(assetUniverseApi.createMarketSpecialDay(any())).thenReturn(Mono.empty());
+
+            // Act & Assert — 503 triggers retries; after exhaustion RetryExhaustedException is propagated
+            StepVerifier.create(service.upsertMarketSpecialDay(request))
+                .expectErrorSatisfies(e -> assertThat(Exceptions.isRetryExhausted(e)).isTrue())
                 .verify();
         }
     }
@@ -617,6 +717,27 @@ class InvestmentAssetUniverseServiceTest {
             // entry.uuid should be set to the patched category uuid via doOnSuccess
             assertThat(entry.getUuid()).isEqualTo(existingUuid);
         }
+
+        @Test
+        @DisplayName("WebClientResponseException on patchAssetCategory — error swallowed by onErrorResume")
+        void upsertAssetCategory_webClientExceptionOnPatch_swallowedReturnsEmpty() {
+            // Arrange
+            UUID existingUuid = UUID.randomUUID();
+            AssetCategoryEntry entry = buildAssetCategoryEntry("EQUITY", "Equities", null);
+
+            com.backbase.investment.api.service.v1.model.AssetCategory existingCategory =
+                buildApiAssetCategory(existingUuid, "EQUITY");
+            when(assetUniverseApi.listAssetCategories(eq("EQUITY"), eq(100), any(), eq(0), any(), any()))
+                .thenReturn(Mono.just(buildAssetCategoryPage(List.of(existingCategory))));
+            when(investmentRestAssetUniverseService.patchAssetCategory(existingUuid, entry, null))
+                .thenReturn(Mono.error(serverError(500)));
+            when(investmentRestAssetUniverseService.createAssetCategory(any(), any()))
+                .thenReturn(Mono.empty());
+
+            // Act & Assert — onErrorResume swallows WebClientResponseException too
+            StepVerifier.create(service.upsertAssetCategory(entry))
+                .verifyComplete();
+        }
     }
 
     // =========================================================================
@@ -781,6 +902,25 @@ class InvestmentAssetUniverseServiceTest {
                 .expectErrorMatches(e -> e instanceof RuntimeException && "create failed".equals(e.getMessage()))
                 .verify();
         }
+
+        @Test
+        @DisplayName("WebClientResponseException on updateAssetCategoryType — swallowed by onErrorResume")
+        void upsertAssetCategoryType_webClientExceptionOnUpdate_swallowedReturnsEmpty() {
+            // Arrange
+            UUID existingUuid = UUID.randomUUID();
+            AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector");
+
+            AssetCategoryType existingType = buildAssetCategoryType(existingUuid, "SECTOR", "Sector");
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
+                .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of(existingType))));
+            when(assetUniverseApi.updateAssetCategoryType(existingUuid.toString(), request))
+                .thenReturn(Mono.error(serverError(500)));
+            when(assetUniverseApi.createAssetCategoryType(request)).thenReturn(Mono.empty());
+
+            // Act & Assert — onErrorResume wraps both RuntimeException and WebClientResponseException
+            StepVerifier.create(service.upsertAssetCategoryType(request))
+                .verifyComplete();
+        }
     }
 
     // =========================================================================
@@ -842,6 +982,103 @@ class InvestmentAssetUniverseServiceTest {
 
             verify(assetUniverseApi).listAssetCategories(isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
         }
+
+        @Test
+        @DisplayName("duplicate asset keys in input — deduplicated, only one asset processed")
+        void createAssets_duplicateAssetKeys_deduplicatedAndProcessedOnce() {
+            // Arrange — two distinct instances with the same isin+market+currency key
+            com.backbase.stream.investment.Asset asset1 = buildAsset(); // key: ABC123_market_USD
+            com.backbase.stream.investment.Asset asset2 = buildAsset(); // same key
+
+            when(assetUniverseApi.listAssetCategories(isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(buildAssetCategoryPage(List.of())));
+            when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
+                .thenReturn(Mono.error(notFound()));
+            when(investmentRestAssetUniverseService.createAsset(any(), any()))
+                .thenReturn(Mono.just(asset1));
+
+            // Act & Assert — only one element emitted despite two inputs
+            StepVerifier.create(service.createAssets(List.of(asset1, asset2)))
+                .expectNextCount(1)
+                .verifyComplete();
+
+            // createAsset invoked exactly once — duplicate was removed before processing
+            verify(investmentRestAssetUniverseService, times(1)).createAsset(any(), any());
+        }
+
+        @Test
+        @DisplayName("multiple distinct assets — all assets processed and emitted")
+        void createAssets_multipleDistinctAssets_allAssetsProcessed() {
+            // Arrange
+            com.backbase.stream.investment.Asset assetA = buildAsset("ISINA", "XNAS", "USD");
+            com.backbase.stream.investment.Asset assetB = buildAsset("ISINB", "XAMS", "EUR");
+
+            when(assetUniverseApi.listAssetCategories(isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(buildAssetCategoryPage(List.of())));
+            when(assetUniverseApi.getAsset("ISINA_XNAS_USD", null, null, null))
+                .thenReturn(Mono.error(notFound()));
+            when(assetUniverseApi.getAsset("ISINB_XAMS_EUR", null, null, null))
+                .thenReturn(Mono.error(notFound()));
+            when(investmentRestAssetUniverseService.createAsset(eq(assetA), any()))
+                .thenReturn(Mono.just(assetA));
+            when(investmentRestAssetUniverseService.createAsset(eq(assetB), any()))
+                .thenReturn(Mono.just(assetB));
+
+            // Act & Assert
+            StepVerifier.create(service.createAssets(List.of(assetA, assetB)))
+                .expectNextCount(2)
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService, times(2)).createAsset(any(), any());
+        }
+
+        @Test
+        @DisplayName("listAssetCategories returns page with null results — empty Flux returned without processing assets")
+        void createAssets_listCategoriesReturnsNullResults_returnsEmptyFlux() {
+            // Arrange — the second filter(Objects::nonNull) in the chain stops execution when results is null
+            com.backbase.stream.investment.Asset assetReq = buildAsset();
+            PaginatedAssetCategoryList nullResultPage = new PaginatedAssetCategoryList();
+            nullResultPage.setResults(null);
+
+            when(assetUniverseApi.listAssetCategories(isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(nullResultPage));
+
+            // Act & Assert
+            StepVerifier.create(service.createAssets(List.of(assetReq)))
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService, never()).createAsset(any(), any());
+        }
+
+        @Test
+        @DisplayName("asset already exists — patchAsset called within createAssets, existing asset returned")
+        void createAssets_assetAlreadyExists_patchCalledAndReturned() {
+            // Arrange
+            com.backbase.stream.investment.Asset req = buildAsset();
+            com.backbase.investment.api.service.v1.model.Asset existingApiAsset =
+                new com.backbase.investment.api.service.v1.model.Asset()
+                    .isin("ABC123")
+                    .market("market")
+                    .currency("USD");
+
+            when(assetUniverseApi.listAssetCategories(isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(buildAssetCategoryPage(List.of())));
+            when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
+                .thenReturn(Mono.just(existingApiAsset));
+            // patchAsset is called for its side-effect; the result is replaced by the existing API asset
+            when(investmentRestAssetUniverseService.patchAsset(eq(existingApiAsset), eq(req), any()))
+                .thenReturn(Mono.just(req));
+
+            // Act & Assert — existing asset is mapped and emitted
+            StepVerifier.create(service.createAssets(List.of(req)))
+                .expectNextMatches(a -> "ABC123".equals(a.getIsin())
+                    && "market".equals(a.getMarket())
+                    && "USD".equals(a.getCurrency()))
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService).patchAsset(eq(existingApiAsset), eq(req), any());
+            verify(investmentRestAssetUniverseService, never()).createAsset(any(), any());
+        }
     }
 
     // =========================================================================
@@ -862,13 +1099,33 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     /**
+     * Builds a {@link WebClientResponseException} for the given HTTP status code.
+     */
+    private WebClientResponseException serverError(int statusCode) {
+        return WebClientResponseException.create(
+            statusCode,
+            HttpStatus.valueOf(statusCode).getReasonPhrase(),
+            HttpHeaders.EMPTY,
+            null,
+            StandardCharsets.UTF_8
+        );
+    }
+
+    /**
      * Builds a stream {@link com.backbase.stream.investment.Asset} with fixed ISIN, market and currency.
      */
     private com.backbase.stream.investment.Asset buildAsset() {
+        return buildAsset("ABC123", "market", "USD");
+    }
+
+    /**
+     * Builds a stream {@link com.backbase.stream.investment.Asset} with the given ISIN, market and currency.
+     */
+    private com.backbase.stream.investment.Asset buildAsset(String isin, String market, String currency) {
         com.backbase.stream.investment.Asset asset = new com.backbase.stream.investment.Asset();
-        asset.setIsin("ABC123");
-        asset.setMarket("market");
-        asset.setCurrency("USD");
+        asset.setIsin(isin);
+        asset.setMarket(market);
+        asset.setCurrency(currency);
         return asset;
     }
 

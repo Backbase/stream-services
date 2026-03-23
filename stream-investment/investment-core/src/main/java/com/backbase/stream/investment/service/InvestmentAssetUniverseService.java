@@ -210,8 +210,7 @@ public class InvestmentAssetUniverseService {
         return assetUniverseApi.listAssetCategories(null,
                 null, null, null, null, null)
             .filter(Objects::nonNull)
-            .map(PaginatedAssetCategoryList::getResults)
-            .filter(Objects::nonNull)
+            .flatMap(page -> Mono.justOrEmpty(page.getResults()))
             .flatMapMany(categories -> {
                 Map<String, UUID> categoryIdByCode = categories.stream()
                     .collect(Collectors.toMap(com.backbase.investment.api.service.v1.model.AssetCategory::getCode,
