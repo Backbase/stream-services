@@ -39,11 +39,10 @@ public class InvestmentAssetUniverseService {
     private final AssetMapper assetMapper = Mappers.getMapper(AssetMapper.class);
 
     /**
-     * Gets an existing market by code, or creates it if not found (404). Handles 404 NOT_FOUND from getMarket by
-     * returning Mono.empty(), which triggers market creation via switchIfEmpty.
+     * Upserts a market by code: updates if changed, creates if not found.
      *
-     * @param marketRequest the market request details
-     * @return Mono<Market> representing the existing or newly created market
+     * @param marketRequest the market details
+     * @return the existing, updated, or newly created {@link Market}
      */
     public Mono<Market> upsertMarket(MarketRequest marketRequest) {
         log.debug("Creating market: {}", marketRequest);
@@ -92,10 +91,11 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing asset by its identifier, or creates it if not found (404). Handles 404 NOT_FOUND from getAsset
-     * by returning Mono.empty(), which triggers asset creation via switchIfEmpty.
+     * Upserts an asset by identifier: patches if changed, creates if not found.
      *
-     * @return Mono<Asset> representing the existing or newly created asset
+     * @param asset            the desired asset state
+     * @param categoryIdByCode category UUID lookup map keyed by code
+     * @return the existing, patched, or newly created asset
      */
     public Mono<com.backbase.stream.investment.Asset> getOrCreateAsset(com.backbase.stream.investment.Asset asset,
         Map<String, UUID> categoryIdByCode) {
@@ -118,20 +118,12 @@ public class InvestmentAssetUniverseService {
             // If asset exists, compare mapped fields and only patch when something changed
             .flatMap(a -> {
                 log.info("Asset already exists: assetIdentifier={}", assetIdentifier);
-                // Map the existing API asset to the stream Asset model using the same mapper used
-                // after creation, then compare with the desired asset via @EqualsAndHashCode.
-                // Asset.logo is ignored by the mapper (URI vs String type mismatch), so logo
-                // change detection is done separately via isLogoUnchanged().
-                // Asset.categories is excluded from @EqualsAndHashCode because the server may
-                // return them in a different order; category change detection is done separately
-                // via isCategoriesUnchanged() using an order-insensitive set comparison.
+                // Map existing API asset; logo (URI vs String) and categories (order-insensitive)
+                // are checked separately via isFileUnchanged() and isCategoriesUnchanged().
                 com.backbase.stream.investment.Asset existingMapped = assetMapper.map(a);
                 log.debug("Existing mapped asset: {}", existingMapped);
                 log.debug("Desired asset: {}", asset);
-                // Normalise both sides into trimmed copies before comparison: the server trims
-                // description and name on store, but the config YAML may carry trailing spaces.
-                // normaliseForComparison() returns a new object — neither the server-mapped asset
-                // nor the inbound desired asset is mutated.
+                // Normalise before comparison to ignore trailing whitespace the server would trim.
                 boolean dataUnchanged = normaliseForComparison(existingMapped)
                     .equals(normaliseForComparison(asset));
                 boolean logoUnchanged = isFileUnchanged(a.getLogo(), asset.getLogo());
@@ -144,8 +136,7 @@ public class InvestmentAssetUniverseService {
                 log.info(
                     "Asset changed for assetIdentifier: {} — dataUnchanged={}, logoUnchanged={}, categoriesUnchanged={}",
                     assetIdentifier, dataUnchanged, logoUnchanged, categoriesUnchanged);
-                // patchAsset returns the inbound desired asset (uuid=null); stamp the server UUID
-                // back onto it so that callers (e.g. getAssetByUuid map) always get a non-null key.
+                // Stamp the server UUID back onto the patched asset so callers always get a non-null key.
                 return investmentRestAssetUniverseService.patchAsset(a, asset, categoryIdByCode)
                     .map(patchedAsset -> patchedAsset.toBuilder().uuid(a.getUuid()).build());
             })
@@ -165,11 +156,10 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing market special day by date and market, or creates it if not found. Handles 404 or empty results
-     * by creating the market special day.
+     * Upserts a market special day: updates if changed, creates if not found.
      *
-     * @param marketSpecialDayRequest the request containing market and date details
-     * @return Mono\<MarketSpecialDay\> representing the existing or newly created market special day
+     * @param marketSpecialDayRequest the market and date details
+     * @return the existing, updated, or newly created {@link MarketSpecialDay}
      */
     public Mono<MarketSpecialDay> upsertMarketSpecialDay(MarketSpecialDayRequest marketSpecialDayRequest) {
         log.debug("Creating market special day: {}", marketSpecialDayRequest);
@@ -310,21 +300,9 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Returns a normalised copy of the given {@link com.backbase.stream.investment.Asset} suitable
-     * for equality comparison, without mutating the original.
-     *
-     * <p>The server trims {@code description} and {@code name} on store, but config YAML files may
-     * carry trailing (or leading) spaces. By normalising both the server-mapped asset and the
-     * desired asset through this method before calling {@code equals()}, whitespace differences
-     * that the server would silently discard do not trigger unnecessary patches.
-     *
-     * <p>Uses {@link com.backbase.stream.investment.Asset#toBuilder()} so only the normalised
-     * fields are overridden; all other fields are copied automatically. If {@code Asset} ever gains
-     * new fields they are included in the copy without any change here.
-     *
-     * @param asset the asset to normalise (not mutated)
-     * @return a new {@link com.backbase.stream.investment.Asset} with {@code name} and
-     *         {@code description} trimmed; all other fields are copied as-is
+     * Returns a normalised copy of the asset for equality comparison (trims {@code name} and
+     * {@code description}, normalises empty {@code extraData} to {@code null}).
+     * Does not mutate the original.
      */
     private com.backbase.stream.investment.Asset normaliseForComparison(
         com.backbase.stream.investment.Asset asset) {
@@ -342,16 +320,9 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Determines whether the categories for an asset are unchanged using an order-insensitive comparison.
+     * Order-insensitive comparison of two category code lists.
      *
-     * <p>The server may return categories in a different order than the desired configuration, so a
-     * plain {@link List#equals} check would produce false positives. This method compares both lists
-     * as sets so that only actual additions or removals trigger a patch.
-     *
-     * @param existingCategories the category codes returned by the server (may be {@code null})
-     * @param desiredCategories  the category codes from the desired stream {@link com.backbase.stream.investment.Asset}
-     *                           (may be {@code null})
-     * @return {@code true} if the two category lists contain exactly the same codes regardless of order
+     * @return {@code true} if both lists contain exactly the same codes
      */
     private boolean isCategoriesUnchanged(List<String> existingCategories, List<String> desiredCategories) {
         List<String> existing = Objects.requireNonNullElse(existingCategories, List.of());
@@ -363,23 +334,9 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Determines whether a file (asset logo or asset-category image) stored on the server is
-     * unchanged and does not need re-uploading.
-     *
-     * <p>Logic:
-     * <ul>
-     *   <li>{@code desiredFilename} is {@code null} → nothing to upload → unchanged.</li>
-     *   <li>{@code existingUri} is {@code null} → file not yet stored → must upload → changed.</li>
-     *   <li>Otherwise → unchanged if the {@code existingUri} string contains {@code desiredFilename}.
-     *       The server stores files under a path that includes the original filename (e.g.
-     *       {@code http://host/.../apple.png?se=...}), so a {@code contains} check is sufficient.</li>
-     * </ul>
-     *
-     * @param existingUri     the URI returned by the server for the currently stored file
-     *                        (may be {@code null} when no file has been uploaded yet)
-     * @param desiredFilename the filename from the desired configuration
-     *                        (may be {@code null} when no file is configured)
-     * @return {@code true} if the file does not need to be re-uploaded
+     * Returns {@code true} if the stored file does not need re-uploading.
+     * No-ops when {@code desiredFilename} is {@code null}; requires upload when
+     * {@code existingUri} is {@code null}; otherwise checks that the URI contains the filename.
      */
     private boolean isFileUnchanged(URI existingUri, String desiredFilename) {
         if (desiredFilename == null) {
@@ -394,12 +351,10 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing asset category by its code, or creates it if not found.
-     * Handles empty results by creating the
-     * asset category.
+     * Upserts an asset category by code: patches if changed, creates if not found.
      *
-     * @param assetCategoryEntry the request containing asset category details
-     * @return Mono&lt;AssetCategory&gt; representing the existing or newly created asset category
+     * @param assetCategoryEntry the desired asset category state
+     * @return the existing, patched, or newly created {@link AssetCategory}
      */
     public Mono<AssetCategory> upsertAssetCategory(AssetCategoryEntry assetCategoryEntry) {
         if (assetCategoryEntry == null) {
@@ -416,12 +371,8 @@ public class InvestmentAssetUniverseService {
                     .findAny())
                 .map(c -> {
                     log.info("Asset category already exists for code: {}", assetCategoryEntry.getCode());
-                    // Map the existing response to an AssetCategoryEntry and compare content fields
-                    // only (name, code, order, type, excerpt, description).
-                    // Fields excluded from @EqualsAndHashCode on AssetCategoryEntry:
-                    //   uuid          — server-assigned; always null on the inbound desired entry
-                    //   image         — static filename string from config; not returned by list API
-                    //   imageResource — Resource object; checked separately via filename comparison
+                    // Compare content fields; uuid/image/imageResource are excluded and image is
+                    // checked separately via isFileUnchanged().
                     AssetCategoryEntry existingEntry = assetMapper.toAssetCategoryEntry(c);
                     log.debug("Existing: {}", existingEntry);
                     log.debug("Desired:  {}", assetCategoryEntry);
@@ -491,11 +442,10 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing asset category type by its code, or creates it if not found. Handles 404 or empty results by
-     * creating the asset category type.
+     * Upserts an asset category type by code: updates if changed, creates if not found.
      *
-     * @param assetCategoryTypeRequest the request containing asset category type details
-     * @return Mono<AssetCategoryType> representing the existing or newly created asset category type
+     * @param assetCategoryTypeRequest the desired asset category type state
+     * @return the existing, updated, or newly created {@link AssetCategoryType}
      */
     public Mono<AssetCategoryType> upsertAssetCategoryType(AssetCategoryTypeRequest assetCategoryTypeRequest) {
         if (assetCategoryTypeRequest == null) {
@@ -516,8 +466,7 @@ public class InvestmentAssetUniverseService {
                         log.info("Asset category type already exists for code: {}",
                             assetCategoryTypeRequest.getCode());
                         AssetCategoryType existingType = matchingType.get();
-                        // Map the existing record to a request and compare using generated equals()
-                        // (code, name). Skip the update if the data is identical to what is stored.
+                        // Skip update if data is identical to what is stored.
                         if (assetCategoryTypeRequest.equals(assetMapper.toAssetCategoryTypeRequest(existingType))) {
                             log.info("Skipping asset category type update - no changes detected for code: {}",
                                 assetCategoryTypeRequest.getCode());
