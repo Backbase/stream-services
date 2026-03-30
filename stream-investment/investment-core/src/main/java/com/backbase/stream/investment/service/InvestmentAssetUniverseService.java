@@ -11,6 +11,7 @@ import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryList;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
+import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
@@ -55,14 +56,21 @@ public class InvestmentAssetUniverseService {
                 return Mono.error(error);
             })
             .flatMap(existingMarket -> {
-                log.info("Market already exists: {}", existingMarket.getCode());
-                log.debug("Market already exists: {}", existingMarket);
+                log.info("Market already exists: code={}", existingMarket.getCode());
+                log.debug("Existing market details: {}", existingMarket);
+                // Skip the update if the incoming request carries identical data to what is already stored.
+                log.debug("Mapped existing marketRequest: {}", assetMapper.toMarketRequest(existingMarket));
+                log.debug("marketRequest: {}", marketRequest);
+                if (marketRequest.equals(assetMapper.toMarketRequest(existingMarket))) {
+                    log.info("Skipping market update - no changes detected for code: {}", existingMarket.getCode());
+                    return Mono.just(existingMarket);
+                }
                 return assetUniverseApi.updateMarket(existingMarket.getCode(), marketRequest)
                     .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
                         .filter(this::isRetryableError)
                         .doBeforeRetry(signal -> log.warn("Retrying market update: code={}, attempt={}",
                             marketRequest.getCode(), signal.totalRetries() + 1)))
-                    .doOnSuccess(updatedMarket -> log.info("Updated market: {}", updatedMarket))
+                    .doOnSuccess(updatedMarket -> log.info("Updated market: code={}", updatedMarket.getCode()))
                     .doOnError(error -> {
                         if (error instanceof WebClientResponseException w) {
                             log.error("Error updating market: {} : HTTP {} -> {}", marketRequest.getCode(),
@@ -73,14 +81,14 @@ public class InvestmentAssetUniverseService {
                         }
                     });
             })
-            .switchIfEmpty(assetUniverseApi.createMarket(marketRequest)
+            .switchIfEmpty(Mono.defer(() -> assetUniverseApi.createMarket(marketRequest)
                 .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
                     .filter(this::isRetryableError)
                     .doBeforeRetry(signal -> log.warn("Retrying market create: code={}, attempt={}",
                         marketRequest.getCode(), signal.totalRetries() + 1)))
-                .doOnSuccess(createdMarket -> log.info("Created market: {}", createdMarket))
+                .doOnSuccess(createdMarket -> log.info("Created market: code={}", createdMarket.getCode()))
                 .doOnError(error -> log.error("Error creating market: {}", error.getMessage(), error))
-            );
+            ));
     }
 
     /**
@@ -101,18 +109,46 @@ public class InvestmentAssetUniverseService {
             // Handle 404 NOT_FOUND by returning Mono.empty() to trigger asset creation
             .onErrorResume(error -> {
                 if (error instanceof org.springframework.web.reactive.function.client.WebClientResponseException.NotFound) {
-                    log.info("Asset not found with Asset Identifier : {}", assetIdentifier);
+                    log.info("Asset not found: assetIdentifier={}", assetIdentifier);
                     return Mono.empty();
                 }
                 // Propagate other errors
                 return Mono.error(error);
             })
-            // If asset exists, log and return it
+            // If asset exists, compare mapped fields and only patch when something changed
             .flatMap(a -> {
-                log.info("Asset already exists with Asset Identifier : {}", assetIdentifier);
-                return investmentRestAssetUniverseService.patchAsset(a, asset, categoryIdByCode).thenReturn(a);
+                log.info("Asset already exists: assetIdentifier={}", assetIdentifier);
+                // Map the existing API asset to the stream Asset model using the same mapper used
+                // after creation, then compare with the desired asset via @EqualsAndHashCode.
+                // Asset.logo is ignored by the mapper (URI vs String type mismatch), so logo
+                // change detection is done separately via isLogoUnchanged().
+                // Asset.categories is excluded from @EqualsAndHashCode because the server may
+                // return them in a different order; category change detection is done separately
+                // via isCategoriesUnchanged() using an order-insensitive set comparison.
+                com.backbase.stream.investment.Asset existingMapped = assetMapper.map(a);
+                log.debug("Existing mapped asset: {}", existingMapped);
+                log.debug("Desired asset: {}", asset);
+                // Normalise both sides into trimmed copies before comparison: the server trims
+                // description and name on store, but the config YAML may carry trailing spaces.
+                // normaliseForComparison() returns a new object — neither the server-mapped asset
+                // nor the inbound desired asset is mutated.
+                boolean dataUnchanged = normaliseForComparison(existingMapped)
+                    .equals(normaliseForComparison(asset));
+                boolean logoUnchanged = isFileUnchanged(a.getLogo(), asset.getLogo());
+                boolean categoriesUnchanged = isCategoriesUnchanged(existingMapped.getCategories(),
+                    asset.getCategories());
+                if (dataUnchanged && logoUnchanged && categoriesUnchanged) {
+                    log.info("Skipping asset patch - no changes detected for assetIdentifier: {}", assetIdentifier);
+                    return Mono.just(existingMapped);
+                }
+                log.info(
+                    "Asset changed for assetIdentifier: {} — dataUnchanged={}, logoUnchanged={}, categoriesUnchanged={}",
+                    assetIdentifier, dataUnchanged, logoUnchanged, categoriesUnchanged);
+                // patchAsset returns the inbound desired asset (uuid=null); stamp the server UUID
+                // back onto it so that callers (e.g. getAssetByUuid map) always get a non-null key.
+                return investmentRestAssetUniverseService.patchAsset(a, asset, categoryIdByCode)
+                    .map(patchedAsset -> patchedAsset.toBuilder().uuid(a.getUuid()).build());
             })
-            .map(assetMapper::map)
             // If Mono is empty (asset not found), create the asset
             .switchIfEmpty(Mono.defer(() -> investmentRestAssetUniverseService.createAsset(asset, categoryIdByCode)
                 .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
@@ -154,8 +190,17 @@ public class InvestmentAssetUniverseService {
                         .filter(msd -> marketSpecialDayRequest.getMarket().equals(msd.getMarket()))
                         .findFirst();
                     if (matchingSpecialDay.isPresent()) {
-                        log.info("Market special day already exists for day: {}", marketSpecialDayRequest);
-                        return assetUniverseApi.updateMarketSpecialDay(matchingSpecialDay.get().getUuid().toString(),
+                        log.info("Market special day already exists: date={}, market={}",
+                            date, marketSpecialDayRequest.getMarket());
+                        MarketSpecialDay existing = matchingSpecialDay.get();
+                        log.debug("Mapped existing MarketSpecialDayRequest: {}", assetMapper.toMarketSpecialDayRequest(existing));
+                        log.debug("marketSpecialDayRequest: {}", marketSpecialDayRequest);
+                        if (marketSpecialDayRequest.equals(assetMapper.toMarketSpecialDayRequest(existing))) {
+                            log.info("Skipping market special day update - no changes detected for date: {}, market: {}",
+                                date, marketSpecialDayRequest.getMarket());
+                            return Mono.just(existing);
+                        }
+                        return assetUniverseApi.updateMarketSpecialDay(existing.getUuid().toString(),
                                 marketSpecialDayRequest)
                             .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
                                 .filter(this::isRetryableError)
@@ -163,7 +208,8 @@ public class InvestmentAssetUniverseService {
                                     "Retrying market special day update: date={}, attempt={}",
                                     date, signal.totalRetries() + 1)))
                             .doOnSuccess(updatedMarketSpecialDay ->
-                                log.info("Updated market special day: {}", updatedMarketSpecialDay))
+                                log.info("Updated market special day: date={}, market={}",
+                                    date, marketSpecialDayRequest.getMarket()))
                             .doOnError(error -> {
                                 if (error instanceof WebClientResponseException w) {
                                     log.error("Error updating market special day : {} : HTTP {} -> {}",
@@ -188,8 +234,8 @@ public class InvestmentAssetUniverseService {
                     .doBeforeRetry(signal -> log.warn(
                         "Retrying market special day create: date={}, attempt={}",
                         marketSpecialDayRequest.getDate(), signal.totalRetries() + 1)))
-                .doOnSuccess(
-                    createdMarketSpecialDay -> log.info("Created market special day: {}", createdMarketSpecialDay))
+                .doOnSuccess(createdMarketSpecialDay -> log.info("Created market special day: date={}, market={}",
+                    marketSpecialDayRequest.getDate(), marketSpecialDayRequest.getMarket()))
                 .doOnError(error -> {
                     if (error instanceof WebClientResponseException w) {
                         log.error("Error creating market special day : {} : HTTP {} -> {}", marketSpecialDayRequest,
@@ -264,11 +310,96 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Gets an existing asset category by its code, or creates it if not found. Handles empty results by creating the
+     * Returns a normalised copy of the given {@link com.backbase.stream.investment.Asset} suitable
+     * for equality comparison, without mutating the original.
+     *
+     * <p>The server trims {@code description} and {@code name} on store, but config YAML files may
+     * carry trailing (or leading) spaces. By normalising both the server-mapped asset and the
+     * desired asset through this method before calling {@code equals()}, whitespace differences
+     * that the server would silently discard do not trigger unnecessary patches.
+     *
+     * <p>Uses {@link com.backbase.stream.investment.Asset#toBuilder()} so only the normalised
+     * fields are overridden; all other fields are copied automatically. If {@code Asset} ever gains
+     * new fields they are included in the copy without any change here.
+     *
+     * @param asset the asset to normalise (not mutated)
+     * @return a new {@link com.backbase.stream.investment.Asset} with {@code name} and
+     *         {@code description} trimmed; all other fields are copied as-is
+     */
+    private com.backbase.stream.investment.Asset normaliseForComparison(
+        com.backbase.stream.investment.Asset asset) {
+        if (asset == null) {
+            return null;
+        }
+        // toBuilder() copies every field; only name and description are overridden with trimmed
+        // versions. If Asset ever gains new fields they are automatically included in the copy.
+        return asset.toBuilder()
+            .name(asset.getName() != null ? asset.getName().trim() : null)
+            .description(asset.getDescription() != null ? asset.getDescription().trim() : null)
+            .extraData(asset.getExtraData() != null && !asset.getExtraData().isEmpty()
+                ? asset.getExtraData() : null)
+            .build();
+    }
+
+    /**
+     * Determines whether the categories for an asset are unchanged using an order-insensitive comparison.
+     *
+     * <p>The server may return categories in a different order than the desired configuration, so a
+     * plain {@link List#equals} check would produce false positives. This method compares both lists
+     * as sets so that only actual additions or removals trigger a patch.
+     *
+     * @param existingCategories the category codes returned by the server (may be {@code null})
+     * @param desiredCategories  the category codes from the desired stream {@link com.backbase.stream.investment.Asset}
+     *                           (may be {@code null})
+     * @return {@code true} if the two category lists contain exactly the same codes regardless of order
+     */
+    private boolean isCategoriesUnchanged(List<String> existingCategories, List<String> desiredCategories) {
+        List<String> existing = Objects.requireNonNullElse(existingCategories, List.of());
+        List<String> desired = Objects.requireNonNullElse(desiredCategories, List.of());
+        boolean same = existing.size() == desired.size()
+            && new java.util.HashSet<>(existing).containsAll(desired);
+        log.debug("Categories check: existing={}, desired={}, unchanged={}", existing, desired, same);
+        return same;
+    }
+
+    /**
+     * Determines whether a file (asset logo or asset-category image) stored on the server is
+     * unchanged and does not need re-uploading.
+     *
+     * <p>Logic:
+     * <ul>
+     *   <li>{@code desiredFilename} is {@code null} → nothing to upload → unchanged.</li>
+     *   <li>{@code existingUri} is {@code null} → file not yet stored → must upload → changed.</li>
+     *   <li>Otherwise → unchanged if the {@code existingUri} string contains {@code desiredFilename}.
+     *       The server stores files under a path that includes the original filename (e.g.
+     *       {@code http://host/.../apple.png?se=...}), so a {@code contains} check is sufficient.</li>
+     * </ul>
+     *
+     * @param existingUri     the URI returned by the server for the currently stored file
+     *                        (may be {@code null} when no file has been uploaded yet)
+     * @param desiredFilename the filename from the desired configuration
+     *                        (may be {@code null} when no file is configured)
+     * @return {@code true} if the file does not need to be re-uploaded
+     */
+    private boolean isFileUnchanged(URI existingUri, String desiredFilename) {
+        if (desiredFilename == null) {
+            return true;
+        }
+        if (existingUri == null) {
+            return false;
+        }
+        boolean same = existingUri.toString().contains(desiredFilename);
+        log.debug("File unchanged check: desiredFilename='{}', existingUri contains it={}", desiredFilename, same);
+        return same;
+    }
+
+    /**
+     * Gets an existing asset category by its code, or creates it if not found.
+     * Handles empty results by creating the
      * asset category.
      *
      * @param assetCategoryEntry the request containing asset category details
-     * @return Mono<AssetCategory> representing the existing or newly created asset category
+     * @return Mono&lt;AssetCategory&gt; representing the existing or newly created asset category
      */
     public Mono<AssetCategory> upsertAssetCategory(AssetCategoryEntry assetCategoryEntry) {
         if (assetCategoryEntry == null) {
@@ -285,9 +416,52 @@ public class InvestmentAssetUniverseService {
                     .findAny())
                 .map(c -> {
                     log.info("Asset category already exists for code: {}", assetCategoryEntry.getCode());
+                    // Map the existing response to an AssetCategoryEntry and compare content fields
+                    // only (name, code, order, type, excerpt, description).
+                    // Fields excluded from @EqualsAndHashCode on AssetCategoryEntry:
+                    //   uuid          — server-assigned; always null on the inbound desired entry
+                    //   image         — static filename string from config; not returned by list API
+                    //   imageResource — Resource object; checked separately via filename comparison
+                    AssetCategoryEntry existingEntry = assetMapper.toAssetCategoryEntry(c);
+                    log.debug("Existing: {}", existingEntry);
+                    log.debug("Desired:  {}", assetCategoryEntry);
+
+                    boolean dataUnchanged = existingEntry.equals(assetCategoryEntry);
+                    String desiredImageFilename = assetCategoryEntry.getImageResource() != null
+                        ? assetCategoryEntry.getImageResource().getFilename() : null;
+                    boolean imageUnchanged = isFileUnchanged(c.getImage(), desiredImageFilename);
+
+                    log.debug("Asset category comparison: code={}, dataUnchanged={}, imageUnchanged={}",
+                        assetCategoryEntry.getCode(), dataUnchanged, imageUnchanged);
+                    if (dataUnchanged && imageUnchanged) {
+                        log.info("Skipping asset category patch - no changes detected for code: {}",
+                            assetCategoryEntry.getCode());
+                        // Return a non-empty Mono so that switchIfEmpty is NOT triggered.
+                        // A lightweight AssetCategory carrying only the uuid is sufficient.
+                        assetCategoryEntry.setUuid(c.getUuid());
+                        return Mono.just(new AssetCategory(c.getUuid()));
+                    }
+                    log.info("Patching asset category for code: {} — dataUnchanged={}, imageUnchanged={}",
+                        assetCategoryEntry.getCode(), dataUnchanged, imageUnchanged);
                     return investmentRestAssetUniverseService.patchAssetCategory(
                         c.getUuid(),
-                        assetCategoryEntry, assetCategoryEntry.getImageResource());
+                        assetCategoryEntry, assetCategoryEntry.getImageResource())
+                        .doOnSuccess(updatedCategory -> {
+                            assetCategoryEntry.setUuid(updatedCategory.getUuid());
+                            log.info("Updated asset category: code={}", assetCategoryEntry.getCode());
+                        })
+                        .doOnError(error -> {
+                            if (error instanceof WebClientResponseException w) {
+                                log.error("Error updating asset category: {} : HTTP {} -> {}",
+                                    assetCategoryEntry.getCode(),
+                                    w.getStatusCode(), w.getResponseBodyAsString());
+                            } else {
+                                log.error("Error updating asset category: {} : {}",
+                                    assetCategoryEntry.getCode(),
+                                    error.getMessage(), error);
+                            }
+                        })
+                        .onErrorResume(e -> Mono.empty());
                 })
                 .orElseGet(() -> {
                     log.debug("No asset category exists for code: {}", assetCategoryEntry.getCode());
@@ -295,24 +469,24 @@ public class InvestmentAssetUniverseService {
                 })
                 .switchIfEmpty(
                     Mono.defer(() -> investmentRestAssetUniverseService
-                        .createAssetCategory(assetCategoryEntry, assetCategoryEntry.getImageResource()))
+                        .createAssetCategory(assetCategoryEntry, assetCategoryEntry.getImageResource())
+                        .doOnSuccess(createdCategory -> {
+                            assetCategoryEntry.setUuid(createdCategory.getUuid());
+                            log.info("Created asset category: code={}", assetCategoryEntry.getCode());
+                        })
+                        .doOnError(error -> {
+                            if (error instanceof WebClientResponseException w) {
+                                log.error("Error creating asset category: {} : HTTP {} -> {}",
+                                    assetCategoryEntry.getCode(),
+                                    w.getStatusCode(), w.getResponseBodyAsString());
+                            } else {
+                                log.error("Error creating asset category: {} : {}",
+                                    assetCategoryEntry.getCode(),
+                                    error.getMessage(), error);
+                            }
+                        })
+                        .onErrorResume(e -> Mono.empty()))
                 )
-                .doOnSuccess(updatedCategory -> {
-                    assetCategoryEntry.setUuid(updatedCategory.getUuid());
-                    log.info("Updated asset category: {}", updatedCategory);
-                })
-                .doOnError(error -> {
-                    if (error instanceof WebClientResponseException w) {
-                        log.error("Error updating asset category: {} : HTTP {} -> {}",
-                            assetCategoryEntry.getCode(),
-                            w.getStatusCode(), w.getResponseBodyAsString());
-                    } else {
-                        log.error("Error updating asset category: {} : {}",
-                            assetCategoryEntry.getCode(),
-                            error.getMessage(), error);
-                    }
-                })
-                .onErrorResume(e -> Mono.empty())
             );
     }
 
@@ -341,14 +515,23 @@ public class InvestmentAssetUniverseService {
                     if (matchingType.isPresent()) {
                         log.info("Asset category type already exists for code: {}",
                             assetCategoryTypeRequest.getCode());
-                        return assetUniverseApi.updateAssetCategoryType(matchingType.get().getUuid().toString(),
+                        AssetCategoryType existingType = matchingType.get();
+                        // Map the existing record to a request and compare using generated equals()
+                        // (code, name). Skip the update if the data is identical to what is stored.
+                        if (assetCategoryTypeRequest.equals(assetMapper.toAssetCategoryTypeRequest(existingType))) {
+                            log.info("Skipping asset category type update - no changes detected for code: {}",
+                                assetCategoryTypeRequest.getCode());
+                            return Mono.just(existingType);
+                        }
+                        return assetUniverseApi.updateAssetCategoryType(existingType.getUuid().toString(),
                                 assetCategoryTypeRequest)
                             .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
                                 .filter(this::isRetryableError)
                                 .doBeforeRetry(signal -> log.warn(
                                     "Retrying asset category type update: code={}, attempt={}",
                                     assetCategoryTypeRequest.getCode(), signal.totalRetries() + 1)))
-                            .doOnSuccess(updatedType -> log.info("Updated asset category type: {}", updatedType))
+                            .doOnSuccess(updatedType -> log.info("Updated asset category type: code={}",
+                                assetCategoryTypeRequest.getCode()))
                             .doOnError(error -> {
                                 if (error instanceof WebClientResponseException w) {
                                     log.error("Error updating asset category type: {} : HTTP {} -> {}",
@@ -373,7 +556,8 @@ public class InvestmentAssetUniverseService {
                         .doBeforeRetry(signal -> log.warn(
                             "Retrying asset category type create: code={}, attempt={}",
                             assetCategoryTypeRequest.getCode(), signal.totalRetries() + 1)))
-                    .doOnSuccess(createdType -> log.info("Created asset category type: {}", createdType))
+                    .doOnSuccess(createdType -> log.info("Created asset category type: code={}",
+                        assetCategoryTypeRequest.getCode()))
                     .doOnError(error -> {
                         if (error instanceof WebClientResponseException w) {
                             log.error("Error creating asset category type: {} : HTTP {} -> {}",

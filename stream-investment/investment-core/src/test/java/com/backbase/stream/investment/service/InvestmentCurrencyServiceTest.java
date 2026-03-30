@@ -118,10 +118,29 @@ class InvestmentCurrencyServiceTest {
         }
 
         @Test
-        @DisplayName("currency code already exists — updateCurrency is called and currency returned")
-        void upsertCurrencies_currencyAlreadyExists_updateCurrencyCalledAndReturned() {
-            // Arrange
+        @DisplayName("currency already exists with identical name and symbol — updateCurrency is skipped and existing returned")
+        void upsertCurrencies_currencyUnchanged_updateSkipped() {
+            // Arrange — existing and desired carry exactly the same name and symbol
             Currency currency = buildCurrency("EUR", "Euro", "€");
+            Currency existingEntry = buildCurrency("EUR", "Euro", "€");
+            PaginatedCurrencyList page = buildPage(List.of(existingEntry));
+            when(currencyApi.listCurrencies(InvestmentCurrencyService.CONTENT_RETRIEVE_LIMIT, 0))
+                .thenReturn(Mono.just(page));
+
+            // Act & Assert — existing currency returned without any update call
+            StepVerifier.create(service.upsertCurrencies(List.of(currency)))
+                .expectNextMatches(result -> result.size() == 1 && "EUR".equals(result.get(0).getCode()))
+                .verifyComplete();
+
+            verify(currencyApi, never()).updateCurrency(any(), any());
+            verify(currencyApi, never()).createCurrency(any());
+        }
+
+        @Test
+        @DisplayName("currency already exists — updateCurrency is called and currency returned")
+        void upsertCurrencies_currencyAlreadyExists_updateCurrencyCalledAndReturned() {
+            // Arrange — desired name differs from existing name so update IS triggered
+            Currency currency = buildCurrency("EUR", "Euro Updated", "€");
 
             Currency existingEntry = buildCurrency("EUR", "Euro", "€");
             PaginatedCurrencyList page = buildPage(List.of(existingEntry));
@@ -141,18 +160,18 @@ class InvestmentCurrencyServiceTest {
             verify(currencyApi).updateCurrency(eq("EUR"), captor.capture());
             verify(currencyApi, never()).createCurrency(any());
             assertThat(captor.getValue().getCode()).isEqualTo("EUR");
-            assertThat(captor.getValue().getName()).isEqualTo("Euro");
+            assertThat(captor.getValue().getName()).isEqualTo("Euro Updated");
             assertThat(captor.getValue().getSymbol()).isEqualTo("€");
         }
 
         @Test
         @DisplayName("multiple currencies — mix of create and update, both results collected")
         void upsertCurrencies_multipleCurrencies_mixedCreateAndUpdate_allCollected() {
-            // Arrange
+            // Arrange — eurCurrency has a new name; existingEur has old name → update triggered for EUR
             Currency usdCurrency = buildCurrency("USD", "US Dollar", "$");
-            Currency eurCurrency = buildCurrency("EUR", "Euro", "€");
+            Currency eurCurrency = buildCurrency("EUR", "Euro Updated", "€");
 
-            // EUR already exists, USD does not
+            // EUR already exists (old name), USD does not
             Currency existingEur = buildCurrency("EUR", "Euro", "€");
             PaginatedCurrencyList page = buildPage(List.of(existingEur));
             when(currencyApi.listCurrencies(InvestmentCurrencyService.CONTENT_RETRIEVE_LIMIT, 0))
@@ -247,8 +266,8 @@ class InvestmentCurrencyServiceTest {
         @Test
         @DisplayName("updateCurrency fails — onErrorResume swallows error, entry absent from result")
         void upsertCurrencies_updateCurrencyFails_errorSwallowed_entryAbsentFromResult() {
-            // Arrange
-            Currency currency = buildCurrency("CHF", "Swiss Franc", "Fr");
+            // Arrange — desired name differs from existing so update IS triggered (then fails and is swallowed)
+            Currency currency = buildCurrency("CHF", "Swiss Franc Updated", "Fr");
 
             Currency existingEntry = buildCurrency("CHF", "Swiss Franc", "Fr");
             PaginatedCurrencyList page = buildPage(List.of(existingEntry));

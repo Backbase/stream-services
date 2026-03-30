@@ -2,15 +2,15 @@ package com.backbase.stream.investment.model;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.core.io.Resource;
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"uuid", "image", "imageResource"})
 public class AssetCategoryEntry {
 
     private UUID uuid;

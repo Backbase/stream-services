@@ -24,6 +24,7 @@ import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryTypeLi
 import com.backbase.investment.api.service.v1.model.PaginatedMarketSpecialDayList;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -88,6 +89,33 @@ class InvestmentAssetUniverseServiceTest {
     @Nested
     @DisplayName("upsertMarket")
     class UpsertMarketTests {
+
+        @Test
+        @DisplayName("market already exists with identical data — updateMarket is skipped and existing market returned")
+        void upsertMarket_marketExistsUnchanged_updateSkipped() {
+            // Arrange — request and existing market carry exactly the same fields
+            MarketRequest request = new MarketRequest()
+                .code("US")
+                .name("US Market")
+                .sessionStart("09:30")
+                .sessionEnd("16:00");
+            Market existing = new Market()
+                .code("US")
+                .name("US Market")
+                .sessionStart("09:30")
+                .sessionEnd("16:00");
+
+            when(assetUniverseApi.getMarket("US")).thenReturn(Mono.just(existing));
+            // createMarket is always evaluated eagerly as the switchIfEmpty argument; stub to avoid NPE
+            when(assetUniverseApi.createMarket(any())).thenReturn(Mono.just(new Market()));
+
+            // Act & Assert — existing market returned, no update call made
+            StepVerifier.create(service.upsertMarket(request))
+                .expectNext(existing)
+                .verifyComplete();
+
+            verify(assetUniverseApi, never()).updateMarket(any(), any());
+        }
 
         @Test
         @DisplayName("market already exists — updateMarket is called and updated market returned")
@@ -186,9 +214,9 @@ class InvestmentAssetUniverseServiceTest {
         @Test
         @DisplayName("503 on updateMarket — retries exhausted, RetryExhaustedException propagated")
         void upsertMarket_503OnUpdate_retriesExhaustedErrorPropagated() {
-            // Arrange
+            // Arrange — existing has a name; request does not, so the data differs and update is triggered
             MarketRequest request = new MarketRequest().code("US");
-            Market existing = new Market().code("US");
+            Market existing = new Market().code("US").name("US Market");
 
             when(assetUniverseApi.getMarket("US")).thenReturn(Mono.just(existing));
             when(assetUniverseApi.updateMarket("US", request))
@@ -243,10 +271,115 @@ class InvestmentAssetUniverseServiceTest {
     class GetOrCreateAssetTests {
 
         @Test
+        @DisplayName("asset already exists with identical data and no logo configured — patchAsset is skipped")
+        void getOrCreateAsset_assetExistsUnchangedNoLogo_patchSkipped() {
+            // Arrange — desired asset has no logo, data fields identical → skip
+            com.backbase.stream.investment.Asset req = buildAsset(); // logo=null
+            com.backbase.investment.api.service.v1.model.Asset existingApiAsset =
+                new com.backbase.investment.api.service.v1.model.Asset()
+                    .isin("ABC123").market("market").currency("USD");
+
+            when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
+                .thenReturn(Mono.just(existingApiAsset));
+            when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
+
+            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+                .expectNextMatches(a -> "ABC123".equals(a.getIsin()))
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService, never())
+                .patchAsset(any(com.backbase.investment.api.service.v1.model.Asset.class),
+                    any(com.backbase.stream.investment.Asset.class), any());
+        }
+
+        @Test
+        @DisplayName("asset exists, logo filename found in server URI — patchAsset is skipped")
+        void getOrCreateAsset_assetExistsLogoFilenameInServerUri_patchSkipped() {
+            // Arrange — server returns a signed URI that contains the desired logo filename
+            com.backbase.stream.investment.Asset req = buildAsset();
+            req.setLogo("apple.png"); // desired filename
+
+            com.backbase.investment.api.service.v1.model.Asset existingApiAsset =
+                new com.backbase.investment.api.service.v1.model.Asset()
+                    .isin("ABC123").market("market").currency("USD")
+                    .logo(URI.create("http://azurite:10000/account1/assets/logos/apple.png?se=2029-05-25&sp=r"));
+
+            when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
+                .thenReturn(Mono.just(existingApiAsset));
+            when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
+
+            // Act & Assert — URI contains "apple.png" → logo unchanged → skip
+            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+                .expectNextMatches(a -> "ABC123".equals(a.getIsin()))
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService, never())
+                .patchAsset(any(com.backbase.investment.api.service.v1.model.Asset.class),
+                    any(com.backbase.stream.investment.Asset.class), any());
+        }
+
+        @Test
+        @DisplayName("asset exists, logo filename NOT in server URI — patchAsset IS called")
+        void getOrCreateAsset_assetExistsLogoFilenameNotInServerUri_patchCalled() {
+            // Arrange — server URI contains "old-logo.png", desired is "new-logo.png"
+            com.backbase.stream.investment.Asset req = buildAsset();
+            req.setLogo("new-logo.png");
+
+            com.backbase.investment.api.service.v1.model.Asset existingApiAsset =
+                new com.backbase.investment.api.service.v1.model.Asset()
+                    .isin("ABC123").market("market").currency("USD")
+                    .logo(URI.create("http://azurite:10000/account1/assets/logos/old-logo.png?se=2029-05-25"));
+
+            when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
+                .thenReturn(Mono.just(existingApiAsset));
+            com.backbase.stream.investment.Asset patchedAsset = buildAsset();
+            when(investmentRestAssetUniverseService.patchAsset(eq(existingApiAsset), eq(req), any()))
+                .thenReturn(Mono.just(patchedAsset));
+            when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
+
+            // Act & Assert — URI does not contain "new-logo.png" → patch IS called
+            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+                .expectNextMatches(a -> "ABC123".equals(a.getIsin()))
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService)
+                .patchAsset(eq(existingApiAsset), eq(req), any());
+        }
+
+        @Test
+        @DisplayName("asset exists, logo desired but server has no logo URI yet — patchAsset IS called")
+        void getOrCreateAsset_assetExistsLogoDesiredButNoServerUri_patchCalled() {
+            // Arrange — logo configured but server has no URI yet (logo never uploaded)
+            com.backbase.stream.investment.Asset req = buildAsset();
+            req.setLogo("apple.png");
+
+            com.backbase.investment.api.service.v1.model.Asset existingApiAsset =
+                new com.backbase.investment.api.service.v1.model.Asset()
+                    .isin("ABC123").market("market").currency("USD")
+                    .logo(null); // no logo on server yet
+
+            when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
+                .thenReturn(Mono.just(existingApiAsset));
+            com.backbase.stream.investment.Asset patchedAsset = buildAsset();
+            when(investmentRestAssetUniverseService.patchAsset(eq(existingApiAsset), eq(req), any()))
+                .thenReturn(Mono.just(patchedAsset));
+            when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
+
+            // Act & Assert — logo desired but none stored → patch IS called
+            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+                .expectNextMatches(a -> "ABC123".equals(a.getIsin()))
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService)
+                .patchAsset(eq(existingApiAsset), eq(req), any());
+        }
+
+        @Test
         @DisplayName("asset already exists — patchAsset is called and mapped asset returned")
         void getOrCreateAsset_assetExists_patchCalledAndMappedReturned() {
-            // Arrange
+            // Arrange — req carries a name that existingApiAsset does not, so data differs and patch is triggered
             com.backbase.stream.investment.Asset req = buildAsset();
+            req.setName("Updated Name"); // differs from existingApiAsset (null name) → triggers patch
             com.backbase.investment.api.service.v1.model.Asset existingApiAsset =
                 new com.backbase.investment.api.service.v1.model.Asset()
                     .isin("ABC123")
@@ -400,13 +533,46 @@ class InvestmentAssetUniverseServiceTest {
     class UpsertMarketSpecialDayTests {
 
         @Test
+        @DisplayName("matching special day exists with identical data — updateMarketSpecialDay is skipped and existing day returned")
+        void upsertMarketSpecialDay_matchingExistsUnchanged_updateSkipped() {
+            // Arrange — request and existing record carry identical fields
+            LocalDate date = LocalDate.of(2025, 12, 25);
+            UUID existingUuid = UUID.randomUUID();
+            MarketSpecialDayRequest request = new MarketSpecialDayRequest()
+                .date(date)
+                .market("NYSE")
+                .description("Christmas")
+                .sessionStart("09:30")
+                .sessionEnd("13:00");
+            MarketSpecialDay existing = new MarketSpecialDay(existingUuid);
+            existing.setDate(date);
+            existing.setMarket("NYSE");
+            existing.setDescription("Christmas");
+            existing.setSessionStart("09:30");
+            existing.setSessionEnd("13:00");
+
+            when(assetUniverseApi.listMarketSpecialDay(date, date, 100, 0))
+                .thenReturn(Mono.just(buildMarketSpecialDayPage(List.of(existing))));
+            // createMarketSpecialDay stubbed as the switchIfEmpty argument; should not be subscribed
+            when(assetUniverseApi.createMarketSpecialDay(any())).thenReturn(Mono.just(new MarketSpecialDay(UUID.randomUUID())));
+
+            // Act & Assert — existing record returned, no update call made
+            StepVerifier.create(service.upsertMarketSpecialDay(request))
+                .expectNext(existing)
+                .verifyComplete();
+
+            verify(assetUniverseApi, never()).updateMarketSpecialDay(any(), any());
+        }
+
+        @Test
         @DisplayName("matching special day exists — updateMarketSpecialDay called and updated day returned")
         void upsertMarketSpecialDay_matchingExists_updateCalledAndReturned() {
-            // Arrange
+            // Arrange — existing has a description the request does not; data differs so update is triggered
             LocalDate date = LocalDate.of(2025, 12, 25);
             UUID existingUuid = UUID.randomUUID();
             MarketSpecialDayRequest request = buildMarketSpecialDayRequest("NYSE", date);
             MarketSpecialDay existing = buildMarketSpecialDay(existingUuid, "NYSE", date);
+            existing.setDescription("Old description"); // differs from request (null) → triggers update
             MarketSpecialDay updated = buildMarketSpecialDay(existingUuid, "NYSE", date);
 
             when(assetUniverseApi.listMarketSpecialDay(date, date, 100, 0))
@@ -471,11 +637,12 @@ class InvestmentAssetUniverseServiceTest {
         @Test
         @DisplayName("matching special day exists but update fails — error propagated")
         void upsertMarketSpecialDay_updateFails_errorPropagated() {
-            // Arrange
+            // Arrange — existing description differs from request so update is triggered
             LocalDate date = LocalDate.of(2025, 12, 25);
             UUID existingUuid = UUID.randomUUID();
             MarketSpecialDayRequest request = buildMarketSpecialDayRequest("NYSE", date);
             MarketSpecialDay existing = buildMarketSpecialDay(existingUuid, "NYSE", date);
+            existing.setDescription("Old description"); // differs from request (null) → triggers update
 
             when(assetUniverseApi.listMarketSpecialDay(date, date, 100, 0))
                 .thenReturn(Mono.just(buildMarketSpecialDayPage(List.of(existing))));
@@ -530,11 +697,12 @@ class InvestmentAssetUniverseServiceTest {
         @Test
         @DisplayName("matching special day exists but update fails with WebClientResponseException — error propagated")
         void upsertMarketSpecialDay_webClientExceptionOnUpdate_propagated() {
-            // Arrange
+            // Arrange — existing description differs from request so update is triggered
             LocalDate date = LocalDate.of(2025, 12, 25);
             UUID existingUuid = UUID.randomUUID();
             MarketSpecialDayRequest request = buildMarketSpecialDayRequest("NYSE", date);
             MarketSpecialDay existing = buildMarketSpecialDay(existingUuid, "NYSE", date);
+            existing.setDescription("Old description"); // differs from request (null) → triggers update
 
             when(assetUniverseApi.listMarketSpecialDay(date, date, 100, 0))
                 .thenReturn(Mono.just(buildMarketSpecialDayPage(List.of(existing))));
@@ -694,6 +862,156 @@ class InvestmentAssetUniverseServiceTest {
         }
 
         @Test
+        @DisplayName("existing category unchanged, no imageResource supplied — patchAssetCategory is skipped")
+        void upsertAssetCategory_existingUnchangedNoImage_patchSkipped() {
+            // Arrange — mirrors real-world: existing has server uuid, desired has uuid=null.
+            // No imageResource on desired entry → image check returns unchanged → skip entirely.
+            UUID existingUuid = UUID.randomUUID();
+            AssetCategoryEntry entry = new AssetCategoryEntry();
+            entry.setCode("CERTIFICATE");
+            entry.setName("Certificate");
+            entry.setOrder(1);
+            entry.setType("ASSET_TYPE");
+            entry.setDescription("Certificates are structured financial instruments.");
+            // uuid and imageResource intentionally null
+
+            com.backbase.investment.api.service.v1.model.AssetCategory existingCategory =
+                new com.backbase.investment.api.service.v1.model.AssetCategory(existingUuid);
+            existingCategory.setCode("CERTIFICATE");
+            existingCategory.setName("Certificate");
+            existingCategory.setOrder(1);
+            existingCategory.setType("ASSET_TYPE");
+            existingCategory.setDescription("Certificates are structured financial instruments.");
+
+            when(assetUniverseApi.listAssetCategories(eq("CERTIFICATE"), eq(100), any(), eq(0), any(), any()))
+                .thenReturn(Mono.just(buildAssetCategoryPage(List.of(existingCategory))));
+
+            // Act & Assert — skip path: no patch, uuid set on entry via doOnSuccess
+            StepVerifier.create(service.upsertAssetCategory(entry))
+                .expectNextMatches(result -> existingUuid.equals(result.getUuid()))
+                .verifyComplete();
+
+            assertThat(entry.getUuid()).isEqualTo(existingUuid);
+            verify(investmentRestAssetUniverseService, never()).patchAssetCategory(any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("existing category unchanged, imageResource filename found in server URI — patchAssetCategory is skipped")
+        void upsertAssetCategory_existingUnchangedImageFilenameMatches_patchSkipped() {
+            // Arrange — server returns a signed URI that contains the desired filename.
+            // isImageUnchanged checks existingUri.toString().contains(desiredFilename).
+            UUID existingUuid = UUID.randomUUID();
+            AssetCategoryEntry entry = new AssetCategoryEntry();
+            entry.setCode("TECH_TITANS");
+            entry.setName("Tech titans");
+            entry.setOrder(3);
+            entry.setType("COLLECTION");
+            entry.setDescription("Dominant innovators shaping tomorrow's digital economy.");
+            entry.setImageResource(new org.springframework.core.io.ByteArrayResource("img".getBytes()) {
+                @Override public String getFilename() { return "tech-titans.png"; }
+            });
+
+            com.backbase.investment.api.service.v1.model.AssetCategory existingCategory =
+                new com.backbase.investment.api.service.v1.model.AssetCategory(existingUuid);
+            existingCategory.setCode("TECH_TITANS");
+            existingCategory.setName("Tech titans");
+            existingCategory.setOrder(3);
+            existingCategory.setType("COLLECTION");
+            existingCategory.setDescription("Dominant innovators shaping tomorrow's digital economy.");
+            // URI string contains "tech-titans.png" → filename found → image unchanged
+            existingCategory.setImage(URI.create(
+                "http://azurite:10000/account1/asset_categories/images/tech-titans.png"
+                    + "?se=2029-05-25T18%3A10%3A11Z&sp=r&sv=2026-02-06&sr=b&sig=abc123"));
+
+            when(assetUniverseApi.listAssetCategories(eq("TECH_TITANS"), eq(100), any(), eq(0), any(), any()))
+                .thenReturn(Mono.just(buildAssetCategoryPage(List.of(existingCategory))));
+
+            // Act & Assert — skip: data unchanged AND URI contains desired filename
+            StepVerifier.create(service.upsertAssetCategory(entry))
+                .expectNextMatches(result -> existingUuid.equals(result.getUuid()))
+                .verifyComplete();
+
+            assertThat(entry.getUuid()).isEqualTo(existingUuid);
+            verify(investmentRestAssetUniverseService, never()).patchAssetCategory(any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("existing category unchanged, imageResource filename NOT in server URI — patchAssetCategory IS called")
+        void upsertAssetCategory_existingUnchangedButDifferentImageFilename_patchCalled() {
+            // Arrange — server URI does not contain the desired filename → image changed → patch
+            UUID existingUuid = UUID.randomUUID();
+            AssetCategoryEntry entry = new AssetCategoryEntry();
+            entry.setCode("EQUITY");
+            entry.setName("Equities");
+            entry.setOrder(1);
+            entry.setType("ASSET_TYPE");
+            entry.setImageResource(new org.springframework.core.io.ByteArrayResource("img".getBytes()) {
+                @Override public String getFilename() { return "new-logo.png"; }
+            });
+
+            com.backbase.investment.api.service.v1.model.AssetCategory existingCategory =
+                new com.backbase.investment.api.service.v1.model.AssetCategory(existingUuid);
+            existingCategory.setCode("EQUITY");
+            existingCategory.setName("Equities");
+            existingCategory.setOrder(1);
+            existingCategory.setType("ASSET_TYPE");
+            // URI contains "old-logo.png", NOT "new-logo.png" → patch required
+            existingCategory.setImage(URI.create(
+                "http://azurite:10000/account1/asset_categories/images/old-logo.png?se=2029-05-25"));
+
+            when(assetUniverseApi.listAssetCategories(eq("EQUITY"), eq(100), any(), eq(0), any(), any()))
+                .thenReturn(Mono.just(buildAssetCategoryPage(List.of(existingCategory))));
+
+            AssetCategory patchedCategory = buildSyncAssetCategory(existingUuid);
+            when(investmentRestAssetUniverseService.patchAssetCategory(eq(existingUuid), eq(entry), any()))
+                .thenReturn(Mono.just(patchedCategory));
+
+            // Act & Assert — patch IS called because filename not found in server URI
+            StepVerifier.create(service.upsertAssetCategory(entry))
+                .expectNextMatches(result -> existingUuid.equals(result.getUuid()))
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService).patchAssetCategory(eq(existingUuid), eq(entry), any());
+        }
+
+        @Test
+        @DisplayName("imageResource supplied but server has no image URI yet — patchAssetCategory IS called")
+        void upsertAssetCategory_imageResourceSuppliedButNoServerImage_patchCalled() {
+            // Arrange — first run after data fields already exist but image upload was missed
+            UUID existingUuid = UUID.randomUUID();
+            AssetCategoryEntry entry = new AssetCategoryEntry();
+            entry.setCode("EQUITY");
+            entry.setName("Equities");
+            entry.setOrder(1);
+            entry.setType("ASSET_TYPE");
+            entry.setImageResource(new org.springframework.core.io.ByteArrayResource("img".getBytes()) {
+                @Override public String getFilename() { return "equity.png"; }
+            });
+
+            com.backbase.investment.api.service.v1.model.AssetCategory existingCategory =
+                new com.backbase.investment.api.service.v1.model.AssetCategory(existingUuid);
+            existingCategory.setCode("EQUITY");
+            existingCategory.setName("Equities");
+            existingCategory.setOrder(1);
+            existingCategory.setType("ASSET_TYPE");
+            existingCategory.setImage(null); // no image stored on server yet
+
+            when(assetUniverseApi.listAssetCategories(eq("EQUITY"), eq(100), any(), eq(0), any(), any()))
+                .thenReturn(Mono.just(buildAssetCategoryPage(List.of(existingCategory))));
+
+            AssetCategory patchedCategory = buildSyncAssetCategory(existingUuid);
+            when(investmentRestAssetUniverseService.patchAssetCategory(eq(existingUuid), eq(entry), any()))
+                .thenReturn(Mono.just(patchedCategory));
+
+            // Act & Assert — patch IS called: image desired but none stored yet
+            StepVerifier.create(service.upsertAssetCategory(entry))
+                .expectNextMatches(result -> existingUuid.equals(result.getUuid()))
+                .verifyComplete();
+
+            verify(investmentRestAssetUniverseService).patchAssetCategory(eq(existingUuid), eq(entry), any());
+        }
+
+        @Test
         @DisplayName("successful patch — entry uuid is updated to patched category uuid")
         void upsertAssetCategory_successfulPatch_entryUuidUpdated() {
             // Arrange
@@ -775,14 +1093,34 @@ class InvestmentAssetUniverseServiceTest {
         }
 
         @Test
-        @DisplayName("matching type exists — updateAssetCategoryType called and updated type returned")
-        void upsertAssetCategoryType_matchingExists_updateCalledAndReturned() {
-            // Arrange
+        @DisplayName("matching type exists with identical data — updateAssetCategoryType is skipped and existing type returned")
+        void upsertAssetCategoryType_matchingExistsUnchanged_updateSkipped() {
+            // Arrange — request and existing type carry identical code and name
             UUID existingUuid = UUID.randomUUID();
             AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector");
+            AssetCategoryType existingType = buildAssetCategoryType(existingUuid, "SECTOR", "Sector");
+
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
+                .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of(existingType))));
+
+            // Act & Assert — existing type returned, no update call made
+            StepVerifier.create(service.upsertAssetCategoryType(request))
+                .expectNext(existingType)
+                .verifyComplete();
+
+            verify(assetUniverseApi, never()).updateAssetCategoryType(any(), any());
+            verify(assetUniverseApi, never()).createAssetCategoryType(any());
+        }
+
+        @Test
+        @DisplayName("matching type exists — updateAssetCategoryType called and updated type returned")
+        void upsertAssetCategoryType_matchingExists_updateCalledAndReturned() {
+            // Arrange — request name differs from existingType name so update IS triggered
+            UUID existingUuid = UUID.randomUUID();
+            AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector Updated");
 
             AssetCategoryType existingType = buildAssetCategoryType(existingUuid, "SECTOR", "Sector");
-            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector Updated", 0))
                 .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of(existingType))));
 
             AssetCategoryType updated = buildAssetCategoryType(existingUuid, "SECTOR", "Sector Updated");
@@ -868,12 +1206,12 @@ class InvestmentAssetUniverseServiceTest {
         @Test
         @DisplayName("update fails — onErrorResume swallows error, Mono.empty() returned")
         void upsertAssetCategoryType_updateFails_errorSwallowedReturnsEmpty() {
-            // Arrange
+            // Arrange — request name differs from existingType so update IS triggered (then fails)
             UUID existingUuid = UUID.randomUUID();
-            AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector");
+            AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector Updated");
 
             AssetCategoryType existingType = buildAssetCategoryType(existingUuid, "SECTOR", "Sector");
-            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector Updated", 0))
                 .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of(existingType))));
             when(assetUniverseApi.updateAssetCategoryType(existingUuid.toString(), request))
                 .thenReturn(Mono.error(new RuntimeException("update failed")));
@@ -906,12 +1244,12 @@ class InvestmentAssetUniverseServiceTest {
         @Test
         @DisplayName("WebClientResponseException on updateAssetCategoryType — swallowed by onErrorResume")
         void upsertAssetCategoryType_webClientExceptionOnUpdate_swallowedReturnsEmpty() {
-            // Arrange
+            // Arrange — request name differs from existingType so update IS triggered (then fails)
             UUID existingUuid = UUID.randomUUID();
-            AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector");
+            AssetCategoryTypeRequest request = buildAssetCategoryTypeRequest("SECTOR", "Sector Updated");
 
             AssetCategoryType existingType = buildAssetCategoryType(existingUuid, "SECTOR", "Sector");
-            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector", 0))
+            when(assetUniverseApi.listAssetCategoryTypes("SECTOR", 100, "Sector Updated", 0))
                 .thenReturn(Mono.just(buildAssetCategoryTypePage(List.of(existingType))));
             when(assetUniverseApi.updateAssetCategoryType(existingUuid.toString(), request))
                 .thenReturn(Mono.error(serverError(500)));
@@ -1053,8 +1391,9 @@ class InvestmentAssetUniverseServiceTest {
         @Test
         @DisplayName("asset already exists — patchAsset called within createAssets, existing asset returned")
         void createAssets_assetAlreadyExists_patchCalledAndReturned() {
-            // Arrange
+            // Arrange — req carries a name that existingApiAsset does not, so data differs and patch is triggered
             com.backbase.stream.investment.Asset req = buildAsset();
+            req.setName("Updated Name"); // differs from existingApiAsset (null name) → triggers patch
             com.backbase.investment.api.service.v1.model.Asset existingApiAsset =
                 new com.backbase.investment.api.service.v1.model.Asset()
                     .isin("ABC123")
@@ -1065,11 +1404,11 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(buildAssetCategoryPage(List.of())));
             when(assetUniverseApi.getAsset("ABC123_market_USD", null, null, null))
                 .thenReturn(Mono.just(existingApiAsset));
-            // patchAsset is called for its side-effect; the result is replaced by the existing API asset
+            // patchAsset returns the desired stream asset; verify it is what gets emitted
             when(investmentRestAssetUniverseService.patchAsset(eq(existingApiAsset), eq(req), any()))
                 .thenReturn(Mono.just(req));
 
-            // Act & Assert — existing asset is mapped and emitted
+            // Act & Assert — patched asset (req) is emitted
             StepVerifier.create(service.createAssets(List.of(req)))
                 .expectNextMatches(a -> "ABC123".equals(a.getIsin())
                     && "market".equals(a.getMarket())
