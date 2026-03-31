@@ -12,6 +12,7 @@ import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.investment.api.service.v1.PortfolioTradingAccountsApi;
+import com.backbase.investment.api.service.v1.RiskAssessmentApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.investment.saga.InvestmentAssetUniverseSaga;
 import com.backbase.stream.investment.saga.InvestmentContentSaga;
@@ -26,6 +27,7 @@ import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceServic
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
+import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
@@ -108,12 +110,18 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    public InvestmentRiskAssessmentService investmentRiskAssessmentService(RiskAssessmentApi riskAssessmentApi) {
+        return new InvestmentRiskAssessmentService(riskAssessmentApi);
+    }
+
+    @Bean
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
+        InvestmentRiskAssessmentService investmentRiskAssessmentService,
         InvestmentPortfolioService investmentPortfolioService,
         InvestmentModelPortfolioService investmentModelPortfolioService,
         InvestmentPortfolioAllocationService investmentPortfolioAllocationService, AsyncTaskService asyncTaskService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
-        return new InvestmentSaga(investmentClientService, investmentPortfolioService,
+        return new InvestmentSaga(investmentClientService, investmentRiskAssessmentService, investmentPortfolioService,
             investmentPortfolioAllocationService, investmentModelPortfolioService, asyncTaskService,
             coreConfigurationProperties);
     }
