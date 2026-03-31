@@ -3,15 +3,18 @@ package com.backbase.stream.investment.service;
 import com.backbase.investment.api.service.v1.RiskAssessmentApi;
 import com.backbase.investment.api.service.v1.model.Assessment;
 import com.backbase.investment.api.service.v1.model.BaseAssessmentRequest;
+import com.backbase.investment.api.service.v1.model.BaseRiskChoice;
 import com.backbase.investment.api.service.v1.model.BaseRiskChoiceRequest;
 import com.backbase.investment.api.service.v1.model.BaseRiskQuestionRequest;
 import com.backbase.investment.api.service.v1.model.OASBaseAssessment;
-import com.backbase.investment.api.service.v1.model.OASBaseRiskChoice;
 import com.backbase.investment.api.service.v1.model.OASRiskQuestion;
 import com.backbase.investment.api.service.v1.model.PatchedBaseAssessmentRequest;
 import com.backbase.investment.api.service.v1.model.PatchedBaseRiskChoiceRequest;
 import com.backbase.investment.api.service.v1.model.PatchedBaseRiskQuestionRequest;
 import com.backbase.investment.api.service.v1.model.RiskChoice;
+import com.backbase.stream.investment.model.QuestionChoice;
+import com.backbase.stream.investment.model.RiskQuestion;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -78,22 +81,8 @@ public class InvestmentRiskAssessmentService {
             .collectList();
     }
 
-    /**
-     * Upserts multiple risk questions.
-     *
-     * <p>This method implements an upsert pattern for each question:
-     * <ol>
-     *   <li>Maps input questions to API request objects</li>
-     *   <li>For each question, searches for existing questions by code</li>
-     *   <li>If found, patches the existing question</li>
-     *   <li>If not found, creates a new question</li>
-     * </ol>
-     *
-     * @param questions the list of risk question requests to upsert (must not be null)
-     * @return Flux emitting the created or updated risk questions
-     */
-    public Mono<List<OASRiskQuestion>> upsertRiskQuestions(List<BaseRiskQuestionRequest> questions) {
-        return Flux.fromIterable(Objects.requireNonNullElse(questions, List.of()))
+    public Mono<List<RiskQuestion>> upsertRiskQuestions(List<RiskQuestion> riskQuestions) {
+        return Flux.fromIterable(Objects.requireNonNullElse(riskQuestions, List.of()))
             .flatMap(questionRequest -> {
                 log.debug("Upserting risk question: code={}, order={}",
                     questionRequest.getCode(), questionRequest.getOrder());
@@ -106,27 +95,39 @@ public class InvestmentRiskAssessmentService {
                         "Failed to upsert risk question: code={}, order={}",
                         questionRequest.getCode(), questionRequest.getOrder(), throwable));
             })
-            .collectList();
+//            .flatMap(this::upsertRiskQuestionsChoices)
+            .map(rq -> rq.getChoices().stream().map(c -> new BaseRiskChoice()
+                    .question(rq.getCode())
+                    .code(c.getCode())
+                    .order(c.getOrder())
+                    .description(c.getDescription())
+                    .score(c.getScore()))
+                .toList() // Return the parent question after processing choices
+            )
+            .collectList()
+            .flatMapIterable(list -> list.stream().flatMap(Collection::stream).toList()) // Flatten List<List<BaseRiskChoice>> to BaseRiskChoice
+            .flatMap(this::upsertRiskChoice)
+            .collectList()
+            .map(l -> riskQuestions);
     }
 
-    public Mono<List<OASBaseRiskChoice>> upsertRiskQuestionsChoices(List<BaseRiskChoiceRequest> questionsChoices) {
-        return Flux.fromIterable(Objects.requireNonNullElse(questionsChoices, List.of()))
-            .flatMap(questionChoiceRequest -> {
-                log.debug("Upserting risk choice: question={}, code={}, order={}",
-                    questionChoiceRequest.getQuestion(), questionChoiceRequest.getCode(),
-                    questionChoiceRequest.getOrder());
-
-                return upsertRiskChoice(questionChoiceRequest)
-                    .doOnSuccess(question -> log.debug(
-                        "Successfully upserted risk choice: uuid={}, code={}, order={}",
-                        question.getUuid(), question.getCode(), question.getOrder()))
-                    .doOnError(throwable -> log.error(
-                        "Failed to upsert risk choice: question={}, code={}, order={}",
-                        questionChoiceRequest.getQuestion(), questionChoiceRequest.getCode(),
-                        questionChoiceRequest.getOrder(), throwable));
-            })
-            .collectList();
+    public Mono<BaseRiskChoice> upsertRiskQuestionsChoices(Flux<RiskQuestion> rq) {
+        return
     }
+
+    /*public Mono<BaseRiskChoice> upsertRiskQuestionsChoices(BaseRiskChoice riskChoice) {
+        log.debug("Upserting risk choice: question={}, code={}, order={}",
+            riskChoice.getQuestion(), riskChoice.getCode(), riskChoice.getOrder());
+        return upsertRiskChoice(riskChoice.getQuestion(), choice)
+            .map(c -> riskQuestion) // Return the parent question for downstream processing
+            .doOnSuccess(question -> log.debug(
+                "Successfully upserted risk choice: uuid={}, code={}, order={}",
+                question.getUuid(), question.getCode(), question.getOrder()))
+            .doOnError(throwable -> log.error(
+                "Failed to upsert risk choice: question={}, code={}, order={}",
+                riskQuestion.getCode(), choice.getCode(), choice.getOrder(), throwable));
+            );
+    }*/
 
     /**
      * Upserts a single risk assessment for a client.
@@ -174,7 +175,7 @@ public class InvestmentRiskAssessmentService {
      * @return Mono emitting the created or updated risk question
      * @throws NullPointerException if question is null
      */
-    private Mono<OASRiskQuestion> upsertRiskQuestion(BaseRiskQuestionRequest question) {
+    private Mono<RiskQuestion> upsertRiskQuestion(RiskQuestion question) {
         Objects.requireNonNull(question, "Risk question must not be null");
 
         String code = question.getCode();
@@ -193,18 +194,18 @@ public class InvestmentRiskAssessmentService {
                 code, order, throwable));
     }
 
-    private Mono<OASBaseRiskChoice> upsertRiskChoice(BaseRiskChoiceRequest questionChoice) {
-        Objects.requireNonNull(questionChoice, "Risk question choice must not be null");
+    private Mono<BaseRiskChoice> upsertRiskChoice(BaseRiskChoice choice) {
+        Objects.requireNonNull(choice, "Risk question choice must not be null");
 
-        String question = questionChoice.getQuestion();
-        String code = questionChoice.getCode();
-        Integer order = questionChoice.getOrder();
+        String code = choice.getCode();
+        Integer order = choice.getOrder();
 
-        log.info("Upserting risk question: question={}, code={}, order={}", question, code, order);
+        log.info("Upserting risk question: question={}, code={}, order={}", choice.getQuestion(), code, order);
 
-        return listExistingRiskChoices(question, code)
-            .flatMap(existing -> patchRiskChoice(existing.getUuid(), questionChoice))
-            .switchIfEmpty(createNewRiskChoice(questionChoice))
+        return listExistingRiskChoices(choice.getQuestion(), code)
+            .flatMap(existing -> patchRiskChoice(existing.getUuid(), choice))
+            .switchIfEmpty(createNewRiskChoice(choice))
+            .map(o -> choice)
             .doOnSuccess(upserted -> log.info(
                 "Successfully upserted risk question: uuid={}, question={}, code={}, order={}",
                 upserted.getUuid(), upserted.getQuestion(), upserted.getCode(), upserted.getOrder()))
@@ -299,7 +300,7 @@ public class InvestmentRiskAssessmentService {
 
                 // Filter by code
                 RiskChoice matchingQuestion = choices.getResults().stream()
-                    .filter(q -> code.equals(q.getCode()) && question.equals(q.getQuestion()))
+                    .filter(q -> code.equals(q.getCode()) && question.equals(q.getQuestion().getCode()))
                     .findFirst()
                     .orElse(null);
 
@@ -337,20 +338,17 @@ public class InvestmentRiskAssessmentService {
      * @param question the risk question request to create
      * @return Mono emitting the newly created risk question
      */
-    private Mono<OASRiskQuestion> createNewRiskQuestion(BaseRiskQuestionRequest question) {
+    private Mono<RiskQuestion> createNewRiskQuestion(RiskQuestion question) {
         log.info("Creating new risk question: code={}, order={}",
             question.getCode(), question.getOrder());
 
-        return riskAssessmentApi.createRiskQuestion(question)
-            .map(baseRiskQuestion -> {
-                // Map BaseRiskQuestion to OASRiskQuestion
-                OASRiskQuestion oasQuestion = new OASRiskQuestion();
-                oasQuestion.setCode(baseRiskQuestion.getCode());
-                oasQuestion.setOrder(baseRiskQuestion.getOrder());
-                oasQuestion.setDescription(baseRiskQuestion.getDescription());
-                oasQuestion.setScore(baseRiskQuestion.getScore());
-                return oasQuestion;
-            })
+        BaseRiskQuestionRequest request = new BaseRiskQuestionRequest()
+            .code(question.getCode())
+            .order(question.getOrder())
+            .score(question.getScore())
+            .description(question.getDescription());
+        return riskAssessmentApi.createRiskQuestion(request)
+            .map(baseRiskQuestion -> question)
             .doOnSuccess(created -> log.info(
                 "Successfully created risk question: code={}, order={}",
                 created.getCode(), created.getOrder()))
@@ -358,21 +356,19 @@ public class InvestmentRiskAssessmentService {
                 question.getCode(), question.getOrder(), throwable));
     }
 
-    private Mono<OASBaseRiskChoice> createNewRiskChoice(BaseRiskChoiceRequest choice) {
+    private Mono<BaseRiskChoice> createNewRiskChoice(BaseRiskChoice choice) {
         log.info("Creating new risk question: code={}, order={}",
             choice.getCode(), choice.getOrder());
 
-        return riskAssessmentApi.createRiskChoice(choice)
-            .map(baseRiskQuestion -> {
-                // Map BaseRiskQuestion to OASRiskQuestion
-                OASBaseRiskChoice oasQuestion = new OASBaseRiskChoice();
-                oasQuestion.setQuestion(baseRiskQuestion.getQuestion());
-                oasQuestion.setCode(baseRiskQuestion.getCode());
-                oasQuestion.setOrder(baseRiskQuestion.getOrder());
-                oasQuestion.setDescription(baseRiskQuestion.getDescription());
-                oasQuestion.setScore(baseRiskQuestion.getScore());
-                return oasQuestion;
-            })
+        BaseRiskChoiceRequest choiceRequest = new BaseRiskChoiceRequest()
+            .question(choice.getQuestion())
+            .code(choice.getCode())
+            .order(choice.getOrder())
+            .suitable(choice.getSuitable())
+            .description(choice.getDescription())
+            .score(choice.getScore());
+        return riskAssessmentApi.createRiskChoice(choiceRequest)
+            .map(o -> choice)
             .doOnSuccess(created -> log.info(
                 "Successfully created risk question: code={}, order={}",
                 created.getCode(), created.getOrder()))
@@ -414,7 +410,7 @@ public class InvestmentRiskAssessmentService {
      * @param question     the question data to update
      * @return Mono emitting the updated risk question
      */
-    private Mono<OASRiskQuestion> patchRiskQuestion(UUID questionUuid, BaseRiskQuestionRequest question) {
+    private Mono<RiskQuestion> patchRiskQuestion(UUID questionUuid, RiskQuestion question) {
         log.info("Patching risk question: uuid={}, code={}", questionUuid, question.getCode());
         log.debug("Patch risk question: uuid={}, object={}", questionUuid, question);
 
@@ -425,15 +421,7 @@ public class InvestmentRiskAssessmentService {
             .score(question.getScore());
 
         return riskAssessmentApi.patchRiskQuestion(questionUuid, patchRequest)
-            .map(baseRiskQuestion -> {
-                // Map BaseRiskQuestion to OASRiskQuestion
-                OASRiskQuestion oasQuestion = new OASRiskQuestion();
-                oasQuestion.setCode(baseRiskQuestion.getCode());
-                oasQuestion.setOrder(baseRiskQuestion.getOrder());
-                oasQuestion.setDescription(baseRiskQuestion.getDescription());
-                oasQuestion.setScore(baseRiskQuestion.getScore());
-                return oasQuestion;
-            })
+            .map(baseRiskQuestion -> question)
             .doOnSuccess(patched -> log.info(
                 "Successfully patched risk question: uuid={}, code={}",
                 questionUuid, patched.getCode()))
@@ -441,7 +429,7 @@ public class InvestmentRiskAssessmentService {
                 question.getCode(), question.getOrder(), throwable));
     }
 
-    private Mono<OASBaseRiskChoice> patchRiskChoice(UUID choiceUuid, BaseRiskChoiceRequest choice) {
+    private Mono<BaseRiskChoice> patchRiskChoice(UUID choiceUuid, BaseRiskChoice choice) {
         log.info("Patching risk choice: uuid={}, question={}, code={}", choiceUuid, choice.getQuestion(), choice.getCode());
         log.debug("Patch risk choice: uuid={}, object={}", choiceUuid, choice);
 
@@ -453,19 +441,10 @@ public class InvestmentRiskAssessmentService {
             .score(choice.getScore());
 
         return riskAssessmentApi.patchRiskChoice(choiceUuid, patchRequest)
-            .map(baseRiskQuestion -> {
-                // Map BaseRiskQuestion to OASRiskQuestion
-                OASBaseRiskChoice oasRiskChoice = new OASBaseRiskChoice();
-                oasRiskChoice.setQuestion(baseRiskQuestion.getQuestion());
-                oasRiskChoice.setCode(baseRiskQuestion.getCode());
-                oasRiskChoice.setOrder(baseRiskQuestion.getOrder());
-                oasRiskChoice.setDescription(baseRiskQuestion.getDescription());
-                oasRiskChoice.setScore(baseRiskQuestion.getScore());
-                return oasRiskChoice;
-            })
+            .map(o -> choice)
             .doOnSuccess(patched -> log.info(
                 "Successfully patched risk choice: uuid={}, question={}, code={}",
-                choiceUuid, patched.getQuestion(), patched.getCode()))
+                choiceUuid, choice.getQuestion(), patched.getCode()))
             .doOnError(throwable -> logRiskQuestionError("patch",
                 choice.getCode(), choice.getOrder(), throwable));
     }
