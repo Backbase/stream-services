@@ -56,8 +56,8 @@ public class InvestmentAssetUniverseService {
             })
             .flatMap(existingMarket -> {
                 log.info("Market already exists: code={}", existingMarket.getCode());
-                // Skip the update if the incoming request carries identical data to what is already stored.
-                if (isMarketUnchanged(marketRequest, existingMarket)) {
+                // Skip the update if the incoming request carries the same data as what is already stored.
+                if (isMarketSame(marketRequest, existingMarket)) {
                     log.info("Skipping market update - no changes detected for code: {}", existingMarket.getCode());
                     return Mono.just(existingMarket);
                 }
@@ -116,9 +116,9 @@ public class InvestmentAssetUniverseService {
             .flatMap(a -> {
                 log.info("Asset already exists: assetIdentifier={}", assetIdentifier);
                 // Map existing API asset; logo (URI vs String) and categories (order-insensitive)
-                // are checked separately inside isAssetUnchanged().
+                // are checked separately inside isAssetSame().
                 com.backbase.stream.investment.Asset existingMapped = assetMapper.map(a);
-                if (isAssetUnchanged(asset, existingMapped, a.getLogo())) {
+                if (isAssetSame(asset, existingMapped, a.getLogo())) {
                     log.info("Skipping asset patch - no changes detected for assetIdentifier: {}", assetIdentifier);
                     return Mono.just(existingMapped);
                 }
@@ -170,7 +170,7 @@ public class InvestmentAssetUniverseService {
                         log.info("Market special day already exists: date={}, market={}",
                             date, marketSpecialDayRequest.getMarket());
                         MarketSpecialDay existing = matchingSpecialDay.get();
-                        if (isMarketSpecialDayUnchanged(marketSpecialDayRequest, existing)) {
+                        if (isMarketSpecialDaySame(marketSpecialDayRequest, existing)) {
                             log.info("Skipping market special day update - no changes detected for date: {}, market: {}",
                                 date, marketSpecialDayRequest.getMarket());
                             return Mono.just(existing);
@@ -267,75 +267,71 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Returns {@code true} when the given {@link MarketRequest} carries identical data to the
+     * Returns {@code true} when the given {@link MarketRequest} carries the same data as the
      * already-stored {@link Market}.
      */
-    private boolean isMarketUnchanged(MarketRequest request, Market existing) {
+    private boolean isMarketSame(MarketRequest request, Market existing) {
         log.debug("Mapped existing marketRequest: {}", assetMapper.toMarketRequest(existing));
         log.debug("Incoming marketRequest: {}", request);
-        boolean unchanged = request.equals(assetMapper.toMarketRequest(existing));
-        log.debug("Market unchanged check: code={}, unchanged={}", existing.getCode(), unchanged);
-        return unchanged;
+        boolean same = request.equals(assetMapper.toMarketRequest(existing));
+        log.debug("Market same check: code={}, same={}", existing.getCode(), same);
+        return same;
     }
 
     /**
-     * Returns {@code true} when the desired asset state is identical to what is already stored.
-     * Checks normalised data fields, logo file, and categories (order-insensitive).
+     * Returns {@code true} when the desired asset state is the same as what is already stored.
+     * Checks normalized data fields, logo file, and categories (order-insensitive).
      */
-    private boolean isAssetUnchanged(
-        com.backbase.stream.investment.Asset desired,
-        com.backbase.stream.investment.Asset existingMapped,
-        URI existingLogo) {
+    private boolean isAssetSame(com.backbase.stream.investment.Asset desired,
+        com.backbase.stream.investment.Asset existingMapped, URI existingLogo) {
         log.debug("Existing mapped asset: {}", existingMapped);
         log.debug("Desired asset: {}", desired);
-        boolean dataUnchanged = normaliseForComparison(existingMapped).equals(normaliseForComparison(desired));
-        boolean logoUnchanged = isFileUnchanged(existingLogo, desired.getLogo());
-        boolean categoriesUnchanged = isCategoriesUnchanged(existingMapped.getCategories(), desired.getCategories());
-        log.debug("Asset unchanged check: dataUnchanged={}, logoUnchanged={}, categoriesUnchanged={}",
-            dataUnchanged, logoUnchanged, categoriesUnchanged);
-        return dataUnchanged && logoUnchanged && categoriesUnchanged;
+        boolean dataSame = normalizeAsset(existingMapped).equals(normalizeAsset(desired));
+        boolean logoSame = isFileSame(existingLogo, desired.getLogo());
+        boolean categoriesSame = areCategoriesSame(existingMapped.getCategories(), desired.getCategories());
+        log.debug("Asset same check: dataSame={}, logoSame={}, categoriesSame={}",
+            dataSame, logoSame, categoriesSame);
+        return dataSame && logoSame && categoriesSame;
     }
 
     /**
-     * Returns {@code true} when the given {@link MarketSpecialDayRequest} carries identical data
-     * to the already-stored {@link MarketSpecialDay}.
+     * Returns {@code true} when the given {@link MarketSpecialDayRequest} carries the same data as
+     * the already-stored {@link MarketSpecialDay}.
      */
-    private boolean isMarketSpecialDayUnchanged(MarketSpecialDayRequest request, MarketSpecialDay existing) {
+    private boolean isMarketSpecialDaySame(MarketSpecialDayRequest request, MarketSpecialDay existing) {
         log.debug("Mapped existing MarketSpecialDayRequest: {}", assetMapper.toMarketSpecialDayRequest(existing));
         log.debug("Incoming MarketSpecialDayRequest: {}", request);
-        boolean unchanged = request.equals(assetMapper.toMarketSpecialDayRequest(existing));
-        log.debug("Market special day unchanged check: date={}, market={}, unchanged={}",
-            existing.getDate(), existing.getMarket(), unchanged);
-        return unchanged;
+        boolean same = request.equals(assetMapper.toMarketSpecialDayRequest(existing));
+        log.debug("Market special day same check: date={}, market={}, same={}",
+            existing.getDate(), existing.getMarket(), same);
+        return same;
     }
 
     /**
-     * Returns {@code true} when the desired asset category state is identical to what is already
+     * Returns {@code true} when the desired asset category state is the same as what is already
      * stored. Checks data fields and image file separately.
      */
-    private boolean isAssetCategoryUnchanged(
-        AssetCategoryEntry desired,
-        AssetCategoryEntry existingEntry,
+    private boolean isAssetCategorySame(AssetCategoryEntry desired, AssetCategoryEntry existingEntry,
         URI existingImage) {
         log.debug("Existing asset category: {}", existingEntry);
         log.debug("Desired asset category:  {}", desired);
-        boolean dataUnchanged = existingEntry.equals(desired);
+        boolean dataSame  = existingEntry.equals(desired);
         String desiredImageFilename = desired.getImageResource() != null
             ? desired.getImageResource().getFilename() : null;
-        boolean imageUnchanged = isFileUnchanged(existingImage, desiredImageFilename);
-        log.debug("Asset category unchanged check: code={}, dataUnchanged={}, imageUnchanged={}",
-            desired.getCode(), dataUnchanged, imageUnchanged);
-        return dataUnchanged && imageUnchanged;
+        boolean imageSame = isFileSame(existingImage, desiredImageFilename);
+        log.debug("Asset category same check: code={}, dataSame={}, imageSame={}",
+            desired.getCode(), dataSame, imageSame);
+        return dataSame && imageSame;
     }
 
     /**
-     * Returns {@code true} when the given {@link AssetCategoryTypeRequest} carries identical data
-     * to the already-stored {@link AssetCategoryType}.
+     * Returns {@code true} when the given {@link AssetCategoryTypeRequest} carries the same data as
+     * the already-stored {@link AssetCategoryType}.
      */
-    private boolean isAssetCategoryTypeUnchanged(AssetCategoryTypeRequest request, AssetCategoryType existing) {
-        boolean unchanged = request.equals(assetMapper.toAssetCategoryTypeRequest(existing));
-        log.debug("Asset category type unchanged check: code={}, unchanged={}", existing.getCode(), unchanged);
-        return unchanged;
+    private boolean isAssetCategoryTypeSame(AssetCategoryTypeRequest request, AssetCategoryType existing) {
+        boolean same = request.equals(assetMapper.toAssetCategoryTypeRequest(existing));
+        log.debug("Asset category type same check: code={}, same={}", existing.getCode(), same);
+        return same;
     }
 
     /**
@@ -364,11 +360,11 @@ public class InvestmentAssetUniverseService {
     }
 
     /**
-     * Returns a normalised copy of the asset for equality comparison (trims {@code name} and
-     * {@code description}, normalises empty {@code extraData} to {@code null}).
+     * Returns a normalized copy of the asset for same-check comparison (trims {@code name} and
+     * {@code description}, normalizes empty {@code extraData} to {@code null}).
      * Does not mutate the original.
      */
-    private com.backbase.stream.investment.Asset normaliseForComparison(
+    private com.backbase.stream.investment.Asset normalizeAsset(
         com.backbase.stream.investment.Asset asset) {
         if (asset == null) {
             return null;
@@ -388,12 +384,12 @@ public class InvestmentAssetUniverseService {
      *
      * @return {@code true} if both lists contain exactly the same codes
      */
-    private boolean isCategoriesUnchanged(List<String> existingCategories, List<String> desiredCategories) {
+    private boolean areCategoriesSame(List<String> existingCategories, List<String> desiredCategories) {
         List<String> existing = Objects.requireNonNullElse(existingCategories, List.of());
         List<String> desired = Objects.requireNonNullElse(desiredCategories, List.of());
         boolean same = existing.size() == desired.size()
             && new java.util.HashSet<>(existing).containsAll(desired);
-        log.debug("Categories check: existing={}, desired={}, unchanged={}", existing, desired, same);
+        log.debug("Categories same check: existing={}, desired={}, same={}", existing, desired, same);
         return same;
     }
 
@@ -402,7 +398,7 @@ public class InvestmentAssetUniverseService {
      * No-ops when {@code desiredFilename} is {@code null}; requires upload when
      * {@code existingUri} is {@code null}; otherwise checks that the URI contains the filename.
      */
-    private boolean isFileUnchanged(URI existingUri, String desiredFilename) {
+    private boolean isFileSame(URI existingUri, String desiredFilename) {
         if (desiredFilename == null) {
             return true;
         }
@@ -410,7 +406,7 @@ public class InvestmentAssetUniverseService {
             return false;
         }
         boolean same = existingUri.toString().contains(desiredFilename);
-        log.debug("File unchanged check: desiredFilename='{}', existingUri='{}'", desiredFilename, existingUri);
+        log.debug("File same check: desiredFilename='{}', existingUri='{}'", desiredFilename, existingUri);
         return same;
     }
 
@@ -436,10 +432,10 @@ public class InvestmentAssetUniverseService {
                 .map(c -> {
                     log.info("Asset category already exists for code: {}", assetCategoryEntry.getCode());
                     // Compare content fields; uuid/image/imageResource are excluded and image is
-                    // checked separately via isFileUnchanged().
+                    // checked separately via isFileSame().
                     AssetCategoryEntry existingEntry = assetMapper.toAssetCategoryEntry(c);
 
-                    if (isAssetCategoryUnchanged(assetCategoryEntry, existingEntry, c.getImage())) {
+                    if (isAssetCategorySame(assetCategoryEntry, existingEntry, c.getImage())) {
                         log.info("Skipping asset category patch - no changes detected for code: {}",
                             assetCategoryEntry.getCode());
                         // Return a non-empty Mono so that switchIfEmpty is NOT triggered.
@@ -520,8 +516,8 @@ public class InvestmentAssetUniverseService {
                         log.info("Asset category type already exists for code: {}",
                             assetCategoryTypeRequest.getCode());
                         AssetCategoryType existingType = matchingType.get();
-                        // Skip update if data is identical to what is stored.
-                        if (isAssetCategoryTypeUnchanged(assetCategoryTypeRequest, existingType)) {
+                        // Skip update if data is the same as what is stored.
+                        if (isAssetCategoryTypeSame(assetCategoryTypeRequest, existingType)) {
                             log.info("Skipping asset category type update - no changes detected for code: {}",
                                 assetCategoryTypeRequest.getCode());
                             return Mono.just(existingType);
