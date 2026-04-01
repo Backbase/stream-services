@@ -46,7 +46,7 @@ public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
 
         log.info("Started ingestion of contacts for Type {}", item.getAccessContext().getScope());
         // Acquire the permit on boundedElastic to avoid blocking the event-loop thread,
-        // then execute the API call. doFinally releases the permit on complete/error/cancel.
+        // then execute the API call. `doFinally` releases the permit on complete/error/cancel.
         Mono<ContactsBulkPostResponseBody> insert = sequential ? sequentialContactsInsert(item) : contactsInsert(item);
         return insert
             .map(contactsBulkPostResponse -> {
@@ -57,11 +57,9 @@ public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
             })
             .doOnError(throwable -> {
                 if (throwable instanceof WebClientResponseException ex) {
-                    log.warn("Execute contacts POST client failed (falling back to PATCH client): status={}, body={}",
-                        ex.getStatusCode(), ex.getResponseBodyAsString());
+                    log.warn("Execute contacts POST client failed: status={}, body={}", ex.getStatusCode(), ex.getResponseBodyAsString());
                 } else {
-                    log.warn("Execute contacts POST client failed (falling back to PATCH client): {}",
-                        throwable.getMessage());
+                    log.warn("Execute contacts POST client failed: {}", throwable.getMessage());
                 }
             })
             .onErrorResume(throwable -> {
