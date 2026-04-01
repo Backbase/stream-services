@@ -94,7 +94,7 @@ public class InvestmentAssetUniverseService {
      * @param categoryIdByCode category UUID lookup map keyed by code
      * @return the existing, patched, or newly created asset
      */
-    public Mono<com.backbase.stream.investment.Asset> getOrCreateAsset(com.backbase.stream.investment.Asset asset,
+    public Mono<com.backbase.stream.investment.Asset> upsertAsset(com.backbase.stream.investment.Asset asset,
         Map<String, UUID> categoryIdByCode) {
         log.debug("Creating asset: {}", asset);
 
@@ -224,7 +224,14 @@ public class InvestmentAssetUniverseService {
             ));
     }
 
-    public Flux<com.backbase.stream.investment.Asset> createAssets(List<com.backbase.stream.investment.Asset> assets) {
+    /**
+     * Upserts a list of assets: patches each if changed, creates if not found.
+     * Deduplicates by key before processing and limits concurrency to 5.
+     *
+     * @param assets the desired asset states
+     * @return the existing, patched, or newly created assets
+     */
+    public Flux<com.backbase.stream.investment.Asset> upsertAssets(List<com.backbase.stream.investment.Asset> assets) {
         if (CollectionUtils.isEmpty(assets)) {
             return Flux.empty();
         }
@@ -249,7 +256,7 @@ public class InvestmentAssetUniverseService {
                     ));
                 // Limit concurrency to 5 to prevent overwhelming the service and triggering 503 errors
                 return Flux.fromIterable(uniqueAssets.values())
-                    .flatMap(asset -> this.getOrCreateAsset(asset, categoryIdByCode)
+                    .flatMap(asset -> this.upsertAsset(asset, categoryIdByCode)
                         .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
                             .filter(this::isRetryableError)
                             .doBeforeRetry(signal -> log.warn(
@@ -403,7 +410,7 @@ public class InvestmentAssetUniverseService {
             return false;
         }
         boolean same = existingUri.toString().contains(desiredFilename);
-        log.debug("File unchanged check: desiredFilename='{}', existingUri contains it={}", desiredFilename, same);
+        log.debug("File unchanged check: desiredFilename='{}', existingUri='{}'", desiredFilename, existingUri);
         return same;
     }
 

@@ -250,11 +250,11 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     // =========================================================================
-    // getOrCreateAsset
+    // upsertAsset
     // =========================================================================
 
     /**
-     * Tests for {@link InvestmentAssetUniverseService#getOrCreateAsset}.
+     * Tests for {@link InvestmentAssetUniverseService#upsertAsset}.
      *
      * <p>Covers:
      * <ul>
@@ -267,12 +267,12 @@ class InvestmentAssetUniverseServiceTest {
      * </ul>
      */
     @Nested
-    @DisplayName("getOrCreateAsset")
-    class GetOrCreateAssetTests {
+    @DisplayName("upsertAsset")
+    class UpsertAssetTests {
 
         @Test
         @DisplayName("asset already exists with identical data and no logo configured — patchAsset is skipped")
-        void getOrCreateAsset_assetExistsUnchangedNoLogo_patchSkipped() {
+        void upsertAsset_assetExistsUnchangedNoLogo_patchSkipped() {
             // Arrange — desired asset has no logo, data fields identical → skip
             com.backbase.stream.investment.Asset req = buildAsset(); // logo=null
             com.backbase.investment.api.service.v1.model.Asset existingApiAsset =
@@ -283,7 +283,7 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(existingApiAsset));
             when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
 
-            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+            StepVerifier.create(service.upsertAsset(req, Map.of()))
                 .expectNextMatches(a -> "ABC123".equals(a.getIsin()))
                 .verifyComplete();
 
@@ -294,7 +294,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("asset exists, logo filename found in server URI — patchAsset is skipped")
-        void getOrCreateAsset_assetExistsLogoFilenameInServerUri_patchSkipped() {
+        void upsertAsset_assetExistsLogoFilenameInServerUri_patchSkipped() {
             // Arrange — server returns a signed URI that contains the desired logo filename
             com.backbase.stream.investment.Asset req = buildAsset();
             req.setLogo("apple.png"); // desired filename
@@ -309,7 +309,7 @@ class InvestmentAssetUniverseServiceTest {
             when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert — URI contains "apple.png" → logo unchanged → skip
-            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+            StepVerifier.create(service.upsertAsset(req, Map.of()))
                 .expectNextMatches(a -> "ABC123".equals(a.getIsin()))
                 .verifyComplete();
 
@@ -320,7 +320,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("asset exists, logo filename NOT in server URI — patchAsset IS called")
-        void getOrCreateAsset_assetExistsLogoFilenameNotInServerUri_patchCalled() {
+        void upsertAsset_assetExistsLogoFilenameNotInServerUri_patchCalled() {
             // Arrange — server URI contains "old-logo.png", desired is "new-logo.png"
             com.backbase.stream.investment.Asset req = buildAsset();
             req.setLogo("new-logo.png");
@@ -338,7 +338,7 @@ class InvestmentAssetUniverseServiceTest {
             when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert — URI does not contain "new-logo.png" → patch IS called
-            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+            StepVerifier.create(service.upsertAsset(req, Map.of()))
                 .expectNextMatches(a -> "ABC123".equals(a.getIsin()))
                 .verifyComplete();
 
@@ -348,7 +348,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("asset exists, logo desired but server has no logo URI yet — patchAsset IS called")
-        void getOrCreateAsset_assetExistsLogoDesiredButNoServerUri_patchCalled() {
+        void upsertAsset_assetExistsLogoDesiredButNoServerUri_patchCalled() {
             // Arrange — logo configured but server has no URI yet (logo never uploaded)
             com.backbase.stream.investment.Asset req = buildAsset();
             req.setLogo("apple.png");
@@ -366,7 +366,7 @@ class InvestmentAssetUniverseServiceTest {
             when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert — logo desired but none stored → patch IS called
-            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+            StepVerifier.create(service.upsertAsset(req, Map.of()))
                 .expectNextMatches(a -> "ABC123".equals(a.getIsin()))
                 .verifyComplete();
 
@@ -376,7 +376,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("asset already exists — patchAsset is called and mapped asset returned")
-        void getOrCreateAsset_assetExists_patchCalledAndMappedReturned() {
+        void upsertAsset_assetExists_patchCalledAndMappedReturned() {
             // Arrange — req carries a name that existingApiAsset does not, so data differs and patch is triggered
             com.backbase.stream.investment.Asset req = buildAsset();
             req.setName("Updated Name"); // differs from existingApiAsset (null name) → triggers patch
@@ -394,7 +394,7 @@ class InvestmentAssetUniverseServiceTest {
             when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert
-            StepVerifier.create(service.getOrCreateAsset(req, null))
+            StepVerifier.create(service.upsertAsset(req, null))
                 .expectNextMatches(a -> "ABC123".equals(a.getIsin())
                     && "market".equals(a.getMarket())
                     && "USD".equals(a.getCurrency()))
@@ -406,7 +406,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("asset not found (404) — createAsset is called and created asset returned")
-        void getOrCreateAsset_assetNotFound_createCalledAndReturned() {
+        void upsertAsset_assetNotFound_createCalledAndReturned() {
             // Arrange
             com.backbase.stream.investment.Asset req = buildAsset();
             com.backbase.stream.investment.Asset created = buildAsset();
@@ -417,7 +417,7 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(created));
 
             // Act & Assert
-            StepVerifier.create(service.getOrCreateAsset(req, Map.of()))
+            StepVerifier.create(service.upsertAsset(req, Map.of()))
                 .expectNext(created)
                 .verifyComplete();
 
@@ -431,7 +431,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("non-404 error from getAsset — error propagated")
-        void getOrCreateAsset_nonNotFoundError_propagated() {
+        void upsertAsset_nonNotFoundError_propagated() {
             // Arrange
             com.backbase.stream.investment.Asset req = buildAsset();
 
@@ -440,7 +440,7 @@ class InvestmentAssetUniverseServiceTest {
             when(investmentRestAssetUniverseService.createAsset(any(), any())).thenReturn(Mono.empty());
 
             // Act & Assert
-            StepVerifier.create(service.getOrCreateAsset(req, null))
+            StepVerifier.create(service.upsertAsset(req, null))
                 .expectErrorMatches(e -> e instanceof RuntimeException && "API error".equals(e.getMessage()))
                 .verify();
 
@@ -454,7 +454,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("asset not found and createAsset fails — error propagated")
-        void getOrCreateAsset_notFoundAndCreateFails_errorPropagated() {
+        void upsertAsset_notFoundAndCreateFails_errorPropagated() {
             // Arrange
             com.backbase.stream.investment.Asset req = buildAsset();
 
@@ -464,14 +464,14 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.error(new RuntimeException("create failed")));
 
             // Act & Assert
-            StepVerifier.create(service.getOrCreateAsset(req, null))
+            StepVerifier.create(service.upsertAsset(req, null))
                 .expectErrorMatches(e -> e instanceof RuntimeException && "create failed".equals(e.getMessage()))
                 .verify();
         }
 
         @Test
         @DisplayName("asset not found and createAsset returns empty — completes empty")
-        void getOrCreateAsset_notFoundAndCreateReturnsEmpty_completesEmpty() {
+        void upsertAsset_notFoundAndCreateReturnsEmpty_completesEmpty() {
             // Arrange
             com.backbase.stream.investment.Asset req = buildAsset();
 
@@ -481,21 +481,21 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.empty());
 
             // Act & Assert
-            StepVerifier.create(service.getOrCreateAsset(req, null))
+            StepVerifier.create(service.upsertAsset(req, null))
                 .verifyComplete();
         }
 
         @Test
         @DisplayName("null asset request — NullPointerException thrown")
-        void getOrCreateAsset_nullRequest_throwsNullPointerException() {
-            StepVerifier.create(Mono.defer(() -> service.getOrCreateAsset(null, null)))
+        void upsertAsset_nullRequest_throwsNullPointerException() {
+            StepVerifier.create(Mono.defer(() -> service.upsertAsset(null, null)))
                 .expectError(NullPointerException.class)
                 .verify();
         }
 
         @Test
         @DisplayName("createAsset fails with WebClientResponseException — error propagated")
-        void getOrCreateAsset_createFailsWithWebClientException_errorPropagated() {
+        void upsertAsset_createFailsWithWebClientException_errorPropagated() {
             // Arrange
             com.backbase.stream.investment.Asset req = buildAsset();
 
@@ -505,7 +505,7 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.error(serverError(500)));
 
             // Act & Assert
-            StepVerifier.create(service.getOrCreateAsset(req, null))
+            StepVerifier.create(service.upsertAsset(req, null))
                 .expectErrorMatches(e -> e instanceof WebClientResponseException
                     && ((WebClientResponseException) e).getStatusCode().value() == 500)
                 .verify();
@@ -1262,28 +1262,28 @@ class InvestmentAssetUniverseServiceTest {
     }
 
     // =========================================================================
-    // createAssets
+    // upsertAssets
     // =========================================================================
 
     /**
-     * Tests for {@link InvestmentAssetUniverseService#createAssets(List)}.
+     * Tests for {@link InvestmentAssetUniverseService#upsertAssets(List)}.
      *
      * <p>Covers:
      * <ul>
      *   <li>Null list → returns Flux.empty() without calling API</li>
      *   <li>Empty list → returns Flux.empty() without calling API</li>
-     *   <li>Non-empty list → listAssetCategories called and each asset processed via getOrCreateAsset</li>
+     *   <li>Non-empty list → listAssetCategories called and each asset processed via upsertAsset</li>
      * </ul>
      */
     @Nested
-    @DisplayName("createAssets")
-    class CreateAssetsTests {
+    @DisplayName("upsertAssets")
+    class UpsertAssetsTests {
 
         @Test
         @DisplayName("null asset list — returns empty Flux without calling any API")
-        void createAssets_nullList_returnsEmptyFlux() {
+        void upsertAssets_nullList_returnsEmptyFlux() {
             // Act & Assert
-            StepVerifier.create(service.createAssets(null))
+            StepVerifier.create(service.upsertAssets(null))
                 .verifyComplete();
 
             verify(assetUniverseApi, never()).listAssetCategories(any(), any(), any(), any(), any(), any());
@@ -1291,9 +1291,9 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("empty asset list — returns empty Flux without calling any API")
-        void createAssets_emptyList_returnsEmptyFlux() {
+        void upsertAssets_emptyList_returnsEmptyFlux() {
             // Act & Assert
-            StepVerifier.create(service.createAssets(List.of()))
+            StepVerifier.create(service.upsertAssets(List.of()))
                 .verifyComplete();
 
             verify(assetUniverseApi, never()).listAssetCategories(any(), any(), any(), any(), any(), any());
@@ -1301,7 +1301,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("non-empty list — listAssetCategories called and each asset processed")
-        void createAssets_nonEmptyList_listCategoriesCalledAndAssetsProcessed() {
+        void upsertAssets_nonEmptyList_listCategoriesCalledAndAssetsProcessed() {
             // Arrange
             com.backbase.stream.investment.Asset assetReq = buildAsset();
             com.backbase.stream.investment.Asset created = buildAsset();
@@ -1314,7 +1314,7 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(created));
 
             // Act & Assert
-            StepVerifier.create(service.createAssets(List.of(assetReq)))
+            StepVerifier.create(service.upsertAssets(List.of(assetReq)))
                 .expectNextCount(1)
                 .verifyComplete();
 
@@ -1323,7 +1323,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("duplicate asset keys in input — deduplicated, only one asset processed")
-        void createAssets_duplicateAssetKeys_deduplicatedAndProcessedOnce() {
+        void upsertAssets_duplicateAssetKeys_deduplicatedAndProcessedOnce() {
             // Arrange — two distinct instances with the same isin+market+currency key
             com.backbase.stream.investment.Asset asset1 = buildAsset(); // key: ABC123_market_USD
             com.backbase.stream.investment.Asset asset2 = buildAsset(); // same key
@@ -1336,7 +1336,7 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(asset1));
 
             // Act & Assert — only one element emitted despite two inputs
-            StepVerifier.create(service.createAssets(List.of(asset1, asset2)))
+            StepVerifier.create(service.upsertAssets(List.of(asset1, asset2)))
                 .expectNextCount(1)
                 .verifyComplete();
 
@@ -1346,7 +1346,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("multiple distinct assets — all assets processed and emitted")
-        void createAssets_multipleDistinctAssets_allAssetsProcessed() {
+        void upsertAssets_multipleDistinctAssets_allAssetsProcessed() {
             // Arrange
             com.backbase.stream.investment.Asset assetA = buildAsset("ISINA", "XNAS", "USD");
             com.backbase.stream.investment.Asset assetB = buildAsset("ISINB", "XAMS", "EUR");
@@ -1363,7 +1363,7 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(assetB));
 
             // Act & Assert
-            StepVerifier.create(service.createAssets(List.of(assetA, assetB)))
+            StepVerifier.create(service.upsertAssets(List.of(assetA, assetB)))
                 .expectNextCount(2)
                 .verifyComplete();
 
@@ -1372,7 +1372,7 @@ class InvestmentAssetUniverseServiceTest {
 
         @Test
         @DisplayName("listAssetCategories returns page with null results — empty Flux returned without processing assets")
-        void createAssets_listCategoriesReturnsNullResults_returnsEmptyFlux() {
+        void upsertAssets_listCategoriesReturnsNullResults_returnsEmptyFlux() {
             // Arrange — the second filter(Objects::nonNull) in the chain stops execution when results is null
             com.backbase.stream.investment.Asset assetReq = buildAsset();
             PaginatedAssetCategoryList nullResultPage = new PaginatedAssetCategoryList();
@@ -1382,15 +1382,15 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(nullResultPage));
 
             // Act & Assert
-            StepVerifier.create(service.createAssets(List.of(assetReq)))
+            StepVerifier.create(service.upsertAssets(List.of(assetReq)))
                 .verifyComplete();
 
             verify(investmentRestAssetUniverseService, never()).createAsset(any(), any());
         }
 
         @Test
-        @DisplayName("asset already exists — patchAsset called within createAssets, existing asset returned")
-        void createAssets_assetAlreadyExists_patchCalledAndReturned() {
+        @DisplayName("asset already exists — patchAsset called within upsertAssets, existing asset returned")
+        void upsertAssets_assetAlreadyExists_patchCalledAndReturned() {
             // Arrange — req carries a name that existingApiAsset does not, so data differs and patch is triggered
             com.backbase.stream.investment.Asset req = buildAsset();
             req.setName("Updated Name"); // differs from existingApiAsset (null name) → triggers patch
@@ -1409,7 +1409,7 @@ class InvestmentAssetUniverseServiceTest {
                 .thenReturn(Mono.just(req));
 
             // Act & Assert — patched asset (req) is emitted
-            StepVerifier.create(service.createAssets(List.of(req)))
+            StepVerifier.create(service.upsertAssets(List.of(req)))
                 .expectNextMatches(a -> "ABC123".equals(a.getIsin())
                     && "market".equals(a.getMarket())
                     && "USD".equals(a.getCurrency()))
@@ -1568,6 +1568,4 @@ class InvestmentAssetUniverseServiceTest {
         return page;
     }
 }
-
-
 
