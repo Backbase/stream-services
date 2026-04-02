@@ -7,21 +7,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.core.io.Resource;
 
 /**
  * Lightweight projection of {@link com.backbase.investment.api.service.v1.model.Asset} that keeps the DTO immutable
  * while providing helpers to translate to/from the generated model.
  */
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@Builder(toBuilder = true)
+@EqualsAndHashCode(exclude = {"uuid", "logo", "logoFile", "categories"})
 public class Asset implements AssetKey {
 
     private UUID uuid;

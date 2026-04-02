@@ -217,7 +217,7 @@ class InvestmentAssetUniverseSagaTest {
                     verify(assetUniverseService, never()).upsertMarketSpecialDay(any());
                     verify(assetUniverseService, never()).upsertAssetCategoryType(any());
                     verify(assetUniverseService, never()).upsertAssetCategory(any());
-                    verify(assetUniverseService, never()).createAssets(any());
+                    verify(assetUniverseService, never()).upsertAssets(any());
                     verify(investmentAssetPriceService, never()).ingestPrices(any(), any());
                     verify(investmentIntradayAssetPriceService, never()).ingestIntradayPrices();
                 })
@@ -673,19 +673,19 @@ class InvestmentAssetUniverseSagaTest {
     }
 
     // =========================================================================
-    // createAssets
+    // upsertAssets
     // =========================================================================
 
     /**
-     * Tests for the {@code createAssets} stage of the saga pipeline.
+     * Tests for the {@code upsertAssets} stage of the saga pipeline.
      *
      * <p>The stage follows asset categories. An empty asset list must short-circuit without
-     * calling {@link InvestmentAssetUniverseService#createAssets}, while a non-empty list
+     * calling {@link InvestmentAssetUniverseService#upsertAssets}, while a non-empty list
      * must delegate to the service and store the resulting assets on the task.
      */
     @Nested
-    @DisplayName("createAssets")
-    class CreateAssetsTests {
+    @DisplayName("upsertAssets")
+    class UpsertAssetsTests {
 
         /**
          * Verifies that when the asset list is empty, the saga skips asset creation
@@ -693,7 +693,7 @@ class InvestmentAssetUniverseSagaTest {
          */
         @Test
         @DisplayName("should skip asset creation and set COMPLETED when asset list is empty")
-        void createAssets_emptyList_setsCompleted() {
+        void upsertAssets_emptyList_setsCompleted() {
             InvestmentAssetsTask task = createMinimalTask();
 
             when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
@@ -707,19 +707,19 @@ class InvestmentAssetUniverseSagaTest {
                 .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
                 .verifyComplete();
 
-            verify(assetUniverseService, never()).createAssets(anyList());
+            verify(assetUniverseService, never()).upsertAssets(anyList());
         }
 
         /**
-         * Verifies that when assets are present, {@code createAssets} is invoked and
+         * Verifies that when assets are present, {@code upsertAssets} is invoked and
          * the task completes with {@link State#COMPLETED}.
          */
         @Test
-        @DisplayName("should create assets and set them on the task on success")
-        void createAssets_success() {
+        @DisplayName("should upsert assets and set them on the task on success")
+        void upsertAssets_success() {
             InvestmentAssetsTask task = createTaskWithAssets();
 
-            when(assetUniverseService.createAssets(anyList()))
+            when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
             when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -734,15 +734,15 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that a failure in {@code createAssets} causes the task to be marked
+         * Verifies that a failure in {@code upsertAssets} causes the task to be marked
          * {@link State#FAILED} without propagating an error signal.
          */
         @Test
-        @DisplayName("should propagate error and mark task FAILED when asset creation fails")
-        void createAssets_error_marksTaskFailed() {
+        @DisplayName("should propagate error and mark task FAILED when asset upsert fails")
+        void upsertAssets_error_marksTaskFailed() {
             InvestmentAssetsTask task = createTaskWithAssets();
 
-            when(assetUniverseService.createAssets(anyList()))
+            when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.error(new RuntimeException("Asset creation failure")));
 
             StepVerifier.create(saga.executeTask(task))
@@ -775,7 +775,7 @@ class InvestmentAssetUniverseSagaTest {
             InvestmentAssetsTask task = createTaskWithAssets();
             GroupResult groupResult = new GroupResult(UUID.randomUUID(), "PENDING", null);
 
-            when(assetUniverseService.createAssets(anyList()))
+            when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
             when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
                 .thenReturn(Mono.just(List.of(groupResult)));
@@ -798,7 +798,7 @@ class InvestmentAssetUniverseSagaTest {
         void upsertPrices_emptyGroupResults() {
             InvestmentAssetsTask task = createTaskWithAssets();
 
-            when(assetUniverseService.createAssets(anyList()))
+            when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
             when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -820,7 +820,7 @@ class InvestmentAssetUniverseSagaTest {
         void upsertPrices_error_marksTaskFailed() {
             InvestmentAssetsTask task = createTaskWithAssets();
 
-            when(assetUniverseService.createAssets(anyList()))
+            when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
             when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
                 .thenReturn(Mono.error(new RuntimeException("Price ingestion failure")));
@@ -878,7 +878,7 @@ class InvestmentAssetUniverseSagaTest {
             InvestmentAssetsTask task = createTaskWithAssets();
             GroupResult groupResult = new GroupResult(UUID.randomUUID(), "SUCCESS", null);
 
-            when(assetUniverseService.createAssets(anyList()))
+            when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
             when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
                 .thenReturn(Mono.just(List.of(groupResult)));
@@ -901,7 +901,7 @@ class InvestmentAssetUniverseSagaTest {
         void createIntradayPrices_error_marksTaskFailed() {
             InvestmentAssetsTask task = createTaskWithAssets();
 
-            when(assetUniverseService.createAssets(anyList()))
+            when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
             when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -923,7 +923,7 @@ class InvestmentAssetUniverseSagaTest {
         void createIntradayPrices_asyncCheckFails_marksTaskFailed() {
             InvestmentAssetsTask task = createTaskWithAssets();
 
-            when(assetUniverseService.createAssets(anyList()))
+            when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
             when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -1060,7 +1060,7 @@ class InvestmentAssetUniverseSagaTest {
      * Configures all mocked services to return successful responses for a fully populated task.
      * Intended for use with {@link #createFullTask()} in end-to-end happy-path tests.
      *
-     * @param task the task whose asset list is used to stub {@code createAssets}
+     * @param task the task whose asset list is used to stub {@code upsertAssets}
      */
     private void stubAllServicesSuccess(InvestmentAssetsTask task) {
         when(investmentCurrencyService.upsertCurrencies(anyList()))
@@ -1080,7 +1080,7 @@ class InvestmentAssetUniverseSagaTest {
             .thenReturn(Mono.just(
                 new com.backbase.investment.api.service.sync.v1.model.AssetCategory()
                     .name("TECH")));
-        when(assetUniverseService.createAssets(anyList()))
+        when(assetUniverseService.upsertAssets(anyList()))
             .thenReturn(Flux.fromIterable(task.getData().getAssets()));
         when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
             .thenReturn(Mono.just(Collections.emptyList()));

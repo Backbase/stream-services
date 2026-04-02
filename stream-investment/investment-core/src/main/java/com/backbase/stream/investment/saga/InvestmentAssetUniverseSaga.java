@@ -80,7 +80,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
             .flatMap(this::upsertMarketSpecialDays)
             .flatMap(this::upsertAssetCategoryTypes)
             .flatMap(this::upsertAssetCategories)
-            .flatMap(this::createAssets)
+            .flatMap(this::upsertAssets)
             .flatMap(this::upsertPrices)
             .flatMap(this::createIntradayPrices)
             .doOnSuccess(completedTask -> log.info(
@@ -116,7 +116,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
     private Mono<InvestmentAssetsTask> upsertCurrencies(InvestmentAssetsTask investmentTask) {
         InvestmentAssetData investmentData = investmentTask.getData();
         int currencyCount = investmentData.getCurrencies() != null ? investmentData.getCurrencies().size() : 0;
-        log.info("Starting investment currency creation: taskId={}, currencies={}",
+        log.info("Starting investment currency creation: taskId={}, currencyCount={}",
             investmentTask.getId(), currencyCount);
         // Log the start of market creation and set task state to IN_PROGRESS
         investmentTask.info(INVESTMENT, OP_CREATE, null, investmentTask.getName(), investmentTask.getId(),
@@ -136,12 +136,12 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
                     investmentTask.getId(),
                     OP_UPSERT + " " + currencies.size() + " Investment Currencies");
                 investmentTask.setState(State.COMPLETED);
-                log.info("Successfully processed all currencies: taskId={}, marketCount={}",
+                log.info("Successfully processed all currencies: taskId={}, currencyCount={}",
                     investmentTask.getId(), currencies.size());
                 return investmentTask;
             })
             .doOnError(throwable -> {
-                log.error("Failed to create/upsert investment currencies: taskId={}, marketCount={}",
+                log.error("Failed to create/upsert investment currencies: taskId={}, currencyCount={}",
                     investmentTask.getId(), currencyCount, throwable);
                 investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
                     investmentTask.getId(),
@@ -363,13 +363,13 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
     }
 
     /**
-     * Creates investment assets by invoking the asset universe service for each asset in the task data. Updates the
+     * Upserts investment assets by invoking the asset universe service for each asset in the task data. Updates the
      * task state and logs progress for observability.
      *
      * @param investmentTask the investment task containing asset data
      * @return Mono<InvestmentTask> with updated assets and state
      */
-    public Mono<InvestmentAssetsTask> createAssets(InvestmentAssetsTask investmentTask) {
+    public Mono<InvestmentAssetsTask> upsertAssets(InvestmentAssetsTask investmentTask) {
         InvestmentAssetData investmentData = investmentTask.getData();
         int assetCount = investmentData.getAssets() != null ? investmentData.getAssets().size() : 0;
 
@@ -387,7 +387,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
             return Mono.just(investmentTask);
         }
         // Process each asset: create or get from asset universe service
-        return assetUniverseService.createAssets(investmentData.getAssets())
+        return assetUniverseService.upsertAssets(investmentData.getAssets())
             .collectList()
             .doOnSuccess(assets -> {
                 investmentTask.setAssets(assets);

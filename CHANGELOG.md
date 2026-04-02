@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.10.0]
+### Changed
+- Investment service
+  - avoid redundant API calls by checking for unchanged data before patch/update for markets, market special days, asset category types, asset categories, assets and currencies
+  - improve structured logging across investment upsert operations and renamed few methods
+
 ## [9.8.0]
 ### Changed
 - Create investment data based on exists entries in system

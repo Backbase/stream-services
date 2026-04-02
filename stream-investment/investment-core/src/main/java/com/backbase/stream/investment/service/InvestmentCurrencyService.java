@@ -68,6 +68,14 @@ public class InvestmentCurrencyService {
                 .findFirst())
             .flatMap(existingCurrency -> {
                 if (existingCurrency.isPresent()) {
+                    Currency existing = existingCurrency.get();
+                    // Skip the update entirely when name and symbol are unchanged — the code is the
+                    // lookup key and cannot change without a delete/re-create cycle anyway.
+                    if (Objects.equals(existing.getName(), currency.getName())
+                        && Objects.equals(existing.getSymbol(), currency.getSymbol())) {
+                        log.info("Currency unchanged - skipping update: code='{}'", currency.getCode());
+                        return Mono.just(existing);
+                    }
                     log.info("Currency already exists: code='{}', updating", currency.getCode());
                     return updateCurrency(currency);
                 } else {
