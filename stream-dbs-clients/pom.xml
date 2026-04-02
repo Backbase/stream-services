@@ -238,7 +238,7 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>0.17.66</version>
+                <version>0.18.0</version>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-datagroup-service-api-v1-code</id>
