@@ -12,4 +12,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class ContactsWorkerConfigurationProperties extends StreamWorkerConfiguration {
     private boolean continueOnError;
+
+    /**
+     * When {@code true} (default), calls to {@code postContactsBulk} are executed sequentially
+     * using a semaphore, even when {@code executeTask} is invoked concurrently.
+     * Set to {@code false} to allow fully concurrent bulk-contact API calls.
+     */
+    private boolean sequentialContactsBulk = true;
+
+    private int semaphorePermitsCount = 1;
+
 }
