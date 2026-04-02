@@ -265,7 +265,7 @@ class ArrangementServiceTest {
         String internalId = "internal_id";
 
         ArrangementItem arrangementItem = new ArrangementItem().id("acct_arr_item_id");
-        when(arrangementsApi.getArrangementById(internalId, false)).thenReturn(Mono.just(arrangementItem));
+        when(arrangementsApi.getArrangementById(internalId, false, null)).thenReturn(Mono.just(arrangementItem));
 
         StepVerifier.create(arrangementService.getArrangement(internalId))
             .assertNext(response -> {
@@ -273,7 +273,7 @@ class ArrangementServiceTest {
                 Assertions.assertEquals(response.getId(), arrangementItem.getId());
             }).verifyComplete();
 
-        verify(arrangementsApi).getArrangementById(internalId, false);
+        verify(arrangementsApi).getArrangementById(internalId, false, null);
     }
 
     @Test
@@ -282,11 +282,11 @@ class ArrangementServiceTest {
 
         WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.NOT_FOUND,
             "Arrangement Not Found");
-        when(arrangementsApi.getArrangementById(internalId, false)).thenReturn(Mono.error(webClientResponseException));
+        when(arrangementsApi.getArrangementById(internalId, false, null)).thenReturn(Mono.error(webClientResponseException));
 
         StepVerifier.create(arrangementService.getArrangement(internalId)).verifyComplete();
 
-        verify(arrangementsApi).getArrangementById(internalId, false);
+        verify(arrangementsApi).getArrangementById(internalId, false, null);
     }
 
     @Test
@@ -401,14 +401,14 @@ class ArrangementServiceTest {
         arrangementsDeleteResponseElement.setValue(arrangementItem.getExternalArrangementId());
         arrangementsDeleteResponseElement.setSelector(ArrangementsDeleteResponseElement.SelectorEnum.EXTERNAL_ID);
 
-        when(arrangementsApi.getArrangementById(arrangementInternalId, false)).thenReturn(Mono.just(arrangementItem));
+        when(arrangementsApi.getArrangementById(arrangementInternalId, false, null)).thenReturn(Mono.just(arrangementItem));
         when(arrangementsApi.postDelete(arrangementsDeleteItemSet)).thenReturn(
             Flux.just(arrangementsDeleteResponseElement));
 
         StepVerifier.create(arrangementService.deleteArrangementByInternalId(arrangementInternalId))
             .expectNext(arrangementInternalId).verifyComplete();
 
-        verify(arrangementsApi).getArrangementById(arrangementInternalId, false);
+        verify(arrangementsApi).getArrangementById(arrangementInternalId, false, null);
         verify(arrangementsApi).postDelete(arrangementsDeleteItemSet);
     }
 
@@ -419,13 +419,13 @@ class ArrangementServiceTest {
         WebClientResponseException webClientResponseException = buildWebClientResponseException(
             HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
 
-        when(arrangementsApi.getArrangementById(arrangementInternalId, false)).thenReturn(
+        when(arrangementsApi.getArrangementById(arrangementInternalId, false, null)).thenReturn(
             Mono.error(webClientResponseException));
 
         StepVerifier.create(arrangementService.deleteArrangementByInternalId(arrangementInternalId))
             .expectNext(arrangementInternalId).verifyComplete();
 
-        verify(arrangementsApi).getArrangementById(arrangementInternalId, false);
+        verify(arrangementsApi).getArrangementById(arrangementInternalId, false, null);
         verify(arrangementsApi, times(0)).postDelete(anySet());
     }
 
@@ -435,7 +435,7 @@ class ArrangementServiceTest {
 
         ArrangementItem accountArrangementItem = new ArrangementItem().externalArrangementId("ext_arr_id");
 
-        when(arrangementsApi.getArrangementById(arrangementInternalId, false)).thenReturn(
+        when(arrangementsApi.getArrangementById(arrangementInternalId, false, null)).thenReturn(
             Mono.just(accountArrangementItem));
         WebClientResponseException webClientResponseException = buildWebClientResponseException(
             HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
@@ -453,7 +453,7 @@ class ArrangementServiceTest {
                 Assertions.assertEquals("500 Some error", e.getMessage());
             }).verify();
 
-        verify(arrangementsApi).getArrangementById(arrangementInternalId, false);
+        verify(arrangementsApi).getArrangementById(arrangementInternalId, false, null);
         verify(arrangementsApi).postDelete(arrangementsDeleteItemSet);
     }
 
