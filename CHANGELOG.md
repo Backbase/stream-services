@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [9.9.1]
+## [9.10.0]
 ### Changed
 - Investment service
   - avoid redundant API calls by checking for unchanged data before patch/update for markets, market special days, asset category types, asset categories, assets and currencies
