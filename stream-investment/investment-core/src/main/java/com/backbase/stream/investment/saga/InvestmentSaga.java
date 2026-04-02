@@ -17,6 +17,7 @@ import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
+import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.StreamTask.State;
@@ -79,6 +80,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
     private final InvestmentClientService clientService;
     private final InvestmentRiskAssessmentService investmentRiskAssessmentService;
+    private final InvestmentRiskQuestionaryService investmentRiskQuestionaryService;
     private final InvestmentPortfolioService investmentPortfolioService;
     private final InvestmentPortfolioAllocationService investmentPortfolioAllocationService;
     private final InvestmentModelPortfolioService investmentModelPortfolioService;
@@ -306,7 +308,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        Mono<InvestmentTask> investmentTaskMono = investmentRiskAssessmentService.upsertRiskQuestions(riskQuestions)
+        Mono<InvestmentTask> investmentTaskMono = investmentRiskQuestionaryService.upsertRiskQuestions(riskQuestions)
             .map(products -> {
                 investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
@@ -323,15 +325,6 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
             });
-        List<BaseRiskChoiceRequest> choices = null;
-        try {
-            choices = objectMapper.readValue(Files.newBufferedReader(
-                    Path.of("/Users/r.kniazevych/work/backbase/BSJ/stream-services/stream-investment/riskQuestionChoises.json")),
-                new TypeReference<>() {
-                });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         List<BaseAssessmentRequest> assessments = null;
         try {
             assessments = objectMapper.readValue(Files.newBufferedReader(

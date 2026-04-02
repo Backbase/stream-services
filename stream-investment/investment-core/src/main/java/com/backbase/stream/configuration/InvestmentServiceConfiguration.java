@@ -28,6 +28,7 @@ import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
+import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
@@ -63,7 +64,8 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
-        InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi, PortfolioTradingAccountsApi portfolioTradingAccountsApi,
+        InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi,
+        PortfolioTradingAccountsApi portfolioTradingAccountsApi,
         InvestmentIngestProperties portfolioProperties) {
         return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi,
             portfolioTradingAccountsApi, portfolioProperties);
@@ -117,13 +119,14 @@ public class InvestmentServiceConfiguration {
     @Bean
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
         InvestmentRiskAssessmentService investmentRiskAssessmentService,
+        InvestmentRiskQuestionaryService investmentRiskQuestionaryService,
         InvestmentPortfolioService investmentPortfolioService,
         InvestmentModelPortfolioService investmentModelPortfolioService,
         InvestmentPortfolioAllocationService investmentPortfolioAllocationService, AsyncTaskService asyncTaskService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
-        return new InvestmentSaga(investmentClientService, investmentRiskAssessmentService, investmentPortfolioService,
-            investmentPortfolioAllocationService, investmentModelPortfolioService, asyncTaskService,
-            coreConfigurationProperties);
+        return new InvestmentSaga(investmentClientService, investmentRiskAssessmentService,
+            investmentRiskQuestionaryService, investmentPortfolioService, investmentPortfolioAllocationService,
+            investmentModelPortfolioService, asyncTaskService, coreConfigurationProperties);
     }
 
     @Bean
@@ -145,7 +148,8 @@ public class InvestmentServiceConfiguration {
         InvestmentRestNewsContentService investmentRestNewsContentService,
         InvestmentRestDocumentContentService investmentRestDocumentContentService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
-        return new InvestmentContentSaga(investmentRestNewsContentService, investmentRestDocumentContentService, coreConfigurationProperties);
+        return new InvestmentContentSaga(investmentRestNewsContentService, investmentRestDocumentContentService,
+            coreConfigurationProperties);
     }
 
 }

@@ -23,6 +23,7 @@ import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
+import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
 import com.backbase.stream.worker.model.StreamTask.State;
 import java.util.Collections;
 import java.util.List;
@@ -56,6 +57,9 @@ class InvestmentSagaTest {
     InvestmentRiskAssessmentService investmentRiskAssessmentService;
 
     @Mock
+    InvestmentRiskQuestionaryService investmentRiskQuestionaryService;
+
+    @Mock
     private InvestmentPortfolioService investmentPortfolioService;
 
     @Mock
@@ -81,6 +85,7 @@ class InvestmentSagaTest {
         investmentSaga = new InvestmentSaga(
             clientService,
             investmentRiskAssessmentService,
+            investmentRiskQuestionaryService,
             investmentPortfolioService,
             investmentPortfolioAllocationService,
             investmentModelPortfolioService,
