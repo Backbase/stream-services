@@ -51,10 +51,10 @@ class PaymentOrderIntegrationServiceImplTest {
             .build();
 
         PullIngestionRequest pullIngestionRequest = new PullIngestionRequest()
-            .withArrangementId("arrangementId")
-            .withExternalArrangementId("externalArrangementId")
-            .withDateRangeStart("dateRangeStart")
-            .withDateRangeEnd("dateRangeEnd");
+            .arrangementId("arrangementId")
+            .externalArrangementId("externalArrangementId")
+            .dateRangeStart("dateRangeStart")
+            .dateRangeEnd("dateRangeEnd");
 
         when(paymentOrderMapper.mapStreamToIntegration(paymentOrderIngestPullRequest)).thenReturn(pullIngestionRequest);
 

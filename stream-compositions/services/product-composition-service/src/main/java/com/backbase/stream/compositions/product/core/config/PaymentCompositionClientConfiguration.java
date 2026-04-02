@@ -21,6 +21,7 @@ public class PaymentCompositionClientConfiguration extends CompositeApiClientCon
     }
 
     @Bean
+    @Primary
     public ApiClient paymentOrderApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());

@@ -59,6 +59,7 @@
                             </inputSpec>
                             <apiPackage>com.backbase.stream.compositions.paymentorder.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.paymentorder.api.model</modelPackage>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
                             <typeMappings>
                                 <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
                             </typeMappings>
