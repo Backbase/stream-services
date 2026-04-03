@@ -53,7 +53,7 @@ public class UserKindSegmentationSaga implements StreamTaskExecutor<UserKindSegm
         if (apiClient == null) {
             return;
         }
-        if (request.getUserKind() == UserKindEnum.RETAIL_CUSTOMER) {
+        if (request.getUserKind() == UserKindEnum.RETAILCUSTOMER) {
             log.debug("adding header for retail customer");
             apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, LineOfBusiness.RETAIL.getValue());
         } else if (request.getUserKind() == UserKindEnum.SME) {

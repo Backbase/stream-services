@@ -28,7 +28,7 @@
 
     <properties>
         <backbase-bom.version>2026.03-LTS</backbase-bom.version>
-        <boat-maven-plugin.version>0.18.0</boat-maven-plugin.version>
+        <boat-maven-plugin.version>0.17.66</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.15.0</mock.server.version>
         <skip.integration.tests>false</skip.integration.tests>
