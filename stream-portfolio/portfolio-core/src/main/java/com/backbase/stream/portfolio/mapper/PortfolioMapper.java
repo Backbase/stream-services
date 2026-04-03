@@ -33,6 +33,8 @@ import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionTransaction;
 import com.backbase.stream.portfolio.model.SubPortfolio;
 import com.backbase.stream.portfolio.model.TransactionCategory;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ValueMapping;
 
 @Mapper
 public interface PortfolioMapper {
@@ -47,20 +49,12 @@ public interface PortfolioMapper {
 
     List<PortfolioAllocationsParentItem> mapAllocations(List<Allocation> allocations);
 
-    default AllocationType map(String allocationTypeEnum) {
-        if (allocationTypeEnum == null) {
-            return null;
-        }
-        return switch (allocationTypeEnum) {
-            case "CURRENCY", "BY_CURRENCY" -> AllocationType.BY_CURRENCY;
-            case "ASSET_CLASS", "BY_ASSET_CLASS" -> AllocationType.BY_ASSET_CLASS;
-            case "REGION", "BY_REGION" -> AllocationType.BY_REGION;
-            case "COUNTRY", "BY_COUNTRY" -> AllocationType.BY_COUNTRY;
-            case "SUB_ASSET_CLASS", "BY_SUB_ASSET_CLASS" -> AllocationType.BY_SUB_ASSET_CLASS;
-            case "SECTOR", "BY_SECTOR" -> AllocationType.BY_SECTOR;
-            default -> null;
-        };
-    }
+    @ValueMapping(source = "BY_CURRENCY", target = "CURRENCY")
+    @ValueMapping(source = "BY_ASSET_CLASS", target = "ASSET_CLASS")
+    @ValueMapping(source = "BY_REGION", target = "REGION")
+    @ValueMapping(source = "BY_COUNTRY", target = "COUNTRY")
+    @ValueMapping(source = MappingConstants.ANY_UNMAPPED, target = MappingConstants.NULL)
+    AllocationType map(String allocationTypeEnum);
 
     List<PortfolioPositionsHierarchyItem> mapHierarchies(List<PortfolioPositionsHierarchy> hierarchies);
 
