@@ -627,7 +627,7 @@ class InvestmentSagaTest {
         when(investmentModelPortfolioService.upsertModels(any()))
             .thenReturn(Flux.just(new OASModelPortfolioResponse()));
         when(clientService.upsertClients(any()))
-            .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+            .thenReturn(Mono.just(List.of(ClientUser.builder().investmentClientId(UUID.randomUUID()).build())));
         when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
             .thenReturn(Mono.just(List.of()));
         when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
