@@ -118,7 +118,7 @@ public class InvestmentRiskQuestionaryService {
 
         return listExistingRiskQuestions(code)
             .flatMap(existing -> patchRiskQuestion(existing.getUuid(), question))
-            .switchIfEmpty(createNewRiskQuestion(question))
+            .switchIfEmpty(Mono.defer(() -> createNewRiskQuestion(question)))
             .doOnSuccess(upserted -> log.info(
                 "Successfully upserted risk question: uuid={}, code={}, order={}",
                 upserted.getUuid(), upserted.getCode(), upserted.getOrder()))
@@ -133,17 +133,17 @@ public class InvestmentRiskQuestionaryService {
         String code = choice.getCode();
         Integer order = choice.getOrder();
 
-        log.info("Upserting risk question: question={}, code={}, order={}", choice.getQuestion(), code, order);
+        log.info("Upserting risk choice: question={}, code={}, order={}", choice.getQuestion(), code, order);
 
         return listExistingRiskChoices(choice.getQuestion(), code)
             .flatMap(existing -> patchRiskChoice(existing.getUuid(), choice))
-            .switchIfEmpty(createNewRiskChoice(choice))
+            .switchIfEmpty(Mono.defer(() -> createNewRiskChoice(choice)))
             .map(o -> choice)
             .doOnSuccess(upserted -> log.info(
-                "Successfully upserted risk question: uuid={}, question={}, code={}, order={}",
+                "Successfully upserted risk choice: uuid={}, question={}, code={}, order={}",
                 upserted.getUuid(), upserted.getQuestion(), upserted.getCode(), upserted.getOrder()))
             .doOnError(throwable -> log.error(
-                "Failed to upsert risk question: code={}, order={}",
+                "Failed to upsert risk choice: code={}, order={}",
                 code, order, throwable));
     }
 
@@ -211,7 +211,7 @@ public class InvestmentRiskQuestionaryService {
     private Mono<RiskChoice> listExistingRiskChoices(String question, String code) {
         return riskAssessmentApi.listRiskChoices(100, null)
             .doOnSuccess(choices -> log.debug(
-                "List risk questions query completed: question={}, code={}, found={} total results",
+                "List risk choices query completed: question={}, code={}, found={} total results",
                 question, code, choices != null ? choices.getResults().size() : 0))
             .doOnError(throwable -> log.error(
                 "Failed to list existing risk choices: question={}, code={}",
@@ -264,7 +264,7 @@ public class InvestmentRiskQuestionaryService {
     }
 
     private Mono<BaseRiskChoice> createNewRiskChoice(BaseRiskChoice choice) {
-        log.info("Creating new risk question: code={}, order={}",
+        log.info("Creating new risk choice: code={}, order={}",
             choice.getCode(), choice.getOrder());
 
         BaseRiskChoiceRequest choiceRequest = new BaseRiskChoiceRequest()
@@ -277,7 +277,7 @@ public class InvestmentRiskQuestionaryService {
         return riskAssessmentApi.createRiskChoice(choiceRequest)
             .map(o -> choice)
             .doOnSuccess(created -> log.info(
-                "Successfully created risk question: code={}, order={}",
+                "Successfully created risk choice: code={}, order={}",
                 created.getCode(), created.getOrder()))
             .doOnError(throwable -> logRiskQuestionError("create",
                 choice.getCode(), choice.getOrder(), throwable));

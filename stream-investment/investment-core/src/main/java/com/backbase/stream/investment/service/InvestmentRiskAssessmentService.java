@@ -5,7 +5,6 @@ import com.backbase.investment.api.service.v1.model.Assessment;
 import com.backbase.investment.api.service.v1.model.BaseAssessmentRequest;
 import com.backbase.investment.api.service.v1.model.OASBaseAssessment;
 import com.backbase.investment.api.service.v1.model.PatchedBaseAssessmentRequest;
-import com.backbase.stream.configuration.IngestConfigProperties;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -95,7 +94,7 @@ public class InvestmentRiskAssessmentService {
 
         return listExistingRiskAssessments(clientUuid)
             .flatMap(existing -> patchRiskAssessment(clientUuid, existing, assessment))
-            .switchIfEmpty(createNewRiskAssessment(clientUuid, assessment))
+            .switchIfEmpty(Mono.defer(() -> createNewRiskAssessment(clientUuid, assessment)))
             .doOnSuccess(upserted -> log.info(
                 "Successfully upserted risk assessment: uuid={}, clientUuid={}",
                 upserted.getUuid(), clientUuid))
