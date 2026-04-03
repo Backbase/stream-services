@@ -14,6 +14,7 @@ public class ClientUser {
     private String internalUserId;
     private String externalUserId;
     private String legalEntityId;
+    private String userName;
 
 
 }

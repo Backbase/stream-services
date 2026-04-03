@@ -1,22 +1,20 @@
 package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.RiskAssessmentApi;
-import com.backbase.investment.api.service.v1.model.Assessment;
-import com.backbase.investment.api.service.v1.model.BaseAssessmentRequest;
 import com.backbase.investment.api.service.v1.model.BaseRiskChoice;
 import com.backbase.investment.api.service.v1.model.BaseRiskChoiceRequest;
 import com.backbase.investment.api.service.v1.model.BaseRiskQuestionRequest;
-import com.backbase.investment.api.service.v1.model.OASBaseAssessment;
 import com.backbase.investment.api.service.v1.model.OASRiskQuestion;
-import com.backbase.investment.api.service.v1.model.PatchedBaseAssessmentRequest;
 import com.backbase.investment.api.service.v1.model.PatchedBaseRiskChoiceRequest;
 import com.backbase.investment.api.service.v1.model.PatchedBaseRiskQuestionRequest;
 import com.backbase.investment.api.service.v1.model.RiskChoice;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.model.RiskQuestion;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -47,6 +45,7 @@ import reactor.core.publisher.Mono;
 public class InvestmentRiskQuestionaryService {
 
     private final RiskAssessmentApi riskAssessmentApi;
+    private final IngestConfigProperties ingestProperties;
 
     public Mono<List<RiskQuestion>> upsertRiskQuestions(List<RiskQuestion> riskQuestions) {
         return Flux.fromIterable(Objects.requireNonNullElse(riskQuestions, List.of()))
@@ -84,7 +83,7 @@ public class InvestmentRiskQuestionaryService {
     public Mono<List<RiskQuestion>> upsertRiskQuestionsChoices(List<RiskQuestion> rqs) {
         List<BaseRiskChoice> riskChoices = retrieveAllQuestions(rqs);
         return Flux.fromIterable(riskChoices)
-            .map(this::upsertRiskChoice)
+            .flatMap(this::upsertRiskChoice)
             .collectList()
             .doOnSuccess(choices -> log.debug(
                 "Successfully upserted question choices count: {}", choices.size()))
@@ -155,13 +154,28 @@ public class InvestmentRiskQuestionaryService {
      * @return Mono emitting the first matching risk question, or empty if no match found
      */
     private Mono<OASRiskQuestion> listExistingRiskQuestions(String code) {
-        return riskAssessmentApi.listRiskQuestions(100, null)
+        int riskQuestionsPageSize = ingestProperties.getAssessment().getRiskQuestionsPageSize();
+        AtomicInteger atomicInteger = new AtomicInteger(0);
+        return riskAssessmentApi.listRiskQuestions(riskQuestionsPageSize, atomicInteger.get())
             .doOnSuccess(questions -> log.debug(
                 "List risk questions query completed: code={}, found={} total results",
                 code, questions != null ? questions.getResults().size() : 0))
             .doOnError(throwable -> log.error(
                 "Failed to list existing risk questions: code={}",
                 code, throwable))
+            .expand(response -> {
+                if (response.getNext() == null) {
+                    return Mono.empty();
+                }
+                int offset = atomicInteger.addAndGet(riskQuestionsPageSize);
+                return riskAssessmentApi.listRiskQuestions(riskQuestionsPageSize, offset)
+                    .doOnSuccess(questions -> log.debug(
+                        "List risk questions query completed: code={}, found={} total results",
+                        code, questions != null ? questions.getResults().size() : 0))
+                    .doOnError(throwable -> log.error(
+                        "Failed to list existing risk questions: code={}",
+                        code, throwable));
+            })
             .flatMap(questions -> {
                 if (Objects.isNull(questions) || CollectionUtils.isEmpty(questions.getResults())) {
                     log.info("No existing risk question found with code={}", code);
@@ -182,7 +196,16 @@ public class InvestmentRiskQuestionaryService {
                 log.info("Found existing risk question: uuid={}, code={}",
                     matchingQuestion.getUuid(), code);
                 return Mono.just(matchingQuestion);
-            });
+            })
+            .filter(Objects::nonNull)
+            .collectList()
+            .flatMap(list -> {
+                if (CollectionUtils.isEmpty(list)) {
+                    return Mono.empty();
+                }
+                return Mono.just(list.get(0));
+            })
+            .filter(Objects::nonNull);
     }
 
     private Mono<RiskChoice> listExistingRiskChoices(String question, String code) {

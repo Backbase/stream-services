@@ -1,9 +1,6 @@
 package com.backbase.stream.investment.saga;
 
 import com.backbase.investment.api.service.v1.model.BaseAssessmentRequest;
-import com.backbase.investment.api.service.v1.model.BaseRiskChoiceRequest;
-import com.backbase.investment.api.service.v1.model.BaseRiskQuestionRequest;
-import com.backbase.investment.api.service.v1.model.OASBaseRiskChoice;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
@@ -11,6 +8,7 @@ import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import com.backbase.stream.investment.model.RiskQuestion;
+import com.backbase.stream.investment.model.UserRiskAssessment;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
@@ -26,12 +24,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -98,12 +99,13 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             streamTask.getId(), streamTask.getName());
         return this.upsertInvestmentPortfolioModels(streamTask)
             .flatMap(this::upsertClients)
+            .flatMap(this::upsertRiskQuestions)
             .flatMap(this::upsertRiskAssessments)
-//            .flatMap(this::upsertInvestmentProducts)
-//            .flatMap(this::upsertInvestmentPortfolios)
-//            .flatMap(this::upsertPortfolioTradingAccounts)
-//            .flatMap(this::upsertInvestmentPortfolioDeposits)
-//            .flatMap(this::upsertPortfoliosAllocations)
+            .flatMap(this::upsertInvestmentProducts)
+            .flatMap(this::upsertInvestmentPortfolios)
+            .flatMap(this::upsertPortfolioTradingAccounts)
+            .flatMap(this::upsertInvestmentPortfolioDeposits)
+            .flatMap(this::upsertPortfoliosAllocations)
             .doOnNext(completedTask -> log.info(
                 "Successfully completed investment saga: taskId={}, taskName={}, state={}",
                 completedTask.getId(), completedTask.getName(), completedTask.getState()))
@@ -292,8 +294,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             });
     }
 
-    private Mono<InvestmentTask> upsertRiskAssessments(InvestmentTask investmentTask) {
-        log.info("Starting investment portfolio trading accounts upsert: taskId={}, arrangementCount={}",
+    private Mono<InvestmentTask> upsertRiskQuestions(InvestmentTask investmentTask) {
+        log.info("Starting investment risk questionary upsert: taskId={}, questions={}",
             investmentTask.getId(), 100);
 
         investmentTask.info(INVESTMENT_RISK_ASSESSMENTS, OP_UPSERT, null, investmentTask.getName(),
@@ -308,7 +310,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        Mono<InvestmentTask> investmentTaskMono = investmentRiskQuestionaryService.upsertRiskQuestions(riskQuestions)
+        return investmentRiskQuestionaryService.upsertRiskQuestions(riskQuestions)
             .map(products -> {
                 investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
@@ -325,7 +327,16 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
             });
-        List<BaseAssessmentRequest> assessments = null;
+    }
+
+    private Mono<InvestmentTask> upsertRiskAssessments(InvestmentTask investmentTask) {
+        log.info("Starting investment portfolio trading accounts upsert: taskId={}, arrangementCount={}",
+            investmentTask.getId(), 100);
+
+        investmentTask.info(INVESTMENT_RISK_ASSESSMENTS, OP_UPSERT, null, investmentTask.getName(),
+            investmentTask.getId(), PROCESSING_PREFIX + 100 + " investment risk assessments");
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<UserRiskAssessment> assessments = null;
         try {
             assessments = objectMapper.readValue(Files.newBufferedReader(
                     Path.of("/Users/r.kniazevych/work/backbase/BSJ/stream-services/stream-investment/riskAssessment.json")),
@@ -334,29 +345,41 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return investmentTaskMono
-            .then(
-                investmentRiskAssessmentService.upsertRiskAssessments("4ce7aa5f-8539-45cf-8eca-87ee620e8d76",
-                        List.of(assessments.getFirst()))
-                    .map(products -> {
-                        investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_CREATED,
-                            investmentTask.getName(), investmentTask.getId(),
-                            UPSERTED_PREFIX + products.size() + " investment portfolio trading accounts");
-                        log.info(
-                            "Successfully upserted all investment portfolio trading accounts: taskId={}, productCount={}",
-                            investmentTask.getId(), products.size());
+        ArrayList<UserRiskAssessment> userRiskAssessments = new ArrayList<>(assessments);
+        return Flux.fromIterable(investmentTask.getData().getClientUsers())
+            .flatMap(c -> {
+                String userName = (c.getUserName() == null ? "" : c.getExternalUserId()).toLowerCase(Locale.ROOT);
+                List<BaseAssessmentRequest> list = userRiskAssessments.stream()
+                    .filter(a -> Strings.isBlank(a.getUserName()))
+                    .filter(a -> a.getUserName().toLowerCase(Locale.ROOT).contentEquals(userName))
+                    .map(a -> new BaseAssessmentRequest()
+                        .choices(a.getChoices())
+                        .extraData(a.getExtraData())
+                        .flatAttributes(a.getFlatAttributes())
+                        .status(a.getStatus()))
+                    .toList();
+                return investmentRiskAssessmentService
+                    .upsertRiskAssessments(c.getInvestmentClientId().toString(), list);
+            })
+            .collectList()
+            .map(assessmentList -> {
+                investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_CREATED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    UPSERTED_PREFIX + assessmentList.size() + " investment portfolio trading accounts");
+                log.info(
+                    "Successfully upserted all investment portfolio trading accounts: taskId={}, productCount={}",
+                    investmentTask.getId(), assessmentList.size());
 
-                        return investmentTask;
-                    })
-                    .doOnError(throwable -> {
-                        log.error(
-                            "Failed to upsert investment portfolio trading accounts: taskId={}, arrangementCount={}",
-                            investmentTask.getId(), 100, throwable);
-                        investmentTask.error(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_FAILED,
-                            investmentTask.getName(), investmentTask.getId(),
-                            "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
-                    })
-            );
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error(
+                    "Failed to upsert investment portfolio trading accounts: taskId={}, arrangementCount={}",
+                    investmentTask.getId(), 100, throwable);
+                investmentTask.error(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_FAILED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
+            });
     }
 
     private Mono<InvestmentTask> upsertPortfolioTradingAccounts(InvestmentTask investmentTask) {
