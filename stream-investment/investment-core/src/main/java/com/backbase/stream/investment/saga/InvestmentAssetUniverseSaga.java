@@ -3,7 +3,7 @@ package com.backbase.stream.investment.saga;
 import com.backbase.investment.api.service.v1.model.AssetCategoryTypeRequest;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
-import com.backbase.stream.configuration.InvestmentIngestProperties;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.InvestmentAssetsTask;
@@ -64,7 +64,7 @@ public class InvestmentAssetUniverseSaga implements StreamTaskExecutor<Investmen
     private final InvestmentCurrencyService investmentCurrencyService;
     private final AsyncTaskService asyncTaskService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
-    private final InvestmentIngestProperties ingestProperties;
+    private final IngestConfigProperties ingestProperties;
 
     @Override
     public Mono<InvestmentAssetsTask> executeTask(InvestmentAssetsTask streamTask) {

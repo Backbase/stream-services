@@ -14,7 +14,8 @@ import com.backbase.investment.api.service.v1.model.Currency;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
-import com.backbase.stream.configuration.InvestmentIngestProperties;
+import com.backbase.stream.configuration.IngestConfigProperties;
+import com.backbase.stream.configuration.IngestConfigProperties.AssetConfig;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.AssetPrice;
@@ -104,14 +105,14 @@ class InvestmentAssetUniverseSagaTest {
     private InvestmentIngestionConfigurationProperties configurationProperties;
 
     @Mock
-    private InvestmentIngestProperties ingestProperties;
+    private IngestConfigProperties ingestProperties;
 
     private InvestmentAssetUniverseSaga saga;
 
     /**
      * Initialises Mockito mocks and constructs the saga under test before each test method.
-     * {@link InvestmentIngestionConfigurationProperties#isAssetUniverseEnabled()} is set to
-     * {@code true} by default so that the feature flag does not suppress any pipeline stage.
+     * {@link InvestmentIngestionConfigurationProperties#isAssetUniverseEnabled()} is set to {@code true} by default so
+     * that the feature flag does not suppress any pipeline stage.
      */
     @BeforeEach
     void setUp() {
@@ -119,7 +120,7 @@ class InvestmentAssetUniverseSagaTest {
         when(configurationProperties.isAssetUniverseEnabled()).thenReturn(true);
         // Provide real AssetConfig so concurrency values are non-null when the saga calls
         // ingestProperties.getAsset().getMarketConcurrency() / getAssetCategoryConcurrency() / etc.
-        when(ingestProperties.getAsset()).thenReturn(new InvestmentIngestProperties.AssetConfig());
+        when(ingestProperties.getAsset()).thenReturn(new AssetConfig());
         saga = new InvestmentAssetUniverseSaga(
             assetUniverseService,
             investmentAssetPriceService,
@@ -139,16 +140,16 @@ class InvestmentAssetUniverseSagaTest {
      * Tests for the top-level {@code executeTask} method.
      *
      * <p>These tests exercise the full pipeline end-to-end with all services stubbed
-     * to return successful responses, and also verify that a mid-pipeline failure
-     * causes the task to be marked {@link State#FAILED} without propagating an error signal.
+     * to return successful responses, and also verify that a mid-pipeline failure causes the task to be marked
+     * {@link State#FAILED} without propagating an error signal.
      */
     @Nested
     @DisplayName("executeTask")
     class ExecuteTaskTests {
 
         /**
-         * Verifies that when all services succeed, {@code executeTask} completes normally
-         * and the returned task is marked {@link State#COMPLETED}.
+         * Verifies that when all services succeed, {@code executeTask} completes normally and the returned task is
+         * marked {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should complete successfully when all services succeed")
@@ -162,8 +163,8 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that when a service throws an error, the task is marked {@link State#FAILED}
-         * and the reactive stream completes without emitting an error signal.
+         * Verifies that when a service throws an error, the task is marked {@link State#FAILED} and the reactive stream
+         * completes without emitting an error signal.
          */
         @Test
         @DisplayName("should mark task FAILED and complete stream when a service throws an error")
@@ -179,8 +180,8 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that a minimal task with no data collections still completes successfully
-         * without invoking any upsert services due to empty-list short-circuiting.
+         * Verifies that a minimal task with no data collections still completes successfully without invoking any
+         * upsert services due to empty-list short-circuiting.
          */
         @Test
         @DisplayName("should complete with empty task data")
@@ -200,8 +201,8 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that when the feature flag is disabled, the saga skips all processing
-         * and returns the task unchanged without calling any service.
+         * Verifies that when the feature flag is disabled, the saga skips all processing and returns the task unchanged
+         * without calling any service.
          */
         @Test
         @DisplayName("should skip all processing when feature flag is disabled")
@@ -268,8 +269,8 @@ class InvestmentAssetUniverseSagaTest {
     class UpsertCurrenciesTests {
 
         /**
-         * Verifies that when the currency list is empty, the pipeline short-circuits
-         * without calling the currency service, and the task completes successfully.
+         * Verifies that when the currency list is empty, the pipeline short-circuits without calling the currency
+         * service, and the task completes successfully.
          */
         @Test
         @DisplayName("should complete successfully without calling service when currency list is empty")
@@ -285,8 +286,8 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that when the currency list is non-empty, currencies are upserted
-         * and the task is marked {@link State#COMPLETED}.
+         * Verifies that when the currency list is non-empty, currencies are upserted and the task is marked
+         * {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should upsert currencies and mark task COMPLETED")
@@ -314,8 +315,8 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that a failure in the currency service causes the task to be marked
-         * {@link State#FAILED} without propagating the error signal.
+         * Verifies that a failure in the currency service causes the task to be marked {@link State#FAILED} without
+         * propagating the error signal.
          */
         @Test
         @DisplayName("should mark task FAILED when currency upsert throws an error")
@@ -348,8 +349,7 @@ class InvestmentAssetUniverseSagaTest {
      * Tests for the {@code upsertMarkets} stage of the saga pipeline.
      *
      * <p>Markets follow currencies. An empty market list must skip service calls,
-     * while a populated list must call {@link InvestmentAssetUniverseService#upsertMarket}
-     * for each entry.
+     * while a populated list must call {@link InvestmentAssetUniverseService#upsertMarket} for each entry.
      */
     @Nested
     @DisplayName("upsertMarkets")
@@ -372,8 +372,8 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that when the market list is non-empty, markets are upserted and
-         * the task is marked {@link State#COMPLETED}.
+         * Verifies that when the market list is non-empty, markets are upserted and the task is marked
+         * {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should upsert markets and mark task COMPLETED")
@@ -440,8 +440,8 @@ class InvestmentAssetUniverseSagaTest {
     class UpsertMarketSpecialDaysTests {
 
         /**
-         * Verifies that when the special-day list is non-empty, each entry is upserted
-         * and the task is marked {@link State#COMPLETED}.
+         * Verifies that when the special-day list is non-empty, each entry is upserted and the task is marked
+         * {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should upsert market special days and mark task COMPLETED")
@@ -524,8 +524,8 @@ class InvestmentAssetUniverseSagaTest {
     class UpsertAssetCategoryTypesTests {
 
         /**
-         * Verifies that when the category-type list is non-empty, each entry is upserted
-         * and the task is marked {@link State#COMPLETED}.
+         * Verifies that when the category-type list is non-empty, each entry is upserted and the task is marked
+         * {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should upsert asset category types and mark task COMPLETED")
@@ -602,17 +602,16 @@ class InvestmentAssetUniverseSagaTest {
      * Tests for the {@code upsertAssetCategories} stage of the saga pipeline.
      *
      * <p>Asset categories follow category types. Each entry is forwarded to
-     * {@link InvestmentAssetUniverseService#upsertAssetCategory}.
-     * Note: the service returns the {@code sync.v1} model {@code AssetCategory}
-     * as defined by the asset universe service contract.
+     * {@link InvestmentAssetUniverseService#upsertAssetCategory}. Note: the service returns the {@code sync.v1} model
+     * {@code AssetCategory} as defined by the asset universe service contract.
      */
     @Nested
     @DisplayName("upsertAssetCategories")
     class UpsertAssetCategoriesTests {
 
         /**
-         * Verifies that when the category list is non-empty, each entry is upserted
-         * and the task is marked {@link State#COMPLETED}.
+         * Verifies that when the category list is non-empty, each entry is upserted and the task is marked
+         * {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should upsert asset categories and mark task COMPLETED")
@@ -688,8 +687,8 @@ class InvestmentAssetUniverseSagaTest {
     class UpsertAssetsTests {
 
         /**
-         * Verifies that when the asset list is empty, the saga skips asset creation
-         * and the task is marked {@link State#COMPLETED}.
+         * Verifies that when the asset list is empty, the saga skips asset creation and the task is marked
+         * {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should skip asset creation and set COMPLETED when asset list is empty")
@@ -713,6 +712,8 @@ class InvestmentAssetUniverseSagaTest {
         /**
          * Verifies that when assets are present, {@code upsertAssets} is invoked and
          * the task completes with {@link State#COMPLETED}.
+         * Verifies that when assets are present, {@code createAssets} is invoked and the task completes with
+         * {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should upsert assets and set them on the task on success")
@@ -736,6 +737,8 @@ class InvestmentAssetUniverseSagaTest {
         /**
          * Verifies that a failure in {@code upsertAssets} causes the task to be marked
          * {@link State#FAILED} without propagating an error signal.
+         * Verifies that a failure in {@code createAssets} causes the task to be marked {@link State#FAILED} without
+         * propagating an error signal.
          */
         @Test
         @DisplayName("should propagate error and mark task FAILED when asset upsert fails")
@@ -759,8 +762,8 @@ class InvestmentAssetUniverseSagaTest {
      * Tests for the {@code upsertPrices} stage of the saga pipeline.
      *
      * <p>The stage delegates to {@link InvestmentAssetPriceService#ingestPrices} with the
-     * asset list and the price-by-asset map from the task data. The returned
-     * {@link GroupResult} list is stored on the task for use by the next stage.
+     * asset list and the price-by-asset map from the task data. The returned {@link GroupResult} list is stored on the
+     * task for use by the next stage.
      */
     @Nested
     @DisplayName("upsertPrices")
@@ -790,8 +793,7 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that an empty {@link GroupResult} list from the price service is
-         * handled without error.
+         * Verifies that an empty {@link GroupResult} list from the price service is handled without error.
          */
         @Test
         @DisplayName("should handle empty GroupResult list from price ingestion")
@@ -831,8 +833,8 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that when the asset list is empty, the price service is still called
-         * (no short-circuit in upsertPrices) and completes successfully.
+         * Verifies that when the asset list is empty, the price service is still called (no short-circuit in
+         * upsertPrices) and completes successfully.
          */
         @Test
         @DisplayName("should pass empty asset list to price service when assets are empty")
@@ -861,16 +863,16 @@ class InvestmentAssetUniverseSagaTest {
      *
      * <p>This is the final stage. It first waits for all async price tasks to finish
      * ({@link AsyncTaskService#checkPriceAsyncTasksFinished}) before calling
-     * {@link InvestmentIntradayAssetPriceService#ingestIntradayPrices}.
-     * Results are collected and stored as {@code intradayPriceTasks} on the task.
+     * {@link InvestmentIntradayAssetPriceService#ingestIntradayPrices}. Results are collected and stored as
+     * {@code intradayPriceTasks} on the task.
      */
     @Nested
     @DisplayName("createIntradayPrices")
     class CreateIntradayPricesTests {
 
         /**
-         * Verifies that intraday prices are ingested after the async task check completes
-         * and the task is marked {@link State#COMPLETED}.
+         * Verifies that intraday prices are ingested after the async task check completes and the task is marked
+         * {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should ingest intraday prices after async tasks finish")
@@ -893,8 +895,7 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that an intraday price ingestion failure causes the task to be marked
-         * {@link State#FAILED}.
+         * Verifies that an intraday price ingestion failure causes the task to be marked {@link State#FAILED}.
          */
         @Test
         @DisplayName("should mark task FAILED when intraday price ingestion fails")
@@ -961,9 +962,8 @@ class InvestmentAssetUniverseSagaTest {
     // =========================================================================
 
     /**
-     * Creates an {@link InvestmentAssetsTask} with all data collections set to empty lists.
-     * Suitable as a base task when the behaviour under test is not affected by data content,
-     * or when testing empty-list short-circuit paths.
+     * Creates an {@link InvestmentAssetsTask} with all data collections set to empty lists. Suitable as a base task
+     * when the behaviour under test is not affected by data content, or when testing empty-list short-circuit paths.
      *
      * @return a minimal task with empty data
      */
@@ -981,8 +981,8 @@ class InvestmentAssetUniverseSagaTest {
     }
 
     /**
-     * Creates an {@link InvestmentAssetsTask} containing two sample {@link Asset} objects
-     * and corresponding {@link AssetPrice} entries. Used by asset-creation and price tests.
+     * Creates an {@link InvestmentAssetsTask} containing two sample {@link Asset} objects and corresponding
+     * {@link AssetPrice} entries. Used by asset-creation and price tests.
      *
      * @return a task with two assets and two prices
      */
@@ -1023,9 +1023,8 @@ class InvestmentAssetUniverseSagaTest {
     }
 
     /**
-     * Creates an {@link InvestmentAssetsTask} with one entry in every data collection.
-     * Used for the full end-to-end happy-path test in conjunction with
-     * {@link #stubAllServicesSuccess(InvestmentAssetsTask)}.
+     * Creates an {@link InvestmentAssetsTask} with one entry in every data collection. Used for the full end-to-end
+     * happy-path test in conjunction with {@link #stubAllServicesSuccess(InvestmentAssetsTask)}.
      *
      * @return a fully populated task
      */
@@ -1057,8 +1056,8 @@ class InvestmentAssetUniverseSagaTest {
     }
 
     /**
-     * Configures all mocked services to return successful responses for a fully populated task.
-     * Intended for use with {@link #createFullTask()} in end-to-end happy-path tests.
+     * Configures all mocked services to return successful responses for a fully populated task. Intended for use with
+     * {@link #createFullTask()} in end-to-end happy-path tests.
      *
      * @param task the task whose asset list is used to stub {@code upsertAssets}
      */
@@ -1091,13 +1090,13 @@ class InvestmentAssetUniverseSagaTest {
     }
 
     /**
-     * Stubs the price and intraday-price stages so that tests focusing on earlier pipeline
-     * stages (currencies, markets, special days, category types, categories) can complete
-     * without needing to configure those downstream mocks individually.
+     * Stubs the price and intraday-price stages so that tests focusing on earlier pipeline stages (currencies, markets,
+     * special days, category types, categories) can complete without needing to configure those downstream mocks
+     * individually.
      *
      * <p>Note: upstream stages that short-circuit on empty lists (currencies, markets,
-     * special days, category types, categories) do NOT need stubs when using
-     * {@link #createMinimalTask()} — the implementation returns early without calling services.
+     * special days, category types, categories) do NOT need stubs when using {@link #createMinimalTask()} — the
+     * implementation returns early without calling services.
      */
     private void wireTrivialPipelineAfterCurrencies() {
         when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
@@ -1109,9 +1108,8 @@ class InvestmentAssetUniverseSagaTest {
     }
 
     /**
-     * Stubs the price and intraday-price stages for tests focused on the market stage.
-     * Functionally equivalent to {@link #wireTrivialPipelineAfterCurrencies()} but named
-     * to clarify intent at the call site.
+     * Stubs the price and intraday-price stages for tests focused on the market stage. Functionally equivalent to
+     * {@link #wireTrivialPipelineAfterCurrencies()} but named to clarify intent at the call site.
      */
     private void wireTrivialPipelineAfterMarkets() {
         wireTrivialPipelineAfterCurrencies();

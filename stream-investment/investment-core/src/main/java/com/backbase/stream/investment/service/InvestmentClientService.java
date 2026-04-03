@@ -131,8 +131,8 @@ public class InvestmentClientService {
     private Mono<ClientUser> upsertClient(@NotNull ClientCreateRequest request, String legalEntityExternalId) {
         Objects.requireNonNull(request, "ClientCreateRequest must not be null");
 
-        Map<String, Object> extraData = request.getExtraData();
-        String userExternalId = extraData != null ? (String) extraData.get(USER_EXTERNAL_ID_KEY) : null;
+        Map<String, String> extraData = request.getExtraData();
+        String userExternalId = extraData != null ? extraData.get(USER_EXTERNAL_ID_KEY) : null;
         String internalUserId = request.getInternalUserId();
 
         log.info("Upserting investment client (internalUserId={}, userExternalId={})", internalUserId, userExternalId);
@@ -215,8 +215,8 @@ public class InvestmentClientService {
                 return Mono.just(existingClient);
             })
             .map(updatedOrOriginal -> {
-                Map<String, Object> extraData = updatedOrOriginal.getExtraData();
-                String userExternalId = extraData != null ? (String) extraData.get(USER_EXTERNAL_ID_KEY) : null;
+                Map<String, String> extraData = updatedOrOriginal.getExtraData();
+                String userExternalId = extraData != null ? extraData.get(USER_EXTERNAL_ID_KEY) : null;
                 return buildClientUser(
                     updatedOrOriginal.getUuid(),
                     updatedOrOriginal.getInternalUserId(),
@@ -233,7 +233,7 @@ public class InvestmentClientService {
      * @return Mono emitting the newly created client as {@link ClientUser}
      */
     private Mono<ClientUser> createNewClient(ClientCreateRequest request, String legalEntityExternalId) {
-        Map<String, Object> extraData = request.getExtraData();
+        Map<String, String> extraData = request.getExtraData();
         String userExternalId = extraData != null ? (String) extraData.get(USER_EXTERNAL_ID_KEY) : null;
         String internalUserId = request.getInternalUserId();
 
@@ -242,9 +242,9 @@ public class InvestmentClientService {
 
         return clientApi.createClient(request)
             .doOnSuccess(created -> {
-                Map<String, Object> createdExtraData = created.getExtraData();
+                Map<String, String> createdExtraData = created.getExtraData();
                 String createdUserExternalId = createdExtraData != null
-                    ? (String) createdExtraData.get(USER_EXTERNAL_ID_KEY) : null;
+                    ? createdExtraData.get(USER_EXTERNAL_ID_KEY) : null;
                 log.info(
                     "Successfully created new investment client: uuid={}, internalUserId={}, userExternalId={}",
                     created.getUuid(), created.getInternalUserId(), createdUserExternalId);

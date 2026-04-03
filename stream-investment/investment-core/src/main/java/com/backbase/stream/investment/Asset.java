@@ -32,7 +32,7 @@ public class Asset implements AssetKey {
     private String market;
     private String currency;
     @JsonProperty("extra_data")
-    private Map<String, Object> extraData;
+    private Map<String, String> extraData;
     @JsonProperty("asset_type")
     private AssetTypeEnum assetType;
     private List<String> categories;

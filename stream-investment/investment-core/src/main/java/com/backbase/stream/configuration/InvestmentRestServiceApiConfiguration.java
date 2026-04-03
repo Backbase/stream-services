@@ -1,6 +1,5 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.investment.api.service.sync.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.sync.v1.ContentApi;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
@@ -92,7 +91,7 @@ public class InvestmentRestServiceApiConfiguration {
     @Bean
     public InvestmentRestAssetUniverseService investmentRestAssetUniverseService(
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient,
-        InvestmentIngestProperties portfolioProperties) {
+        IngestConfigProperties portfolioProperties) {
         return new InvestmentRestAssetUniverseService(restInvestmentApiClient, portfolioProperties);
     }
 

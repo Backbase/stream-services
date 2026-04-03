@@ -17,11 +17,14 @@ import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
+import com.backbase.stream.investment.model.RiskQuestion;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
+import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
+import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
 import com.backbase.stream.worker.model.StreamTask.State;
 import java.util.Collections;
 import java.util.List;
@@ -52,6 +55,12 @@ class InvestmentSagaTest {
     private InvestmentClientService clientService;
 
     @Mock
+    InvestmentRiskAssessmentService investmentRiskAssessmentService;
+
+    @Mock
+    InvestmentRiskQuestionaryService investmentRiskQuestionaryService;
+
+    @Mock
     private InvestmentPortfolioService investmentPortfolioService;
 
     @Mock
@@ -76,6 +85,8 @@ class InvestmentSagaTest {
         when(configurationProperties.isWealthEnabled()).thenReturn(true);
         investmentSaga = new InvestmentSaga(
             clientService,
+            investmentRiskAssessmentService,
+            investmentRiskQuestionaryService,
             investmentPortfolioService,
             investmentPortfolioAllocationService,
             investmentModelPortfolioService,
@@ -152,7 +163,109 @@ class InvestmentSagaTest {
     }
 
     // =========================================================================
-    // upsertPortfolioModels
+    // upsertRiskQuestions
+    // =========================================================================
+
+    @Nested
+    @DisplayName("upsertRiskQuestions")
+    class UpsertRiskQuestionsTests {
+
+        @Test
+        @DisplayName("should complete successfully when risk questions list is empty")
+        void upsertRiskQuestions_emptyList_completesSuccessfully() {
+            InvestmentTask task = createMinimalTask();
+            wireTrivialPipelineAfterModelPortfolios();
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            verify(investmentRiskQuestionaryService).upsertRiskQuestions(Collections.emptyList());
+        }
+
+        @Test
+        @DisplayName("should upsert risk questions and mark task COMPLETED")
+        void upsertRiskQuestions_success() {
+            InvestmentTask task = createTaskWithRiskQuestions();
+            wireTrivialPipelineAfterModelPortfolios();
+            when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+                .thenReturn(Mono.just(List.of()));
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("should mark task FAILED when risk questions upsert throws an error")
+        void upsertRiskQuestions_error_marksTaskFailed() {
+            InvestmentTask task = createMinimalTask();
+
+            when(investmentModelPortfolioService.upsertModels(any()))
+                .thenReturn(Flux.empty());
+            when(clientService.upsertClients(any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+                .thenReturn(Mono.error(new RuntimeException("Risk questions service failure")));
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.FAILED))
+                .verifyComplete();
+        }
+    }
+
+    // =========================================================================
+    // upsertRiskAssessments
+    // =========================================================================
+
+    @Nested
+    @DisplayName("upsertRiskAssessments")
+    class UpsertRiskAssessmentsTests {
+
+        @Test
+        @DisplayName("should skip assessment service call when client list is empty")
+        void upsertRiskAssessments_emptyClientList_skipsService() {
+            InvestmentTask task = createMinimalTask();
+            wireTrivialPipelineAfterModelPortfolios();
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("should upsert risk assessments for each client and mark task COMPLETED")
+        void upsertRiskAssessments_success() {
+            InvestmentTask task = createFullTask();
+            stubAllServicesSuccess();
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            verify(investmentRiskAssessmentService).upsertRiskAssessments(any(), any());
+        }
+
+        @Test
+        @DisplayName("should mark task FAILED when risk assessment upsert throws an error")
+        void upsertRiskAssessments_error_marksTaskFailed() {
+            InvestmentTask task = createFullTask();
+
+            when(investmentModelPortfolioService.upsertModels(any()))
+                .thenReturn(Flux.just(new OASModelPortfolioResponse()));
+            when(clientService.upsertClients(any()))
+                .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+            when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
+                .thenReturn(Mono.error(new RuntimeException("Risk assessment service failure")));
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.FAILED))
+                .verifyComplete();
+        }
+    }
+
     // =========================================================================
 
     @Nested
@@ -278,6 +391,10 @@ class InvestmentSagaTest {
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
                 .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+            when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
+                .thenReturn(Mono.just(List.of()));
             when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
                 .thenReturn(Mono.error(new RuntimeException("Arrangement upsert failure")));
 
@@ -317,6 +434,10 @@ class InvestmentSagaTest {
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
                 .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+            when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
+                .thenReturn(Mono.just(List.of()));
             when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
                 .thenReturn(Mono.just(List.of(new PortfolioProduct())));
             when(investmentPortfolioService.upsertPortfolios(any(), any()))
@@ -369,6 +490,10 @@ class InvestmentSagaTest {
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
                 .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+            when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
+                .thenReturn(Mono.just(List.of()));
             when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
                 .thenReturn(Mono.just(List.of(new PortfolioProduct())));
             when(investmentPortfolioService.upsertPortfolios(any(), any()))
@@ -410,6 +535,10 @@ class InvestmentSagaTest {
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
                 .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+            when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
+                .thenReturn(Mono.just(List.of()));
             when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
                 .thenReturn(Mono.just(List.of(new PortfolioProduct())));
             when(investmentPortfolioService.upsertPortfolios(any(), any()))
@@ -456,6 +585,20 @@ class InvestmentSagaTest {
             .build());
     }
 
+    private InvestmentTask createTaskWithRiskQuestions() {
+        RiskQuestion q = new RiskQuestion();
+        q.setCode("INVESTMENT_HORIZON");
+        q.setOrder(1);
+        return new InvestmentTask("risk-question-task", InvestmentData.builder()
+            .clientUsers(Collections.emptyList())
+            .investmentArrangements(Collections.emptyList())
+            .modelPortfolios(Collections.emptyList())
+            .investmentPortfolioTradingAccounts(Collections.emptyList())
+            .portfolios(Collections.emptyList())
+            .riskQuestions(List.of(q))
+            .build());
+    }
+
     private InvestmentTask createFullTask() {
         return new InvestmentTask("full-task", InvestmentData.builder()
             .clientUsers(List.of(ClientUser.builder()
@@ -484,7 +627,11 @@ class InvestmentSagaTest {
         when(investmentModelPortfolioService.upsertModels(any()))
             .thenReturn(Flux.just(new OASModelPortfolioResponse()));
         when(clientService.upsertClients(any()))
-            .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+            .thenReturn(Mono.just(List.of(ClientUser.builder().investmentClientId(UUID.randomUUID()).build())));
+        when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+            .thenReturn(Mono.just(List.of()));
+        when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
+            .thenReturn(Mono.just(List.of()));
         when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
             .thenReturn(Mono.just(List.of(new PortfolioProduct())));
         when(investmentPortfolioService.upsertPortfolios(any(), any()))
@@ -503,6 +650,8 @@ class InvestmentSagaTest {
         when(investmentModelPortfolioService.upsertModels(any()))
             .thenReturn(Flux.empty());
         when(clientService.upsertClients(any()))
+            .thenReturn(Mono.just(List.of()));
+        when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
             .thenReturn(Mono.just(List.of()));
         when(investmentPortfolioService.upsertInvestmentProducts(any(), any()))
             .thenReturn(Mono.just(List.of()));
