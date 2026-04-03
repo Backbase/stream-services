@@ -41,5 +41,6 @@ public class TransactionsQuery {
     private String orderBy;
     private String direction;
     private String secDirection;
+    private String sort;
 
 }

@@ -3,8 +3,6 @@ package com.backbase.stream.portfolio.mapper;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ValueMapping;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AllocationType;
@@ -35,6 +33,8 @@ import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionTransaction;
 import com.backbase.stream.portfolio.model.SubPortfolio;
 import com.backbase.stream.portfolio.model.TransactionCategory;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ValueMapping;
 
 @Mapper
 public interface PortfolioMapper {

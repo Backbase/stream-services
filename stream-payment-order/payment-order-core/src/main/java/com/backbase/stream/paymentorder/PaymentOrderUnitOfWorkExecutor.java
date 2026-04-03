@@ -273,7 +273,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         paymentOrderPostFilterRequest.setStatuses(FILTER);
 
         return paymentOrdersApi.postFilterPaymentOrders(null, null, null, null, null, null, null, null, null,
-                        null, null, null, null, null, null, currentCount / PAGE_SIZE, PAGE_SIZE, null,
+                        null, null, null, null, null, null, null, null, currentCount / PAGE_SIZE, PAGE_SIZE, null,
                         null, paymentOrderPostFilterRequest)
                 .retryWhen(fixedDelay(3, Duration.of(2000, MILLIS)).filter(
                         t -> t instanceof WebClientRequestException

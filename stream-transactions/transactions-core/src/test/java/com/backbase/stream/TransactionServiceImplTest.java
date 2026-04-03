@@ -52,7 +52,7 @@ class TransactionServiceImplTest {
             eq(bookingDateLessThan),
             any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             eq(arrangementId),
-            any(), any(), any(), any(), any(), any(), any(), eq(Integer.valueOf(size)), any(), any(), any()
+            any(), any(), any(), any(), any(), any(), any(), eq(Integer.valueOf(size)), any(), any(), any(), any()
         )).thenReturn(Flux.just(transactionItem1, transactionItem2));
 
         // When
@@ -83,7 +83,7 @@ class TransactionServiceImplTest {
             eq(bookingDateLessThan),
             any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             eq(arrangementId),
-            any(), any(), any(), any(), any(), any(), any(), eq(Integer.valueOf(size)), any(), any(), any()
+            any(), any(), any(), any(), any(), any(), any(), eq(Integer.valueOf(size)), any(), any(), any(), any()
         )).thenReturn(Flux.error(notFoundException));
 
         // When
@@ -110,7 +110,7 @@ class TransactionServiceImplTest {
             eq(bookingDateLessThan),
             any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             eq(arrangementId),
-            any(), any(), any(), any(), any(), any(), any(), eq(Integer.valueOf(size)), any(), any(), any()
+            any(), any(), any(), any(), any(), any(), any(), eq(Integer.valueOf(size)), any(), any(), any(), any()
         )).thenReturn(Flux.error(runtimeException));
 
         // When
@@ -143,7 +143,7 @@ class TransactionServiceImplTest {
             eq(bookingDateLessThan),
             any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             eq(query.getArrangementId()),
-            any(), any(), any(), any(), any(), any(), any(), eq(query.getSize()), any(), any(), any()
+            any(), any(), any(), any(), any(), any(), any(), eq(query.getSize()), any(), any(), any(), any()
         )).thenReturn(Flux.just(transactionItem));
 
         // When
@@ -155,4 +155,3 @@ class TransactionServiceImplTest {
             .verifyComplete();
     }
 }
-

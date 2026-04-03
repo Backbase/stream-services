@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.11.0]
+### Changed
+- Update SSDK 20.1.0 and BBOM 2026.03 LTS, boat-maven-plugin unified 0.17.66
+
 ## [9.10.0]
 ### Changed
 - Investment service
