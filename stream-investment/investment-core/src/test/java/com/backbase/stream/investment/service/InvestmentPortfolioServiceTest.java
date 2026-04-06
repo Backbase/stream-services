@@ -26,7 +26,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioTradingAccount;
 import com.backbase.investment.api.service.v1.model.PortfolioTradingAccountRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
-import com.backbase.stream.configuration.InvestmentIngestProperties;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
@@ -70,7 +70,7 @@ class InvestmentPortfolioServiceTest {
     private PortfolioApi portfolioApi;
     private PaymentsApi paymentsApi;
     private PortfolioTradingAccountsApi portfolioTradingAccountsApi;
-    private InvestmentIngestProperties config;
+    private IngestConfigProperties config;
     private InvestmentPortfolioService service;
 
     @BeforeEach
@@ -79,7 +79,7 @@ class InvestmentPortfolioServiceTest {
         portfolioApi = Mockito.mock(PortfolioApi.class);
         paymentsApi = Mockito.mock(PaymentsApi.class);
         portfolioTradingAccountsApi = Mockito.mock(PortfolioTradingAccountsApi.class);
-        config = new InvestmentIngestProperties();
+        config = new IngestConfigProperties();
         service = new InvestmentPortfolioService(
             productsApi, portfolioApi, paymentsApi, portfolioTradingAccountsApi, config);
     }

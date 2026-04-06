@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * <p>Controls which high-level ingestion flows are enabled. Service-level tuning
  * (portfolio currencies, deposit provider, allocation assets, etc.) lives in
- * {@link InvestmentIngestProperties}.
+ * {@link IngestConfigProperties}.
  */
 @Data
 @ConditionalOnBean(InvestmentServiceConfiguration.class)
@@ -20,6 +20,7 @@ public class InvestmentIngestionConfigurationProperties {
     private boolean contentEnabled = true;
     private boolean assetUniverseEnabled = true;
     private boolean wealthEnabled = true;
+    private IngestConfigProperties config = new IngestConfigProperties();
 
 
 }

@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.v1.model.AssetCategory;
-import com.backbase.stream.configuration.InvestmentIngestProperties;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import java.util.Map;
@@ -34,7 +34,7 @@ class InvestmentRestAssetUniverseServiceTest {
     @Mock
     private ApiClient apiClient;
 
-    private final InvestmentIngestProperties ingestProperties = new InvestmentIngestProperties();
+    private final IngestConfigProperties ingestProperties = new IngestConfigProperties();
 
     private InvestmentRestAssetUniverseService service;
 

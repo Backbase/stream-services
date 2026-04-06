@@ -27,7 +27,7 @@ import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.RelatedAssetSerializerWithAssetCategories;
-import com.backbase.stream.configuration.InvestmentIngestProperties;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentAssetData;
@@ -69,7 +69,7 @@ class InvestmentPortfolioAllocationServiceTest {
     private InvestmentApi investmentApi;
     private CustomIntegrationApiService customIntegrationApiService;
     private InvestmentPortfolioAllocationService service;
-    private InvestmentIngestProperties ingestProperties;
+    private IngestConfigProperties ingestProperties;
 
     @BeforeEach
     void setUp() {
@@ -77,7 +77,7 @@ class InvestmentPortfolioAllocationServiceTest {
         assetUniverseApi = mock(AssetUniverseApi.class);
         investmentApi = mock(InvestmentApi.class);
         customIntegrationApiService = mock(CustomIntegrationApiService.class);
-        ingestProperties = new InvestmentIngestProperties();
+        ingestProperties = new IngestConfigProperties();
         service = new InvestmentPortfolioAllocationService(
             allocationsApi, assetUniverseApi, investmentApi, customIntegrationApiService, ingestProperties);
     }

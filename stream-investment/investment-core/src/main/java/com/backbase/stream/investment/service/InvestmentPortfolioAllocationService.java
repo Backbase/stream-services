@@ -22,7 +22,7 @@ import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.StatusA7dEnum;
-import com.backbase.stream.configuration.InvestmentIngestProperties;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentAssetData;
@@ -77,7 +77,7 @@ public class InvestmentPortfolioAllocationService {
     private final AssetUniverseApi assetUniverseApi;
     private final InvestmentApi investmentApi;
     private final CustomIntegrationApiService customIntegrationApiService;
-    private final InvestmentIngestProperties ingestProperties;
+    private final IngestConfigProperties ingestProperties;
 
     public Mono<Void> removeAllocations(PortfolioList portfolio) {
         String portfolioUuid = portfolio.getUuid().toString();

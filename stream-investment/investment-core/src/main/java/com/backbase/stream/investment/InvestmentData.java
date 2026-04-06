@@ -28,6 +28,7 @@ public class InvestmentData implements InvestmentDataValue {
     private InvestmentAssetData investmentAssetData;
     private List<InvestmentPortfolio> portfolios;
     private List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts;
+    private List<PortfolioRiskAssessment> portfolioRiskAssessments;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {
         Map<String, List<UUID>> clientsByLeExternalId = new HashMap<>();

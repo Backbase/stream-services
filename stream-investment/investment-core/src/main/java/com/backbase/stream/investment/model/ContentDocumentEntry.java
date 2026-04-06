@@ -23,7 +23,7 @@ public class ContentDocumentEntry {
     private List<String> tags;
     private List<ModelAsset> assets;
     @JsonProperty("extra_data")
-    private Map<String, Object> extraData;
+    private Map<String, String> extraData;
     private String document;
     private Resource documentResource;
 

@@ -6,7 +6,7 @@ import com.backbase.investment.api.service.sync.v1.model.AssetCategoryRequest;
 import com.backbase.investment.api.service.sync.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedAssetCategoryRequest;
 import com.backbase.investment.api.service.v1.model.Asset;
-import com.backbase.stream.configuration.InvestmentIngestProperties;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ import reactor.core.publisher.Mono;
 public class InvestmentRestAssetUniverseService {
 
     private final ApiClient apiClient;
-    private final InvestmentIngestProperties ingestProperties;
+    private final IngestConfigProperties ingestProperties;
     private final RestTemplateAssetMapper assetMapper = Mappers.getMapper(RestTemplateAssetMapper.class);
 
     public Mono<com.backbase.stream.investment.Asset> createAsset(com.backbase.stream.investment.Asset asset,
