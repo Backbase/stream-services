@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.12.0]
+### Added
+- Implement Portfolio Risk assessments data ingestion;
+### Changed
+- use latest investment service api 1.4.1;
+- update investment data integraton service
+
 ## [9.10.0]
 ### Changed
 - Investment service
