@@ -15,6 +15,7 @@ import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.PortfolioRiskAssessment;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import com.backbase.stream.investment.model.RiskQuestion;
@@ -589,13 +590,17 @@ class InvestmentSagaTest {
         RiskQuestion q = new RiskQuestion();
         q.setCode("INVESTMENT_HORIZON");
         q.setOrder(1);
+        PortfolioRiskAssessment portfolioRiskAssessment = PortfolioRiskAssessment.builder()
+            .riskQuestions(List.of(q))
+            .build();
+
         return new InvestmentTask("risk-question-task", InvestmentData.builder()
             .clientUsers(Collections.emptyList())
             .investmentArrangements(Collections.emptyList())
             .modelPortfolios(Collections.emptyList())
             .investmentPortfolioTradingAccounts(Collections.emptyList())
             .portfolios(Collections.emptyList())
-            .riskQuestions(List.of(q))
+            .portfolioRiskAssessments(List.of(portfolioRiskAssessment))
             .build());
     }
 

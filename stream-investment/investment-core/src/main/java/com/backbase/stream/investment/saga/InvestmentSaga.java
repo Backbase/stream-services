@@ -5,6 +5,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
+import com.backbase.stream.investment.PortfolioRiskAssessment;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import com.backbase.stream.investment.model.RiskQuestion;
@@ -289,8 +290,15 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     }
 
     private Mono<InvestmentTask> upsertRiskQuestions(InvestmentTask investmentTask) {
-        List<RiskQuestion> riskQuestions = Objects.requireNonNullElse(
-            investmentTask.getData().getRiskQuestions(), List.of());
+        List<PortfolioRiskAssessment> portfolioRiskAssessments = Objects.requireNonNullElse(
+            investmentTask.getData().getPortfolioRiskAssessments(), List.of());
+
+        List<RiskQuestion> riskQuestions = portfolioRiskAssessments.stream()
+            .map(PortfolioRiskAssessment::getRiskQuestions)
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
+            .toList();
+
         int questionCount = riskQuestions.size();
 
         log.info("Starting investment risk questions upsert: taskId={}, questionCount={}",
@@ -318,8 +326,13 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     }
 
     private Mono<InvestmentTask> upsertRiskAssessments(InvestmentTask investmentTask) {
-        List<UserRiskAssessment> riskAssessments = Objects.requireNonNullElse(
-            investmentTask.getData().getRiskAssessments(), List.of());
+        List<PortfolioRiskAssessment> portfolioRiskAssessments = Objects.requireNonNullElse(
+            investmentTask.getData().getPortfolioRiskAssessments(), List.of());
+        List<UserRiskAssessment> riskAssessments = portfolioRiskAssessments.stream()
+            .map(PortfolioRiskAssessment::getAssessments)
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
+            .toList();
         int assessmentCount = riskAssessments.size();
 
         log.info("Starting investment risk assessments upsert: taskId={}, assessmentCount={}",
@@ -330,10 +343,9 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
         return Flux.fromIterable(investmentTask.getData().getClientUsers())
             .flatMap(c -> {
-                String userName = Objects.requireNonNullElse(c.getUserName(), "").toLowerCase(Locale.ROOT);
+                String userName = Objects.requireNonNullElse(c.getExternalUserId(), "");
                 List<BaseAssessmentRequest> list = riskAssessments.stream()
-                    .filter(a -> a.getUserName() != null && !a.getUserName().isBlank())
-                    .filter(a -> a.getUserName().toLowerCase(Locale.ROOT).contentEquals(userName))
+                    .filter(a -> isAssessmentApplicable(a, userName))
                     .map(a -> new BaseAssessmentRequest()
                         .choices(a.getChoices())
                         .extraData(a.getExtraData())
@@ -359,6 +371,13 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment risk assessments: " + throwable.getMessage());
             });
+    }
+
+    private static boolean isAssessmentApplicable(UserRiskAssessment a, String userName) {
+        if (a.getUserName() == null || a.getUserName().isBlank()) {
+            return true;
+        }
+        return a.getUserName().toLowerCase(Locale.ROOT).contentEquals(userName.toLowerCase(Locale.ROOT));
     }
 
     private Mono<InvestmentTask> upsertPortfolioTradingAccounts(InvestmentTask investmentTask) {

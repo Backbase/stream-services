@@ -4,8 +4,6 @@ import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
-import com.backbase.stream.investment.model.RiskQuestion;
-import com.backbase.stream.investment.model.UserRiskAssessment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +28,7 @@ public class InvestmentData implements InvestmentDataValue {
     private InvestmentAssetData investmentAssetData;
     private List<InvestmentPortfolio> portfolios;
     private List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts;
-    private List<RiskQuestion> riskQuestions;
-    private List<UserRiskAssessment> riskAssessments;
+    private List<PortfolioRiskAssessment> portfolioRiskAssessments;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {
         Map<String, List<UUID>> clientsByLeExternalId = new HashMap<>();
