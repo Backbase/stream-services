@@ -21,6 +21,7 @@ public class TransactionCursorClientConfiguration extends CompositeApiClientConf
     }
 
     @Bean
+    @Primary
     public ApiClient transactionCursorClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());

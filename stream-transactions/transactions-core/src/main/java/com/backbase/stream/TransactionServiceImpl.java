@@ -123,7 +123,8 @@ public class TransactionServiceImpl implements TransactionService {
             transactionsQuery.getSize(),
             transactionsQuery.getOrderBy(),
             transactionsQuery.getDirection(),
-            transactionsQuery.getSecDirection());
+            transactionsQuery.getSecDirection(),
+            transactionsQuery.getSort());
     }
 
     /**

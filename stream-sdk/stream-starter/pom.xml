@@ -4,13 +4,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.4</version>
+        <version>3.5.11</version>
         <relativePath/>
     </parent>
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-starter</artifactId>
     <name>Stream :: SDK :: stream-starter</name>
-    <version>9.12.0</version>
+    <version>9.13.0</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -114,7 +114,7 @@
             <dependency>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>backbase-building-blocks-release</artifactId>
-                <version>19.0.0</version>
+                <version>20.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
