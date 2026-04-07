@@ -42,7 +42,6 @@ import reactor.core.publisher.Mono;
 public class InvestmentModelPortfolioService {
 
     private final FinancialAdviceApi financialAdviceApi;
-    private final CustomIntegrationApiService customIntegrationApiService;
 
     public Flux<OASModelPortfolioResponse> upsertModels(InvestmentData investmentData) {
         return Flux.fromIterable(Objects.requireNonNullElse(investmentData.getModelPortfolios(), List.of()))
@@ -153,7 +152,7 @@ public class InvestmentModelPortfolioService {
 
         log.info("Creating new model portfolio: name={}, riskLevel={}",
             modelPortfolio.getName(), modelPortfolio.getRiskLevel());
-        return customIntegrationApiService.createModelPortfolioRequestCreation(null, null, null,
+        return financialAdviceApi.createModelPortfolio(null, null, null,
                 modelPortfolio, null)
             .doOnSuccess(created -> log.info(
                 "Successfully created model portfolio: uuid={}, name={}, riskLevel={}",
@@ -168,7 +167,7 @@ public class InvestmentModelPortfolioService {
         log.info("Patch model portfolio: name={}, riskLevel={}",
             modelPortfolio.getName(), modelPortfolio.getRiskLevel());
         log.debug("Patch model portfolio: uuid={}, object={}", uuid, modelPortfolio);
-        return customIntegrationApiService.patchModelPortfolioRequestCreation(uuid.toString(),
+        return financialAdviceApi.patchModelPortfolio(uuid.toString(),
                 null, null, null, modelPortfolio, null)
             .doOnSuccess(created -> log.info(
                 "Successfully patched model portfolio: uuid={}, name={}, riskLevel={}",

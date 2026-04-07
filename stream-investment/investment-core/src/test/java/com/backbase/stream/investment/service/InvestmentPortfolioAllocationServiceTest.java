@@ -67,7 +67,6 @@ class InvestmentPortfolioAllocationServiceTest {
     private AllocationsApi allocationsApi;
     private AssetUniverseApi assetUniverseApi;
     private InvestmentApi investmentApi;
-    private CustomIntegrationApiService customIntegrationApiService;
     private InvestmentPortfolioAllocationService service;
     private IngestConfigProperties ingestProperties;
 
@@ -76,10 +75,9 @@ class InvestmentPortfolioAllocationServiceTest {
         allocationsApi = mock(AllocationsApi.class);
         assetUniverseApi = mock(AssetUniverseApi.class);
         investmentApi = mock(InvestmentApi.class);
-        customIntegrationApiService = mock(CustomIntegrationApiService.class);
         ingestProperties = new IngestConfigProperties();
         service = new InvestmentPortfolioAllocationService(
-            allocationsApi, assetUniverseApi, investmentApi, customIntegrationApiService, ingestProperties);
+            allocationsApi, assetUniverseApi, investmentApi, ingestProperties);
     }
 
     // =========================================================================
@@ -220,7 +218,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .expectNextMatches(d -> d == deposit)
                 .verifyComplete();
 
-            verify(customIntegrationApiService, never())
+            verify(allocationsApi, never())
                 .createPortfolioAllocation(any(), any(), any(), any(), any());
         }
 
@@ -243,7 +241,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .thenReturn(Mono.just(page));
 
             OASPortfolioAllocation created = mock(OASPortfolioAllocation.class);
-            when(customIntegrationApiService.createPortfolioAllocation(
+            when(allocationsApi.createPortfolioAllocation(
                 eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(created));
 
@@ -252,7 +250,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .expectNextMatches(d -> d == deposit)
                 .verifyComplete();
 
-            verify(customIntegrationApiService)
+            verify(allocationsApi)
                 .createPortfolioAllocation(eq(portfolioUuid.toString()),
                     any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull());
         }
@@ -273,7 +271,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .thenReturn(Mono.just(emptyPage));
 
             OASPortfolioAllocation created = mock(OASPortfolioAllocation.class);
-            when(customIntegrationApiService.createPortfolioAllocation(
+            when(allocationsApi.createPortfolioAllocation(
                 eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(created));
 
@@ -282,7 +280,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .expectNextMatches(d -> d == deposit)
                 .verifyComplete();
 
-            verify(customIntegrationApiService)
+            verify(allocationsApi)
                 .createPortfolioAllocation(eq(portfolioUuid.toString()),
                     any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull());
         }
@@ -305,7 +303,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 eq(completedAt.minusDays(4)), eq(completedAt.plusDays(5))))
                 .thenReturn(Mono.just(page));
 
-            when(customIntegrationApiService.createPortfolioAllocation(
+            when(allocationsApi.createPortfolioAllocation(
                 eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.error(new RuntimeException("downstream failure")));
 
@@ -331,7 +329,7 @@ class InvestmentPortfolioAllocationServiceTest {
             StepVerifier.create(service.createDepositAllocation(deposit))
                 .verifyComplete();
 
-            verify(customIntegrationApiService, never())
+            verify(allocationsApi, never())
                 .createPortfolioAllocation(any(), any(), any(), any(), any());
         }
 
@@ -358,7 +356,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .thenReturn(Mono.just(page));
 
             OASPortfolioAllocation created = mock(OASPortfolioAllocation.class);
-            when(customIntegrationApiService.createPortfolioAllocation(
+            when(allocationsApi.createPortfolioAllocation(
                 eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(created));
 
@@ -463,7 +461,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .thenReturn(Mono.just(mock(OASOrder.class)));
 
             OASPortfolioAllocation createdAlloc = mock(OASPortfolioAllocation.class);
-            when(customIntegrationApiService.createPortfolioAllocation(
+            when(allocationsApi.createPortfolioAllocation(
                 eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(createdAlloc));
 
@@ -476,7 +474,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .expectNextMatches(result -> !result.isEmpty())
                 .verifyComplete();
 
-            verify(customIntegrationApiService, atLeastOnce())
+            verify(allocationsApi, atLeastOnce())
                 .createPortfolioAllocation(eq(portfolioUuid.toString()), any(), isNull(), isNull(), isNull());
         }
 
@@ -534,7 +532,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
 
-            verify(customIntegrationApiService, never())
+            verify(allocationsApi, never())
                 .createPortfolioAllocation(any(), any(), any(), any(), any());
         }
 
@@ -596,7 +594,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .thenReturn(Mono.just(mock(OASOrder.class)));
 
             OASPortfolioAllocation createdAlloc = mock(OASPortfolioAllocation.class);
-            when(customIntegrationApiService.createPortfolioAllocation(
+            when(allocationsApi.createPortfolioAllocation(
                 eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(createdAlloc));
 
@@ -609,7 +607,7 @@ class InvestmentPortfolioAllocationServiceTest {
                 .expectNextMatches(result -> !result.isEmpty())
                 .verifyComplete();
 
-            verify(customIntegrationApiService, atLeastOnce())
+            verify(allocationsApi, atLeastOnce())
                 .createPortfolioAllocation(eq(portfolioUuid.toString()), any(), isNull(), isNull(), isNull());
         }
     }

@@ -52,18 +52,13 @@ import reactor.test.StepVerifier;
  *
  * <p>Mocked dependencies:
  * <ul>
- *   <li>{@link FinancialAdviceApi} – list model portfolios</li>
- *   <li>{@link CustomIntegrationApiService} – create / patch model portfolios</li>
+ *   <li>{@link FinancialAdviceApi} – list / create / patch model portfolios</li>
  * </ul>
  */
-@SuppressWarnings({"deprecation", "removal"})
 class InvestmentModelPortfolioServiceTest {
 
     @Mock
     private FinancialAdviceApi financialAdviceApi;
-
-    @Mock
-    private CustomIntegrationApiService customIntegrationApiService;
 
     private InvestmentModelPortfolioService service;
 
@@ -75,7 +70,7 @@ class InvestmentModelPortfolioServiceTest {
     @BeforeEach
     void setUp() {
         mocks = MockitoAnnotations.openMocks(this);
-        service = new InvestmentModelPortfolioService(financialAdviceApi, customIntegrationApiService);
+        service = new InvestmentModelPortfolioService(financialAdviceApi);
     }
 
     /**
@@ -117,7 +112,7 @@ class InvestmentModelPortfolioServiceTest {
 
             verify(financialAdviceApi, never()).listModelPortfolio(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
-            verify(customIntegrationApiService, never()).createModelPortfolioRequestCreation(
+            verify(financialAdviceApi, never()).createModelPortfolio(
                 any(), any(), any(), any(), any());
         }
 
@@ -159,7 +154,7 @@ class InvestmentModelPortfolioServiceTest {
 
             stubListReturnsEmpty("Conservative", 3);
             OASModelPortfolioResponse created = buildResponse(expectedUuid, "Conservative", 3);
-            when(customIntegrationApiService.createModelPortfolioRequestCreation(
+            when(financialAdviceApi.createModelPortfolio(
                 isNull(), isNull(), isNull(), any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.just(created));
 
@@ -192,7 +187,7 @@ class InvestmentModelPortfolioServiceTest {
             stubListReturnsOne("Balanced", 5, existing);
 
             OASModelPortfolioResponse patched = buildResponse(existingUuid, "Balanced", 5);
-            when(customIntegrationApiService.patchModelPortfolioRequestCreation(
+            when(financialAdviceApi.patchModelPortfolio(
                 eq(existingUuid.toString()), isNull(), isNull(), isNull(),
                 any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.just(patched));
@@ -202,7 +197,7 @@ class InvestmentModelPortfolioServiceTest {
                 .assertNext(response -> assertThat(response.getUuid()).isEqualTo(existingUuid))
                 .verifyComplete();
 
-            verify(customIntegrationApiService, never()).createModelPortfolioRequestCreation(
+            verify(financialAdviceApi, never()).createModelPortfolio(
                 any(), any(), any(), any(), any());
         }
 
@@ -226,7 +221,7 @@ class InvestmentModelPortfolioServiceTest {
             stubListReturnsEmpty("Conservative", 3);
             stubListReturnsEmpty("Aggressive", 8);
 
-            when(customIntegrationApiService.createModelPortfolioRequestCreation(
+            when(financialAdviceApi.createModelPortfolio(
                 isNull(), isNull(), isNull(), any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(
                     Mono.just(buildResponse(uuid1, "Conservative", 3)),
@@ -256,7 +251,7 @@ class InvestmentModelPortfolioServiceTest {
                 .build();
 
             stubListReturnsEmpty("Conservative", 3);
-            when(customIntegrationApiService.createModelPortfolioRequestCreation(
+            when(financialAdviceApi.createModelPortfolio(
                 isNull(), isNull(), isNull(), any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.error(new RuntimeException("create failed")));
 
@@ -292,7 +287,7 @@ class InvestmentModelPortfolioServiceTest {
 
             ArgumentCaptor<OASModelPortfolioRequestDataRequest> requestCaptor =
                 ArgumentCaptor.forClass(OASModelPortfolioRequestDataRequest.class);
-            when(customIntegrationApiService.createModelPortfolioRequestCreation(
+            when(financialAdviceApi.createModelPortfolio(
                 isNull(), isNull(), isNull(), requestCaptor.capture(), isNull()))
                 .thenReturn(Mono.just(buildResponse(expectedUuid, "Growth", 7)));
 
@@ -341,7 +336,7 @@ class InvestmentModelPortfolioServiceTest {
                 .build();
 
             stubListReturnsEmpty("Conservative", 2);
-            when(customIntegrationApiService.createModelPortfolioRequestCreation(
+            when(financialAdviceApi.createModelPortfolio(
                 isNull(), isNull(), isNull(), any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.just(buildResponse(expectedUuid, "Conservative", 2)));
 
@@ -368,7 +363,7 @@ class InvestmentModelPortfolioServiceTest {
             OASModelPortfolioResponse existing = buildResponse(existingUuid, "Moderate", 5);
             stubListReturnsOne("Moderate", 5, existing);
             OASModelPortfolioResponse patched = buildResponse(existingUuid, "Moderate", 5);
-            when(customIntegrationApiService.patchModelPortfolioRequestCreation(
+            when(financialAdviceApi.patchModelPortfolio(
                 eq(existingUuid.toString()), isNull(), isNull(), isNull(),
                 any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.just(patched));
@@ -378,7 +373,7 @@ class InvestmentModelPortfolioServiceTest {
                 .assertNext(r -> assertThat(r.getUuid()).isEqualTo(existingUuid))
                 .verifyComplete();
 
-            verify(customIntegrationApiService, never()).createModelPortfolioRequestCreation(
+            verify(financialAdviceApi, never()).createModelPortfolio(
                 any(), any(), any(), any(), any());
         }
 
@@ -409,7 +404,7 @@ class InvestmentModelPortfolioServiceTest {
                 .thenReturn(Mono.just(page));
 
             OASModelPortfolioResponse patched = buildResponse(firstUuid, "Balanced", 6);
-            when(customIntegrationApiService.patchModelPortfolioRequestCreation(
+            when(financialAdviceApi.patchModelPortfolio(
                 eq(firstUuid.toString()), isNull(), isNull(), isNull(),
                 any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.just(patched));
@@ -419,7 +414,7 @@ class InvestmentModelPortfolioServiceTest {
                 .assertNext(r -> assertThat(r.getUuid()).isEqualTo(firstUuid))
                 .verifyComplete();
 
-            verify(customIntegrationApiService, never()).createModelPortfolioRequestCreation(
+            verify(financialAdviceApi, never()).createModelPortfolio(
                 any(), any(), any(), any(), any());
         }
 
@@ -476,7 +471,7 @@ class InvestmentModelPortfolioServiceTest {
 
             stubListReturnsEmpty("Income", 2);
             OASModelPortfolioResponse created = buildResponse(newUuid, "Income", 2);
-            when(customIntegrationApiService.createModelPortfolioRequestCreation(
+            when(financialAdviceApi.createModelPortfolio(
                 isNull(), isNull(), isNull(), any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.just(created));
 
@@ -506,7 +501,7 @@ class InvestmentModelPortfolioServiceTest {
             stubListReturnsEmpty("Income", 2);
             WebClientResponseException ex = WebClientResponseException.create(
                 HttpStatus.BAD_REQUEST.value(), "Bad Request", null, null, null);
-            when(customIntegrationApiService.createModelPortfolioRequestCreation(
+            when(financialAdviceApi.createModelPortfolio(
                 isNull(), isNull(), isNull(), any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.error(ex));
 
@@ -530,7 +525,7 @@ class InvestmentModelPortfolioServiceTest {
                 .build();
 
             stubListReturnsEmpty("Income", 2);
-            when(customIntegrationApiService.createModelPortfolioRequestCreation(
+            when(financialAdviceApi.createModelPortfolio(
                 isNull(), isNull(), isNull(), any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.error(new IllegalStateException("unexpected")));
 
@@ -570,7 +565,7 @@ class InvestmentModelPortfolioServiceTest {
             OASModelPortfolioResponse existing = buildResponse(existingUuid, "Dynamic", 9);
             stubListReturnsOne("Dynamic", 9, existing);
             OASModelPortfolioResponse patched = buildResponse(existingUuid, "Dynamic", 9);
-            when(customIntegrationApiService.patchModelPortfolioRequestCreation(
+            when(financialAdviceApi.patchModelPortfolio(
                 eq(existingUuid.toString()), isNull(), isNull(), isNull(),
                 any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.just(patched));
@@ -584,7 +579,7 @@ class InvestmentModelPortfolioServiceTest {
                 })
                 .verifyComplete();
 
-            verify(customIntegrationApiService, never()).createModelPortfolioRequestCreation(
+            verify(financialAdviceApi, never()).createModelPortfolio(
                 any(), any(), any(), any(), any());
         }
 
@@ -606,7 +601,7 @@ class InvestmentModelPortfolioServiceTest {
 
             ArgumentCaptor<String> uuidCaptor = ArgumentCaptor.forClass(String.class);
             OASModelPortfolioResponse patched = buildResponse(existingUuid, "Stable", 4);
-            when(customIntegrationApiService.patchModelPortfolioRequestCreation(
+            when(financialAdviceApi.patchModelPortfolio(
                 uuidCaptor.capture(), isNull(), isNull(), isNull(),
                 any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.just(patched));
@@ -637,7 +632,7 @@ class InvestmentModelPortfolioServiceTest {
             stubListReturnsOne("Dynamic", 9, existing);
             WebClientResponseException ex = WebClientResponseException.create(
                 HttpStatus.NOT_FOUND.value(), "Not Found", null, null, null);
-            when(customIntegrationApiService.patchModelPortfolioRequestCreation(
+            when(financialAdviceApi.patchModelPortfolio(
                 eq(existingUuid.toString()), isNull(), isNull(), isNull(),
                 any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.error(ex));
@@ -664,7 +659,7 @@ class InvestmentModelPortfolioServiceTest {
 
             OASModelPortfolioResponse existing = buildResponse(existingUuid, "Dynamic", 9);
             stubListReturnsOne("Dynamic", 9, existing);
-            when(customIntegrationApiService.patchModelPortfolioRequestCreation(
+            when(financialAdviceApi.patchModelPortfolio(
                 eq(existingUuid.toString()), isNull(), isNull(), isNull(),
                 any(OASModelPortfolioRequestDataRequest.class), isNull()))
                 .thenReturn(Mono.error(new RuntimeException("patch failed")));

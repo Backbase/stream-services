@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.13.0]
+### Changed
+- Remove custom workaround to connect with Investment service
+
 ## [9.12.0]
 ### Added
 - Implement Portfolio Risk assessments data ingestion;
