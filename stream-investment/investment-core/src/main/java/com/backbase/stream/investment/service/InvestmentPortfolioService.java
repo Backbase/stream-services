@@ -21,13 +21,12 @@ import com.backbase.investment.api.service.v1.model.PortfolioTradingAccountReque
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.Status08fEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
-import com.backbase.stream.configuration.InvestmentIngestProperties;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,7 +71,7 @@ public class InvestmentPortfolioService {
     private final PortfolioApi portfolioApi;
     private final PaymentsApi paymentsApi;
     private final PortfolioTradingAccountsApi portfolioTradingAccountsApi;
-    private final InvestmentIngestProperties config;
+    private final IngestConfigProperties config;
 
     public Mono<List<InvestmentPortfolio>> upsertPortfolios(List<InvestmentArrangement> investmentArrangements,
         Map<String, List<UUID>> clientsByLeExternalId) {

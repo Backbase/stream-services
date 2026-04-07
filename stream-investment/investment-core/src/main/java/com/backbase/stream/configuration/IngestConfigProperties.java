@@ -2,6 +2,7 @@ package com.backbase.stream.configuration;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Fine-grained configuration properties for {@code InvestmentPortfolioService}.
@@ -33,8 +34,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * </pre>
  */
 @Data
-@ConfigurationProperties(prefix = "backbase.bootstrap.ingestions.investment.service")
-public class InvestmentIngestProperties {
+@ConfigurationProperties(prefix = "backbase.bootstrap.ingestions.investment.config")
+public class IngestConfigProperties {
 
     public static final double DEFAULT_INIT_CASH = 10_000d;
 
@@ -42,6 +43,7 @@ public class InvestmentIngestProperties {
     private AllocationConfig allocation = new AllocationConfig();
     private DepositConfig deposit = new DepositConfig();
     private AssetConfig asset = new AssetConfig();
+    private AssessmentConfig assessment = new AssessmentConfig();
 
     // -------------------------------------------------------------------------
     // Portfolio
@@ -123,6 +125,13 @@ public class InvestmentIngestProperties {
         private int marketSpecialDayConcurrency = 5;
         private int assetCategoryConcurrency = 5;
         private int assetCategoryTypeConcurrency = 5;
+
+    }
+
+    @Data
+    public static class AssessmentConfig {
+
+        private int riskQuestionsPageSize = 100;
 
     }
 
