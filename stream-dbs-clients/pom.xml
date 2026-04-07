@@ -587,7 +587,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/audit/audit-service-api-v*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/audit-spec/audit-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.audit.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.audit.api.service.v2.model</modelPackage>
                             <configOptions>

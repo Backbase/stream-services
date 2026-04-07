@@ -21,6 +21,7 @@ public class TransactionIntegrationClientConfiguration extends CompositeApiClien
     }
 
     @Bean
+    @Primary
     public ApiClient transactionIntegrationClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
