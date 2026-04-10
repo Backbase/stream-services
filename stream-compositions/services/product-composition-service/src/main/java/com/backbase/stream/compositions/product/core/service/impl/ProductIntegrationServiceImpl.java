@@ -65,6 +65,7 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
             log.debug("Credit Cards received from Integration: {}", productGroup.getCreditCards());
             log.debug("Debit Cards received from Integration: {}", productGroup.getDebitCards());
             log.debug("Investment accounts received from Integration: {}", productGroup.getInvestmentAccounts());
+            log.debug("Investment portfolios received from Integration: {}", productGroup.getInvestmentPortfolios());
             log.debug("Term Deposit Accounts received from Integration: {}", productGroup.getTermDeposits());
             log.debug("Custom Accounts received from Integration: {}", productGroup.getCustomProducts());
             log.debug("Custom Data group items received from Integration: {}", productGroup.getCustomDataGroupItems());

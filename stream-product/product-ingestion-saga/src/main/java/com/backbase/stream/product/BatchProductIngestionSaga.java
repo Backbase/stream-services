@@ -220,6 +220,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                         StreamUtils.nullableCollectionToStream(pg.getLoans()).map(productMapper::toPresentation),
                         StreamUtils.nullableCollectionToStream(pg.getTermDeposits()).map(productMapper::toPresentation),
                         StreamUtils.nullableCollectionToStream(pg.getInvestmentAccounts()).map(productMapper::toPresentation),
+                        StreamUtils.nullableCollectionToStream(pg.getInvestmentPortfolios()).map(productMapper::toPresentation),
                         StreamUtils.nullableCollectionToStream(pg.getCustomProducts()).map(productMapper::toPresentation)
                 )
                         .flatMap(i -> i)

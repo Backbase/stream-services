@@ -198,6 +198,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                                         .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
+                                        .flatMap(group -> productStream(group.getInvestmentPortfolios()))
+                                        .toList())
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getCustomProducts()))
                                         .toList())
                                 .orElseGet(Collections::emptyList)))

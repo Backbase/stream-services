@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Transaction composition API
-  version: 2.0.0
+  version: 2.1.0
 servers:
   - url: http://localhost:8080/service-api/v2
     description: The server
@@ -180,6 +180,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvestmentAccount'
+        investmentPortfolios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
 
     BaseProduct:
       title: Base Product

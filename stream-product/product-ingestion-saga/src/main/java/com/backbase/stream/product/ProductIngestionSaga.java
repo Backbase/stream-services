@@ -224,6 +224,7 @@ public class ProductIngestionSaga {
         Flux<Loan> loanFlux = getLoanFlux(productGroup);
         Flux<TermDeposit> termDepositFlux = getTermDepositFlux(productGroup);
         Flux<InvestmentAccount> investmentAccountFlux = getInvestmentAccountFlux(productGroup);
+        Flux<Product> investmentPortfolioFlux = getInvestmentPortfolioFlux(productGroup);
         Flux<Product> productFlux = getProductFlux(productGroup);
 
 
@@ -234,6 +235,7 @@ public class ProductIngestionSaga {
         Mono<List<ArrangementItem>> loansRequests = upsertArrangements(streamTask, loanFlux.map(productMapper::toPresentation));
         Mono<List<ArrangementItem>> termDepositsRequests = upsertArrangements(streamTask, termDepositFlux.map(productMapper::toPresentation));
         Mono<List<ArrangementItem>> investmentAccountsRequests = upsertArrangements(streamTask, investmentAccountFlux.map(productMapper::toPresentation));
+        Mono<List<ArrangementItem>> investmentPortfoliosRequests = upsertArrangements(streamTask, investmentPortfolioFlux.map(productMapper::toPresentation));
         Mono<List<ArrangementItem>> customProductsRequests = upsertArrangements(streamTask, productFlux.map(productMapper::toPresentation));
 
         return Mono.just(productGroup)
@@ -247,6 +249,7 @@ public class ProductIngestionSaga {
             .zipWith(loansRequests, (actual, arrangements) -> actual.loans(arrangements.stream().map(productMapper::mapLoan).toList()))
             .zipWith(termDepositsRequests, (actual, arrangements) -> actual.termDeposits(arrangements.stream().map(productMapper::mapTermDeposit).toList()))
             .zipWith(investmentAccountsRequests, (actual, arrangements) -> actual.investmentAccounts(arrangements.stream().map(productMapper::mapInvestmentAccount).toList()))
+            .zipWith(investmentPortfoliosRequests, (actual, arrangements) -> actual.investmentPortfolios(arrangements.stream().map(productMapper::mapCustomProduct).toList()))
             .zipWith(customProductsRequests, (actual, arrangements) -> actual.customProducts(arrangements.stream().map(productMapper::mapCustomProduct).toList()))
             .cast(ProductGroup.class)
             .map(streamTask::data);
@@ -326,6 +329,12 @@ public class ProductIngestionSaga {
         return productGroup.getInvestmentAccounts() == null
             ? Flux.empty()
             : Flux.fromIterable(productGroup.getInvestmentAccounts());
+    }
+
+    private Flux<Product> getInvestmentPortfolioFlux(ProductGroup productGroup) {
+        return productGroup.getInvestmentPortfolios() == null
+            ? Flux.empty()
+            : Flux.fromIterable(productGroup.getInvestmentPortfolios());
     }
 
     private Flux<TermDeposit> getTermDepositFlux(ProductGroup productGroup) {

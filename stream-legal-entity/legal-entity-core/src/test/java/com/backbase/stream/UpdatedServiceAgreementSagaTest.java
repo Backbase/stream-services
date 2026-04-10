@@ -17,6 +17,7 @@ import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Loan;
+import com.backbase.stream.legalentity.model.Product;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
@@ -120,6 +121,91 @@ class UpdatedServiceAgreementSagaTest {
         verify(accessGroupService).setupProductGroups(productGroupTaskCaptor.capture());
         ProductGroupTask productGroupTask = productGroupTaskCaptor.getValue();
         assertEquals(productGroup, productGroupTask.getData());
+
+        verify(accessGroupService).getUserByExternalId(eq("someUserExId1"), eq(true));
+        verify(accessGroupService).getUserByExternalId(eq("someUserExId2"), eq(true));
+
+        verify(accessGroupService).getFunctionGroupsForServiceAgreement(eq(saInternalId));
+
+        Map<BusinessFunctionGroup, List<BaseProductGroup>> permissionUser1 = new HashMap<>();
+        permissionUser1.put(new BusinessFunctionGroup().name("someJobRole1"), asList(baseProductGroup));
+        Map<BusinessFunctionGroup, List<BaseProductGroup>> permissionUser2 = new HashMap<>();
+        permissionUser2.put(new BusinessFunctionGroup().name("someJobRole2"), asList(baseProductGroup));
+        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> permissionsRequest = new HashMap<>();
+        permissionsRequest.put(user1, permissionUser1);
+        permissionsRequest.put(user2, permissionUser2);
+        verify(accessGroupService).assignPermissionsBatch(any(), eq(permissionsRequest));
+    }
+
+    @Test
+    void updateServiceAgreementWithInvestmentPortfolios() {
+        final String saExternalId = "somePortfolioSaExternalId";
+        final String saInternalId = "somePortfolioSaInternalId";
+        final String portfolioExId = "somePortfolioExId";
+        final String portfolioInId = "somePortfolioInId";
+        User user1 = new User().externalId("someUserExId1");
+        User user2 = new User().externalId("someUserExId2");
+        Product investmentPortfolio = new Product();
+        investmentPortfolio.setExternalId(portfolioExId);
+        LegalEntityParticipant participant =
+            new LegalEntityParticipant().externalId("someLeExId").sharingAccounts(true).sharingUsers(true);
+        BaseProductGroup baseProductGroup = new BaseProductGroup().addInvestmentPortfoliosItem(investmentPortfolio);
+        JobProfileUser jobProfileUser1 = new JobProfileUser().user(user1).addReferenceJobRoleNamesItem("someJobRole1");
+        JobProfileUser jobProfileUser2 = new JobProfileUser().user(user2).addReferenceJobRoleNamesItem("someJobRole2");
+        UpdatedServiceAgreement serviceAgreement = new UpdatedServiceAgreement().addProductGroupsItem(baseProductGroup)
+            .addSaAdminsItem(new ServiceAgreementUserAction().userProfile(jobProfileUser1))
+            .addSaUsersItem(new ServiceAgreementUserAction().userProfile(jobProfileUser2));
+        serviceAgreement.externalId(saExternalId).internalId(saInternalId).name("someSa")
+            .addParticipantsItem(participant);
+        ServiceAgreement internalSA = new ServiceAgreement().externalId(saExternalId).internalId(saInternalId);
+        UpdatedServiceAgreementTask task = new UpdatedServiceAgreementTask(serviceAgreement);
+        List<FunctionGroupItem> serviceAgreementFunctionGroups = asList(
+            new FunctionGroupItem().name("someJobRole1").type(TypeEnum.CUSTOM),
+            new FunctionGroupItem().name("someJobRole2").type(TypeEnum.CUSTOM),
+            new FunctionGroupItem().name("someJobRole3").type(TypeEnum.CUSTOM));
+        ProductGroup productGroup = new ProductGroup().serviceAgreement(serviceAgreement);
+        productGroup.investmentPortfolios(baseProductGroup.getInvestmentPortfolios());
+
+        when(accessGroupService.updateServiceAgreementAssociations(eq(task), eq(serviceAgreement), any()))
+            .thenReturn(Mono.just(serviceAgreement));
+
+        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(new ProductGroupTask(productGroup));
+        when(accessGroupService.setupProductGroups(any())).thenReturn(productGroupTaskMono);
+
+        when(accessGroupService.getUserByExternalId(eq("someUserExId1"), eq(true)))
+            .thenReturn(Mono.just(new GetUser().id("someUserInId1").externalId("someUserExId1")));
+        when(accessGroupService.getUserByExternalId(eq("someUserExId2"), eq(true)))
+            .thenReturn(Mono.just(new GetUser().id("someUserInId2").externalId("someUserExId2")));
+
+        when(accessGroupService.getFunctionGroupsForServiceAgreement(eq(saInternalId)))
+            .thenReturn(Mono.just(serviceAgreementFunctionGroups));
+
+        BatchProductGroupTask bpgTask =
+            new BatchProductGroupTask().data(new BatchProductGroup().serviceAgreement(serviceAgreement));
+        when(accessGroupService.assignPermissionsBatch(any(), any())).thenReturn(Mono.just(bpgTask));
+
+        when(accessGroupService.getServiceAgreementByExternalId(eq(saExternalId))).thenReturn(Mono.just(internalSA));
+
+        when(arrangementService.getArrangementByExternalId(ArgumentMatchers.<List<String>>any()))
+            .thenReturn(Flux.fromIterable(
+                Collections.singletonList(
+                    new ArrangementItem().id(portfolioInId).externalArrangementId(portfolioExId))));
+
+        UpdatedServiceAgreementTask actual = updatedServiceAgreementSaga.executeTask(task).block();
+
+        assertEquals(StreamTask.State.COMPLETED, actual.getState());
+
+        // Verify the investment portfolio's internal ID was resolved from the arrangement service
+        assertEquals(portfolioInId, investmentPortfolio.getInternalId());
+
+        verify(accessGroupService).updateServiceAgreementAssociations(any(), eq(serviceAgreement), any());
+
+        verify(accessGroupService).setupProductGroups(productGroupTaskCaptor.capture());
+        ProductGroupTask productGroupTask = productGroupTaskCaptor.getValue();
+        assertEquals(productGroup, productGroupTask.getData());
+
+        verify(arrangementService).getArrangementByExternalId(
+            ArgumentMatchers.<List<String>>argThat(ids -> ids.contains(portfolioExId)));
 
         verify(accessGroupService).getUserByExternalId(eq("someUserExId1"), eq(true));
         verify(accessGroupService).getUserByExternalId(eq("someUserExId2"), eq(true));
