@@ -229,6 +229,7 @@ public class UpdatedServiceAgreementSaga implements StreamTaskExecutor<UpdatedSe
                 pg.getCustomProducts(),
                 pg.getDebitCards(),
                 pg.getInvestmentAccounts(),
+                pg.getInvestmentPortfolios(),
                 pg.getSavingAccounts(),
                 pg.getTermDeposits()))
             .filter(Objects::nonNull)

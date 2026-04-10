@@ -53,6 +53,7 @@ public class StreamUtils {
             productGroup.getLoans(),
             productGroup.getTermDeposits(),
             productGroup.getInvestmentAccounts(),
+            productGroup.getInvestmentPortfolios(),
             productGroup.getCustomProducts())
             .filter(Objects::nonNull)
             .flatMap(List::stream);
