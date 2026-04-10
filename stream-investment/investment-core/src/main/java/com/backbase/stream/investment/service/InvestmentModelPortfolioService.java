@@ -1,13 +1,10 @@
-
 package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
-import com.backbase.investment.api.service.v1.InvestmentProductsApi;
-import com.backbase.investment.api.service.v1.PortfolioApi;
-import com.backbase.investment.api.service.v1.model.OASAssetModelPortfolioRequestRequest;
-import com.backbase.investment.api.service.v1.model.OASModelPortfolioRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
 import com.backbase.stream.investment.InvestmentData;
+import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPortfolioService;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -19,19 +16,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Service wrapper around generated {@link PortfolioApi} and {@link InvestmentProductsApi} providing guarded
+ * Service wrapper around generated {@link FinancialAdviceApi} providing guarded
  * create/patch operations with logging, minimal idempotency helpers and consistent error handling.
  *
  * <p>This service manages:
  * <ul>
- *   <li>Investment product creation and updates (portfolio products)</li>
- *   <li>Investment portfolio creation and updates</li>
- *   <li>Client-to-portfolio associations via legal entity mappings</li>
+ *   <li>Investment portfolio model creation and updates</li>
  * </ul>
  *
- * <p>Design notes (see CODING_RULES_COPILOT.md):
+ * <p>Design notes:
  * <ul>
- *   <li>No direct manipulation of generated API classes beyond construction & mapping</li>
  *   <li>Side-effecting operations are logged at info (create) or debug (patch) levels</li>
  *   <li>Exceptions from the underlying WebClient are propagated (caller decides retry strategy)</li>
  *   <li>All reactive operations include proper success and error handlers for observability</li>
@@ -42,7 +36,7 @@ import reactor.core.publisher.Mono;
 public class InvestmentModelPortfolioService {
 
     private final FinancialAdviceApi financialAdviceApi;
-    private final CustomIntegrationApiService customIntegrationApiService;
+    private final InvestmentRestModelPortfolioService investmentRestModelPortfolioService;
 
     public Flux<OASModelPortfolioResponse> upsertModels(InvestmentData investmentData) {
         return Flux.fromIterable(Objects.requireNonNullElse(investmentData.getModelPortfolios(), List.of()))
@@ -50,17 +44,7 @@ public class InvestmentModelPortfolioService {
                 log.debug("Upserting investment portfolio model: name={}, riskLevel={}",
                     modelPortfolioTemplate.getName(), modelPortfolioTemplate.getRiskLevel());
 
-                OASModelPortfolioRequestDataRequest modelPortfolioRequest = new OASModelPortfolioRequestDataRequest()
-                    .name(modelPortfolioTemplate.getName())
-                    .riskLevel(modelPortfolioTemplate.getRiskLevel())
-                    .allocation(modelPortfolioTemplate.getAllocations().stream()
-                        .map(m -> new OASAssetModelPortfolioRequestRequest()
-                            .asset(m.asset().getAssetMap())
-                            .weight(m.weight()))
-                        .toList())
-                    .cashWeight(modelPortfolioTemplate.getCashWeight());
-
-                return upsertModelPortfolio(modelPortfolioRequest)
+                return upsertModelPortfolio(modelPortfolioTemplate)
                     .doOnSuccess(modelPortfolio -> {
                         modelPortfolioTemplate.uuid(modelPortfolio.getUuid());
                         log.debug(
@@ -69,9 +53,8 @@ public class InvestmentModelPortfolioService {
                     })
                     .doOnError(throwable -> log.error(
                         "Failed to upsert investment portfolio model: name={}, riskLevel={}",
-                        modelPortfolioRequest.getName(), modelPortfolioRequest.getRiskLevel(), throwable));
+                        modelPortfolioTemplate.getName(), modelPortfolioTemplate.getRiskLevel(), throwable));
             });
-
     }
 
     /**
@@ -80,16 +63,16 @@ public class InvestmentModelPortfolioService {
      * <p>This method implements an upsert pattern:
      * <ol>
      *   <li>Searches for existing model portfolios by name and risk level</li>
-     *   <li>If found, returns the existing model portfolio</li>
+     *   <li>If found, patches the existing model portfolio</li>
      *   <li>If not found, creates a new model portfolio</li>
      * </ol>
      *
      * @param modelPortfolio the model portfolio to upsert (must not be null)
-     * @return Mono emitting the created or existing model portfolio
+     * @return Mono emitting the created or updated model portfolio response
      * @throws NullPointerException if modelPortfolio is null
      */
-    private Mono<OASModelPortfolioResponse> upsertModelPortfolio(OASModelPortfolioRequestDataRequest modelPortfolio) {
-        Objects.requireNonNull(modelPortfolio, "InvestorModelPortfolio must not be null");
+    private Mono<OASModelPortfolioResponse> upsertModelPortfolio(ModelPortfolio modelPortfolio) {
+        Objects.requireNonNull(modelPortfolio, "ModelPortfolio must not be null");
 
         String modelName = modelPortfolio.getName();
         Integer riskLevel = modelPortfolio.getRiskLevel();
@@ -135,7 +118,7 @@ public class InvestmentModelPortfolioService {
                         resultCount, name, riskLevel);
                 }
 
-                OASModelPortfolioResponse existingModel = models.getResults().get(0);
+                OASModelPortfolioResponse existingModel = models.getResults().getFirst();
                 log.info("Found existing model portfolio: uuid={}, name={}, riskLevel={}",
                     existingModel.getUuid(), name, riskLevel);
                 return Mono.just(existingModel);
@@ -143,56 +126,43 @@ public class InvestmentModelPortfolioService {
     }
 
     /**
-     * Creates a new model portfolio via the Financial Advice API.
+     * Creates a new model portfolio via the rest service.
      *
      * @param modelPortfolio the model portfolio to create
      * @return Mono emitting the newly created model portfolio
      */
-    private Mono<OASModelPortfolioResponse> createNewModelPortfolio(
-        OASModelPortfolioRequestDataRequest modelPortfolio) {
-
-        log.info("Creating new model portfolio: name={}, riskLevel={}",
-            modelPortfolio.getName(), modelPortfolio.getRiskLevel());
-        return customIntegrationApiService.createModelPortfolioRequestCreation(null, null, null,
-                modelPortfolio, null)
-            .doOnSuccess(created -> log.info(
-                "Successfully created model portfolio: uuid={}, name={}, riskLevel={}",
-                created.getUuid(), created.getName(), created.getRiskLevel()))
+    private Mono<OASModelPortfolioResponse> createNewModelPortfolio(ModelPortfolio modelPortfolio) {
+        log.debug("Creating new model portfolio: name={}, riskLevel={}, details={}",
+            modelPortfolio.getName(), modelPortfolio.getRiskLevel(), modelPortfolio);
+        return investmentRestModelPortfolioService.createModelPortfolio(modelPortfolio)
             .doOnError(throwable -> logModelPortfolioError("create",
                 modelPortfolio.getName(), modelPortfolio.getRiskLevel(), throwable));
     }
 
-    private Mono<OASModelPortfolioResponse> patchModelPortfolio(UUID uuid,
-        OASModelPortfolioRequestDataRequest modelPortfolio) {
-
-        log.info("Patch model portfolio: name={}, riskLevel={}",
-            modelPortfolio.getName(), modelPortfolio.getRiskLevel());
+    private Mono<OASModelPortfolioResponse> patchModelPortfolio(UUID uuid, ModelPortfolio modelPortfolio) {
         log.debug("Patch model portfolio: uuid={}, object={}", uuid, modelPortfolio);
-        return customIntegrationApiService.patchModelPortfolioRequestCreation(uuid.toString(),
-                null, null, null, modelPortfolio, null)
-            .doOnSuccess(created -> log.info(
-                "Successfully patched model portfolio: uuid={}, name={}, riskLevel={}",
-                created.getUuid(), created.getName(), created.getRiskLevel()))
+        return investmentRestModelPortfolioService.patchModelPortfolio(uuid.toString(), modelPortfolio)
             .doOnError(throwable -> logModelPortfolioError("patch",
                 modelPortfolio.getName(), modelPortfolio.getRiskLevel(), throwable));
     }
 
     /**
-     * Logs model portfolio creation errors with detailed information about the failure.
+     * Logs model portfolio operation errors with detailed information about the failure.
      *
      * <p>Provides enhanced error context for WebClient exceptions including
      * HTTP status code and response body.
      *
-     * @param name      the name of the model portfolio being created
-     * @param riskLevel the risk level of the model portfolio being created
-     * @param throwable the exception that occurred during creation
+     * @param operation the operation being performed (e.g. "create", "patch")
+     * @param name      the name of the model portfolio
+     * @param riskLevel the risk level of the model portfolio
+     * @param throwable the exception that occurred
      */
-    private void logModelPortfolioError(String request, String name, Integer riskLevel, Throwable throwable) {
+    private void logModelPortfolioError(String operation, String name, int riskLevel, Throwable throwable) {
         if (throwable instanceof WebClientResponseException ex) {
             log.error("Failed to {} model portfolio: name={}, riskLevel={}, status={}, body={}",
-                request, name, riskLevel, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
+                operation, name, riskLevel, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
         } else {
-            log.error("Failed to {} model portfolio: name={}, riskLevel={}", request,
+            log.error("Failed to {} model portfolio: name={}, riskLevel={}", operation,
                 name, riskLevel, throwable);
         }
     }
