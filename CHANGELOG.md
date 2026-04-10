@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.14.0]
+### Changed
+- Remove custom workaround to connect with Investment service
+
 ## [9.13.0]
 ### Changed
 - Update SSDK 20.1.0 and BBOM 2026.03 LTS, boat-maven-plugin unified 0.17.66

@@ -1,6 +1,5 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.investment.api.service.ApiClient;
 import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
@@ -18,7 +17,6 @@ import com.backbase.stream.investment.saga.InvestmentAssetUniverseSaga;
 import com.backbase.stream.investment.saga.InvestmentContentSaga;
 import com.backbase.stream.investment.saga.InvestmentSaga;
 import com.backbase.stream.investment.service.AsyncTaskService;
-import com.backbase.stream.investment.service.CustomIntegrationApiService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
@@ -31,6 +29,7 @@ import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
 import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -58,8 +57,9 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
-    public CustomIntegrationApiService customIntegrationApiService(ApiClient apiClient) {
-        return new CustomIntegrationApiService(apiClient);
+    public InvestmentModelPortfolioService investmentModelPortfolioService(FinancialAdviceApi financialAdviceApi,
+        InvestmentRestModelPortfolioService investmentRestModelPortfolioService) {
+        return new InvestmentModelPortfolioService(financialAdviceApi, investmentRestModelPortfolioService);
     }
 
     @Bean
@@ -83,12 +83,6 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
-    public InvestmentModelPortfolioService investmentModelPortfolioService(FinancialAdviceApi financialAdviceApi,
-        CustomIntegrationApiService customIntegrationApiService) {
-        return new InvestmentModelPortfolioService(financialAdviceApi, customIntegrationApiService);
-    }
-
-    @Bean
     public InvestmentAssetPriceService investmentAssetPriceService(AssetUniverseApi assetUniverseApi) {
         return new InvestmentAssetPriceService(assetUniverseApi);
     }
@@ -101,9 +95,9 @@ public class InvestmentServiceConfiguration {
     @Bean
     public InvestmentPortfolioAllocationService investmentPortfolioAllocationService(AllocationsApi allocationsApi,
         AssetUniverseApi assetUniverseApi, InvestmentApi investmentApi,
-        CustomIntegrationApiService customIntegrationApiService, IngestConfigProperties portfolioProperties) {
+        IngestConfigProperties portfolioProperties) {
         return new InvestmentPortfolioAllocationService(allocationsApi, assetUniverseApi, investmentApi,
-            customIntegrationApiService, portfolioProperties);
+            portfolioProperties);
     }
 
     @Bean
