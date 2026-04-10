@@ -76,7 +76,6 @@ public class InvestmentPortfolioAllocationService {
     private final AllocationsApi allocationsApi;
     private final AssetUniverseApi assetUniverseApi;
     private final InvestmentApi investmentApi;
-    private final CustomIntegrationApiService customIntegrationApiService;
     private final IngestConfigProperties ingestProperties;
 
     public Mono<Void> removeAllocations(PortfolioList portfolio) {
@@ -156,7 +155,7 @@ public class InvestmentPortfolioAllocationService {
     private Mono<List<OASPortfolioAllocation>> upsertAllocations(String portfolioId,
         List<OASAllocationCreateRequest> allocations) {
         return Flux.fromIterable(allocations)
-            .flatMap(a -> customIntegrationApiService.createPortfolioAllocation(portfolioId, a, null, null, null),
+            .flatMap(a -> allocationsApi.createPortfolioAllocation(portfolioId, a, null, null, null),
                 ingestProperties.getAllocation().getAllocationConcurrency())
 
             .collectList().doOnSuccess(

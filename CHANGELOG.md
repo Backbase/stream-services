@@ -2,8 +2,13 @@
 All notable changes to this project will be documented in this file.
 
 ## [9.14.0]
+<<<<<<< investment-service/WLNP-12501-Define-investment-portfolio-property
 ### Added
 - Add investmentPortfolios ingestion support to BaseProductGroup (similar to investmentAccounts)
+=======
+### Changed
+- Remove custom workaround to connect with Investment service
+>>>>>>> master
 
 ## [9.13.0]
 ### Changed
