@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Remove custom workaround to connect with Investment service
 >>>>>>> master
+### Added
+- Add investmentPortfolios ingestion support to BaseProductGroup (similar to investmentAccounts)
 
 ## [9.13.0]
 ### Changed
