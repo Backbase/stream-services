@@ -9,6 +9,12 @@ Improve Investment asset universe price setup
 ### Added
 - Add investmentPortfolios ingestion support to BaseProductGroup (similar to investmentAccounts)
 ## [9.15.0]
+## [10.0.0]
+### Changed
+- Align Spring Boot and Spring Cloud versions with Service SDK 21.0.1 managed stack.
+- Remove local Spring metadata plugin and Azure Service Bus version overrides in favor of the Service SDK 21.0.1 managed dependency chain.
+
+## [9.14.0]
 ### Changed
 - Remove custom workaround to connect with Investment service
 

@@ -32,12 +32,12 @@ public class HeaderForwardingClientFilterTest {
     @Test
     void shouldEnrichWithAdditionalHeaders() {
         doReturn(new HttpHeaders()).when(clientRequest).headers();
-        doReturn(new LinkedMultiValueMap()).when(clientRequest).cookies();
+        doReturn(new LinkedMultiValueMap<String, String>()).when(clientRequest).cookies();
 
         will(a -> assertClientRequestHeader(a.getArgument(0), "X-HEADER"))
             .given(exchangeFunction).exchange(any());
 
-        MultiValueMap<String, String> headersToBeIncluded = new LinkedMultiValueMap();
+        MultiValueMap<String, String> headersToBeIncluded = new LinkedMultiValueMap<>();
         headersToBeIncluded.add("x-header", "extra-value");
 
         DbsWebClientConfigurationProperties properties = new DbsWebClientConfigurationProperties();
@@ -51,7 +51,7 @@ public class HeaderForwardingClientFilterTest {
     @Test
     void shouldEnrichWithServerHeadersToForward() {
         doReturn(new HttpHeaders()).when(clientRequest).headers();
-        doReturn(new LinkedMultiValueMap()).when(clientRequest).cookies();
+        doReturn(new LinkedMultiValueMap<String, String>()).when(clientRequest).cookies();
 
         will(a -> assertClientRequestHeader(a.getArgument(0), "x-tid"))
             .given(exchangeFunction).exchange(any());
@@ -69,12 +69,12 @@ public class HeaderForwardingClientFilterTest {
     @Test
     void shouldSkipAdditionalHeaderWhenEnrichingWithSameServerHeadersToForward() {
         doReturn(new HttpHeaders()).when(clientRequest).headers();
-        doReturn(new LinkedMultiValueMap()).when(clientRequest).cookies();
+        doReturn(new LinkedMultiValueMap<String, String>()).when(clientRequest).cookies();
 
         will(a -> assertClientRequestHeader(a.getArgument(0), "x-tid", "tenant1"))
             .given(exchangeFunction).exchange(any());
 
-        MultiValueMap<String, String> headersToBeIncluded = new LinkedMultiValueMap();
+        MultiValueMap<String, String> headersToBeIncluded = new LinkedMultiValueMap<>();
         headersToBeIncluded.add("x-tid", "tenant2");
 
         DbsWebClientConfigurationProperties properties = new DbsWebClientConfigurationProperties();
@@ -99,7 +99,7 @@ public class HeaderForwardingClientFilterTest {
      */
     private Mono<Void> assertClientRequestHeader(ClientRequest request, String expectedKey) {
         Assert.notNull(request, "Invalid request");
-        Assert.isTrue(request.headers().containsKey(expectedKey), "Missing header");
+        Assert.notEmpty(request.headers().get(expectedKey), "Missing header");
         return Mono.empty();
     }
 

@@ -4,13 +4,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.11</version>
+        <version>4.0.5</version>
         <relativePath/>
     </parent>
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-starter</artifactId>
     <name>Stream :: SDK :: stream-starter</name>
-    <version>9.17.0</version>
+    <version>10.0.0</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -76,7 +76,7 @@
         <!-- other config -->
         <jacoco.version>0.8.11</jacoco.version>
         <japicmp.plugin.version>0.17.2</japicmp.plugin.version>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <!-- Plugin versions -->
         <jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
         <!-- jib preset properties -->
@@ -105,7 +105,6 @@
         <sonar.sources>${project.basedir}/src/main/</sonar.sources>
         <sonar.tests>${project.basedir}/src/test/</sonar.tests>
         <sortpom-maven-plugin.version>3.3.0</sortpom-maven-plugin.version>
-        <spring-cloud-app-starter-metadata-maven-plugin.version>2.0.2.RELEASE</spring-cloud-app-starter-metadata-maven-plugin.version>
         <ssdk-checkstyle-config.version>1.0.22</ssdk-checkstyle-config.version>
         <velocity.version>1.7</velocity.version>
     </properties>
@@ -114,14 +113,9 @@
             <dependency>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>backbase-building-blocks-release</artifactId>
-                <version>20.1.0</version>
+                <version>21.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.azure</groupId>
-                <artifactId>azure-messaging-servicebus</artifactId>
-                <version>7.17.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -264,24 +258,6 @@
                                     <file>${project.build.outputDirectory}/META-INF/spring-configuration-metadata-encoded.properties</file>
                                 </files>
                             </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <!-- Generate SCDF app metadata from 'ConfigurationProperties' classes -->
-                <plugin>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
-                    <version>${spring-cloud-app-starter-metadata-maven-plugin.version}</version>
-                    <configuration>
-                        <storeFilteredMetadata>true</storeFilteredMetadata>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>aggregate-metadata</id>
-                            <goals>
-                                <goal>aggregate-metadata</goal>
-                            </goals>
-                            <phase>compile</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -1097,28 +1073,6 @@
                 <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
                 <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
             </properties>
-        </profile>
-        <profile>
-            <!-- TODO why include-metadata is this here?-->
-            <id>include-metadata</id>
-            <activation>
-                <property>
-                    <name>package.properties.metadata</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>properties-maven-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.cloud</groupId>
-                        <artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
         <profile>
             <id>only-eclipse</id>

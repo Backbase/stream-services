@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-investment</artifactId>
-        <version>9.17.0</version>
+        <version>10.0.0</version>
     </parent>
 
     <artifactId>investment-core</artifactId>
@@ -120,7 +120,7 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>0.17.66</version>
+                <version>0.18.0</version>
                 <executions>
                     <execution>
                         <id>generate-investment-service-api-code</id>

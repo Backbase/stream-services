@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.function.context.config.ContextFunctionCatalogAutoConfiguration;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
@@ -44,10 +43,10 @@ public class TenantAwareEventExchangeTest {
     @Autowired
     EventBus eventBus;
 
-    @SpyBean
+    @Autowired
     TenantMessageInProcessor tenantMessageInProcessor;
 
-    @SpyBean
+    @Autowired
     TenantEventMessageProcessor tenantEventMessageProcessor;
 
     @Test
