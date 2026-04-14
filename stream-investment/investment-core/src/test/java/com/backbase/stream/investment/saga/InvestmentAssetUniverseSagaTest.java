@@ -188,7 +188,7 @@ class InvestmentAssetUniverseSagaTest {
         void executeTask_emptyTask_completesNormally() {
             InvestmentAssetsTask task = createMinimalTask();
 
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(Collections.emptyList()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -219,7 +219,7 @@ class InvestmentAssetUniverseSagaTest {
                     verify(assetUniverseService, never()).upsertAssetCategoryType(any());
                     verify(assetUniverseService, never()).upsertAssetCategory(any());
                     verify(assetUniverseService, never()).upsertAssets(any());
-                    verify(investmentAssetPriceService, never()).ingestPrices(any(), any());
+                    verify(investmentAssetPriceService, never()).ingestPrices(any());
                     verify(investmentIntradayAssetPriceService, never()).ingestIntradayPrices();
                 })
                 .verifyComplete();
@@ -299,7 +299,6 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(Collections.emptyList())
                 .assetCategories(Collections.emptyList())
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("currency-task", data);
             wireTrivialPipelineAfterCurrencies();
@@ -328,7 +327,6 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(Collections.emptyList())
                 .assetCategories(Collections.emptyList())
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("currency-error-task", data);
 
@@ -385,7 +383,7 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(Collections.emptyList())
                 .assetCategories(Collections.emptyList())
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
+
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("market-task", data);
             wireTrivialPipelineAfterMarkets();
@@ -412,7 +410,7 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(Collections.emptyList())
                 .assetCategories(Collections.emptyList())
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
+
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("market-error-task", data);
 
@@ -453,7 +451,7 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(Collections.emptyList())
                 .assetCategories(Collections.emptyList())
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
+
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("special-day-task", data);
             wireTrivialPipelineAfterSpecialDays();
@@ -496,7 +494,7 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(Collections.emptyList())
                 .assetCategories(Collections.emptyList())
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
+
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("special-day-error-task", data);
 
@@ -537,7 +535,7 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(List.of(buildAssetCategoryType("EQ")))
                 .assetCategories(Collections.emptyList())
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
+
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("cat-type-task", data);
             wireTrivialPipelineAfterCategoryTypes();
@@ -581,7 +579,7 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(List.of(buildAssetCategoryType("EQ")))
                 .assetCategories(Collections.emptyList())
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
+
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("cat-type-error-task", data);
 
@@ -626,7 +624,7 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(Collections.emptyList())
                 .assetCategories(List.of(categoryEntry))
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
+
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("cat-task", data);
             wireTrivialPipelineAfterCategories();
@@ -658,7 +656,7 @@ class InvestmentAssetUniverseSagaTest {
                 .assetCategoryTypes(Collections.emptyList())
                 .assetCategories(List.of(entry))
                 .assets(Collections.emptyList())
-                .assetPrices(Collections.emptyList())
+
                 .build();
             InvestmentAssetsTask task = new InvestmentAssetsTask("cat-error-task", data);
 
@@ -679,8 +677,8 @@ class InvestmentAssetUniverseSagaTest {
      * Tests for the {@code upsertAssets} stage of the saga pipeline.
      *
      * <p>The stage follows asset categories. An empty asset list must short-circuit without
-     * calling {@link InvestmentAssetUniverseService#upsertAssets}, while a non-empty list
-     * must delegate to the service and store the resulting assets on the task.
+     * calling {@link InvestmentAssetUniverseService#upsertAssets}, while a non-empty list must delegate to the service
+     * and store the resulting assets on the task.
      */
     @Nested
     @DisplayName("upsertAssets")
@@ -695,7 +693,7 @@ class InvestmentAssetUniverseSagaTest {
         void upsertAssets_emptyList_setsCompleted() {
             InvestmentAssetsTask task = createMinimalTask();
 
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(Collections.emptyList()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -710,10 +708,9 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that when assets are present, {@code upsertAssets} is invoked and
-         * the task completes with {@link State#COMPLETED}.
-         * Verifies that when assets are present, {@code createAssets} is invoked and the task completes with
-         * {@link State#COMPLETED}.
+         * Verifies that when assets are present, {@code upsertAssets} is invoked and the task completes with
+         * {@link State#COMPLETED}. Verifies that when assets are present, {@code createAssets} is invoked and the task
+         * completes with {@link State#COMPLETED}.
          */
         @Test
         @DisplayName("should upsert assets and set them on the task on success")
@@ -722,7 +719,7 @@ class InvestmentAssetUniverseSagaTest {
 
             when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(Collections.emptyList()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -735,10 +732,9 @@ class InvestmentAssetUniverseSagaTest {
         }
 
         /**
-         * Verifies that a failure in {@code upsertAssets} causes the task to be marked
+         * Verifies that a failure in {@code upsertAssets} causes the task to be marked {@link State#FAILED} without
+         * propagating an error signal. Verifies that a failure in {@code createAssets} causes the task to be marked
          * {@link State#FAILED} without propagating an error signal.
-         * Verifies that a failure in {@code createAssets} causes the task to be marked {@link State#FAILED} without
-         * propagating an error signal.
          */
         @Test
         @DisplayName("should propagate error and mark task FAILED when asset upsert fails")
@@ -780,7 +776,7 @@ class InvestmentAssetUniverseSagaTest {
 
             when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(List.of(groupResult)));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(List.of(groupResult)));
@@ -802,7 +798,7 @@ class InvestmentAssetUniverseSagaTest {
 
             when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(Collections.emptyList()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -824,7 +820,7 @@ class InvestmentAssetUniverseSagaTest {
 
             when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.error(new RuntimeException("Price ingestion failure")));
 
             StepVerifier.create(saga.executeTask(task))
@@ -841,7 +837,7 @@ class InvestmentAssetUniverseSagaTest {
         void upsertPrices_emptyAssets_callsPriceServiceWithEmptyList() {
             InvestmentAssetsTask task = createMinimalTask();
 
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(Collections.emptyList()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -882,7 +878,7 @@ class InvestmentAssetUniverseSagaTest {
 
             when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(List.of(groupResult)));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(List.of(groupResult)));
@@ -904,7 +900,7 @@ class InvestmentAssetUniverseSagaTest {
 
             when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(Collections.emptyList()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -926,7 +922,7 @@ class InvestmentAssetUniverseSagaTest {
 
             when(assetUniverseService.upsertAssets(anyList()))
                 .thenReturn(Flux.fromIterable(task.getData().getAssets()));
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(Collections.emptyList()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.error(new RuntimeException("Async check failure")));
@@ -944,7 +940,7 @@ class InvestmentAssetUniverseSagaTest {
         void createIntradayPrices_emptyResults_success() {
             InvestmentAssetsTask task = createMinimalTask();
 
-            when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+            when(investmentAssetPriceService.ingestPrices(anyList()))
                 .thenReturn(Mono.just(Collections.emptyList()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.just(Collections.emptyList()));
@@ -975,7 +971,6 @@ class InvestmentAssetUniverseSagaTest {
             .assetCategoryTypes(Collections.emptyList())
             .assetCategories(Collections.emptyList())
             .assets(Collections.emptyList())
-            .assetPrices(Collections.emptyList())
             .build();
         return new InvestmentAssetsTask("minimal-task", data);
     }
@@ -1017,7 +1012,6 @@ class InvestmentAssetUniverseSagaTest {
             .assetCategoryTypes(Collections.emptyList())
             .assetCategories(Collections.emptyList())
             .assets(List.of(asset1, asset2))
-            .assetPrices(List.of(price1, price2))
             .build();
         return new InvestmentAssetsTask("assets-task", data);
     }
@@ -1050,7 +1044,6 @@ class InvestmentAssetUniverseSagaTest {
             .assetCategoryTypes(List.of(buildAssetCategoryType("EQ")))
             .assetCategories(List.of(categoryEntry))
             .assets(List.of(asset1))
-            .assetPrices(List.of(price))
             .build();
         return new InvestmentAssetsTask("full-task", data);
     }
@@ -1081,7 +1074,7 @@ class InvestmentAssetUniverseSagaTest {
                     .name("TECH")));
         when(assetUniverseService.upsertAssets(anyList()))
             .thenReturn(Flux.fromIterable(task.getData().getAssets()));
-        when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+        when(investmentAssetPriceService.ingestPrices(anyList()))
             .thenReturn(Mono.just(Collections.emptyList()));
         when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
             .thenReturn(Mono.just(Collections.emptyList()));
@@ -1099,7 +1092,7 @@ class InvestmentAssetUniverseSagaTest {
      * implementation returns early without calling services.
      */
     private void wireTrivialPipelineAfterCurrencies() {
-        when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
+        when(investmentAssetPriceService.ingestPrices(anyList()))
             .thenReturn(Mono.just(Collections.emptyList()));
         when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
             .thenReturn(Mono.just(Collections.emptyList()));

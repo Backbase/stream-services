@@ -40,7 +40,8 @@ public class Asset implements AssetKey {
     private String logo;
     private Resource logoFile;
     private String description;
-    private Double defaultPrice;
+    private Double price;
+    private RandomParam priceConfig;
 
     @Override
     public String getIsin() {

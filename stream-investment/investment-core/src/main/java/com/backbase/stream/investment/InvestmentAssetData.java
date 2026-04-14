@@ -29,14 +29,8 @@ public class InvestmentAssetData implements InvestmentDataValue {
     private List<AssetCategoryType> assetCategoryTypes;
     private List<AssetCategoryEntry> assetCategories;
     private List<Asset> assets;
-    private List<AssetPrice> assetPrices;
     private List<GroupResult> priceAsyncTasks;
     private List<GroupResult> intradayPriceAsyncTasks;
-
-    public Map<String, AssetPrice> getPriceByAsset() {
-        return Objects.requireNonNullElse(assetPrices, List.<AssetPrice>of()).stream()
-            .collect(Collectors.toMap(AssetKey::getKeyString, Function.identity()));
-    }
 
     public Map<UUID, Asset> getAssetByUuid() {
         return Objects.requireNonNullElse(assets, List.<Asset>of()).stream()
@@ -47,11 +41,11 @@ public class InvestmentAssetData implements InvestmentDataValue {
     @Override
     public long getTotalProcessedValues() {
         log.debug(
-            "Calculating total processed values: currencies={}, markets={}, marketSpecialDays={}, assetCategoryTypes={}, assetCategories={}, assets={}, assetPrices={}",
+            "Calculating total processed values: currencies={}, markets={}, marketSpecialDays={}, assetCategoryTypes={}, assetCategories={}, assets={}",
             getSize(currencies), getSize(markets), getSize(marketSpecialDays), getSize(assetCategoryTypes),
-            getSize(assetCategories), getSize(assets), getSize(assetPrices));
+            getSize(assetCategories), getSize(assets));
         return getSize(currencies) + getSize(markets) + getSize(marketSpecialDays) + getSize(assetCategoryTypes)
-            + getSize(assetCategories) + getSize(assets) + getSize(assetPrices);
+            + getSize(assetCategories) + getSize(assets);
     }
 
 }

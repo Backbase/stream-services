@@ -14,14 +14,12 @@ import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.OASPrice;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.stream.investment.Asset;
-import com.backbase.stream.investment.AssetPrice;
 import com.backbase.stream.investment.RandomParam;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,8 +37,8 @@ import reactor.test.StepVerifier;
  * Unit tests for {@link InvestmentAssetPriceService}.
  *
  * <p>Tests are grouped by method under {@link Nested} classes to improve readability
- * and navigation. Each nested class covers a single public method, and each test
- * method covers a specific branch or edge case.
+ * and navigation. Each nested class covers a single public method, and each test method covers a specific branch or
+ * edge case.
  *
  * <p>Conventions:
  * <ul>
@@ -67,7 +65,7 @@ class InvestmentAssetPriceServiceTest {
     // =========================================================================
 
     /**
-     * Tests for {@link InvestmentAssetPriceService#ingestPrices(List, Map)}.
+     * Tests for {@link InvestmentAssetPriceService#ingestPrices(List)}.
      *
      * <p>Covers:
      * <ul>
@@ -94,7 +92,7 @@ class InvestmentAssetPriceServiceTest {
         @DisplayName("null assets list — returns empty list without calling API")
         void ingestPrices_nullAssets_returnsEmptyListWithoutCallingApi() {
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(null, Map.of()))
+            StepVerifier.create(service.ingestPrices(null))
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
 
@@ -106,7 +104,7 @@ class InvestmentAssetPriceServiceTest {
         @DisplayName("empty assets list — returns empty list without calling API")
         void ingestPrices_emptyAssets_returnsEmptyListWithoutCallingApi() {
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(List.of(), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of()))
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
 
@@ -129,7 +127,7 @@ class InvestmentAssetPriceServiceTest {
                 .thenReturn(Flux.just(groupResult));
 
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectNextMatches(results -> !results.isEmpty())
                 .verifyComplete();
 
@@ -151,7 +149,7 @@ class InvestmentAssetPriceServiceTest {
                 .thenReturn(Flux.just(groupResult));
 
             // Act & Assert — pipeline must complete successfully with prices generated
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectNextMatches(results -> !results.isEmpty())
                 .verifyComplete();
 
@@ -163,10 +161,8 @@ class InvestmentAssetPriceServiceTest {
         void ingestPrices_assetPriceEntryPresent_customPriceAndRandomParamUsed() {
             // Arrange
             Asset asset = buildAsset("US5949181045", "NYSE", "USD", null);
-            AssetPrice assetPrice = new AssetPrice(
-                asset.getIsin(), asset.getMarket(), asset.getCurrency(), 350.0,
-                new RandomParam(0.98, 1.02));
-            Map<String, AssetPrice> priceByAsset = Map.of(asset.getKeyString(), assetPrice);
+            asset.setPrice(350.0);
+            asset.setPriceConfig(new RandomParam(0.98, 1.02));
 
             PaginatedOASPriceList emptyPriceList = mock(PaginatedOASPriceList.class);
             when(emptyPriceList.getResults()).thenReturn(List.of());
@@ -177,7 +173,7 @@ class InvestmentAssetPriceServiceTest {
                 .thenReturn(Flux.just(groupResult));
 
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(List.of(asset), priceByAsset))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectNextMatches(results -> !results.isEmpty())
                 .verifyComplete();
 
@@ -205,7 +201,7 @@ class InvestmentAssetPriceServiceTest {
                 .thenReturn(Flux.just(groupResult));
 
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectNextMatches(results -> !results.isEmpty())
                 .verifyComplete();
 
@@ -230,7 +226,7 @@ class InvestmentAssetPriceServiceTest {
             stubListAssetClosePrices(asset, Mono.just(priceList));
 
             // Act & Assert — empty because no new days need to be created
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
 
@@ -245,7 +241,7 @@ class InvestmentAssetPriceServiceTest {
             stubListAssetClosePrices(asset, Mono.empty());
 
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
 
@@ -263,7 +259,7 @@ class InvestmentAssetPriceServiceTest {
             stubListAssetClosePrices(asset, Mono.just(nullResultsList));
 
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
 
@@ -288,7 +284,7 @@ class InvestmentAssetPriceServiceTest {
                 .thenReturn(Flux.error(apiError));
 
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectErrorMatches(e -> e instanceof WebClientResponseException
                     && ((WebClientResponseException) e).getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR)
                 .verify();
@@ -308,7 +304,7 @@ class InvestmentAssetPriceServiceTest {
                 .thenReturn(Flux.error(new RuntimeException("Unexpected persistence error")));
 
             // Act & Assert
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectErrorMatches(e -> e instanceof RuntimeException
                     && "Unexpected persistence error".equals(e.getMessage()))
                 .verify();
@@ -319,7 +315,7 @@ class InvestmentAssetPriceServiceTest {
         void ingestPrices_multipleAssets_resultsMergedIntoFlatList() {
             // Arrange
             Asset asset1 = buildAsset("US0378331005", "NASDAQ", "USD", null);
-            Asset asset2 = buildAsset("US5949181045", "NYSE",   "USD", null);
+            Asset asset2 = buildAsset("US5949181045", "NYSE", "USD", null);
 
             PaginatedOASPriceList emptyList = mock(PaginatedOASPriceList.class);
             when(emptyList.getResults()).thenReturn(List.of());
@@ -334,7 +330,7 @@ class InvestmentAssetPriceServiceTest {
                 .thenReturn(Flux.just(result2));
 
             // Act & Assert — flat list contains entries from both assets
-            StepVerifier.create(service.ingestPrices(List.of(asset1, asset2), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset1, asset2)))
                 .expectNextMatches(results -> results.size() >= 1)
                 .verifyComplete();
         }
@@ -354,7 +350,7 @@ class InvestmentAssetPriceServiceTest {
                 .thenReturn(Flux.empty());
 
             // Act & Assert — the empty sub-result is filtered; final flat list is empty
-            StepVerifier.create(service.ingestPrices(List.of(asset), Map.of()))
+            StepVerifier.create(service.ingestPrices(List.of(asset)))
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
         }
@@ -379,13 +375,12 @@ class InvestmentAssetPriceServiceTest {
         asset.setIsin(isin);
         asset.setMarket(market);
         asset.setCurrency(currency);
-        asset.setDefaultPrice(defaultPrice);
+        asset.setPrice(defaultPrice);
         return asset;
     }
 
     /**
-     * Stubs {@link AssetUniverseApi#listAssetClosePrices} for the given asset to return
-     * the provided {@link Mono}.
+     * Stubs {@link AssetUniverseApi#listAssetClosePrices} for the given asset to return the provided {@link Mono}.
      *
      * @param asset    the asset whose close prices should be stubbed
      * @param response the {@link Mono} to return
