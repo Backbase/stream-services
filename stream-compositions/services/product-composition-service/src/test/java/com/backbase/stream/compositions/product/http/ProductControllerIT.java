@@ -62,10 +62,10 @@ class ProductControllerIT extends IntegrationTest {
     private static final int TRANSACTION_SERVICE_PORT = 12000;
     private static final int PAYMENT_ORDER_SERVICE_PORT = 13000;
     private static BrokerService broker;
-    @MockBean
+    @MockitoBean
     @Qualifier("batchProductIngestionSaga")
     BatchProductIngestionSaga batchProductIngestionSaga;
-    @MockBean
+    @MockitoBean
     ArrangementService arrangementService;
     @Autowired
     ProductController productController;

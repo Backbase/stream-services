@@ -43,7 +43,7 @@ class ProductCatalogControllerIT extends IntegrationTest {
     private MockServerClient integrationServerClient;
     private static BrokerService broker;
 
-    @MockBean
+    @MockitoBean
     ReactiveProductCatalogService reactiveProductCatalogService;
 
     @Autowired

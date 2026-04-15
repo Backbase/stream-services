@@ -69,7 +69,7 @@ class TransactionControllerIT extends IntegrationTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     TransactionService transactionService;
 
     @BeforeAll

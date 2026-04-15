@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -45,13 +45,13 @@ public class TransactionCursorControllerIT {
     @Autowired
     TransactionCursorController transactionCursorController;
 
-    @MockBean
+    @MockitoBean
     TransactionCursorRepository transactionCursorRepository;
 
-    @MockBean
+    @MockitoBean
     TransactionCursorRepositoryImpl transactionCursorRepositoryImpl;
 
-    @MockBean
+    @MockitoBean
     WebClient webClient;
 
     @Autowired
@@ -60,7 +60,7 @@ public class TransactionCursorControllerIT {
     @Autowired
     TransactionCursorMapper mapper;
 
-    @MockBean
+    @MockitoBean
     EntityManager entityManager;
 
 

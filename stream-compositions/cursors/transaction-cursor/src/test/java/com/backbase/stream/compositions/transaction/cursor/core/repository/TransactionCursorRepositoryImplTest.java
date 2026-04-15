@@ -63,7 +63,7 @@ class TransactionCursorRepositoryImplTest {
     @Mock
     TypedQuery<TransactionCursorEntity> query;
 
-    @MockBean
+    @MockitoBean
     TransactionCursorEntity transactionCursorEntity;
 
     @Mock

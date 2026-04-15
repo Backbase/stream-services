@@ -50,8 +50,8 @@
         <coverage.reports.dir>${project.build.directory}/coverage-reports</coverage.reports.dir>
         <!-- azure-identity -->
         <docker.azure.identity>compile</docker.azure.identity>
-        <!-- base image gcr.io/distroless/java21-debian12:nonroot -->
-        <docker.distroless.image>gcr.io/distroless/java21-debian12@sha256:68e11975ae9e7911becda53c8746fd4564182c2c402a1c4c0d4e3479ad50b3ba</docker.distroless.image>
+        <!-- base image gcr.io/distroless/java25-debian13:nonroot -->
+        <docker.distroless.image>gcr.io/distroless/java25-debian13@sha256:6c9412db880a8bd7227ce85593e27df931b59a39ad89559fa50d3ba06a49dd00</docker.distroless.image>
         <docker.image.name>${docker.repo.url}/${docker.repo.project}/${project.artifactId}</docker.image.name>
         <docker.jdbc.mssql>compile</docker.jdbc.mssql>
         <!-- image dependencies -->

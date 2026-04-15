@@ -62,7 +62,7 @@ class PaymentOrderControllerIT extends IntegrationTest {
     @Autowired
     PaymentOrderController paymentOrderController;
 
-    @MockBean
+    @MockitoBean
     PaymentOrderService paymentOrderService;
 
     @BeforeAll

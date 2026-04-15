@@ -6,6 +6,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity.AuthorizeExchangeSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 /**
@@ -22,8 +23,8 @@ public class TransactionCursorConfiguration {
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http
-                .csrf().disable()
-                .build();
+        return http.authorizeExchange(AuthorizeExchangeSpec::anyExchange)
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .build();
     }
 }

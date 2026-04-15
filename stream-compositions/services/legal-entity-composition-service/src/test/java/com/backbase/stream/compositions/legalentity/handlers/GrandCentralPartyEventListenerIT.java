@@ -10,20 +10,34 @@ import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.grandcentral.event.spec.v1.PartyUpsertEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
 @SpringBootTest
 @ActiveProfiles("it")
-@AutoConfigureWireMock(port = 0)
 public class GrandCentralPartyEventListenerIT {
+
+    @RegisterExtension
+    static WireMockExtension wireMock = WireMockExtension.newInstance()
+        .options(wireMockConfig().dynamicPort())
+        .build();
+
+    @DynamicPropertySource
+    static void wireMockProperties(DynamicPropertyRegistry registry) {
+        registry.add("wiremock.server.port", wireMock::getPort);
+    }
 
     @Autowired
     private GrandCentralPartyEventListener listener;
