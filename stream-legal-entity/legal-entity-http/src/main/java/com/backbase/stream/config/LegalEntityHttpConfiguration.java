@@ -14,12 +14,9 @@ public class LegalEntityHttpConfiguration {
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-            .anyExchange()
-            .permitAll()
-            .and()
-            .csrf()
-            .disable()
+        return http
+            .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .build();
     }
 

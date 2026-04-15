@@ -187,7 +187,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
 
     private UserKindEnum customerCategoryToUserKind(CustomerCategory customerCategory) {
         return switch (customerCategory) {
-            case RETAIL -> UserKindEnum.RETAILCUSTOMER;
+            case RETAIL -> UserKindEnum.RETAIL_CUSTOMER;
             case BUSINESS -> UserKindEnum.SME;
         };
     }

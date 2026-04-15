@@ -19,7 +19,10 @@ public class PortfolioHttpConfiguration {
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange().anyExchange().permitAll().and().csrf().disable().build();
+        return http
+            .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .build();
     }
 
     /**
