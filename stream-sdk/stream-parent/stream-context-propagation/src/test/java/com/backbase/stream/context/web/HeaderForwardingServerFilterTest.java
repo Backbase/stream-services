@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
@@ -47,7 +46,7 @@ class HeaderForwardingServerFilterTest {
     void filterShouldForwardRequestHeaders() {
         String headerKeyToForward = "X-TID";
         List<String> headerValueToForward = List.of("tenant1");
-        LinkedMultiValueMap<String, String> expectedForwardedHeaders = new LinkedMultiValueMap<>();
+        HttpHeaders expectedForwardedHeaders = new HttpHeaders();
         expectedForwardedHeaders.put(headerKeyToForward, headerValueToForward);
 
         when(contextPropagationConfigurationProperties.getHeadersToForward()).thenReturn(List.of(headerKeyToForward));
