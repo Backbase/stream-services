@@ -1863,7 +1863,7 @@ public class AccessGroupService {
     }
 
     private void handleError(WebClientResponseException badRequest) {
-        log.warn("Error executing request: [{}] {}", badRequest.getRawStatusCode(),
+        log.warn("Error executing request: [{}] {}", badRequest.getStatusText(),
             badRequest.getResponseBodyAsString());
     }
 

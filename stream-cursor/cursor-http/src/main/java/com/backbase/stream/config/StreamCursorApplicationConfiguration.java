@@ -1,5 +1,7 @@
 package com.backbase.stream.config;
 
+import com.backbase.stream.cursor.CursorService;
+import com.backbase.stream.cursor.configuration.CursorRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -12,12 +14,9 @@ public class StreamCursorApplicationConfiguration {
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-            .anyExchange()
-            .permitAll()
-            .and()
-            .csrf()
-            .disable()
+        return http
+            .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .build();
     }
 

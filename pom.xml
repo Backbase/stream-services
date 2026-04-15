@@ -43,8 +43,9 @@
         <java.version>25</java.version>
         <ssdk.version>21.0.1</ssdk.version>
         <backbase-bom.version>2026.03-LTS</backbase-bom.version>
-        <boat-maven-plugin.version>0.18.0</boat-maven-plugin.version>
+        <boat-maven-plugin.version>0.18.1</boat-maven-plugin.version>
         <backbase.portfolio.version>4.7.0</backbase.portfolio.version>
+        <maven-dependency-plugin.vesion>3.10.0</maven-dependency-plugin.vesion>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
         <openapi-generator-maven-plugin.library>spring-boot</openapi-generator-maven-plugin.library>
@@ -97,6 +98,13 @@
                     <groupId>com.backbase.oss</groupId>
                     <artifactId>boat-maven-plugin</artifactId>
                     <version>${boat-maven-plugin.version}</version>
+                    <configuration>
+                        <configOptions>
+                            <useSpringBoot4>true</useSpringBoot4>
+                            <useJackson3>true</useJackson3>
+                            <openApiNullable>false</openApiNullable>
+                        </configOptions>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -126,6 +134,28 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${lombok-mapstruct-binding.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                        <arg>-Amapstruct.verbose=true</arg>
+                    </compilerArgs>
+                    <!--                    </configuration>-->
                 </configuration>
             </plugin>
             <plugin>
