@@ -74,11 +74,11 @@
         <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
         <gmavenplus-plugin.version>3.0.0</gmavenplus-plugin.version>
         <!-- other config -->
-        <jacoco.version>0.8.11</jacoco.version>
+        <jacoco.version>0.8.14</jacoco.version>
         <japicmp.plugin.version>0.17.2</japicmp.plugin.version>
         <java.version>25</java.version>
         <!-- Plugin versions -->
-        <jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
+        <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
         <!-- jib preset properties -->
         <jib.container.creationTime>USE_CURRENT_TIMESTAMP</jib.container.creationTime>
         <jib.container.ports>8080</jib.container.ports>
