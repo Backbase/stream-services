@@ -72,6 +72,7 @@ You can find listed here the API specification containing the opinionated model 
 ## Software License Terms
 Please see the license terms [here](LICENSE.txt).
 
+
 ## Contributing
 This is an open-source project! Please check our contribution guidelines [here](CONTRIBUTING.md).
 
