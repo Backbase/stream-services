@@ -9,7 +9,6 @@ import com.backbase.investment.api.service.v1.model.OASPrice;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.TypeEnum;
 import com.backbase.stream.investment.Asset;
-import com.backbase.stream.investment.AssetPrice;
 import com.backbase.stream.investment.RandomParam;
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -18,7 +17,6 @@ import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,13 +39,13 @@ public class InvestmentAssetPriceService {
 
     private final AssetUniverseApi assetUniverseApi;
 
-    public Mono<List<GroupResult>> ingestPrices(List<Asset> assets, Map<String, AssetPrice> priceByAsset) {
-        return generatePrices(assets, priceByAsset)
+    public Mono<List<GroupResult>> ingestPrices(List<Asset> assets) {
+        return generatePrices(assets)
             .map(asyncTasks -> asyncTasks.stream().flatMap(Collection::stream).toList());
     }
 
     @Nonnull
-    private Mono<List<List<GroupResult>>> generatePrices(List<Asset> assets, Map<String, AssetPrice> priceByAsset) {
+    private Mono<List<List<GroupResult>>> generatePrices(List<Asset> assets) {
         return Flux.fromIterable(Objects.requireNonNullElse(assets, List.of()))
             .flatMap(asset -> {
                 LocalDate now = LocalDate.now();
@@ -63,7 +61,7 @@ public class InvestmentAssetPriceService {
                     // mapNotNull drops elements where getResults() is null, ensuring the pipeline completes normally.
                     .mapNotNull(PaginatedOASPriceList::getResults)
                     .flatMap(prices -> {
-                        RandomPriceParam priceParam = findPrice(priceByAsset, asset, getLastPrice(prices));
+                        RandomPriceParam priceParam = findPrice(asset, getLastPrice(prices));
                         LocalDate lastDate =
                             prices.isEmpty() ? from : prices.getLast().getDatetime().toLocalDate().plusDays(1);
 
@@ -73,7 +71,8 @@ public class InvestmentAssetPriceService {
                         if (oaSCreatePriceRequest.isEmpty()) {
                             return Mono.empty();
                         }
-                        log.debug("Generated prices for asset ({}) count [{}]", asset.getKeyString(), oaSCreatePriceRequest.size());
+                        log.debug("Generated prices for asset ({}) count [{}]", asset.getKeyString(),
+                            oaSCreatePriceRequest.size());
                         return assetUniverseApi.bulkCreateAssetClosePrice(oaSCreatePriceRequest,
                                 null, null, null)
                             .collectList()
@@ -108,14 +107,11 @@ public class InvestmentAssetPriceService {
             .orElse(null);
     }
 
-    private static RandomPriceParam findPrice(Map<String, AssetPrice> priceByAsset, Asset a, Double lastPrice) {
-        AssetPrice configAssetPrice = priceByAsset.get(a.getKeyString());
-        RandomParam randomParam = Optional.ofNullable(configAssetPrice)
-            .map(AssetPrice::randomParam)
+    private static RandomPriceParam findPrice(Asset asset, Double lastPrice) {
+        RandomParam randomParam = Optional.ofNullable(asset.getPriceConfig())
             .orElse(defaultRandomParam);
         double price = Optional.ofNullable(lastPrice)
-            .or(() -> Optional.ofNullable(configAssetPrice).map(AssetPrice::price)
-                .or(() -> Optional.of(a).map(Asset::getDefaultPrice)))
+            .or(() -> Optional.ofNullable(asset.getPrice()))
             .orElse(DEFAULT_START_PRICE);
         return new RandomPriceParam(price, randomParam);
     }

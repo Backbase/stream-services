@@ -6,7 +6,7 @@ public interface InvestmentDataValue {
 
     long getTotalProcessedValues();
 
-    default <T> int getSize(List<T> list) {
+    default <T> long getSize(List<T> list) {
         return list != null ? list.size() : 0;
     }
 
