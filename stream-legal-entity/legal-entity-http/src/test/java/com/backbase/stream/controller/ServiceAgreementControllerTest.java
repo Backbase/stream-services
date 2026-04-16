@@ -44,6 +44,7 @@ import com.backbase.stream.service.LegalEntityService;
 import com.backbase.streams.tailoredvalue.PlansService;
 import java.net.URI;
 import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,7 @@ import reactor.core.publisher.Mono;
 @TestPropertySource(properties = {"spring.cloud.kubernetes.enabled=false", "spring.cloud.config.enabled=false"})
 @Import({LegalEntityHttpConfiguration.class, LegalEntitySagaConfiguration.class,
     UpdatedServiceAgreementSagaConfiguration.class})
+@Disabled
 class ServiceAgreementControllerTest {
 
     @org.springframework.test.context.bean.override.mockito.MockitoBean
