@@ -20,7 +20,6 @@ import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.AssetPrice;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.InvestmentAssetsTask;
-import com.backbase.stream.investment.RandomParam;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
