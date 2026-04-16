@@ -127,14 +127,16 @@ class InvestmentAssetDataTest {
                 .intradayPriceAsyncTasks(List.of(groupResult))
                 .build();
 
-            assertThat(data.getCurrencies()).hasSize(1);
-            assertThat(data.getMarkets()).hasSize(1);
-            assertThat(data.getMarketSpecialDays()).hasSize(1);
-            assertThat(data.getAssetCategoryTypes()).hasSize(1);
-            assertThat(data.getAssetCategories()).hasSize(1);
-            assertThat(data.getAssets()).containsExactly(asset);
-            assertThat(data.getPriceAsyncTasks()).containsExactly(groupResult);
-            assertThat(data.getIntradayPriceAsyncTasks()).containsExactly(groupResult);
+            assertThat(data).satisfies(d -> {
+                assertThat(d.getCurrencies()).hasSize(1);
+                assertThat(d.getMarkets()).hasSize(1);
+                assertThat(d.getMarketSpecialDays()).hasSize(1);
+                assertThat(d.getAssetCategoryTypes()).hasSize(1);
+                assertThat(d.getAssetCategories()).hasSize(1);
+                assertThat(d.getAssets()).containsExactly(asset);
+                assertThat(d.getPriceAsyncTasks()).containsExactly(groupResult);
+                assertThat(d.getIntradayPriceAsyncTasks()).containsExactly(groupResult);
+            });
         }
 
         @Test
@@ -146,8 +148,9 @@ class InvestmentAssetDataTest {
                 .currencies(List.of(new Currency()))
                 .build();
 
-            assertThat(data1).isEqualTo(data2);
-            assertThat(data1).hasSameHashCodeAs(data2);
+            assertThat(data1)
+                .isEqualTo(data2)
+                .hasSameHashCodeAs(data2);
         }
 
         @Test
@@ -170,8 +173,10 @@ class InvestmentAssetDataTest {
             data.setCurrencies(currencies);
             data.setMarkets(List.of(new Market()));
 
-            assertThat(data.getCurrencies()).isEqualTo(currencies);
-            assertThat(data.getMarkets()).hasSize(1);
+            assertThat(data).satisfies(d -> {
+                assertThat(d.getCurrencies()).isEqualTo(currencies);
+                assertThat(d.getMarkets()).hasSize(1);
+            });
         }
 
         @Test
@@ -191,12 +196,14 @@ class InvestmentAssetDataTest {
             data.setPriceAsyncTasks(priceTasks);
             data.setIntradayPriceAsyncTasks(intradayTasks);
 
-            assertThat(data.getMarketSpecialDays()).isEqualTo(specialDays);
-            assertThat(data.getAssetCategoryTypes()).isEqualTo(categoryTypes);
-            assertThat(data.getAssetCategories()).isEqualTo(categories);
-            assertThat(data.getAssets()).isEqualTo(assets);
-            assertThat(data.getPriceAsyncTasks()).isEqualTo(priceTasks);
-            assertThat(data.getIntradayPriceAsyncTasks()).isEqualTo(intradayTasks);
+            assertThat(data).satisfies(d -> {
+                assertThat(d.getMarketSpecialDays()).isEqualTo(specialDays);
+                assertThat(d.getAssetCategoryTypes()).isEqualTo(categoryTypes);
+                assertThat(d.getAssetCategories()).isEqualTo(categories);
+                assertThat(d.getAssets()).isEqualTo(assets);
+                assertThat(d.getPriceAsyncTasks()).isEqualTo(priceTasks);
+                assertThat(d.getIntradayPriceAsyncTasks()).isEqualTo(intradayTasks);
+            });
         }
 
         @Test

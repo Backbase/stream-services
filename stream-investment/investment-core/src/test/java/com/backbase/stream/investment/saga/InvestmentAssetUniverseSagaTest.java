@@ -3,7 +3,6 @@ package com.backbase.stream.investment.saga;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1000,11 +999,6 @@ class InvestmentAssetUniverseSagaTest {
         asset2.setCurrency("USD");
         asset2.setAssetType(AssetTypeEnum.STOCK);
 
-        AssetPrice price1 = new AssetPrice("US0378331005", "NASDAQ", "USD", 150.0,
-            new RandomParam(0.99, 1.01));
-        AssetPrice price2 = new AssetPrice("US5949181045", "NYSE", "USD", 200.0,
-            new RandomParam(0.99, 1.01));
-
         InvestmentAssetData data = InvestmentAssetData.builder()
             .currencies(Collections.emptyList())
             .markets(Collections.emptyList())
@@ -1031,8 +1025,6 @@ class InvestmentAssetUniverseSagaTest {
         asset1.setMarket("NASDAQ");
         asset1.setCurrency("USD");
         asset1.setAssetType(AssetTypeEnum.STOCK);
-        AssetPrice price = new AssetPrice("US0378331005", "NASDAQ", "USD", 150.0,
-            new RandomParam(0.99, 1.01));
 
         AssetCategoryEntry categoryEntry = new AssetCategoryEntry();
         categoryEntry.setName("TECH");
