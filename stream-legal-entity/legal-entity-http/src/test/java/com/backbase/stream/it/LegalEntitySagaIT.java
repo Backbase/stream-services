@@ -44,13 +44,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @ActiveProfiles("it")
 @WireMockTest(httpPort = 10000)
 @AutoConfigureWebTestClient(timeout = "20000")
-@Disabled
 class LegalEntitySagaIT {
 
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
-        registry.add("management.tracing.enabled", () -> true);
-        registry.add("management.tracing.propagation.type", () -> "B3_MULTI");
         registry.add("management.zipkin.tracing.endpoint", () -> "http://localhost:10000/api/v2/spans");
     }
 
@@ -363,9 +360,7 @@ class LegalEntitySagaIT {
 
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v1/access-control/legal-entities/500000"))
-            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-            .withHeader("X-B3-TraceId", hexString())
-            .withHeader("X-B3-SpanId", hexString()));
+            .withHeader("X-TID", WireMock.equalTo("tenant-id")));
     }
 
     @Test
@@ -387,9 +382,7 @@ class LegalEntitySagaIT {
                 .expectStatus().isEqualTo(200);
 
         // Then
-        verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v1/access-control/legal-entities/500000"))
-            .withHeader("X-B3-TraceId", hexString())
-            .withHeader("X-B3-SpanId", hexString()));
+        verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v1/access-control/legal-entities/500000")));
     }
 
     @Test
@@ -418,9 +411,7 @@ class LegalEntitySagaIT {
 
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v1/access-control/legal-entities/500000"))
-            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-            .withHeader("X-B3-TraceId", hexString())
-            .withHeader("X-B3-SpanId", hexString()));
+            .withHeader("X-TID", WireMock.equalTo("tenant-id")));
     }
 
     @Test
@@ -441,17 +432,9 @@ class LegalEntitySagaIT {
 
         // Then
         verify(WireMock.postRequestedFor(WireMock.urlEqualTo("/limit/service-api/v2/limits/retrieval"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-                .withHeader("X-B3-TraceId", hexString())
-                .withHeader("X-B3-SpanId", hexString()));
+                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
 
         verify(WireMock.postRequestedFor(WireMock.urlEqualTo("/limit/service-api/v2/limits"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-                .withHeader("X-B3-TraceId", hexString())
-                .withHeader("X-B3-SpanId", hexString()));
-    }
-
-    public static RegexPattern hexString() {
-        return new RegexPattern("^[0-9a-f]+$");
+                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
     }
 }

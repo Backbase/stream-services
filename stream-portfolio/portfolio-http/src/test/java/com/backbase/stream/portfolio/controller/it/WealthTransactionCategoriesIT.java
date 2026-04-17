@@ -27,7 +27,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 @WireMockTest(httpPort = 10000)
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
-@Disabled
 class WealthTransactionCategoriesIT {
     @Autowired
     private WebTestClient webTestClient;

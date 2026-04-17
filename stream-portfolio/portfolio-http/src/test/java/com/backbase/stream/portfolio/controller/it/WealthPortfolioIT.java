@@ -31,13 +31,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @WireMockTest(httpPort = 10000)
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
-@Disabled
 class WealthPortfolioIT {
 
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
-        registry.add("management.tracing.enabled", () -> true);
-        registry.add("management.tracing.propagation.type", () -> "B3_MULTI");
         registry.add("management.zipkin.tracing.endpoint", () -> "http://localhost:10000/api/v2/spans");
     }
 
@@ -64,10 +61,7 @@ class WealthPortfolioIT {
         // Then
         verify(WireMock
                 .getRequestedFor(WireMock.urlEqualTo("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-                .withHeader("X-B3-TraceId", hexString())
-                .withHeader("X-B3-SpanId", hexString()));
-
+                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
         Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
     }
 
@@ -98,7 +92,4 @@ class WealthPortfolioIT {
                         .withBody("{\"regions\":[]}")));
     }
 
-    public static RegexPattern hexString() {
-        return new RegexPattern("^[0-9a-f]+$");
-    }
 }

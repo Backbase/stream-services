@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
  * @author Vladimir Kirchev
  *
  */
-@Disabled
 class PortfolioHttpApplicationIT {
 
 	@Test

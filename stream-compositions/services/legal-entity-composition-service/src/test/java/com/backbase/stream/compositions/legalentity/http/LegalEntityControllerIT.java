@@ -90,7 +90,6 @@ class LegalEntityControllerIT extends IntegrationTest {
     }
 
     @Test
-    @Disabled
     void pullIngestLegalEntity_Success() throws Exception {
         LegalEntity legalEntity = new ObjectMapper()
                 .readValue(readContentFromClasspath("integration-data/legal-entity.json"),

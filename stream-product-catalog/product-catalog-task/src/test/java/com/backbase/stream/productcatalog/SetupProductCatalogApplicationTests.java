@@ -14,7 +14,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled
 public class SetupProductCatalogApplicationTests {
 
 
@@ -96,7 +95,7 @@ public class SetupProductCatalogApplicationTests {
         mapper.registerModule(new JavaTimeModule());
         mapper.findAndRegisterModules();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+      //  mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(productCatalog));

@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity.AuthorizeExchangeSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 /**
@@ -22,8 +22,9 @@ public class TransactionCursorConfiguration {
     }
 
     @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange(AuthorizeExchangeSpec::anyExchange)
+    @Order(1)
+    public SecurityWebFilterChain transactionCursorSecurityFilterChain(ServerHttpSecurity http) {
+        return http.authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .build();
     }
