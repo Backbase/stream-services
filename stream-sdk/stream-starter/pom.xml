@@ -118,6 +118,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>com.azure</groupId>
+                <artifactId>azure-messaging-servicebus</artifactId>
+                <version>7.17.6</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>

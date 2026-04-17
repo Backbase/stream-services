@@ -85,6 +85,7 @@
                             <apiPackage>com.backbase.stream.compositions.paymentorder.integration.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.paymentorder.integration.client.model
                             </modelPackage>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
                             <typeMappings>
                                 <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
                             </typeMappings>

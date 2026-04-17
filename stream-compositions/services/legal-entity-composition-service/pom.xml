@@ -108,6 +108,7 @@
                                 <reactive>true</reactive>
                                 <performBeanValidation>true</performBeanValidation>
                                 <skipDefaultInterface>true</skipDefaultInterface>
+                                <additionalProperties>useWithModifiers=true</additionalProperties>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -141,6 +142,7 @@
                             <modelPackage>com.backbase.stream.compositions.product.client.model</modelPackage>
                             <configOptions>
                                 <reactive>true</reactive>
+                                <additionalProperties>useWithModifiers=true</additionalProperties>
                             </configOptions>
                         </configuration>
                     </execution>
