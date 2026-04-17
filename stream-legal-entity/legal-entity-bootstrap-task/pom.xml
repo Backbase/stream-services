@@ -15,7 +15,7 @@
     <name>Stream :: Legal Entity Bootstrap Task</name>
 
     <properties>
-        <wiremock-jre8.version>2.35.1</wiremock-jre8.version>
+        <wiremock.version>3.0.1</wiremock.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
         <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
     </properties>
@@ -46,9 +46,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>${wiremock-jre8.version}</version>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
 

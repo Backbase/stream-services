@@ -36,7 +36,7 @@ RUN ["java", "-cp", "/opt/keycloak/lib/quarkus-run.jar:/opt/keycloak/lib/bootstr
 
 # -------------------------------------------------------------------------------------------
 # The production image build; for example, is based on the `distroless` Java image
-FROM gcr.io/distroless/java21-debian12
+FROM gcr.io/distroless/java25-debian13@sha256:6c9412db880a8bd7227ce85593e27df931b59a39ad89559fa50d3ba06a49dd00
 
 # Copy the files prepared in the previous build-stage
 COPY --from=auth-server-builder /opt/keycloak /opt/keycloak
