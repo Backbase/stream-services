@@ -59,7 +59,7 @@ public class InvestmentRestServiceApiConfiguration {
     public ObjectMapper restInvestmentObjectMapper(ObjectMapper legacyObjectMapper) {
         ObjectMapper mapper = legacyObjectMapper.copy();
         mapper.setSerializationInclusion(Include.NON_EMPTY);
-     //   mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
     }
 
