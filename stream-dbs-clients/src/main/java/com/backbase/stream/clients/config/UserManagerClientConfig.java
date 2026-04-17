@@ -23,8 +23,8 @@ public class UserManagerClientConfig extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ApiClient userManagerClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+    public ApiClient userManagerClient(ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 

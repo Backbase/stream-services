@@ -49,10 +49,10 @@ public interface PortfolioMapper {
 
     List<PortfolioAllocationsParentItem> mapAllocations(List<Allocation> allocations);
 
-    @ValueMapping(source = "BY_CURRENCY", target = "CURRENCY")
-    @ValueMapping(source = "BY_ASSET_CLASS", target = "ASSET_CLASS")
-    @ValueMapping(source = "BY_REGION", target = "REGION")
-    @ValueMapping(source = "BY_COUNTRY", target = "COUNTRY")
+    @ValueMapping(source = "BY_CURRENCY", target = "BY_CURRENCY")
+    @ValueMapping(source = "BY_ASSET_CLASS", target = "BY_ASSET_CLASS")
+    @ValueMapping(source = "BY_REGION", target = "BY_REGION")
+    @ValueMapping(source = "BY_COUNTRY", target = "BY_COUNTRY")
     @ValueMapping(source = MappingConstants.ANY_UNMAPPED, target = MappingConstants.NULL)
     AllocationType map(String allocationTypeEnum);
 

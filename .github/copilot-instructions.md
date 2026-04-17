@@ -78,6 +78,7 @@ class MyConfigTest {
     @Test
     void configurationTest() {
         contextRunner
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(DbsApiClientsAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)

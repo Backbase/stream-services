@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.0.0]
+### Changed
+- Align Spring Boot and Spring Cloud versions with Service SDK 21.0.1 managed stack.
+- Remove local Spring metadata plugin and Azure Service Bus version overrides in favor of the Service SDK 21.0.1 managed dependency chain.
+
 ## [9.17.0]
 ### Changed
 Improve Investment asset universe price setup
@@ -9,6 +14,8 @@ Improve Investment asset universe price setup
 ### Added
 - Add investmentPortfolios ingestion support to BaseProductGroup (similar to investmentAccounts)
 ## [9.15.0]
+
+## [9.14.0]
 ### Changed
 - Remove custom workaround to connect with Investment service
 

@@ -1,165 +1,138 @@
 package com.backbase.stream.compositions.transaction.cursor.http;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.transaction.cursor.core.config.TransactionCursorConfiguration;
-import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
-import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
-import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
-import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepositoryImpl;
+import com.backbase.stream.compositions.transaction.cursor.core.service.TransactionCursorService;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorFilterRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
-
-import jakarta.persistence.EntityManager;
-import java.util.Optional;
-
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-@DirtiesContext
-@ExtendWith({SpringExtension.class})
-@ActiveProfiles("local")
-@WebFluxTest(controllers = TransactionCursorController.class,
-        excludeAutoConfiguration = {TransactionCursorConfiguration.class})
-public class TransactionCursorControllerIT {
+@ExtendWith(MockitoExtension.class)
+class TransactionCursorControllerIT {
 
-    @Autowired
-    TransactionCursorController transactionCursorController;
+    @Mock
+    private TransactionCursorService transactionCursorService;
 
-    @MockBean
-    TransactionCursorRepository transactionCursorRepository;
-
-    @MockBean
-    TransactionCursorRepositoryImpl transactionCursorRepositoryImpl;
-
-    @MockBean
-    WebClient webClient;
-
-    @Autowired
+    private TransactionCursorController transactionCursorController;
     private WebTestClient webTestClient;
 
-    @Autowired
-    TransactionCursorMapper mapper;
-
-    @MockBean
-    EntityManager entityManager;
-
+    @BeforeEach
+    void setUp() {
+        transactionCursorController = new TransactionCursorController(transactionCursorService);
+        webTestClient = WebTestClient.bindToController(transactionCursorController).build();
+    }
 
     @Test
     void deleteCursor_Success() {
         String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
+        when(transactionCursorService.deleteByArrangementId(arrangementId))
+                .thenReturn(Mono.just(ResponseEntity.ok().build()));
 
         webTestClient
                 .method(HttpMethod.DELETE)
                 .uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
                 .exchange()
                 .expectStatus().isOk();
-        Mockito.verify(transactionCursorRepository, Mockito.times(1))
-                .deleteByArrangementId(arrangementId);
     }
 
     @Test
     void getByArrangementId_Success() {
         String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
-
-        TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
-        transactionCursorEntity.setArrangementId(arrangementId);
-        transactionCursorEntity.setId("123");
-        when(transactionCursorRepository.findByArrangementId(arrangementId))
-                .thenReturn(Optional.of(transactionCursorEntity));
+        TransactionCursorResponse response = new TransactionCursorResponse()
+                .cursor(new TransactionCursor().arrangementId(arrangementId).id("123"));
+        when(transactionCursorService.findByArrangementId(arrangementId))
+                .thenReturn(Mono.just(ResponseEntity.ok(response)));
 
         webTestClient.get().uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
                 .exchange().expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.cursor.id").isNotEmpty();
-        Mockito.verify(transactionCursorRepository, Mockito.times(1))
-                .findByArrangementId(arrangementId);
+                .jsonPath("$.cursor.id").isEqualTo("123")
+                .jsonPath("$.cursor.arrangementId").isEqualTo(arrangementId);
     }
 
     @Test
     void getById_Success() {
         String id = "f2c7dcd7-2ed9-45af-8813-a5d630c5d804";
-
-        TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
-        transactionCursorEntity.setArrangementId("123");
-        transactionCursorEntity.setId(id);
-        when(transactionCursorRepository.findById(id))
-                .thenReturn(Optional.of(transactionCursorEntity));
+        TransactionCursorResponse response = new TransactionCursorResponse()
+                .cursor(new TransactionCursor().arrangementId("123").id(id));
+        when(transactionCursorService.findById(id))
+                .thenReturn(Mono.just(ResponseEntity.ok(response)));
 
         webTestClient.get().uri("/service-api/v2/cursor/{id}", id)
                 .exchange().expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.cursor.id").isNotEmpty();
-        Mockito.verify(transactionCursorRepository, Mockito.times(1))
-                .findById(id);
+                .jsonPath("$.cursor.id").isEqualTo(id);
     }
 
     @Test
     void patchByArrangementId_Success() {
         String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
-
         TransactionCursorPatchRequest transactionCursorPatchRequest = new TransactionCursorPatchRequest()
                 .lastTxnDate("2022-05-24 03:18:19")
-                .status(StatusEnum.SUCCESS.getValue())
+                .status(TransactionCursor.StatusEnum.SUCCESS.getValue())
                 .lastTxnIds("11,12,13,14");
+        when(transactionCursorService.patchByArrangementId(anyString(), any()))
+                .thenReturn(Mono.just(ResponseEntity.ok().build()));
 
         webTestClient
                 .patch().uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
                 .body(Mono.just(transactionCursorPatchRequest), TransactionCursorPatchRequest.class)
                 .exchange().expectStatus().isOk();
-        Mockito.verify(transactionCursorRepository, Mockito.times(1))
-                .patchByArrangementId(arrangementId, transactionCursorPatchRequest);
     }
 
     @Test
     void filterCursor_Success() {
         TransactionCursorFilterRequest transactionCursorFilterRequest = new TransactionCursorFilterRequest()
-                .lastTxnDate("2022-05-24 03:18:59").status(StatusEnum.SUCCESS.getValue());
+                .lastTxnDate("2022-05-24 03:18:59")
+                .status(TransactionCursor.StatusEnum.SUCCESS.getValue());
+        TransactionCursorResponse response = new TransactionCursorResponse()
+                .cursor(new TransactionCursor().id("123").arrangementId("arrangement-id"));
+        when(transactionCursorService.filterCursor(any()))
+                .thenReturn(Mono.just(ResponseEntity.ok(Flux.just(response))));
+
         webTestClient.post().uri("/service-api/v2/cursor/filter")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(transactionCursorFilterRequest), TransactionCursorFilterRequest.class)
-                .exchange().expectStatus().isOk();
+                .exchange().expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].cursor.id").isEqualTo("123");
     }
 
-    // @Test
+    @Test
     void upsertCursor_Success() {
         TransactionCursorUpsertRequest transactionCursorUpsertRequest =
                 new TransactionCursorUpsertRequest().cursor(new TransactionCursor()
                         .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
                         .extArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
                         .legalEntityId("beta-emp-ext")
-                        .status(StatusEnum.IN_PROGRESS));
-        TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
-        transactionCursorEntity.setId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq");
+                        .status(TransactionCursor.StatusEnum.IN_PROGRESS));
+        TransactionCursorUpsertResponse response = new TransactionCursorUpsertResponse()
+                .id("3337f8cc-d66d-41b3-a00e-f71ff15d93cq");
+        when(transactionCursorService.upsertCursor(any()))
+                .thenReturn(Mono.just(new ResponseEntity<>(response, HttpStatus.CREATED)));
 
-        //when(transactionCursorRepository.save(transactionCursorEntity)).thenReturn(transactionCursorEntity);
         webTestClient.post().uri("/service-api/v2/cursor/upsert")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(transactionCursorUpsertRequest), TransactionCursorUpsertRequest.class)
-                .exchange().expectStatus().isOk();
-
-        StepVerifier.create(transactionCursorRepository.save(any()))
-                .expectNext(new ResponseEntity<>(HttpStatus.OK)).verifyComplete();
-        //Mockito.verify(transactionCursorRepository, Mockito.times(1)).save(transactionCursorEntity);
+                .exchange().expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo("3337f8cc-d66d-41b3-a00e-f71ff15d93cq");
     }
-
 }

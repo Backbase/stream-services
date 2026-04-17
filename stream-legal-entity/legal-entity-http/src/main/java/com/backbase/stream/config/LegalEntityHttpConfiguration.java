@@ -4,6 +4,7 @@ import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeReposi
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.validation.annotation.Validated;
@@ -13,13 +14,11 @@ import org.springframework.validation.annotation.Validated;
 public class LegalEntityHttpConfiguration {
 
     @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-            .anyExchange()
-            .permitAll()
-            .and()
-            .csrf()
-            .disable()
+    @Order(1)
+    public SecurityWebFilterChain legalEntitySecurityFilterChain(ServerHttpSecurity http) {
+        return http
+            .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .build();
     }
 

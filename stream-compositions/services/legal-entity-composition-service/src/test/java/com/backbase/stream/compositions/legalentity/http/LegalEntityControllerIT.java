@@ -29,9 +29,9 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -54,7 +54,7 @@ class LegalEntityControllerIT extends IntegrationTest {
     @Autowired
     LegalEntityController legalEntityController;
 
-    @MockBean
+    @MockitoBean
     private LegalEntitySaga legalEntitySaga;
 
     @BeforeAll
@@ -90,7 +90,6 @@ class LegalEntityControllerIT extends IntegrationTest {
     }
 
     @Test
-    @Disabled
     void pullIngestLegalEntity_Success() throws Exception {
         LegalEntity legalEntity = new ObjectMapper()
                 .readValue(readContentFromClasspath("integration-data/legal-entity.json"),

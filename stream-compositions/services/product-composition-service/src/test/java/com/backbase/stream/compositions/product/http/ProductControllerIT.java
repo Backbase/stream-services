@@ -2,166 +2,59 @@ package com.backbase.stream.compositions.product.http;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
-import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
-import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPostResponse;
 import com.backbase.stream.compositions.product.api.model.ArrangementPullIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ArrangementPushIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
-import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
-import com.backbase.stream.compositions.transaction.client.model.TransactionsPostResponseBody;
-import com.backbase.stream.legalentity.model.BatchProductGroup;
+import com.backbase.stream.compositions.product.core.mapper.ArrangementMapper;
+import com.backbase.stream.compositions.product.core.mapper.ArrangementRestMapper;
+import com.backbase.stream.compositions.product.core.mapper.ConfigMapper;
+import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
+import com.backbase.stream.compositions.product.core.mapper.ProductRestMapper;
+import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
+import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.core.service.ArrangementIngestionService;
+import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
-import com.backbase.stream.product.BatchProductIngestionSaga;
-import com.backbase.stream.product.service.ArrangementService;
-import com.backbase.stream.product.task.BatchProductGroupTask;
-import com.backbase.stream.product.task.ProductGroupTask;
-import com.backbase.streams.compositions.test.IntegrationTest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.activemq.broker.BrokerService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.MediaType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mapstruct.factory.Mappers;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-@DirtiesContext
-@SpringBootTest
-@AutoConfigureWebTestClient
-@ExtendWith({SpringExtension.class})
-@Slf4j
-class ProductControllerIT extends IntegrationTest {
+@ExtendWith(MockitoExtension.class)
+class ProductControllerIT {
 
-    private static final int INTEGRATION_SERVICE_PORT = 18000;
-    private static final int TRANSACTION_SERVICE_PORT = 12000;
-    private static final int PAYMENT_ORDER_SERVICE_PORT = 13000;
-    private static BrokerService broker;
-    @MockBean
-    @Qualifier("batchProductIngestionSaga")
-    BatchProductIngestionSaga batchProductIngestionSaga;
-    @MockBean
-    ArrangementService arrangementService;
-    @Autowired
-    ProductController productController;
-    @Autowired
-    ObjectMapper objectMapper;
-    private ClientAndServer integrationServer;
-    private ClientAndServer transactionServer;
-    private ClientAndServer paymentOrderServer;
-    private MockServerClient integrationServerClient;
-    private MockServerClient transactionServerClient;
-    private MockServerClient paymentOrderServerClient;
+    @Mock
+    private ProductIngestionService productIngestionService;
+    @Mock
+    private ArrangementIngestionService arrangementIngestionService;
 
-    @BeforeAll
-    static void initActiveMqBroker() throws Exception {
-        broker = new BrokerService();
-        broker.setBrokerName("activemq");
-        broker.setPersistent(false);
-        broker.start();
-        broker.waitUntilStarted();
-    }
+    private ProductController productController;
 
     @BeforeEach
-    void initializeIntegrationServer() throws IOException {
-        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
-        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-        integrationServerClient.when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/service-api/v2/product-group"))
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(readContentFromClasspath("integration-data/response.json"))
-                );
-
-        integrationServerClient.when(
-                        request()
-                                .withMethod("PUT")
-                                .withPath("/service-api/v2/arrangement"))
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(readContentFromClasspath("integration-data/arrangement-response.json"))
-                );
-    }
-
-    @BeforeEach
-    void initializeTransactionServer() throws JsonProcessingException {
-        transactionServer = startClientAndServer(TRANSACTION_SERVICE_PORT);
-        transactionServerClient = new MockServerClient("localhost", TRANSACTION_SERVICE_PORT);
-        transactionServerClient.when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/service-api/v2/ingest/pull"))
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(
-                                        objectMapper.writeValueAsString(new TransactionIngestionResponse()
-                                                .transactions(List.of(new TransactionsPostResponseBody().id("id")
-                                                        .externalId("externalId"))))
-                                ));
-    }
-
-    @BeforeEach
-    void initializePaymentOrderServer() throws JsonProcessingException {
-        paymentOrderServer = startClientAndServer(PAYMENT_ORDER_SERVICE_PORT);
-        paymentOrderServerClient = new MockServerClient("localhost", PAYMENT_ORDER_SERVICE_PORT);
-        paymentOrderServerClient.when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/service-api/v2/ingest/pull"))
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(
-                                        objectMapper.writeValueAsString(new PaymentOrderIngestionResponse()
-                                                .newPaymentOrder(List.of(new PaymentOrderPostResponse().id("id"))))
-                                ));
-    }
-
-    @AfterEach
-    void stopMockServer() {
-        integrationServer.stop();
-        while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
-        }
-        transactionServer.stop();
-        while (!transactionServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
-        }
-        paymentOrderServer.stop();
-        while (!paymentOrderServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
-        }
+    void setUp() {
+        ProductGroupMapper productGroupMapper = Mappers.getMapper(ProductGroupMapper.class);
+        ArrangementMapper arrangementMapper = Mappers.getMapper(ArrangementMapper.class);
+        ProductRestMapper productRestMapper = new ProductRestMapper(productGroupMapper);
+        ArrangementRestMapper arrangementRestMapper = new ArrangementRestMapper(arrangementMapper, new ConfigMapper());
+        ProductSubController productSubController = new ProductSubController(productIngestionService, productRestMapper);
+        ArrangementSubController arrangementSubController =
+                new ArrangementSubController(arrangementIngestionService, arrangementRestMapper);
+        productController = new ProductController(productSubController, arrangementSubController);
     }
 
     @Test
@@ -172,16 +65,13 @@ class ProductControllerIT extends IntegrationTest {
         ProductGroup productGroup = mapper.treeToValue(node, ProductGroup.class);
         productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
 
-        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
-        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
-                .thenReturn(productGroupTaskMono);
-
-        when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
-                .thenReturn(Mono.just(new BatchProductGroupTask()
-                        .data(new BatchProductGroup().productGroups(List.of(productGroup))
-                                .serviceAgreement(productGroup.getServiceAgreement()))));
+        when(productIngestionService.ingestPull(any()))
+                .thenReturn(Mono.just(ProductIngestResponse.builder()
+                        .serviceAgreementInternalId("sa_internalId")
+                        .productGroups(List.of(productGroup))
+                        .additions(Map.of())
+                        .build()));
 
         ProductPullIngestionRequest pullIngestionRequest =
                 new ProductPullIngestionRequest()
@@ -203,7 +93,10 @@ class ProductControllerIT extends IntegrationTest {
     }
 
     @Test
-    void pushIngestProduct_Success() throws Exception {
+    void pushIngestProduct_Success() {
+        when(productIngestionService.ingestPush(any()))
+                .thenReturn(Mono.error(new RuntimeException("push failed")));
+
         ProductPushIngestionRequest pushIngestionRequest = new ProductPushIngestionRequest()
                 .productGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
         URI uri = URI.create("/service-api/v2/ingest/push");
@@ -216,9 +109,11 @@ class ProductControllerIT extends IntegrationTest {
     }
 
     @Test
-    void pullIngestArrangement_Success() throws Exception {
-        when(arrangementService.updateArrangement(any(), any()))
-                .thenReturn(Mono.just(new ArrangementPutItem()));
+    void pullIngestArrangement_Success() {
+        when(arrangementIngestionService.ingestPull(any()))
+                .thenReturn(Mono.just(ArrangementIngestResponse.builder()
+                        .arrangement(new ArrangementPutItem())
+                        .build()));
 
         ArrangementPullIngestionRequest pullIngestionRequest =
                 new ArrangementPullIngestionRequest()
@@ -236,9 +131,9 @@ class ProductControllerIT extends IntegrationTest {
     }
 
     @Test
-    void pullIngestArrangement_Fail() throws Exception {
-        when(arrangementService.updateArrangement(any(), any()))
-                .thenThrow(new RuntimeException());
+    void pullIngestArrangement_Fail() {
+        when(arrangementIngestionService.ingestPull(any()))
+                .thenReturn(Mono.error(new RuntimeException("pull failed")));
 
         ArrangementPullIngestionRequest pullIngestionRequest =
                 new ArrangementPullIngestionRequest()
@@ -263,8 +158,10 @@ class ProductControllerIT extends IntegrationTest {
         com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut arrangementItemPut =
                 mapper.treeToValue(node, com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut.class);
 
-        when(arrangementService.updateArrangement(any(), any()))
-                .thenReturn(Mono.just(new ArrangementPutItem()));
+        when(arrangementIngestionService.ingestPush(any()))
+                .thenReturn(Mono.just(ArrangementIngestResponse.builder()
+                        .arrangement(new ArrangementPutItem())
+                        .build()));
 
         ArrangementPushIngestionRequest pushIngestionRequest =
                 new ArrangementPushIngestionRequest()
@@ -278,5 +175,14 @@ class ProductControllerIT extends IntegrationTest {
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pushIngestionRequest), ArrangementPushIngestionRequest.class).exchange()
                 .expectStatus().isOk();
+    }
+
+    private String readContentFromClasspath(String resourcePath) throws IOException {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new IOException("Resource not found: " + resourcePath);
+            }
+            return new String(inputStream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
     }
 }

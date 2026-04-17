@@ -21,8 +21,8 @@ public class AudiencesCollectorClientConfig extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ApiClient userSegmentCollectorApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+    public ApiClient userSegmentCollectorApiClient(ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 

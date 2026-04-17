@@ -4,11 +4,17 @@ import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEA
 import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEADER_VALUE;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import com.backbase.stream.portfolio.model.RegionBundle;
@@ -27,6 +33,18 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
 class WealthRegionsIT {
+
+    @TestConfiguration
+    static class TestSecurityConfiguration {
+        @Bean
+        public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+            return http
+                .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .build();
+        }
+    }
+
     @Autowired
     private WebTestClient webTestClient;
 

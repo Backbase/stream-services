@@ -29,7 +29,7 @@ public class LocalRunConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ObjectMapper objectMapper(DateFormat dateFormat) {
+    public ObjectMapper legacyObjectMapper(DateFormat dateFormat) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(dateFormat);
         mapper.registerModule(new JavaTimeModule());

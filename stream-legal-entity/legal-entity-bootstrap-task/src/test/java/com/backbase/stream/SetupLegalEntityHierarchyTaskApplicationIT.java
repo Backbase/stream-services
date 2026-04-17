@@ -28,8 +28,6 @@ class SetupLegalEntityHierarchyTaskApplicationIT {
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
         String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
-        registry.add("management.tracing.enabled", () -> true);
-        registry.add("management.tracing.propagation.type", () -> "B3_MULTI");
         registry.add("management.zipkin.tracing.endpoint", () -> wiremockUrl + "/api/v2/spans");
         registry.add("spring.cloud.discovery.client.simple.instances.token-converter[0].uri", () -> wiremockUrl);
         registry.add("spring.cloud.discovery.client.simple.instances.user-manager[0].uri", () -> wiremockUrl);

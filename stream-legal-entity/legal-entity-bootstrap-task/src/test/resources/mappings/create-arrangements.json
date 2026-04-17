@@ -3,12 +3,6 @@
     "method": "POST",
     "url": "/arrangement-manager/integration-api/v3/arrangements/batch",
     "headers": {
-      "X-B3-TraceId": {
-        "matches": "[\\w-]+"
-      },
-      "X-B3-SpanId": {
-        "matches": "[\\w-]+"
-      },
       "X-TID": {
         "contains": "tenant1"
       }

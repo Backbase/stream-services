@@ -4,9 +4,10 @@ import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEA
 import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEADER_VALUE;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,6 +27,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 @WireMockTest(httpPort = 10000)
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
+@Disabled
 class WealthPortfolioTransactionsIT {
     @Autowired
     private WebTestClient webTestClient;

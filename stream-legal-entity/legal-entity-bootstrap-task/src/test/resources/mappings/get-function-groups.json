@@ -3,11 +3,8 @@
     "method": "GET",
     "urlPath": "/access-control/service-api/v1/access-control/function-groups",
     "headers": {
-      "X-B3-TraceId": {
-        "matches": "[\\w-]+"
-      },
-      "X-B3-SpanId": {
-        "matches": "[\\w-]+"
+      "traceparent": {
+        "matches": "00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}"
       },
       "X-TID": {
         "contains": "tenant1"

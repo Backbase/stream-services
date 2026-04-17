@@ -8,12 +8,6 @@ spring:
     task:
       events:
         enabled: false
-
-management:
-  tracing:
-    enabled: true
-    propagation:
-      type: B3_MULTI
 ---
 spring:
   config:

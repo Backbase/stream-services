@@ -83,7 +83,7 @@ class InvestmentRestModelPortfolioServiceTest {
             ModelPortfolio modelPortfolio = buildModelPortfolio("Balanced", 5);
 
             when(apiClient.invokeAPI(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any())).thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
+                any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
             StepVerifier.create(service.createModelPortfolio(modelPortfolio))
                 .expectError(NullPointerException.class)
@@ -156,7 +156,7 @@ class InvestmentRestModelPortfolioServiceTest {
             ModelPortfolio modelPortfolio = buildModelPortfolio("Aggressive", 9);
 
             when(apiClient.invokeAPI(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any())).thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
+                any())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
             StepVerifier.create(service.patchModelPortfolio(existingUuid.toString(), modelPortfolio))
                 .expectError(NullPointerException.class)

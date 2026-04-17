@@ -3,6 +3,7 @@ spring:
     name: product-composition
   main:
     allow-bean-definition-overriding: true
+    web-application-type: reactive
 sso:
   jwt:
     internal:

@@ -4,13 +4,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.11</version>
+        <version>4.0.5</version>
         <relativePath/>
     </parent>
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-starter</artifactId>
     <name>Stream :: SDK :: stream-starter</name>
-    <version>9.18.0</version>
+    <version>10.0.0</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -50,8 +50,8 @@
         <coverage.reports.dir>${project.build.directory}/coverage-reports</coverage.reports.dir>
         <!-- azure-identity -->
         <docker.azure.identity>compile</docker.azure.identity>
-        <!-- base image gcr.io/distroless/java21-debian12:nonroot -->
-        <docker.distroless.image>gcr.io/distroless/java21-debian12@sha256:68e11975ae9e7911becda53c8746fd4564182c2c402a1c4c0d4e3479ad50b3ba</docker.distroless.image>
+        <!-- base image gcr.io/distroless/java25-debian13:nonroot -->
+        <docker.distroless.image>gcr.io/distroless/java25-debian13@sha256:6c9412db880a8bd7227ce85593e27df931b59a39ad89559fa50d3ba06a49dd00</docker.distroless.image>
         <docker.image.name>${docker.repo.url}/${docker.repo.project}/${project.artifactId}</docker.image.name>
         <docker.jdbc.mssql>compile</docker.jdbc.mssql>
         <!-- image dependencies -->
@@ -74,11 +74,11 @@
         <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
         <gmavenplus-plugin.version>3.0.0</gmavenplus-plugin.version>
         <!-- other config -->
-        <jacoco.version>0.8.11</jacoco.version>
+        <jacoco.version>0.8.14</jacoco.version>
         <japicmp.plugin.version>0.17.2</japicmp.plugin.version>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <!-- Plugin versions -->
-        <jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
+        <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
         <!-- jib preset properties -->
         <jib.container.creationTime>USE_CURRENT_TIMESTAMP</jib.container.creationTime>
         <jib.container.ports>8080</jib.container.ports>
@@ -105,16 +105,16 @@
         <sonar.sources>${project.basedir}/src/main/</sonar.sources>
         <sonar.tests>${project.basedir}/src/test/</sonar.tests>
         <sortpom-maven-plugin.version>3.3.0</sortpom-maven-plugin.version>
-        <spring-cloud-app-starter-metadata-maven-plugin.version>2.0.2.RELEASE</spring-cloud-app-starter-metadata-maven-plugin.version>
         <ssdk-checkstyle-config.version>1.0.22</ssdk-checkstyle-config.version>
         <velocity.version>1.7</velocity.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>backbase-building-blocks-release</artifactId>
-                <version>20.1.0</version>
+                <version>21.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -267,24 +267,6 @@
                         </execution>
                     </executions>
                 </plugin>
-                <!-- Generate SCDF app metadata from 'ConfigurationProperties' classes -->
-                <plugin>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
-                    <version>${spring-cloud-app-starter-metadata-maven-plugin.version}</version>
-                    <configuration>
-                        <storeFilteredMetadata>true</storeFilteredMetadata>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>aggregate-metadata</id>
-                            <goals>
-                                <goal>aggregate-metadata</goal>
-                            </goals>
-                            <phase>compile</phase>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
@@ -415,7 +397,7 @@
             <plugin>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
-                <version>19.0.0</version>
+                <version>21.0.1</version>
                 <executions>
                     <execution>
                         <id>find-main-package-for-archunit-maven</id>
@@ -867,6 +849,39 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${java.version}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${lombok-mapstruct-binding.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>${spring-boot.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                        <arg>-Amapstruct.verbose=true</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -1097,28 +1112,6 @@
                 <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
                 <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
             </properties>
-        </profile>
-        <profile>
-            <!-- TODO why include-metadata is this here?-->
-            <id>include-metadata</id>
-            <activation>
-                <property>
-                    <name>package.properties.metadata</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>properties-maven-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.cloud</groupId>
-                        <artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
         <profile>
             <id>only-eclipse</id>

@@ -512,7 +512,6 @@ class ArrangementServiceTest {
     }
 
     @Test
-    @Disabled
     void removeLegalEntityFromArrangement() {
         String arrangementExternalId = "arr_ext_id";
         Set<String> legalEntityExternalIds = Set.of("leid_1", "leid_2");
@@ -535,7 +534,6 @@ class ArrangementServiceTest {
     }
 
     @Test
-    @Disabled
     void removeLegalEntityFromArrangement_Failure() {
         String arrangementExternalId = "arr_ext_id";
         Set<String> legalEntityExternalIds = Set.of("leid_1", "leid_2");
