@@ -23,7 +23,7 @@ class LocalRunConfigTest {
 
     @Test
     void objectMapper() {
-        ObjectMapper mapper = localRunConfig.objectMapper(DateFormat.getInstance());
+        ObjectMapper mapper = localRunConfig.legacyObjectMapper(DateFormat.getInstance());
         Assertions.assertNotNull(mapper);
     }
 

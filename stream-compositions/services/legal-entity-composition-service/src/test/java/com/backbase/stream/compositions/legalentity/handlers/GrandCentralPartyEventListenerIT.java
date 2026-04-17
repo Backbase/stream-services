@@ -43,7 +43,7 @@ public class GrandCentralPartyEventListenerIT {
     private GrandCentralPartyEventListener listener;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper legacyObjectMapper;
 
     @AfterEach
     void reset() {
@@ -53,7 +53,7 @@ public class GrandCentralPartyEventListenerIT {
     @Test
     void processPersonPartyUpsertEventTest() throws IOException {
         var resource = new ClassPathResource("events/person-party-upsert-event.json");
-        PartyUpsertEvent event = objectMapper.readValue(resource.getInputStream(), PartyUpsertEvent.class);
+        PartyUpsertEvent event = legacyObjectMapper.readValue(resource.getInputStream(), PartyUpsertEvent.class);
         var envelopedEvent = new EnvelopedEvent<PartyUpsertEvent>();
         envelopedEvent.setEvent(event);
         listener.handle(envelopedEvent);
@@ -67,7 +67,7 @@ public class GrandCentralPartyEventListenerIT {
     @Test
     void processOrganizationPartyUpsertEventTest() throws IOException {
         var resource = new ClassPathResource("events/organization-party-upsert-event.json");
-        PartyUpsertEvent event = objectMapper.readValue(resource.getInputStream(), PartyUpsertEvent.class);
+        PartyUpsertEvent event = legacyObjectMapper.readValue(resource.getInputStream(), PartyUpsertEvent.class);
         var envelopedEvent = new EnvelopedEvent<PartyUpsertEvent>();
         envelopedEvent.setEvent(event);
         listener.handle(envelopedEvent);
@@ -81,7 +81,7 @@ public class GrandCentralPartyEventListenerIT {
     @Test
     void processPartyUpsertEventWithMissingDataTest() throws IOException {
         var resource = new ClassPathResource("events/person-party-upsert-event.json");
-        PartyUpsertEvent event = objectMapper.readValue(resource.getInputStream(), PartyUpsertEvent.class);
+        PartyUpsertEvent event = legacyObjectMapper.readValue(resource.getInputStream(), PartyUpsertEvent.class);
         event.getData().setElectronicAddress(null);
         event.getData().setPhoneAddresses(List.of());
         var envelopedEvent = new EnvelopedEvent<PartyUpsertEvent>();

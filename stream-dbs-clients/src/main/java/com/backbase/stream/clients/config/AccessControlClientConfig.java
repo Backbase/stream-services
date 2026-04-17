@@ -23,24 +23,24 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.assignpermissions.api.service.ApiClient assignPermissionsServiceApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.assignpermissions.api.service.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.assignpermissions.api.service.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.customeraccessgroup.api.service.ApiClient customerAccessGroupServiceApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.customeraccessgroup.api.service.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.customeraccessgroup.api.service.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.datagroup.api.service.ApiClient dataGroupServiceApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.datagroup.api.service.ApiClient(getWebClient(), objectMapper, dateFormat)
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.datagroup.api.service.ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
@@ -55,48 +55,48 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.functiongroup.api.service.ApiClient functionGroupServiceApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.functiongroup.api.service.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.functiongroup.api.service.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.functiongroup.api.integration.ApiClient functionGroupIntegrationApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.functiongroup.api.integration.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.functiongroup.api.integration.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.legalentity.api.service.ApiClient legalEntityServiceApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.legalentity.api.service.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.legalentity.api.service.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.legalentity.api.integration.ApiClient legalEntityIntegrationApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.legalentity.api.integration.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.legalentity.api.integration.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.permissioncheck.api.service.ApiClient permissionCheckServiceApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.permissioncheck.api.service.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.permissioncheck.api.service.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.serviceagreement.api.service.ApiClient serviceAgreementServiceApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.serviceagreement.api.service.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.serviceagreement.api.service.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 
@@ -111,8 +111,8 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     @Bean
     @ConditionalOnMissingBean
     public com.backbase.accesscontrol.usercontext.api.service.ApiClient userContextServiceApiClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.accesscontrol.usercontext.api.service.ApiClient(getWebClient(), objectMapper,
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.usercontext.api.service.ApiClient(getWebClient(), legacyObjectMapper,
             dateFormat).setBasePath(createBasePath());
     }
 

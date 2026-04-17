@@ -21,8 +21,8 @@ public class LimitsClientConfig extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ApiClient limitApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+    public ApiClient limitApiClient(ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 

@@ -2,8 +2,12 @@ package com.backbase.stream.webclient.configuration;
 
 import com.backbase.buildingblocks.webclient.InterServiceWebClientCustomizer;
 import com.backbase.stream.webclient.filter.HeaderForwardingClientFilter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.logging.LogLevel;
+import java.text.DateFormat;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +34,15 @@ public class DbsWebClientConfiguration {
     @Bean
     public InterServiceWebClientCustomizer webClientCustomizer(DbsWebClientConfigurationProperties properties) {
         return webClientBuilder -> webClientBuilder.filter(new HeaderForwardingClientFilter(properties));
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ObjectMapper legacyObjectMapper(DateFormat dateFormat) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setDateFormat(dateFormat);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper;
     }
 
     /**

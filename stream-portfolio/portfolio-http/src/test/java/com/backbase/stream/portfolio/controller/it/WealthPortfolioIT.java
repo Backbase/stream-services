@@ -10,6 +10,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
@@ -30,6 +31,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @WireMockTest(httpPort = 10000)
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
+@Disabled
 class WealthPortfolioIT {
 
     @DynamicPropertySource

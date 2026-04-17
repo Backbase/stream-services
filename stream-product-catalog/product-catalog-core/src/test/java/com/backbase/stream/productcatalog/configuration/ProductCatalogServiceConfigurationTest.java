@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.productcatalog.ProductCatalogService;
+import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -18,6 +19,7 @@ class ProductCatalogServiceConfigurationTest {
     @Test
     void configurationTest() {
         contextRunner
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(DbsApiClientsAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)

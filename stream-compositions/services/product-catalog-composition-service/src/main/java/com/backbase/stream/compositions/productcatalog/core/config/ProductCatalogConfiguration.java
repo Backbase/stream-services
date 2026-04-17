@@ -38,8 +38,8 @@ public class ProductCatalogConfiguration extends CompositeApiClientConfig {
 
     @Bean
     @Primary
-    public ApiClient productCatalogClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+    public ApiClient productCatalogClient(ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 }

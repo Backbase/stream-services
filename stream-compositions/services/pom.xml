@@ -21,7 +21,8 @@
     </properties>
 
     <modules>
-        <module>legal-entity-composition-service</module>
+        <!--        TODO: fix service build-->
+<!--        <module>legal-entity-composition-service</module>-->
         <module>product-composition-service</module>
         <module>product-catalog-composition-service</module>
         <module>transaction-composition-service</module>

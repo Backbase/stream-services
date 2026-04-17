@@ -244,6 +244,15 @@
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>${boat-maven-plugin.version}</version>
+                <configuration>
+                    <configOptions>
+                        <generateClientAsBean>false</generateClientAsBean>
+                        <useSpringBoot4>true</useSpringBoot4>
+                        <useJackson3>true</useJackson3>
+                        <openApiNullable>false</openApiNullable>
+                    </configOptions>
+                    <model/>
+                </configuration>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-datagroup-service-api-v1-code</id>

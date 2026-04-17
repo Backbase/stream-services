@@ -56,8 +56,8 @@ public class InvestmentRestServiceApiConfiguration {
 
     @Bean
     @Qualifier("restInvestmentObjectMapper")
-    public ObjectMapper restInvestmentObjectMapper(ObjectMapper objectMapper) {
-        ObjectMapper mapper = objectMapper.copy();
+    public ObjectMapper restInvestmentObjectMapper(ObjectMapper legacyObjectMapper) {
+        ObjectMapper mapper = legacyObjectMapper.copy();
         mapper.setSerializationInclusion(Include.NON_EMPTY);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;

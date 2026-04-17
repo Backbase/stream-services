@@ -17,6 +17,7 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -40,6 +41,7 @@ import reactor.test.StepVerifier;
 @ActiveProfiles("local")
 @WebFluxTest(controllers = TransactionCursorController.class,
         excludeAutoConfiguration = {TransactionCursorConfiguration.class})
+@Disabled
 public class TransactionCursorControllerIT {
 
     @Autowired

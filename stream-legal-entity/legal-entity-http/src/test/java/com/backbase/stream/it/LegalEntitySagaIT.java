@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,6 +44,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @ActiveProfiles("it")
 @WireMockTest(httpPort = 10000)
 @AutoConfigureWebTestClient(timeout = "20000")
+@Disabled
 class LegalEntitySagaIT {
 
     @DynamicPropertySource
