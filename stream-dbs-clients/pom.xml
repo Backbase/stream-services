@@ -719,6 +719,60 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>boat-validation-cdp-spec</id>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <input>${project.basedir}/src/main/openapi/cdp-ingestion-service-api-v1.0.0-beta.yaml</input>
+                            <failOnWarning>true</failOnWarning>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-cdp-ingestion-service-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.basedir}/src/main/openapi/cdp-ingestion-service-api-v1.0.0-beta.yaml</inputSpec>
+                            <apiPackage>com.backbase.cdp.ingestion.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.cdp.ingestion.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>boat-validation-cdp-profiles-spec</id>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <input>${project.basedir}/src/main/openapi/cdp-profiles-service-api-v1.0.0-beta.yaml</input>
+                            <failOnWarning>true</failOnWarning>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-cdp-profiles-service-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.basedir}/src/main/openapi/cdp-profiles-service-api-v1.0.0-beta.yaml</inputSpec>
+                            <apiPackage>com.backbase.cdp.profiles.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.cdp.profiles.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>generate-plan-manager-service-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
