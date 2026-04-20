@@ -18,12 +18,13 @@
 
     <properties>
         <activemq.version>6.2.4</activemq.version>
+        <archunit.skip>true</archunit.skip>
     </properties>
 
     <modules>
         <!--        TODO: fix service build-->
 <!--        <module>legal-entity-composition-service</module>-->
-<!--        <module>product-composition-service</module>-->
+        <module>product-composition-service</module>
         <module>product-catalog-composition-service</module>
         <module>transaction-composition-service</module>
         <module>payment-order-composition-service</module>

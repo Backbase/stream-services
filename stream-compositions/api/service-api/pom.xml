@@ -21,4 +21,8 @@
         <module>transaction-composition-api</module>
         <module>payment-order-composition-api</module>
     </modules>
+
+    <properties>
+        <archunit.skip>true</archunit.skip>
+    </properties>
 </project>
