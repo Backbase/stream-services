@@ -41,6 +41,8 @@
         <maven.compiler.proc>full</maven.compiler.proc>
         <ssdk.version>21.0.1</ssdk.version>
         <japicmp.skip>true</japicmp.skip>
+        <bouncycastle.version>1.83</bouncycastle.version>
+        <org.jetbrainsannotations.version>26.1.0</org.jetbrainsannotations.version>
     </properties>
 
     <dependencyManagement>
@@ -55,17 +57,17 @@
             <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
-                <version>26.1.0</version>
+                <version>${org.jetbrainsannotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
-                <version>1.83</version>
+                <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.83</version>
+                <version>${bouncycastle.version}</version>
             </dependency>
 
         </dependencies>

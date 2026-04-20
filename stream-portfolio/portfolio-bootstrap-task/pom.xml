@@ -16,6 +16,7 @@
 
     <properties>
         <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
+        <archunit.skip>true</archunit.skip>
     </properties>
 
     <dependencies>

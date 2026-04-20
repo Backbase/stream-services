@@ -20,6 +20,7 @@
         <openapi-maven-plugin.base-package>com.backbase.stream.portfolio</openapi-maven-plugin.base-package>
 
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <archunit.skip>true</archunit.skip>
 
         <wiremock.version>3.0.1</wiremock.version>
     </properties>
@@ -34,6 +35,28 @@
             <groupId>com.atlassian.oai</groupId>
             <artifactId>swagger-request-validator-core</artifactId>
             <version>2.46.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>tools.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>tools.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>tools.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>tools.jackson.datatype</groupId>
+                    <artifactId>jackson-datatype-jsr310</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>tools.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-yaml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

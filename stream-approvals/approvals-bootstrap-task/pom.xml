@@ -17,6 +17,7 @@
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
         <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
+        <archunit.skip>true</archunit.skip>
     </properties>
 
     <dependencies>

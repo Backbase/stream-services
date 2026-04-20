@@ -104,6 +104,7 @@
         <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
         <sonar.sources>${project.basedir}/src/main/</sonar.sources>
         <sonar.tests>${project.basedir}/src/test/</sonar.tests>
+        <ssdk.version>21.0.1</ssdk.version>
         <sortpom-maven-plugin.version>3.3.0</sortpom-maven-plugin.version>
         <ssdk-checkstyle-config.version>1.0.22</ssdk-checkstyle-config.version>
         <velocity.version>1.7</velocity.version>
@@ -114,7 +115,7 @@
             <dependency>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>backbase-building-blocks-release</artifactId>
-                <version>21.0.1</version>
+                <version>${ssdk.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -344,12 +345,12 @@
                         <dependency>
                             <groupId>com.backbase.buildingblocks</groupId>
                             <artifactId>jib-dependencies-extension</artifactId>
-                            <version>19.0.0</version>
+                            <version>${ssdk.version}</version>
                         </dependency>
                         <dependency>
                             <groupId>com.backbase.buildingblocks</groupId>
                             <artifactId>jib-entrypoint-extension</artifactId>
-                            <version>19.0.0</version>
+                            <version>${ssdk.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -397,7 +398,7 @@
             <plugin>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
-                <version>21.0.1</version>
+                <version>${ssdk.version}</version>
                 <executions>
                     <execution>
                         <id>find-main-package-for-archunit-maven</id>
@@ -498,7 +499,7 @@
                     <dependency>
                         <groupId>com.backbase.buildingblocks</groupId>
                         <artifactId>service-sdk-archunit</artifactId>
-                        <version>19.0.0</version>
+                        <version>${ssdk.version}</version>
                     </dependency>
                 </dependencies>
                 <executions>

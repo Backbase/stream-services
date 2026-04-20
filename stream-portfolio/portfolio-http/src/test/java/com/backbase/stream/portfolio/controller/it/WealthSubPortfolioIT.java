@@ -2,9 +2,13 @@ package com.backbase.stream.portfolio.controller.it;
 
 import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEADER_NAME;
 import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEADER_VALUE;
+
+import com.backbase.stream.portfolio.model.SubPortfolioBundle;
+import com.backbase.stream.portfolio.util.PortfolioHttpTestUtil;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,10 +16,6 @@ import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTest
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import com.backbase.stream.portfolio.model.SubPortfolioBundle;
-import com.backbase.stream.portfolio.util.PortfolioHttpTestUtil;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 /**
  * WealthSubPortfolio IT.

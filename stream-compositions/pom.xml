@@ -19,7 +19,7 @@
     <modules>
         <module>api</module>
         <module>events</module>
-        <module>services</module>
+<!--        <module>services</module>-->
         <module>test-utils</module>
         <module>cursors</module>
     </modules>

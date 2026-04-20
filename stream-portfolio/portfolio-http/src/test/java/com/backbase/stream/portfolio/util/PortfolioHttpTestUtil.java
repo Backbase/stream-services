@@ -1,5 +1,9 @@
 package com.backbase.stream.portfolio.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.List;
 import org.springframework.util.ResourceUtils;
 import com.backbase.stream.portfolio.model.AllocationBundle;
@@ -14,10 +18,6 @@ import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
 import com.backbase.stream.portfolio.model.WealthBundle;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

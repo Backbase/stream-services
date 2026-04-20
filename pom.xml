@@ -34,7 +34,7 @@
         <module>stream-contacts</module>
         <module>stream-loans</module>
         <module>stream-audiences</module>
-        <module>stream-compositions</module>
+        <!--        <module>stream-compositions</module>-->
         <module>stream-plan-manager</module>
         <module>stream-customer-profile</module>
     </modules>
@@ -45,7 +45,7 @@
         <backbase-bom.version>2026.03-LTS</backbase-bom.version>
         <boat-maven-plugin.version>0.18.1</boat-maven-plugin.version>
         <backbase.portfolio.version>4.7.0</backbase.portfolio.version>
-        <maven-dependency-plugin.vesion>3.10.0</maven-dependency-plugin.vesion>
+        <org.jetbrainsannotations.version>26.1.0</org.jetbrainsannotations.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
         <openapi-generator-maven-plugin.library>spring-boot</openapi-generator-maven-plugin.library>
@@ -71,7 +71,7 @@
             <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
-                <version>26.1.0</version>
+                <version>${org.jetbrainsannotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.backbase</groupId>

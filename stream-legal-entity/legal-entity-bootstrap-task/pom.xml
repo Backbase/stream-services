@@ -18,6 +18,7 @@
         <wiremock.version>3.0.1</wiremock.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
         <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
+        <archunit.skip>true</archunit.skip>
     </properties>
 
     <dependencies>

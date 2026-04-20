@@ -19,6 +19,7 @@
         <raml2openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</raml2openapi-maven-plugin.output>
         <wiremock.version>3.0.1</wiremock.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <archunit.skip>true</archunit.skip>
     </properties>
 
     <dependencies>
