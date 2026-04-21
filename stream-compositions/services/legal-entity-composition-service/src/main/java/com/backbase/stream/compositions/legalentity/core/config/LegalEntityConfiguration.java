@@ -5,12 +5,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
 @AllArgsConstructor
 @EnableConfigurationProperties(LegalEntityConfigurationProperties.class)
+@EnableWebFluxSecurity
 public class LegalEntityConfiguration {
 
     @Bean
@@ -20,4 +22,5 @@ public class LegalEntityConfiguration {
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .build();
     }
+
 }

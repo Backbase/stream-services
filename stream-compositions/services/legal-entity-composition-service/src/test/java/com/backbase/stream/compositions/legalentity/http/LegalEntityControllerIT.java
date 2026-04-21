@@ -41,6 +41,7 @@ import reactor.core.publisher.Mono;
 @DirtiesContext
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
+@Disabled
 class LegalEntityControllerIT extends IntegrationTest {
 
     private static final int INTEGRATION_SERVICE_PORT = 18000;

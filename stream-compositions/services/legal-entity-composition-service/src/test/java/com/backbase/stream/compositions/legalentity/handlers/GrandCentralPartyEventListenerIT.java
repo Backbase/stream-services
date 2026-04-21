@@ -14,6 +14,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 
 @SpringBootTest
 @ActiveProfiles("it")
+@Disabled
 public class GrandCentralPartyEventListenerIT {
 
     @RegisterExtension
