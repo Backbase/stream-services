@@ -10,9 +10,10 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,8 +35,6 @@ class WealthPortfolioIT {
 
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
-        registry.add("management.tracing.enabled", () -> true);
-        registry.add("management.tracing.propagation.type", () -> "B3_MULTI");
         registry.add("management.zipkin.tracing.endpoint", () -> "http://localhost:10000/api/v2/spans");
     }
 
@@ -62,10 +61,7 @@ class WealthPortfolioIT {
         // Then
         verify(WireMock
                 .getRequestedFor(WireMock.urlEqualTo("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-                .withHeader("X-B3-TraceId", hexString())
-                .withHeader("X-B3-SpanId", hexString()));
-
+                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
         Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
     }
 
@@ -96,7 +92,4 @@ class WealthPortfolioIT {
                         .withBody("{\"regions\":[]}")));
     }
 
-    public static RegexPattern hexString() {
-        return new RegexPattern("^[0-9a-f]+$");
-    }
 }

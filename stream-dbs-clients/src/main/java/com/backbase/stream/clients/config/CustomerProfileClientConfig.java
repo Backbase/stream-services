@@ -27,8 +27,8 @@ public class CustomerProfileClientConfig extends CompositeApiClientConfig {
     @Bean
     @ConditionalOnMissingBean
     public ApiClient customerProfileApiIntegrationClient(
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 

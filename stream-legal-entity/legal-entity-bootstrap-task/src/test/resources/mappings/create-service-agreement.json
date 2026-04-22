@@ -3,12 +3,6 @@
     "method": "POST",
     "url": "/access-control/integration-api/v1/access-control/service-agreements",
     "headers": {
-      "X-B3-TraceId": {
-        "matches": "[\\w-]+"
-      },
-      "X-B3-SpanId": {
-        "matches": "[\\w-]+"
-      },
       "X-TID": {
         "contains": "tenant1"
       }

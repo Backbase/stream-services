@@ -5,11 +5,13 @@ import static org.mockito.Mockito.mock;
 
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
+import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.clients.config.CustomerProfileClientConfig;
 import com.backbase.stream.mapper.PartyMapper;
 import com.backbase.stream.service.CustomerProfileService;
+import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -22,6 +24,7 @@ class CustomerProfileConfigurationTest {
     @Test
     void configurationTest() {
         contextRunner
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withBean(PartyManagementIntegrationApi.class, () -> mock(PartyManagementIntegrationApi.class))

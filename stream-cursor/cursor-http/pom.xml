@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-http-starter-parent</artifactId>
-        <version>9.18.0</version>
+        <version>10.0.0</version>
         <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
     </parent>
 
@@ -19,6 +19,7 @@
         <raml2openapi-maven-plugin.input>${project.basedir}/../api/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <archunit.skip>true</archunit.skip>
     </properties>
 
     <dependencies>

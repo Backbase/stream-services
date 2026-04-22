@@ -6,8 +6,9 @@ import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.mappers.PaymentOrderTypeMapperImpl;
 import com.backbase.stream.paymentorder.PaymentOrderTaskExecutor;
+import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -20,6 +21,7 @@ class PaymentOrderServiceConfigurationTest {
     void configurationTest() {
         contextRunner
             .withBean(PaymentOrderTypeMapperImpl.class)
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(DbsApiClientsAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)

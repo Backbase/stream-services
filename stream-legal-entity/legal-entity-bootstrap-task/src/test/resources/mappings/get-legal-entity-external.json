@@ -3,12 +3,6 @@
     "method": "GET",
     "urlPathPattern": "/access-control/integration-api/v3/access-control/legal-entities/([\\w-]+)",
     "headers": {
-      "X-B3-TraceId": {
-        "matches": "[\\w-]+"
-      },
-      "X-B3-SpanId": {
-        "matches": "[\\w-]+"
-      },
       "X-TID": {
         "contains": "tenant1"
       }

@@ -8,9 +8,11 @@ import java.text.DateFormat;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity.CsrfSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
@@ -25,8 +27,12 @@ public class ProductCatalogConfiguration extends CompositeApiClientConfig {
     }
 
     @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.csrf().disable().build();
+    @Order(1)
+    public SecurityWebFilterChain productCatalogSecurityFilterChain(ServerHttpSecurity http) {
+        return http
+            .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll())
+            .csrf(CsrfSpec::disable)
+            .build();
     }
 
     @Bean
@@ -37,8 +43,8 @@ public class ProductCatalogConfiguration extends CompositeApiClientConfig {
 
     @Bean
     @Primary
-    public ApiClient productCatalogClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+    public ApiClient productCatalogClient(ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 }

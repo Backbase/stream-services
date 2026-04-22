@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: reactive
   cloud:
     config:
       enabled: false

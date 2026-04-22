@@ -75,7 +75,7 @@ class UserKindSegmentationSagaTest {
         task.setCustomerOnboardedRequest(
             new CustomerOnboardedRequest()
                 .internalUserId("internal-id")
-                .userKind(UserKindEnum.RETAILCUSTOMER)
+                .userKind(UserKindEnum.RETAIL_CUSTOMER)
         );
         return task;
     }

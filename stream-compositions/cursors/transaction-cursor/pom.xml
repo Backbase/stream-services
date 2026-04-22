@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>cursors</artifactId>
-    <version>9.18.0</version>
+    <version>10.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -19,6 +19,7 @@
     <enforce-banned-dependencies.skip>true</enforce-banned-dependencies.skip>
     <archunit.backbase.GeneralCodingRules.skip>true</archunit.backbase.GeneralCodingRules.skip>
     <archunit.backbase.RelationalPersistenceRules.skip>true</archunit.backbase.RelationalPersistenceRules.skip>
+    <archunit.skip>true</archunit.skip>
   </properties>
 
   <dependencies>

@@ -3,12 +3,6 @@
     "method": "PUT",
     "url": "/access-control/service-api/v1/access-control/legal-entities/internal-id",
     "headers": {
-      "X-B3-TraceId": {
-        "matches": "[\\w-]+"
-      },
-      "X-B3-SpanId": {
-        "matches": "[\\w-]+"
-      },
       "X-TID": {
         "contains": "tenant1"
       }

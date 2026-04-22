@@ -1,5 +1,5 @@
 {
-  "id": "2324355a-cfee-3ad4-b9ae-9c1701b78ef0",
+  "id": "a6fb08e4-b7c6-4eec-86cb-3d921b3b94f7",
   "request": {
     "url": "/service-api/v1/access-control/function-groups?serviceAgreementId=2c9280899126d76f01912cbb0e310007",
     "method": "GET"
@@ -20,5 +20,5 @@
       "Keep-Alive": "timeout=60"
     }
   },
-  "uuid": "2324355a-cfee-3ad4-b9ae-9c1701b78ef0"
+  "uuid": "a6fb08e4-b7c6-4eec-86cb-3d921b3b94f7"
 }

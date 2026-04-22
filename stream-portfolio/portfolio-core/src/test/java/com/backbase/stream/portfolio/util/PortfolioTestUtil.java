@@ -1,6 +1,5 @@
 package com.backbase.stream.portfolio.util;
 
-import org.springframework.util.ResourceUtils;
 import com.backbase.stream.portfolio.model.WealthAssetBundle;
 import com.backbase.stream.portfolio.model.WealthInstrumentBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioAllocationsBundle;
@@ -18,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.util.ResourceUtils;
 
 /**
  * PortfolioTestUtil.

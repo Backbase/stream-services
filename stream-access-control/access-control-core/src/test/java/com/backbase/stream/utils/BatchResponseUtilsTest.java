@@ -5,9 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.configuration.AccessControlConfiguration;
+import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -20,6 +21,7 @@ public class BatchResponseUtilsTest {
     @Test
     void shouldThrowExceptionWhenBatchIsInconsistentByDefault() {
         contextRunner
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(DbsApiClientsAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
@@ -41,6 +43,7 @@ public class BatchResponseUtilsTest {
     @Test
     void shouldNotThrowExceptionWhenBatchIsInconsistentIfDisabled() {
         contextRunner
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(DbsApiClientsAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)

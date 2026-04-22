@@ -23,15 +23,15 @@ public class ArrangementManagerClientConfig extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ApiClient arrangementManagerApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+    public ApiClient arrangementManagerApiClient(ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public com.backbase.dbs.arrangement.api.integration.ApiClient arrangementApiIntegrationClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.dbs.arrangement.api.integration.ApiClient(getWebClient(), objectMapper, dateFormat)
+    public com.backbase.dbs.arrangement.api.integration.ApiClient arrangementApiIntegrationClient(ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.dbs.arrangement.api.integration.ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 

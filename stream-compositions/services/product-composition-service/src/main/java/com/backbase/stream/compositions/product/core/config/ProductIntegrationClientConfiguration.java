@@ -23,8 +23,8 @@ public class ProductIntegrationClientConfiguration extends CompositeApiClientCon
 
     @Bean
     @Primary
-    public ApiClient productClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+    public ApiClient productClient(ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), legacyObjectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 

@@ -3,9 +3,10 @@ package com.backbase.stream.clients.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
+import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.Factory;
@@ -23,6 +24,7 @@ class CompositeApiClientConfigTest {
     void shouldReturnServiceIdWhenWithLoadBalancerTest() {
         contextRunner
             .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withBean(CompositeApiClientConfig.class, "banking-service")
@@ -35,6 +37,7 @@ class CompositeApiClientConfigTest {
     @Test
     void shouldReturnServiceIdWhenWithoutLoadBalancerAndWithoutDirectUriTest() {
         contextRunner
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(UserProfileManagerClientConfig.class)
@@ -48,6 +51,7 @@ class CompositeApiClientConfigTest {
     void shouldReturnDirectUriWhenWithoutLoadBalancerAndWithDirectUriTest() {
         contextRunner
             .withPropertyValues("backbase.communication.services.user.profile.direct-uri=http://my-custom-uri/context")
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withBean(UserProfileManagerClientConfig.class)
@@ -62,6 +66,7 @@ class CompositeApiClientConfigTest {
         contextRunner
             .withPropertyValues("backbase.communication.services.user.profile.direct-uri=http://my-custom-uri/context")
             .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(UserProfileManagerClientConfig.class)
@@ -77,6 +82,7 @@ class CompositeApiClientConfigTest {
             .withPropertyValues("backbase.communication.http.default-service-port=8181",
                 "backbase.communication.services.user.profile.service-port=8080")
             .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(UserProfileManagerClientConfig.class)
@@ -90,6 +96,7 @@ class CompositeApiClientConfigTest {
     void shouldReturnDefaultServicePortWhenServicePortIsEmptyTest() {
         contextRunner
             .withPropertyValues("backbase.communication.http.default-service-port=8181")
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(UserProfileManagerClientConfig.class)
@@ -102,6 +109,7 @@ class CompositeApiClientConfigTest {
     void shouldReturnServiceIdWhenCustomerProfileWithLoadBalancerTest() {
         contextRunner
             .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(CustomerProfileClientConfig.class)
@@ -115,6 +123,7 @@ class CompositeApiClientConfigTest {
     void shouldReturnDirectUriWhenCustomerProfileWithoutLoadBalancerAndWithDirectUriTest() {
         contextRunner
             .withPropertyValues("backbase.communication.services.customer-profile.direct-uri=http://custom-profile-uri/api")
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withBean(CustomerProfileClientConfig.class)
@@ -129,6 +138,7 @@ class CompositeApiClientConfigTest {
         contextRunner
             .withPropertyValues("backbase.communication.services.customer-profile.direct-uri=http://custom-profile-uri/api")
             .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(CustomerProfileClientConfig.class)
@@ -144,6 +154,7 @@ class CompositeApiClientConfigTest {
             .withPropertyValues("backbase.communication.http.default-service-port=8181",
                 "backbase.communication.services.customer-profile.service-port=8080")
             .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(CustomerProfileClientConfig.class)
@@ -157,6 +168,7 @@ class CompositeApiClientConfigTest {
     void shouldReturnDefaultServicePortWhenCustomerProfileServicePortIsEmptyTest() {
         contextRunner
             .withPropertyValues("backbase.communication.http.default-service-port=8080")
+            .withBean(DbsWebClientConfiguration.class)
             .withBean(WebClientAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(CustomerProfileClientConfig.class)

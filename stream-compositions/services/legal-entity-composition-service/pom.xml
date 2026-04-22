@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>9.18.0</version>
+        <version>10.0.0</version>
     </parent>
 
     <artifactId>legal-entity-composition-service</artifactId>
@@ -108,7 +108,6 @@
                                 <reactive>true</reactive>
                                 <performBeanValidation>true</performBeanValidation>
                                 <skipDefaultInterface>true</skipDefaultInterface>
-                                <additionalProperties>useWithModifiers=true</additionalProperties>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -142,7 +141,6 @@
                             <modelPackage>com.backbase.stream.compositions.product.client.model</modelPackage>
                             <configOptions>
                                 <reactive>true</reactive>
-                                <additionalProperties>useWithModifiers=true</additionalProperties>
                             </configOptions>
                         </configuration>
                     </execution>

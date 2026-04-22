@@ -3,12 +3,6 @@
     "method": "POST",
     "url": "/access-control/integration-api/v3/access-control/legal-entities",
     "headers": {
-      "X-B3-TraceId": {
-        "matches": "[\\w-]+"
-      },
-      "X-B3-SpanId": {
-        "matches": "[\\w-]+"
-      },
       "X-TID": {
         "contains": "tenant1"
       }

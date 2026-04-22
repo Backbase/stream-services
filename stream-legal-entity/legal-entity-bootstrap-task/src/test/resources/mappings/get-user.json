@@ -3,12 +3,6 @@
     "method": "GET",
     "urlPathPattern": "/user-manager/service-api/v2/users/externalids/([\\w-]+)",
     "headers": {
-      "X-B3-TraceId": {
-        "matches": "[\\w-]+"
-      },
-      "X-B3-SpanId": {
-        "matches": "[\\w-]+"
-      },
       "X-TID": {
         "contains": "tenant1"
       }

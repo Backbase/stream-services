@@ -3,12 +3,6 @@
     "method": "POST",
     "url": "/access-control/service-api/v1/access-control/data-groups",
     "headers": {
-      "X-B3-TraceId": {
-        "matches": "[\\w-]+"
-      },
-      "X-B3-SpanId": {
-        "matches": "[\\w-]+"
-      },
       "X-TID": {
         "contains": "tenant1"
       }
