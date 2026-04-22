@@ -41,7 +41,7 @@
         <maven.compiler.proc>full</maven.compiler.proc>
         <ssdk.version>21.0.1</ssdk.version>
         <japicmp.skip>true</japicmp.skip>
-        <bouncycastle.version>1.83</bouncycastle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
         <org.jetbrainsannotations.version>26.1.0</org.jetbrainsannotations.version>
     </properties>
 

@@ -22,7 +22,7 @@
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
         <archunit.skip>true</archunit.skip>
 
-        <wiremock.version>3.0.1</wiremock.version>
+        <wiremock.version>3.0.3</wiremock.version>
     </properties>
 
     <dependencies>
