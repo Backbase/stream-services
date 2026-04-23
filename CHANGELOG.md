@@ -53,6 +53,7 @@ Improve Investment asset universe price setup
 
 ## [9.6.0]
 ### Added
+- customer-data-platform (CDP) module for the customer profiles ingestion
  - Implement for Document ingestion;
  - Implement Document tags ingestion;
  - add Content news tags upsert;

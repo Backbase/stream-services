@@ -7,6 +7,7 @@ import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.LegalEntityUnitOfWorkExecutor;
 import com.backbase.stream.ServiceAgreementSagaV2;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
+import com.backbase.stream.cdp.CdpSaga;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.legalentity.repository.LegalEntityUnitOfWorkRepository;
 import com.backbase.stream.limit.LimitsSaga;
@@ -80,8 +81,8 @@ public class LegalEntitySagaConfiguration {
         CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
         UserKindSegmentationSaga userKindSegmentationSaga,
-        CustomerProfileService customerProfileService
-    ) {
+        CdpSaga cdpSaga,
+        CustomerProfileService customerProfileService) {
         return new LegalEntitySagaV2(
             legalEntityService,
             userService,
@@ -92,6 +93,7 @@ public class LegalEntitySagaConfiguration {
             customerAccessGroupSaga,
             sinkConfigurationProperties,
             userKindSegmentationSaga,
+            cdpSaga,
             customerProfileService
         );
     }
