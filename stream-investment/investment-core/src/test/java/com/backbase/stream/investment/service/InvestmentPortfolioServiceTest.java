@@ -948,7 +948,7 @@ class InvestmentPortfolioServiceTest {
             when(productList.getResults()).thenReturn(List.of(existingProduct));
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), isNull(), isNull(), isNull(), any(),
-                eq(List.of(ProductTypeEnum.SELF_TRADING.getValue()))))
+                eq(List.of(ProductTypeEnum.SELF_TRADING.getValue())), isNull(), isNull()))
                 .thenReturn(Mono.just(productList));
             when(productsApi.createPortfolioProduct(any(), any(), isNull(), isNull()))
                 .thenReturn(Mono.just(fallbackCreated));
@@ -983,7 +983,7 @@ class InvestmentPortfolioServiceTest {
             when(emptyList.getResults()).thenReturn(List.of());
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), isNull(), isNull(), isNull(), any(),
-                eq(List.of(ProductTypeEnum.SELF_TRADING.getValue()))))
+                eq(List.of(ProductTypeEnum.SELF_TRADING.getValue())), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList));
 
             PortfolioProduct created = buildPortfolioProduct(newProductUuid, ProductTypeEnum.SELF_TRADING);
@@ -1022,7 +1022,7 @@ class InvestmentPortfolioServiceTest {
             when(emptyList.getResults()).thenReturn(List.of());
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), eq(3), isNull(), isNull(), any(),
-                eq(List.of(ProductTypeEnum.ROBO_ADVISOR.getValue()))))
+                eq(List.of(ProductTypeEnum.ROBO_ADVISOR.getValue())), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList));
 
             PortfolioProduct created = buildPortfolioProduct(newProductUuid, ProductTypeEnum.ROBO_ADVISOR);
@@ -1072,7 +1072,7 @@ class InvestmentPortfolioServiceTest {
             when(emptyList.getResults()).thenReturn(List.of());
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), isNull(), isNull(), isNull(), any(),
-                eq(List.of(ProductTypeEnum.SELF_TRADING.getValue()))))
+                eq(List.of(ProductTypeEnum.SELF_TRADING.getValue())), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList));
 
             PortfolioProduct created = buildPortfolioProduct(productUuid, ProductTypeEnum.SELF_TRADING);
@@ -1104,7 +1104,7 @@ class InvestmentPortfolioServiceTest {
             when(productList.getResults()).thenReturn(List.of(existingProduct));
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), isNull(), isNull(), isNull(), any(),
-                eq(List.of(ProductTypeEnum.SELF_TRADING.getValue()))))
+                eq(List.of(ProductTypeEnum.SELF_TRADING.getValue())), isNull(), isNull()))
                 .thenReturn(Mono.just(productList));
             when(productsApi.patchPortfolioProduct(
                 eq(productUuid.toString()), any(), isNull(), isNull(), any()))
