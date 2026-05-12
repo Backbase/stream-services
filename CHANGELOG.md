@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.2.0]
+### Changed
+- Upgrade `investment-service-api` version from `1.4.1` to `1.6.0`; regenerate API clients and fix all compilation errors in production and test sources.
+
 ## [10.1.0]
 ### Changed
 - Align Spring Boot and Spring Cloud versions with Service SDK 21.0.1 managed stack.
