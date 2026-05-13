@@ -1,0 +1,15 @@
+Command: mvn clean install -pl stream-investment/investment-core -am
+Result: BUILD SUCCESS
+Phase: Step 3 GREEN
+
+Reactor Summary:
+  Stream :: SDK :: Parent .............. SUCCESS [  4.271 s]
+  Stream :: SDK :: Context Propagation . SUCCESS [  9.899 s]
+  Stream :: SDK :: Web Client .......... SUCCESS [  5.482 s]
+  Stream :: Services ................... SUCCESS [  0.227 s]
+  Stream :: DBS Clients ................ SUCCESS [ 39.639 s]
+  Stream :: SDK :: Unit Of Worker Support SUCCESS [  1.333 s]
+  Stream :: Investment ................. SUCCESS [  0.111 s]
+  Stream :: Investment Core ............ SUCCESS [ 24.296 s]
+  BUILD SUCCESS
+  Total time: 01:26 min
