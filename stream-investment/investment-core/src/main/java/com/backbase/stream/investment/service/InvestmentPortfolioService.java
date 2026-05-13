@@ -148,9 +148,10 @@ public class InvestmentPortfolioService {
                     }
                     ModelPortfolio modelPortfolio = modelUuid.get(0);
                     portfolioModel = new InvestorModelPortfolio(modelPortfolio.getUuid(), null, null,
-                        modelPortfolio.getRiskLevel(), null, null);
+                        modelPortfolio.getRiskLevel(), null, null, null);
                 }
-                return Mono.just(new PortfolioProduct(null, adviceEngine, portfolioModel, productType));
+                return Mono.just(new PortfolioProduct(null, null, null, null, null, null, null,
+                    adviceEngine, portfolioModel, productType));
             })
             .collectList()
             .flatMapIterable(this::distinctProducts)
@@ -403,7 +404,7 @@ public class InvestmentPortfolioService {
         return productsApi.listPortfolioProducts(List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
                 null, null,
                 1, null, null, riskLevel, null, null, "-model_portfolio__risk_level",
-                List.of(productType.getValue()))
+                List.of(productType.getValue()), null, null)
             .doOnSuccess(products -> log.debug(
                 "List portfolio products query completed: productType={}, found={} results",
                 productType, products != null ? products.getResults().size() : 0))
