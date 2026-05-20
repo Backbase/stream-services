@@ -13,6 +13,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
@@ -25,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient.Builder;
 @Configuration
 @ConditionalOnMissingBean(InterServiceWebClientConfiguration.class)
 @Slf4j
+@Profile("local")
 public class LocalRunConfig {
 
     @Bean
