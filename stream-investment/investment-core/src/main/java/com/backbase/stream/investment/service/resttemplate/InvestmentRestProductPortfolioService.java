@@ -1,18 +1,20 @@
 package com.backbase.stream.investment.service.resttemplate;
 
 import com.backbase.investment.api.service.sync.ApiClient;
-import com.backbase.investment.api.service.v1.model.OASModelPortfolioRequestDataRequest;
-import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
-import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
+import com.backbase.investment.api.service.sync.ApiClient.CollectionFormat;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.ProductPortfolio;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,7 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -39,28 +40,16 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentRestProductPortfolioService {
 
-    private static final String MODEL_PORTFOLIOS_PATH =
-        "/service-api/v2/advice-engines/model-portfolio/model_portfolios/";
-    private static final String MODEL_PORTFOLIO_BY_UUID_PATH =
-        "/service-api/v2/advice-engines/model-portfolio/model_portfolios/{uuid}/";
-
     private final ApiClient apiClient;
-    private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
-        Mappers.getMapper(RestTemplateModelPortfolioMapper.class);
+    private final IngestConfigProperties ingestProperties;
 
-    /**
-     * Creates a new model portfolio via {@code POST /service-api/v2/.../model_portfolios/}.
-     *
-     * @param modelPortfolio the stream model portfolio to create (must not be {@code null})
-     * @return {@link Mono} emitting the created {@link OASModelPortfolioResponse}
-     */
-    public Mono<OASModelPortfolioResponse> createModelPortfolio(ModelPortfolio modelPortfolio) {
-        OASModelPortfolioRequestDataRequest request = modelPortfolioMapper.toRequest(modelPortfolio);
+    public Mono<PortfolioProduct> createPortfolioProduct(ProductPortfolio productPortfolio,
+        List<String> expand) {
 
         log.info("Starting model portfolio creation: name='{}', riskLevel={}",
-            modelPortfolio.getName(), modelPortfolio.getRiskLevel());
+            productPortfolio.getName(), productPortfolio.getOrder());
 
-        return Mono.defer(() -> Mono.just(invokeCreate(request)))
+        return Mono.defer(() -> Mono.just(invokeCreate(productPortfolio, expand)))
             .map(created -> {
                 log.info("Model portfolio created successfully: uuid={}, name='{}'",
                     created.getUuid(), created.getName());
@@ -68,11 +57,12 @@ public class InvestmentRestProductPortfolioService {
             })
             .doOnError(throwable -> log.error(
                 "Model portfolio creation failed: name='{}', riskLevel={}, errorType={}, errorMessage={}",
-                modelPortfolio.getName(), modelPortfolio.getRiskLevel(),
+                productPortfolio.getName(), productPortfolio.getOrder(),
                 throwable.getClass().getSimpleName(), throwable.getMessage(), throwable));
     }
 
-    /*private ResponseSpec patchPortfolioProduct(String uuid, PatchedPortfolioProductCreateUpdateRequest updateRequest)
+    public Mono<PortfolioProduct> patchPortfolioProduct(String uuid, List<String> expand,
+        ProductPortfolio updateRequest)
         throws WebClientResponseException {
         log.info("Starting model portfolio patch: uuid={}, name='{}'", uuid, updateRequest.getName());
 
@@ -81,7 +71,7 @@ public class InvestmentRestProductPortfolioService {
                     throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
                         "Missing the required parameter 'uuid' when calling patchModelPortfolio");
                 }
-                return Mono.just(invokePatch(uuid, updateRequest));
+                return Mono.just(invokePatch(uuid, expand, updateRequest));
             })
             .map(patched -> {
                 log.info("Model portfolio patched successfully: uuid={}, name='{}'",
@@ -92,42 +82,41 @@ public class InvestmentRestProductPortfolioService {
                 "Model portfolio patch failed: uuid={}, name='{}', errorType={}, errorMessage={}",
                 uuid, updateRequest.getName(),
                 throwable.getClass().getSimpleName(), throwable.getMessage(), throwable));
-    }*/
-
-    private OASModelPortfolioResponse invokeCreate(OASModelPortfolioRequestDataRequest data) {
-        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-        final HttpHeaders headerParams = new HttpHeaders();
-        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<>();
-        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
-
-        if (data != null) {
-            formParams.add("data", data);
-        }
-
-        final List<MediaType> accept = apiClient.selectHeaderAccept(new String[]{"application/json"});
-        final MediaType contentType = apiClient.selectHeaderContentType(new String[]{"multipart/form-data"});
-
-        ParameterizedTypeReference<OASModelPortfolioResponse> returnType =
-            new ParameterizedTypeReference<OASModelPortfolioResponse>() {
-            };
-
-        return apiClient.invokeAPI(MODEL_PORTFOLIOS_PATH, HttpMethod.POST,
-                Collections.emptyMap(), queryParams, null, headerParams,
-                cookieParams, formParams, accept, contentType, new String[]{}, returnType)
-            .getBody();
     }
 
-    private PortfolioProduct invokePatch(String uuid, PatchedPortfolioProductCreateUpdateRequest data) {
-        final Map<String, Object> pathParams = new HashMap<String, Object>();
-        pathParams.put("uuid", uuid);
-        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
-        if (data != null) {
-            formParams.add("data", data);
-        }
+    private PortfolioProduct invokeCreate(ProductPortfolio portfolioProduct, List<String> expand) {
+        final MultiValueMap<String, Object> formParams = productPortfolioParams(portfolioProduct);
 
         final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
         final HttpHeaders headerParams = new HttpHeaders();
         final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
+
+        queryParams.putAll(apiClient.parameterToMultiValueMap(
+            CollectionFormat.valueOf("multi".toUpperCase(Locale.ROOT)), "expand", expand));
+
+        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(new String[]{"application/json"});
+        final MediaType localVarContentType = apiClient.selectHeaderContentType(new String[]{"multipart/form-data"});
+
+        ParameterizedTypeReference<PortfolioProduct> localVarReturnType = new ParameterizedTypeReference<>() {
+        };
+
+        return apiClient.invokeAPI("/service-api/v2/products/portfolio/", HttpMethod.POST,
+                Collections.emptyMap(), queryParams, null, headerParams,
+                cookieParams, formParams, localVarAccept, localVarContentType, new String[]{}, localVarReturnType)
+            .getBody();
+    }
+
+    private PortfolioProduct invokePatch(String uuid, List<String> expand, ProductPortfolio data) {
+        final Map<String, Object> pathParams = new HashMap<String, Object>();
+        pathParams.put("uuid", uuid);
+        final MultiValueMap<String, Object> formParams = productPortfolioParams(data);
+
+        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+        final HttpHeaders headerParams = new HttpHeaders();
+        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
+
+        queryParams.putAll(apiClient.parameterToMultiValueMap(
+            CollectionFormat.valueOf("multi".toUpperCase(Locale.ROOT)), "expand", expand));
 
         final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(new String[]{"application/json"});
         final MediaType localVarContentType = apiClient.selectHeaderContentType(new String[]{"multipart/form-data"});
@@ -137,6 +126,36 @@ public class InvestmentRestProductPortfolioService {
         return apiClient.invokeAPI("/service-api/v2/products/portfolio/{uuid}/", HttpMethod.PATCH, pathParams,
             queryParams, null, headerParams, cookieParams, formParams, localVarAccept, localVarContentType,
             new String[]{}, localVarReturnType).getBody();
+    }
+
+    private @NonNull MultiValueMap<String, Object> productPortfolioParams(ProductPortfolio data) {
+        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
+        Optional.ofNullable(data.getName())
+            .ifPresent(v -> formParams.add("name", v));
+        Optional.ofNullable(data.getDescription())
+            .ifPresent(v -> formParams.add("description", v));
+        Optional.ofNullable(data.getBadge())
+            .ifPresent(v -> formParams.add("badge", v));
+        Optional.ofNullable(data.getExternalId())
+            .ifPresent(v -> formParams.add("external_id", v));
+        Optional.ofNullable(data.getStatus())
+            .ifPresent(v -> formParams.add("status", v));
+        Optional.ofNullable(data.getOrder())
+            .ifPresent(v -> formParams.add("order", v));
+        Optional.ofNullable(data.getAdviceEngine())
+            .ifPresent(v -> formParams.add("advice_engine", v));
+        Optional.ofNullable(data.getModelPortfolio())
+            .ifPresent(v -> formParams.add("model_portfolio", v));
+        Optional.ofNullable(data.getProductType())
+            .ifPresent(v -> formParams.add("product_type", v));
+        Optional.ofNullable(data.getProductCategory())
+            .ifPresent(v -> formParams.add("product_category", v));
+        Optional.ofNullable(data.getExtraData())
+            .ifPresent(v -> formParams.add("extra_data", v));
+        if (ingestProperties.getPortfolio().isIngestImages()) {
+            Optional.ofNullable(data.getImageResource()).ifPresent(v -> formParams.add("image", v));
+        }
+        return formParams;
     }
 
 }
