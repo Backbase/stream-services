@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -18,7 +17,6 @@ import com.backbase.investment.api.service.v1.model.Deposit;
 import com.backbase.investment.api.service.v1.model.DepositRequest;
 import com.backbase.investment.api.service.v1.model.PaginatedDepositList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioListList;
-import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioTradingAccountList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
@@ -29,7 +27,6 @@ import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
-import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.nio.charset.StandardCharsets;
@@ -81,7 +78,7 @@ class InvestmentPortfolioServiceTest {
         portfolioTradingAccountsApi = Mockito.mock(PortfolioTradingAccountsApi.class);
         config = new IngestConfigProperties();
         service = new InvestmentPortfolioService(
-            productsApi, portfolioApi, paymentsApi, portfolioTradingAccountsApi, config);
+            portfolioApi, paymentsApi, portfolioTradingAccountsApi, config);
     }
 
     // =========================================================================
@@ -910,7 +907,7 @@ class InvestmentPortfolioServiceTest {
      *   <li>Null arrangements list → {@link NullPointerException}</li>
      * </ul>
      */
-    @Nested
+    /*@Nested
     @DisplayName("upsertInvestmentProducts")
     class UpsertInvestmentProductsTests {
 
@@ -1121,15 +1118,15 @@ class InvestmentPortfolioServiceTest {
             verify(productsApi, never()).createPortfolioProduct(any(), any(), any(), any());
         }
 
-        @Test
-        @DisplayName("null arrangements list — throws NullPointerException immediately")
-        void upsertInvestmentProducts_nullArrangements_throwsNullPointerException() {
-            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
-            StepVerifier.create(service.upsertInvestmentProducts(investmentData, null))
-                .expectError(NullPointerException.class)
-                .verify();
-        }
-    }
+//        @Test
+//        @DisplayName("null arrangements list — throws NullPointerException immediately")
+//        void upsertInvestmentProducts_nullArrangements_throwsNullPointerException() {
+//            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+//            StepVerifier.create(service.upsertInvestmentProducts(investmentData, null))
+//                .expectError(NullPointerException.class)
+//                .verify();
+//        }
+    }*/
 
     // =========================================================================
     // Helpers

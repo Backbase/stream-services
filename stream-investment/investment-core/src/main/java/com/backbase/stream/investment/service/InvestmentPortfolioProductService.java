@@ -12,7 +12,7 @@ import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
-import java.util.Arrays;
+import com.backbase.stream.investment.service.resttemplate.RestTemplateModelPortfolioMapper;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,6 +48,8 @@ public class InvestmentPortfolioProductService {
     private final InvestmentProductsApi productsApi;
     private final IngestConfigProperties config;
     private final InvestmentModelPortfolioService modelPortfolioService;
+    private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
+        Mappers.getMapper(RestTemplateModelPortfolioMapper.class);
 
     /**
      * Creates or updates an investment product (portfolio product) for the given arrangement.
@@ -69,43 +72,19 @@ public class InvestmentPortfolioProductService {
         if (investmentArrangements == null) {
             return Mono.error(new NullPointerException("InvestmentArrangement must not be null"));
         }
-        // create portfolio models with new or existed(so update) portfolio model
-        //
-
-        return Flux.fromIterable(investmentArrangements)
-            .flatMap(investmentArrangement -> {
-                String productTypeExternalId = investmentArrangement.getProductTypeExternalId();
-
-                ProductTypeEnum productType = Arrays.stream(ProductTypeEnum.values())
-                    .filter(pt -> productTypeExternalId.equalsIgnoreCase(pt.getValue()))
-                    .findFirst().orElse(null);
-                if (productType == null) {
-                    log.error("Data setup issue: Investment does not support type {}", productTypeExternalId);
-                    return Mono.error(new IllegalStateException(
-                        String.format("Data setup issue: Investment does not support type=%s",
-                            productTypeExternalId)));
-                }
-                InvestorModelPortfolio portfolioModel = null;
-                String adviceEngine = null;
-                if (productType != ProductTypeEnum.SELF_TRADING) {
-                    adviceEngine = "model_portfolio";
-                    String externalId = investmentArrangement.getExternalId();
-                    List<ModelPortfolio> modelUuid = findModelUuid(investmentData, productType);
-                    if (modelUuid.isEmpty()) {
-                        log.error(
-                            "Data setup issue: Investment portfolio model is not defined for arrangement externalId={}",
-                            externalId);
-                        return Mono.error(new IllegalStateException(
-                            String.format(
-                                "Data setup issue: Investment does have portfolio model for arrangement externalId=%s",
-                                externalId)));
-                    }
-                    ModelPortfolio modelPortfolio = modelUuid.get(0);
-                    portfolioModel = new InvestorModelPortfolio(modelPortfolio.getUuid(), null, null,
-                        modelPortfolio.getRiskLevel(), null, null, null);
-                }
-                return Mono.just(new PortfolioProduct(null, null, null, null, null, null, null,
-                    adviceEngine, portfolioModel, productType));
+        return Flux.fromIterable(investmentData.getPortfolioProducts())
+            .flatMap(pp -> {
+                Mono<ModelPortfolio> modelPortfolio = upsertPortfolioModel(pp);
+                return modelPortfolio
+                    .map(mp -> {
+                        InvestorModelPortfolio map = modelPortfolioMapper.map(mp);
+                        return new PortfolioProduct(pp.getName(), pp.getDescription(), null, pp.getOrder(),
+                            pp.getBadge(),
+                            pp.getProductCategory(), null, null, map, pp.getProductType());
+                    })
+                    .switchIfEmpty(Mono.just(
+                        new PortfolioProduct(pp.getName(), pp.getDescription(), null, pp.getOrder(), pp.getBadge(),
+                            pp.getProductCategory(), null, null, null, pp.getProductType())));
             })
             .collectList()
             .flatMapIterable(this::distinctProducts)
@@ -130,7 +109,10 @@ public class InvestmentPortfolioProductService {
             .collectList()
             .flatMap(products -> {
                 investmentArrangements.forEach(a -> products.stream()
-                    .filter(p -> p.getProductType().toString().equalsIgnoreCase(a.getProductTypeExternalId()))
+                    .filter(p -> p.getProductType().toString().equalsIgnoreCase(a.getProductTypeExternalId())
+                        && Optional.ofNullable(a.getRiskLevel())
+                        .map(r -> r.equals(p.getModelPortfolio().getRiskLevel()))
+                        .orElse(true))
                     .findAny().ifPresent(p -> {
                         log.info(
                             "Assign portfolio product to arrangement: engine={}, productType={}, model={}, arrangementName={}",
@@ -150,13 +132,21 @@ public class InvestmentPortfolioProductService {
                 "Failed to upsert investment products for arrangements {}", investmentArrangements, throwable));
     }
 
+    private Mono<ModelPortfolio> upsertPortfolioModel(PortfolioProduct pp) {
+        if (pp.getProductType() == ProductTypeEnum.SELF_TRADING) {
+            return Mono.empty();
+        }
+        InvestorModelPortfolio modelPortfolio = pp.getModelPortfolio();
+        if (modelPortfolio == null) {
+            return Mono.empty();
+        }
+        return modelPortfolioService.upsertModelPortfolio(modelPortfolio);
+    }
+
     private Collection<PortfolioProduct> distinctProducts(List<PortfolioProduct> products) {
         return products.stream()
             .collect(Collectors.toMap(
-                pp -> pp.getProductType().getValue() + "_" + Optional.ofNullable(pp.getModelPortfolio())
-                    .map(InvestorModelPortfolio::getRiskLevel)
-                    .map(Object::toString)
-                    .orElse(""),
+                PortfolioProduct::getName,
                 pp -> pp,
                 (existing, replacement) -> existing
             ))
@@ -171,11 +161,10 @@ public class InvestmentPortfolioProductService {
     }
 
     private Mono<PortfolioProduct> listExistingPortfolioProducts(PortfolioProduct portfolioProduct) {
-        Integer modelPortfolioRiskLower = null;
+        Integer modelPortfolioRiskLower = Optional.ofNullable(portfolioProduct.getModelPortfolio())
+            .map(InvestorModelPortfolio::getRiskLevel).orElse(null);
+
         ProductTypeEnum productType = portfolioProduct.getProductType();
-        if (ProductTypeEnum.SELF_TRADING != productType) {
-            modelPortfolioRiskLower = portfolioProduct.getModelPortfolio().getRiskLevel();
-        }
         return listExistingPortfolioProducts(productType, modelPortfolioRiskLower);
     }
 

@@ -1,23 +1,27 @@
 package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
+import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
+import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPortfolioService;
+import com.backbase.stream.investment.service.resttemplate.RestTemplateModelPortfolioMapper;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Service wrapper around generated {@link FinancialAdviceApi} providing guarded
- * create/patch operations with logging, minimal idempotency helpers and consistent error handling.
+ * Service wrapper around generated {@link FinancialAdviceApi} providing guarded create/patch operations with logging,
+ * minimal idempotency helpers and consistent error handling.
  *
  * <p>This service manages:
  * <ul>
@@ -37,6 +41,8 @@ public class InvestmentModelPortfolioService {
 
     private final FinancialAdviceApi financialAdviceApi;
     private final InvestmentRestModelPortfolioService investmentRestModelPortfolioService;
+    private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
+        Mappers.getMapper(RestTemplateModelPortfolioMapper.class);
 
     public Flux<OASModelPortfolioResponse> upsertModels(InvestmentData investmentData) {
         return Flux.fromIterable(Objects.requireNonNullElse(investmentData.getModelPortfolios(), List.of()))
@@ -55,6 +61,27 @@ public class InvestmentModelPortfolioService {
                         "Failed to upsert investment portfolio model: name={}, riskLevel={}",
                         modelPortfolioTemplate.getName(), modelPortfolioTemplate.getRiskLevel(), throwable));
             });
+    }
+
+    public Mono<ModelPortfolio> upsertModelPortfolio(InvestorModelPortfolio modelPortfolio) {
+        Objects.requireNonNull(modelPortfolio, "ModelPortfolio must not be null");
+
+        ModelPortfolio map = modelPortfolioMapper.map(modelPortfolio);
+        if(map.getAllocations().stream().map(Allocation::weight).mapToDouble(a -> a).sum() + map.getCashWeight() != 1d) {
+            log.info("failure");
+        }
+        return upsertModelPortfolio(map)
+            .map(mp -> {
+                map.uuid(mp.getUuid());
+                return map;
+            })
+            .doOnSuccess(mp -> {
+                log.debug("Successfully upserted investment portfolio model: modelUuid={}, name={}, riskLevel={}",
+                    mp.getUuid(), mp.getName(), mp.getRiskLevel());
+            })
+            .doOnError(throwable -> log.error(
+                "Failed to upsert investment portfolio model: name={}, riskLevel={}",
+                map.getName(), map.getRiskLevel(), throwable));
     }
 
     /**

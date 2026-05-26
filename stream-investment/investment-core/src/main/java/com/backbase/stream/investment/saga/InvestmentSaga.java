@@ -14,6 +14,7 @@ import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
+import com.backbase.stream.investment.service.InvestmentPortfolioProductService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
 import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
@@ -80,6 +81,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     private final InvestmentPortfolioService investmentPortfolioService;
     private final InvestmentPortfolioAllocationService investmentPortfolioAllocationService;
     private final InvestmentModelPortfolioService investmentModelPortfolioService;
+    private final InvestmentPortfolioProductService investmentPortfolioProductService;
     private final AsyncTaskService asyncTaskService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
 
@@ -161,7 +163,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
             })
-            .map(o -> investmentTask);
+            .map(_ -> investmentTask);
     }
 
     /**
@@ -269,7 +271,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, null, investmentTask.getName(),
             investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment products");
 
-        return investmentPortfolioService.upsertInvestmentProducts(data, data.getInvestmentArrangements())
+        return investmentPortfolioProductService.upsertInvestmentProducts(data, data.getInvestmentArrangements())
             .map(products -> {
                 investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),

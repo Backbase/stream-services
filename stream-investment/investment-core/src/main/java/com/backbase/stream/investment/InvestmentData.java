@@ -25,6 +25,7 @@ public class InvestmentData implements InvestmentDataValue {
     private List<InvestmentArrangement> investmentArrangements;
     private List<ModelPortfolio> modelPortfolios;
     private List<PortfolioProduct> portfolioProducts;
+    private List<PortfolioProduct> ingestedPortfolioProducts;
     private InvestmentAssetData investmentAssetData;
     private List<InvestmentPortfolio> portfolios;
     private List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts;
@@ -42,12 +43,12 @@ public class InvestmentData implements InvestmentDataValue {
         this.portfolioProducts = products;
     }
 
-    public void addPortfolioProducts(PortfolioProduct portfolioProduct) {
-        if (portfolioProducts == null) {
-            portfolioProducts = new ArrayList<>();
+    public void addPortfolioProducts(PortfolioProduct ingestedPortfolioProduct) {
+        if (ingestedPortfolioProducts == null) {
+            ingestedPortfolioProducts = new ArrayList<>();
         }
-        if (portfolioProducts.stream().noneMatch(p -> p.getUuid().equals(portfolioProduct.getUuid()))) {
-            portfolioProducts.add(portfolioProduct);
+        if (ingestedPortfolioProducts.stream().noneMatch(p -> p.getUuid().equals(ingestedPortfolioProduct.getUuid()))) {
+            ingestedPortfolioProducts.add(ingestedPortfolioProduct);
         }
     }
 
