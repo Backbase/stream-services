@@ -3,6 +3,8 @@ package com.backbase.stream.investment.service.resttemplate;
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
+import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
+import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.stream.investment.ModelPortfolio;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,11 +21,13 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 /**
- * RestTemplate-based service for model portfolio operations against the Investment
- * service {@code /service-api/v2} endpoints.
+ * RestTemplate-based service for model portfolio operations against the Investment service {@code /service-api/v2}
+ * endpoints.
  *
  * <p>This service avoids the multipart serialisation issues present
  * in the auto-generated {@code FinancialAdviceApi} wrapper.
@@ -68,35 +72,27 @@ public class InvestmentRestProductPortfolioService {
                 throwable.getClass().getSimpleName(), throwable.getMessage(), throwable));
     }
 
-    /**
-     * Patches an existing model portfolio via {@code PATCH /service-api/v2/.../model_portfolios/{uuid}/}.
-     *
-     * @param uuid           the UUID of the model portfolio to patch (must not be {@code null})
-     * @param modelPortfolio the stream model portfolio with updated values
-     * @return {@link Mono} emitting the patched {@link OASModelPortfolioResponse}
-     */
-    public Mono<OASModelPortfolioResponse> patchModelPortfolio(String uuid, ModelPortfolio modelPortfolio) {
-        OASModelPortfolioRequestDataRequest request = modelPortfolioMapper.toRequest(modelPortfolio);
-
-        log.info("Starting model portfolio patch: uuid={}, name='{}'", uuid, modelPortfolio.getName());
+    /*private ResponseSpec patchPortfolioProduct(String uuid, PatchedPortfolioProductCreateUpdateRequest updateRequest)
+        throws WebClientResponseException {
+        log.info("Starting model portfolio patch: uuid={}, name='{}'", uuid, updateRequest.getName());
 
         return Mono.defer(() -> {
-            if (uuid == null) {
-                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
-                    "Missing the required parameter 'uuid' when calling patchModelPortfolio");
-            }
-            return Mono.just(invokePatch(uuid, request));
-        })
-        .map(patched -> {
-            log.info("Model portfolio patched successfully: uuid={}, name='{}'",
-                patched.getUuid(), patched.getName());
-            return patched;
-        })
-        .doOnError(throwable -> log.error(
-            "Model portfolio patch failed: uuid={}, name='{}', errorType={}, errorMessage={}",
-            uuid, modelPortfolio.getName(),
-            throwable.getClass().getSimpleName(), throwable.getMessage(), throwable));
-    }
+                if (uuid == null) {
+                    throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                        "Missing the required parameter 'uuid' when calling patchModelPortfolio");
+                }
+                return Mono.just(invokePatch(uuid, updateRequest));
+            })
+            .map(patched -> {
+                log.info("Model portfolio patched successfully: uuid={}, name='{}'",
+                    patched.getUuid(), patched.getName());
+                return patched;
+            })
+            .doOnError(throwable -> log.error(
+                "Model portfolio patch failed: uuid={}, name='{}', errorType={}, errorMessage={}",
+                uuid, updateRequest.getName(),
+                throwable.getClass().getSimpleName(), throwable.getMessage(), throwable));
+    }*/
 
     private OASModelPortfolioResponse invokeCreate(OASModelPortfolioRequestDataRequest data) {
         final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
@@ -112,7 +108,8 @@ public class InvestmentRestProductPortfolioService {
         final MediaType contentType = apiClient.selectHeaderContentType(new String[]{"multipart/form-data"});
 
         ParameterizedTypeReference<OASModelPortfolioResponse> returnType =
-            new ParameterizedTypeReference<OASModelPortfolioResponse>() {};
+            new ParameterizedTypeReference<OASModelPortfolioResponse>() {
+            };
 
         return apiClient.invokeAPI(MODEL_PORTFOLIOS_PATH, HttpMethod.POST,
                 Collections.emptyMap(), queryParams, null, headerParams,
@@ -120,29 +117,26 @@ public class InvestmentRestProductPortfolioService {
             .getBody();
     }
 
-    private OASModelPortfolioResponse invokePatch(String uuid, OASModelPortfolioRequestDataRequest data) {
-        final Map<String, Object> uriVariables = new HashMap<>();
-        uriVariables.put("uuid", uuid);
-
-        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-        final HttpHeaders headerParams = new HttpHeaders();
-        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<>();
+    private PortfolioProduct invokePatch(String uuid, PatchedPortfolioProductCreateUpdateRequest data) {
+        final Map<String, Object> pathParams = new HashMap<String, Object>();
+        pathParams.put("uuid", uuid);
         final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
-
         if (data != null) {
             formParams.add("data", data);
         }
 
-        final List<MediaType> accept = apiClient.selectHeaderAccept(new String[]{"application/json"});
-        final MediaType contentType = apiClient.selectHeaderContentType(new String[]{"multipart/form-data"});
+        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+        final HttpHeaders headerParams = new HttpHeaders();
+        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
 
-        ParameterizedTypeReference<OASModelPortfolioResponse> returnType =
-            new ParameterizedTypeReference<OASModelPortfolioResponse>() {};
+        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(new String[]{"application/json"});
+        final MediaType localVarContentType = apiClient.selectHeaderContentType(new String[]{"multipart/form-data"});
 
-        return apiClient.invokeAPI(MODEL_PORTFOLIO_BY_UUID_PATH, HttpMethod.PATCH,
-                uriVariables, queryParams, null, headerParams,
-                cookieParams, formParams, accept, contentType, new String[]{}, returnType)
-            .getBody();
+        ParameterizedTypeReference<PortfolioProduct> localVarReturnType = new ParameterizedTypeReference<>() {
+        };
+        return apiClient.invokeAPI("/service-api/v2/products/portfolio/{uuid}/", HttpMethod.PATCH, pathParams,
+            queryParams, null, headerParams, cookieParams, formParams, localVarAccept, localVarContentType,
+            new String[]{}, localVarReturnType).getBody();
     }
 
 }

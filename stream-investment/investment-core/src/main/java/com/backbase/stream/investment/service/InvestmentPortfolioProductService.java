@@ -217,11 +217,19 @@ public class InvestmentPortfolioProductService {
         UUID productUuid = existingProduct.getUuid();
 
         PatchedPortfolioProductCreateUpdateRequest patch = new PatchedPortfolioProductCreateUpdateRequest()
+            .image(null)
+            .name(portfolioProduct.getName())
+            .description(portfolioProduct.getDescription())
+            .badge(portfolioProduct.getBadge())
+            .externalId(portfolioProduct.getExternalId())
+            .status(portfolioProduct.getStatus())
+            .order(portfolioProduct.getOrder())
+            .adviceEngine(portfolioProduct.getAdviceEngine())
             .modelPortfolio(Optional.ofNullable(portfolioProduct.getModelPortfolio())
                 .map(InvestorModelPortfolio::getUuid)
                 .orElse(null))
             .productType(portfolioProduct.getProductType())
-            .adviceEngine(portfolioProduct.getAdviceEngine())
+            .productCategory(portfolioProduct.getProductCategory())
             .extraData(portfolioProduct.getExtraData());
 
         log.debug("Attempting to patch existing portfolio product: uuid={}, productType={}",
@@ -267,9 +275,18 @@ public class InvestmentPortfolioProductService {
             productType, modelPortfolioUuid);
 
         PortfolioProductCreateUpdateRequest request = new PortfolioProductCreateUpdateRequest()
+            .image(null)
+            .name(portfolioProduct.getName())
+            .description(portfolioProduct.getDescription())
+            .badge(portfolioProduct.getBadge())
+            .externalId(portfolioProduct.getExternalId())
+            .status(portfolioProduct.getStatus())
+            .order(portfolioProduct.getOrder())
             .adviceEngine(portfolioProduct.getAdviceEngine())
             .modelPortfolio(modelPortfolioUuid)
-            .productType(portfolioProduct.getProductType());
+            .productType(portfolioProduct.getProductType())
+            .productCategory(portfolioProduct.getProductCategory())
+            .extraData(portfolioProduct.getExtraData());
 
         return productsApi.createPortfolioProduct(request,
                 List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null)
