@@ -24,7 +24,7 @@ public class InvestmentData implements InvestmentDataValue {
     private List<ClientUser> clientUsers;
     private List<InvestmentArrangement> investmentArrangements;
     private List<ModelPortfolio> modelPortfolios;
-    private List<PortfolioProduct> portfolioProducts;
+    private List<ProductPortfolio> portfolioProducts;
     private List<PortfolioProduct> ingestedPortfolioProducts;
     private InvestmentAssetData investmentAssetData;
     private List<InvestmentPortfolio> portfolios;
@@ -39,8 +39,8 @@ public class InvestmentData implements InvestmentDataValue {
         return clientsByLeExternalId;
     }
 
-    public void setPortfoliosProducts(List<PortfolioProduct> products) {
-        this.portfolioProducts = products;
+    public void addPortfoliosProducts(List<PortfolioProduct> products) {
+        products.forEach(this::addPortfolioProducts);
     }
 
     public void addPortfolioProducts(PortfolioProduct ingestedPortfolioProduct) {

@@ -2,9 +2,9 @@ package com.backbase.stream.investment.service.resttemplate;
 
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.ApiClient.CollectionFormat;
+import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.stream.configuration.IngestConfigProperties;
-import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.ProductPortfolio;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,14 +27,14 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 
 /**
- * RestTemplate-based service for model portfolio operations against the Investment service {@code /service-api/v2}
- * endpoints.
+ * RestTemplate-based service for portfolio product operations against the Investment service
+ * {@code /service-api/v2/products/portfolio/} endpoints.
  *
  * <p>This service avoids the multipart serialisation issues present
- * in the auto-generated {@code FinancialAdviceApi} wrapper.
+ * in the auto-generated {@code InvestmentProductsApi} wrapper.
  *
- * <p>Mapping from the stream {@link ModelPortfolio} model to the OAS request DTO is handled
- * internally by {@link RestTemplateModelPortfolioMapper}.
+ * <p>Mapping from the stream {@link ProductPortfolio} model to multipart form parameters is handled
+ * internally by {@link #productPortfolioParams(ProductPortfolio)}.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -43,44 +43,60 @@ public class InvestmentRestProductPortfolioService {
     private final ApiClient apiClient;
     private final IngestConfigProperties ingestProperties;
 
+    /**
+     * Creates a new portfolio product via {@code POST /service-api/v2/products/portfolio/}.
+     *
+     * @param productPortfolio the stream portfolio product to create (must not be {@code null})
+     * @param expand           optional fields to expand in the response
+     * @return {@link Mono} emitting the created {@link PortfolioProduct}
+     */
     public Mono<PortfolioProduct> createPortfolioProduct(ProductPortfolio productPortfolio,
         List<String> expand) {
 
-        log.info("Starting model portfolio creation: name='{}', riskLevel={}",
-            productPortfolio.getName(), productPortfolio.getOrder());
+        log.info("Starting portfolio product creation: name='{}', productType={}, externalId={}",
+            productPortfolio.getName(), productPortfolio.getProductType(), productPortfolio.getExternalId());
 
         return Mono.defer(() -> Mono.just(invokeCreate(productPortfolio, expand)))
             .map(created -> {
-                log.info("Model portfolio created successfully: uuid={}, name='{}'",
-                    created.getUuid(), created.getName());
+                log.info("Portfolio product created successfully: uuid={}, name='{}', productType={}",
+                    created.getUuid(), created.getName(), created.getProductType());
                 return created;
             })
             .doOnError(throwable -> log.error(
-                "Model portfolio creation failed: name='{}', riskLevel={}, errorType={}, errorMessage={}",
-                productPortfolio.getName(), productPortfolio.getOrder(),
+                "Portfolio product creation failed: name='{}', productType={}, externalId={}, errorType={}, errorMessage={}",
+                productPortfolio.getName(), productPortfolio.getProductType(), productPortfolio.getExternalId(),
                 throwable.getClass().getSimpleName(), throwable.getMessage(), throwable));
     }
 
+    /**
+     * Patches an existing portfolio product via {@code PATCH /service-api/v2/products/portfolio/{uuid}/}.
+     *
+     * @param uuid          the UUID of the portfolio product to patch (must not be {@code null})
+     * @param expand        optional fields to expand in the response
+     * @param updateRequest the stream portfolio product with updated values
+     * @return {@link Mono} emitting the patched {@link PortfolioProduct}
+     */
     public Mono<PortfolioProduct> patchPortfolioProduct(String uuid, List<String> expand,
         ProductPortfolio updateRequest)
         throws WebClientResponseException {
-        log.info("Starting model portfolio patch: uuid={}, name='{}'", uuid, updateRequest.getName());
+        log.info("Starting portfolio product patch: uuid={}, name='{}', productType={}",
+            uuid, updateRequest.getName(), updateRequest.getProductType());
 
         return Mono.defer(() -> {
                 if (uuid == null) {
                     throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
-                        "Missing the required parameter 'uuid' when calling patchModelPortfolio");
+                        "Missing the required parameter 'uuid' when calling patchPortfolioProduct");
                 }
                 return Mono.just(invokePatch(uuid, expand, updateRequest));
             })
             .map(patched -> {
-                log.info("Model portfolio patched successfully: uuid={}, name='{}'",
-                    patched.getUuid(), patched.getName());
+                log.info("Portfolio product patched successfully: uuid={}, name='{}', productType={}",
+                    patched.getUuid(), patched.getName(), patched.getProductType());
                 return patched;
             })
             .doOnError(throwable -> log.error(
-                "Model portfolio patch failed: uuid={}, name='{}', errorType={}, errorMessage={}",
-                uuid, updateRequest.getName(),
+                "Portfolio product patch failed: uuid={}, name='{}', productType={}, errorType={}, errorMessage={}",
+                uuid, updateRequest.getName(), updateRequest.getProductType(),
                 throwable.getClass().getSimpleName(), throwable.getMessage(), throwable));
     }
 
@@ -145,9 +161,10 @@ public class InvestmentRestProductPortfolioService {
         Optional.ofNullable(data.getAdviceEngine())
             .ifPresent(v -> formParams.add("advice_engine", v));
         Optional.ofNullable(data.getModelPortfolio())
-            .ifPresent(v -> formParams.add("model_portfolio", v));
+            .ifPresent(v -> formParams.add("model_portfolio",
+                Optional.ofNullable(v).map(InvestorModelPortfolio::getUuid).orElse(null)));
         Optional.ofNullable(data.getProductType())
-            .ifPresent(v -> formParams.add("product_type", v));
+            .ifPresent(v -> formParams.add("product_type", v.getValue()));
         Optional.ofNullable(data.getProductCategory())
             .ifPresent(v -> formParams.add("product_category", v));
         Optional.ofNullable(data.getExtraData())

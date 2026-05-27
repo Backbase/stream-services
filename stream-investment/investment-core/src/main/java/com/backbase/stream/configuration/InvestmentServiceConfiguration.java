@@ -32,6 +32,7 @@ import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUn
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestProductPortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -65,8 +66,11 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentPortfolioProductService investmentPortfolioProductService(
-        InvestmentProductsApi investmentProductsApi, IngestConfigProperties portfolioProperties, InvestmentModelPortfolioService investmentModelPortfolioService) {
-        return new InvestmentPortfolioProductService(investmentProductsApi, portfolioProperties, investmentModelPortfolioService);
+        InvestmentProductsApi investmentProductsApi, IngestConfigProperties portfolioProperties,
+        InvestmentModelPortfolioService investmentModelPortfolioService,
+        InvestmentRestProductPortfolioService investmentRestProductPortfolioService) {
+        return new InvestmentPortfolioProductService(investmentProductsApi, portfolioProperties,
+            investmentModelPortfolioService, investmentRestProductPortfolioService);
     }
 
     @Bean

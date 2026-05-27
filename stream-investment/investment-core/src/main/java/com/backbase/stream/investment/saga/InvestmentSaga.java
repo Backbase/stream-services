@@ -151,7 +151,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .thenMany(Flux.fromIterable(Objects.requireNonNullElse(data.getPortfolios(), List.of()))
                 .flatMap(
                     p -> investmentPortfolioAllocationService.generateAllocations(p,
-                        data.getPortfolioProducts(),
+                        data.getIngestedPortfolioProducts(),
                         investmentTask.getData().getInvestmentAssetData())))
             .collectList()
             .doOnError(throwable -> {
@@ -276,7 +276,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
                     UPSERTED_PREFIX + products.size() + " investment products");
-                data.setPortfoliosProducts(products);
+                data.addPortfoliosProducts(products);
                 log.info("Successfully upserted all investment products: taskId={}, productCount={}",
                     investmentTask.getId(), products.size());
 

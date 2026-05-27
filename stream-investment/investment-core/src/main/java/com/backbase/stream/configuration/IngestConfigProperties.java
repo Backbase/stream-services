@@ -64,6 +64,8 @@ public class IngestConfigProperties {
          * the portfolio is considered to have been activated 1 month ago.
          */
         private int activationPastMonths = 1;
+
+        private boolean ingestImages = true;
     }
 
     // -------------------------------------------------------------------------

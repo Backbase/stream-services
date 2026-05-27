@@ -5,6 +5,7 @@ import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUn
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestProductPortfolioService;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -100,6 +101,13 @@ public class InvestmentRestServiceApiConfiguration {
     public InvestmentRestModelPortfolioService investmentRestModelPortfolioService(
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
         return new InvestmentRestModelPortfolioService(restInvestmentApiClient);
+    }
+
+    @Bean
+    public InvestmentRestProductPortfolioService investmentRestProductPortfolioService(
+        com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient,
+        IngestConfigProperties portfolioProperties) {
+        return new InvestmentRestProductPortfolioService(restInvestmentApiClient, portfolioProperties);
     }
 
 
