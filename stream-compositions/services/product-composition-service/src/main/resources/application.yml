@@ -43,17 +43,6 @@ backbase:
           function-groups: UPSERT
           data-groups: UPSERT
           arrangements: UPSERT
-  api:
-    extensions:
-      classes:
-        com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem: additional-acc-data
-      property-sets:
-        additional-acc-data:
-          properties:
-            - property-name: templateType
-              type: string
-            - property-name: overdraftProtection
-              type: boolean
 logging:
   level:
     com.backbase.dbs: DEBUG
