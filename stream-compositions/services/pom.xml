@@ -64,7 +64,10 @@
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>service-sdk-starter-mapping</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>validation</artifactId>
+        </dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>com.backbase.stream.compositions</groupId>

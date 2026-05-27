@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.3.1](https://github.com/Backbase/stream-services/compare/9.3.0...9.3.1)
+### Changed
+- Added dependency validation to stream-compositions services pom.xml to fix product validation issues for arrangements with additional properties.
+
 ## [9.3.0](https://github.com/Backbase/stream-services/compare/9.2.0...9.3.0)
 ### Changed
   - fix for NoSuchElementException (No value present) thrown while update data groups

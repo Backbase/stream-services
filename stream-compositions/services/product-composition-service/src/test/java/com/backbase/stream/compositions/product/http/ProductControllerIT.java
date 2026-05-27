@@ -110,7 +110,7 @@ class ProductControllerIT extends IntegrationTest {
                         response()
                                 .withStatusCode(200)
                                 .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(readContentFromClasspath("integration-data/arrangement-response.json"))
+                                .withBody(readContentFromClasspath("integration-data/arrangement-response-additions.json"))
                 );
     }
 
