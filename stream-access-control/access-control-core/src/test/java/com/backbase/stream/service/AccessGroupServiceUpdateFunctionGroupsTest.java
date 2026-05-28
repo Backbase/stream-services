@@ -19,6 +19,7 @@ import com.backbase.accesscontrol.functiongroup.api.service.v1.model.ResultId;
 import com.backbase.accesscontrol.permissioncheck.api.service.v1.PermissionCheckApi;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
 import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
+import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
@@ -34,7 +35,6 @@ import com.backbase.stream.worker.model.StreamTask;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +59,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
     @Mock
     private UserManagementApi usersApi;
+    @Mock
+    private ArrangementsApi arrangementsApi;
     @Mock
     private PermissionCheckApi permissionCheckServiceApi;
     @Mock

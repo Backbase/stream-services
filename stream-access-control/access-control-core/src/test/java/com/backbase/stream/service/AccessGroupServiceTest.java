@@ -9,12 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -60,6 +62,10 @@ import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceA
 import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
 import com.backbase.accesscontrol.usercontext.api.service.v1.model.ContextServiceAgreement;
 import com.backbase.accesscontrol.usercontext.api.service.v1.model.GetContexts;
+import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementSearchesListResponse;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementsSearchesPostRequest;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
@@ -115,6 +121,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import wiremock.org.checkerframework.common.value.qual.ArrayLenRange;
 
 @ExtendWith(MockitoExtension.class)
 class AccessGroupServiceTest {
@@ -123,6 +130,8 @@ class AccessGroupServiceTest {
     private AccessGroupService subject;
     @Mock
     private UserManagementApi usersApi;
+    @Mock
+    ArrangementsApi arrangementsApi;
     @Mock
     private PermissionCheckApi permissionCheckServiceApi;
     @Mock
@@ -592,6 +601,34 @@ class AccessGroupServiceTest {
     }
 
     @Test
+    void assignPermissionsBatch_noPermissions() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa-external-id").internalId("sa-internal-id"))
+        );
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
+
+        when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
+            .thenReturn(Mono.just(new GetFunctionGroups()
+                .functionGroups(List.of(
+                    new FunctionGroupItem().id("system-group-id-1").type(TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("system-group-id-2").type(TypeEnum.REFERENCE),
+                    new FunctionGroupItem().id("system-group-id-3").type(TypeEnum.SYSTEM)
+                ))
+            ));
+
+        // When
+        BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, Map.of())
+            .block();
+
+        // Then
+        Assertions.assertSame(batchProductGroupTask, result);
+
+        verify(assignPermissionsIntegrationApi, never()).batchUpdateUserPermissions(anyList());
+    }
+
+    @Test
     void assignPermissionsBatchIngestionModeReplace() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
@@ -786,6 +823,18 @@ class AccessGroupServiceTest {
             "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-notification");
 
+        when(arrangementsApi.postSearchArrangements(any()))
+            .thenReturn(
+                Mono.just(new ArrangementSearchesListResponse()
+                    .arrangementElements(
+                        List.of(
+                            new ArrangementItem().id("template-custom-test")
+                                .externalArrangementId("template-custom-test-ext"),
+                            new ArrangementItem().id("engagement-template-custom-test")
+                                .externalArrangementId("engagement-template-custom-test-ext"),
+                            new ArrangementItem().id("engagement-template-notification-test")
+                                .externalArrangementId("engagement-template-notification-test-ext")))));
+
         // When
         subject.updateExistingDataGroupsBatch(batchProductGroupTask,
                 List.of(dataGroupItemTemplateCustom,
@@ -794,6 +843,55 @@ class AccessGroupServiceTest {
                 List.of(baseProductGroupTemplateCustom,
                     baseProductGroupEngagementTemplateCustom,
                     baseProductGroupEngagementTemplateNotification))
+            .block();
+
+        // Then
+        verify(dataGroupIntegrationApi, times(0)).batchUpdateDataItems(any());
+    }
+
+    @Test
+    void updateExistingDataGroupsBatchWhenNoMatchingInDbsIngestionModeReplace() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+            List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroup unmatchedDataGroup1 = buildDataGroupItem(
+            "Unmatched Data Group 1",
+            "Unmatched Data Group 1",
+            "unmatched-1"
+        );
+        DataGroup unmatchedDataGroup2 = buildDataGroupItem(
+            "Unmatched Data Group 2",
+            "Unmatched Data Group 2",
+            "unmatched-2"
+        );
+
+        BaseProductGroup productGroup1 = buildBaseProductGroup(
+            "Different Product Group 1",
+            "Different Product Group 1",
+            BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+            "different-1"
+        );
+        BaseProductGroup productGroup2 = buildBaseProductGroup(
+            "Different Product Group 2",
+            "Different Product Group 2",
+            BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+            "different-2"
+        );
+
+        when(arrangementsApi.postSearchArrangements(any()))
+            .thenReturn(Mono.just(new ArrangementSearchesListResponse()
+                .arrangementElements(List.of(
+                    new ArrangementItem().id("unmatched-1").externalArrangementId("ext-unmatched-1"),
+                    new ArrangementItem().id("unmatched-2").externalArrangementId("ext-unmatched-2")
+                ))));
+
+        // When
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                List.of(unmatchedDataGroup1, unmatchedDataGroup2),
+                List.of(productGroup1, productGroup2))
             .block();
 
         // Then
@@ -882,6 +980,19 @@ class AccessGroupServiceTest {
             "Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-notification");
+
+        when(arrangementsApi.postSearchArrangements(any()))
+            .thenReturn(
+                Mono.just(new ArrangementSearchesListResponse()
+                    .arrangementElements(
+                        List.of(
+                            new ArrangementItem().id("template-custom-test")
+                                .externalArrangementId("template-custom-test-ext"),
+                            new ArrangementItem().id("engagement-template-custom-test")
+                                .externalArrangementId("engagement-template-custom-test-ext"),
+                            new ArrangementItem().id("engagement-template-notification-test")
+                                .externalArrangementId("engagement-template-notification-test-ext")))));
+
         when(dataGroupIntegrationApi.batchUpdateDataItems(any()))
             .thenReturn(
                 Flux.just(new com.backbase.accesscontrol.datagroup.api.integration.v1.model.BatchResponseItemExtended()
@@ -904,22 +1015,22 @@ class AccessGroupServiceTest {
         assertEquals(6, actions.size());
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
-                "template-custom-test"));
+                "template-custom-test-ext"));
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
-                "engagement-template-custom-test"));
+                "engagement-template-custom-test-ext"));
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
-                "engagement-template-notification-test"));
+                "engagement-template-notification-test-ext"));
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
-                "template-custom"));
+                "template-custom-ext"));
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
-                "engagement-template-custom"));
+                "engagement-template-custom-ext"));
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
-                "engagement-template-notification"));
+                "engagement-template-notification-ext"));
     }
 
     @Test
@@ -943,6 +1054,15 @@ class AccessGroupServiceTest {
             "rep desc", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "repository-dg-item2");
 
+        when(arrangementsApi.postSearchArrangements(any()))
+            .thenReturn(
+                Mono.just(new ArrangementSearchesListResponse()
+                    .arrangementElements(
+                        List.of(
+                            new ArrangementItem().id("custom-dg-item1").externalArrangementId("custom-dg-item1-ext"),
+                            new ArrangementItem().id("custom-dg-item2").externalArrangementId("custom-dg-item2-ext"),
+                            new ArrangementItem().id("repository-dg-item1").externalArrangementId("repository-dg-item1-ext")))));
+
         when(dataGroupIntegrationApi.batchUpdateDataItems(any()))
             .thenReturn(
                 Flux.just(new com.backbase.accesscontrol.datagroup.api.integration.v1.model.BatchResponseItemExtended()
@@ -962,23 +1082,23 @@ class AccessGroupServiceTest {
 
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
-                "repository-dg-item2"));
+                "repository-dg-item2-ext"));
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
-                "repository-dg-item1"));
+                "repository-dg-item1-ext"));
         // the following assertions is to test if for some reason "custom-dg-item1" and "custom-dg-item2" ended up paired with "repository-dg-item*" ;)
         assertFalse(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
-                "custom-dg-item1"));
+                "custom-dg-item1-ext"));
         assertFalse(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
-                "custom-dg-item2"));
+                "custom-dg-item2-ext"));
         assertFalse(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
-                "custom-dg-item1"));
+                "custom-dg-item1-ext"));
         assertFalse(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
-                "custom-dg-item2"));
+                "custom-dg-item2-ext"));
     }
 
     @Test
@@ -997,6 +1117,13 @@ class AccessGroupServiceTest {
             .productGroupType(ProductGroupTypeEnum.ARRANGEMENTS)
             .addCurrentAccountsItem(new CurrentAccount().internalId("debitAccountInId").name("arrangement1")
                 .externalId("debitAccountExId"));
+
+        when(arrangementsApi.postSearchArrangements(any()))
+            .thenReturn(
+                Mono.just(new ArrangementSearchesListResponse()
+                    .arrangementElements(
+                        List.of(
+                            new ArrangementItem().id("debitAccountInId").externalArrangementId("debitAccountExId")))));
 
         subject.updateExistingDataGroupsBatch(batchProductGroupTask,
                 List.of(existingDGroup),
@@ -1017,6 +1144,13 @@ class AccessGroupServiceTest {
 
         DataGroup existingDGroup = new DataGroup().id("debitAccountInId1").name("arrangement1")
             .addItemsItem("debitAccountExId1").serviceAgreementId("saInId");
+
+        when(arrangementsApi.postSearchArrangements(any()))
+            .thenReturn(
+                Mono.just(new ArrangementSearchesListResponse()
+                    .arrangementElements(
+                        List.of(
+                            new ArrangementItem().id("debitAccountExId1").externalArrangementId("debitAccountExId1")))));
 
         when(dataGroupIntegrationApi.batchUpdateDataItems(any()))
             .thenReturn(
@@ -1041,7 +1175,7 @@ class AccessGroupServiceTest {
         assertEquals(2, actions.size());
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
-                "debitAccountInId2"));
+                "debitAccountExId2"));
         assertTrue(
             actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
                 "debitAccountExId1"));
@@ -1062,6 +1196,14 @@ class AccessGroupServiceTest {
         BaseProductGroup upsertProductGroupCustom = buildBaseProductGroup("Custom data group item",
             "custom desc", ProductGroupTypeEnum.CUSTOM,
             "custom-dg-item2");
+
+        when(arrangementsApi.postSearchArrangements(any()))
+            .thenReturn(
+                Mono.just(new ArrangementSearchesListResponse()
+                    .arrangementElements(
+                        List.of(
+                            new ArrangementItem().id("custom-dg-item1").externalArrangementId("custom-dg-item1-ext")))));
+
         when(dataGroupIntegrationApi.batchUpdateDataItems(any())).thenReturn(
             Flux.error(WebClientResponseException.create(500, "Internal error", null, null, null, null)));
 
@@ -1102,6 +1244,7 @@ class AccessGroupServiceTest {
 
         // Then
         verify(dataGroupIntegrationApi, times(0)).batchUpdateDataItems(any());
+        verifyNoInteractions(arrangementsApi);
     }
 
 
@@ -1440,7 +1583,7 @@ class AccessGroupServiceTest {
         productGroup.setDescription(description);
         productGroup.setProductGroupType(productGroupTypeEnum);
         productGroup.setCustomDataGroupItems(Arrays.stream(dataGroupItemId)
-            .map(dgi -> new CustomDataGroupItem().internalId(dgi).externalId(dgi)).toList());
+            .map(dgi -> new CustomDataGroupItem().internalId(dgi).externalId(dgi + "-ext")).toList());
         return productGroup;
     }
 
