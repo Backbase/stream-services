@@ -7,6 +7,7 @@ import com.backbase.accesscontrol.functiongroup.api.service.v1.FunctionGroupApi;
 import com.backbase.accesscontrol.permissioncheck.api.service.v1.PermissionCheckApi;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
 import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
+import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
@@ -82,6 +83,7 @@ public class AccessControlConfiguration {
     @Bean
     public AccessGroupService accessGroupService(
         UserManagementApi usersApi,
+        ArrangementsApi arrangementsApi,
         DeletionProperties configurationProperties,
         BatchResponseUtils batchResponseUtils,
         AccessControlConfigurationProperties accessControlConfigurationProperties,
@@ -95,7 +97,7 @@ public class AccessControlConfiguration {
         AssignPermissionsApi assignPermissionsApi,
         com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi assignPermissionsIntegrationApi,
         UserContextApi userContextApi) {
-        return new AccessGroupService(usersApi, batchResponseUtils, configurationProperties,
+        return new AccessGroupService(usersApi, arrangementsApi, batchResponseUtils, configurationProperties,
             accessControlConfigurationProperties,
             permissionCheckApi, dataGroupServiceApi, dataGroupIntegrationApi, functionGroupServiceApi,
             functionGroupIntegrationApi,

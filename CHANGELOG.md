@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.1.4](https://github.com/Backbase/stream-services/compare/8.1.3...8.1.4)
+### Changed
+- Fix update data group items request to access-control (use externalDataItemIds instead of internal)
+
 ## [8.1.3](https://github.com/Backbase/stream-services/compare/8.1.2...8.1.3)
 ### Changed
 - Added dependency validation to stream-compositions services pom.xml to fix product validation issues for arrangements with additional properties.
