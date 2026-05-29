@@ -4,9 +4,9 @@ import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
 import com.backbase.stream.configuration.IngestConfigProperties;
-import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.model.PaginatedExpandedModelPortfolioList;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.RestTemplateModelPortfolioMapper;
 import java.util.List;
@@ -69,10 +69,6 @@ public class InvestmentModelPortfolioService {
         Objects.requireNonNull(modelPortfolio, "ModelPortfolio must not be null");
 
         ModelPortfolio map = modelPortfolioMapper.map(modelPortfolio);
-        if (map.getAllocations().stream().map(Allocation::weight).mapToDouble(a -> a).sum() + map.getCashWeight()
-            != 1d) {
-            log.info("failure");
-        }
         return upsertModelPortfolio(map)
             .map(mp -> {
                 map.uuid(mp.getUuid());
@@ -110,7 +106,11 @@ public class InvestmentModelPortfolioService {
         log.info("Upserting model portfolio: name={}, riskLevel={}", modelName, riskLevel);
 
         return listExistingModelPortfolios(modelName, riskLevel)
-            .flatMap(pm -> patchModelPortfolio(pm.getUuid(), modelPortfolio))
+            .flatMap(pm -> {
+                modelPortfolio.setAllocations(modelPortfolioMapper.mapAssetModel(pm.getAllocation()));
+                modelPortfolio.setCashWeight(pm.getCashWeight());
+                return patchModelPortfolio(pm.getUuid(), modelPortfolio);
+            })
             .switchIfEmpty(Mono.defer(() -> createNewModelPortfolio(modelPortfolio)))
             .doOnSuccess(upserted -> log.info(
                 "Successfully upserted model portfolio: uuid={}, name={}, riskLevel={}",
@@ -127,9 +127,11 @@ public class InvestmentModelPortfolioService {
      * @param riskLevel the risk level to filter by
      * @return Mono emitting the first matching model portfolio, or empty if no match found
      */
-    private Mono<OASModelPortfolioResponse> listExistingModelPortfolios(String name, Integer riskLevel) {
-        return financialAdviceApi.listModelPortfolio(
-                null, null, null, config.getPortfolio().getListModelPageSize(), name, null, null, null, null, null)
+    private Mono<InvestorModelPortfolio> listExistingModelPortfolios(String name, Integer riskLevel) {
+        return financialAdviceApi.listModelPortfolioWithResponseSpec(
+                List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null,
+                config.getPortfolio().getListModelPageSize(), name, null, null, null, null, null)
+            .bodyToMono(PaginatedExpandedModelPortfolioList.class)
             .doOnSuccess(models -> log.debug(
                 "List model portfolios query completed: name={}, riskLevel={}, found={} results",
                 name, riskLevel, models != null ? models.getResults().size() : 0))
@@ -148,7 +150,7 @@ public class InvestmentModelPortfolioService {
                         resultCount, name, riskLevel);
                 }
 
-                OASModelPortfolioResponse existingModel = models.getResults().getFirst();
+                InvestorModelPortfolio existingModel = models.getResults().getFirst();
                 log.info("Found existing model portfolio: uuid={}, name={}, riskLevel={}",
                     existingModel.getUuid(), name, riskLevel);
                 return Mono.just(existingModel);

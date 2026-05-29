@@ -69,8 +69,9 @@ public class InvestmentServiceConfiguration {
     @Bean
     public InvestmentPortfolioProductService investmentPortfolioProductService(
         InvestmentProductsApi investmentProductsApi, IngestConfigProperties portfolioProperties,
+        InvestmentModelPortfolioService modelPortfolioService,
         InvestmentRestProductPortfolioService investmentRestProductPortfolioService) {
-        return new InvestmentPortfolioProductService(investmentProductsApi, portfolioProperties,
+        return new InvestmentPortfolioProductService(investmentProductsApi, portfolioProperties, modelPortfolioService,
             investmentRestProductPortfolioService);
     }
 

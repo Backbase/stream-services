@@ -4,7 +4,6 @@ import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
-import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
@@ -56,6 +55,7 @@ public class InvestmentPortfolioProductService {
 
     private final InvestmentProductsApi productsApi;
     private final IngestConfigProperties config;
+    private final InvestmentModelPortfolioService modelPortfolioService;
     private final InvestmentRestProductPortfolioService investmentRestProductPortfolioService;
     private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
         Mappers.getMapper(RestTemplateModelPortfolioMapper.class);
@@ -81,7 +81,8 @@ public class InvestmentPortfolioProductService {
         if (investmentArrangements == null) {
             return Mono.error(new NullPointerException("InvestmentArrangement must not be null"));
         }
-        return Flux.fromIterable(distinctProducts(enrichPortfolioProductsWithModels(investmentData)))
+        return enrichPortfolioProductsWithModels(investmentData)
+            .flatMapIterable(this::distinctProducts)
             .flatMap(p -> listExistingPortfolioProducts(p)
                 .flatMap(existingProduct -> updateExistingPortfolioProduct(existingProduct, p, investmentData))
                 .switchIfEmpty(Mono.defer(() -> createPortfolioProductWithModel(p, investmentData)))
@@ -106,64 +107,30 @@ public class InvestmentPortfolioProductService {
                 "Failed to upsert portfolio products: arrangementCount={}", investmentArrangements.size(), throwable));
     }
 
-    private List<ProductPortfolio> enrichPortfolioProductsWithModels(InvestmentData investmentData) {
+    private Mono<List<ProductPortfolio>> enrichPortfolioProductsWithModels(InvestmentData investmentData) {
         List<ProductPortfolio> portfolioProducts = Objects.requireNonNullElse(
             investmentData.getPortfolioProducts(), List.of());
-        return portfolioProducts.stream()
-            .map(pp -> enrichWithUpsertedModel(pp, investmentData))
-            .toList();
+        return Flux.fromStream(portfolioProducts.stream())
+            .flatMap(pp -> {
+                Mono<ModelPortfolio> modelPortfolio = upsertPortfolioModel(pp);
+                return modelPortfolio
+                    // todo: improve upsert load
+                    .map(mp -> {
+                        InvestorModelPortfolio map = modelPortfolioMapper.map(mp);
+                        pp.setModelPortfolio(map);
+                        return pp;
+                    })
+                    .switchIfEmpty(Mono.just(pp));
+            })
+            .collectList();
     }
 
-    private ProductPortfolio enrichWithUpsertedModel(ProductPortfolio portfolioProduct,
-        InvestmentData investmentData) {
-        if (portfolioProduct.getProductType() == ProductTypeEnum.SELF_TRADING) {
-            return portfolioProduct;
+    private Mono<ModelPortfolio> upsertPortfolioModel(ProductPortfolio pp) {
+        InvestorModelPortfolio modelPortfolio = pp.getModelPortfolio();
+        if (modelPortfolio == null) {
+            return Mono.empty();
         }
-        resolveModelPortfolio(investmentData, portfolioProduct)
-            .map(modelPortfolioMapper::map)
-            .ifPresent(portfolioProduct::setModelPortfolio);
-        return portfolioProduct;
-    }
-
-    private Optional<ModelPortfolio> resolveModelPortfolio(InvestmentData investmentData,
-        ProductPortfolio portfolioProduct) {
-        List<ModelPortfolio> candidates = findModelPortfolios(investmentData, portfolioProduct.getProductType());
-        if (candidates.isEmpty()) {
-            return Optional.empty();
-        }
-
-        InvestorModelPortfolio template = portfolioProduct.getModelPortfolio();
-        if (template == null) {
-            return candidates.size() == 1 ? Optional.of(candidates.getFirst()) : Optional.empty();
-        }
-
-        List<ModelPortfolio> matches = candidates;
-        Integer riskLevel = template.getRiskLevel();
-        if (riskLevel != null) {
-            matches = matches.stream()
-                .filter(model -> model.getRiskLevel() == riskLevel)
-                .toList();
-        }
-        if (StringUtils.hasText(template.getName())) {
-            matches = matches.stream()
-                .filter(model -> template.getName().equals(model.getName()))
-                .toList();
-        }
-        if (matches.size() == 1) {
-            return Optional.of(matches.getFirst());
-        }
-        return matches.isEmpty() && candidates.size() == 1
-            ? Optional.of(candidates.getFirst())
-            : Optional.empty();
-    }
-
-    private static List<ModelPortfolio> findModelPortfolios(InvestmentData investmentData,
-        ProductTypeEnum productType) {
-        List<ModelPortfolio> modelPortfolios = Objects.requireNonNullElse(
-            investmentData.getModelPortfolios(), List.of());
-        return modelPortfolios.stream()
-            .filter(model -> model.getProductTypeEnum() == productType)
-            .toList();
+        return modelPortfolioService.upsertModelPortfolio(modelPortfolio);
     }
 
     private void assignProductsToArrangements(List<PortfolioProduct> products,
@@ -255,14 +222,16 @@ public class InvestmentPortfolioProductService {
                     .map(PaginatedPortfolioProductList::getResults)
                     .flatMap(Collection::stream)
                     .filter(Objects::nonNull)
-                    .filter(p -> p.getName().equals(portfolioProduct.getName()))
+                    .filter(p -> p.getName().equals(portfolioProduct.getName()) || p.getName()
+                        .equals(Optional.ofNullable(portfolioProduct.getProductType()).map(ProductTypeEnum::getValue)
+                            .orElse(null)))
                     .toList();
                 if (portfolioProducts.isEmpty()) {
                     log.info("No existing portfolio product found: name={}, productType={}",
                         portfolioProduct.getName(), productType);
                     return Mono.empty();
                 }
-
+                portfolioProducts = List.of(portfolioProducts.getLast());
                 int resultCount = portfolioProducts.size();
                 if (resultCount > 1) {
                     log.error("Data setup issue: found {} portfolio products with name={}, productType={}, "
@@ -294,7 +263,7 @@ public class InvestmentPortfolioProductService {
         ProductPortfolio portfolioProduct, InvestmentData investmentData) {
         UUID productUuid = existingProduct.getUuid();
 
-        PatchedPortfolioProductCreateUpdateRequest patch = new PatchedPortfolioProductCreateUpdateRequest()
+        PortfolioProductCreateUpdateRequest patch = new PortfolioProductCreateUpdateRequest()
             .image(null)
             .name(portfolioProduct.getName())
             .description(portfolioProduct.getDescription())
@@ -313,9 +282,9 @@ public class InvestmentPortfolioProductService {
         log.debug("Patching existing portfolio product: uuid={}, name={}, productType={}",
             productUuid, portfolioProduct.getName(), portfolioProduct.getProductType());
 
-        return productsApi.patchPortfolioProduct(productUuid.toString(),
+        return productsApi.updatePortfolioProduct(productUuid.toString(), patch,
                 List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
-                null, null, patch)
+                null, null)
             .doOnSuccess(updated -> {
                 log.info("Successfully patched portfolio product: uuid={}, name={}, productType={}",
                     updated.getUuid(), updated.getName(), updated.getProductType());
