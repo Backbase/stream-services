@@ -1,42 +1,48 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [10.1.0]
+## [10.1.1](https://github.com/Backbase/stream-services/compare/10.1.0...10.1.1)
+### Changed
+- Added dependency validation to stream-compositions services pom.xml to fix product validation issues for arrangements with additional properties.
+
+## [10.1.0](https://github.com/Backbase/stream-services/compare/9.17.0...10.1.0)
 ### Changed
 - Align Spring Boot and Spring Cloud versions with Service SDK 21.0.1 managed stack.
 - Remove local Spring metadata plugin and Azure Service Bus version overrides in favor of the Service SDK 21.0.1 managed dependency chain.
 
-## [9.17.0]
+## [9.17.0](https://github.com/Backbase/stream-services/compare/9.16.0...9.17.0)
 ### Changed
 Improve Investment asset universe price setup
 
-## [9.16.0]
+## [9.16.0](https://github.com/Backbase/stream-services/compare/9.15.0...9.16.0)
 ### Added
 - Add investmentPortfolios ingestion support to BaseProductGroup (similar to investmentAccounts)
-## [9.15.0]
 
-## [9.14.0]
+## [9.15.0](https://github.com/Backbase/stream-services/compare/9.14.0...9.15.0)
+### Changed
+
+## [9.14.0](https://github.com/Backbase/stream-services/compare/9.13.0...9.14.0)
 ### Changed
 - Remove custom workaround to connect with Investment service
 
-## [9.13.0]
+## [9.13.0](https://github.com/Backbase/stream-services/compare/9.12.0...9.13.0)
 ### Changed
 - Update SSDK 20.1.0 and BBOM 2026.03 LTS, boat-maven-plugin unified 0.17.66
 
-## [9.12.0]
+## [9.12.0](https://github.com/Backbase/stream-services/compare/9.10.0...9.12.0)
 ### Added
 - Implement Portfolio Risk assessments data ingestion;
 ### Changed
 - use latest investment service api 1.4.1;
 - update investment data integraton service
 
-## [9.10.0]
+## [9.10.0](https://github.com/Backbase/stream-services/compare/9.8.0...9.10.0)
 ### Changed
 - Investment service
   - avoid redundant API calls by checking for unchanged data before patch/update for markets, market special days, asset category types, asset categories, assets and currencies
   - improve structured logging across investment upsert operations and renamed few methods
 
-## [9.8.0]
+## [9.8.0](https://github.com/Backbase/stream-services/compare/9.7.0...9.8.0)
 ### Changed
 - Create investment data based on exists entries in system
   - do not rely on LE on yaml config
@@ -47,11 +53,11 @@ Improve Investment asset universe price setup
   - Use available balance of arrangement for Portfolio setup. Use as initial cash
  
 
-## [9.7.0]
+## [9.7.0](https://github.com/Backbase/stream-services/compare/9.6.0...9.7.0)
 ### Added
  - Implement Portfolio Trading Account Creation;
 
-## [9.6.0]
+## [9.6.0](https://github.com/Backbase/stream-services/compare/9.5.0...9.6.0)
 ### Added
  - Implement for Document ingestion;
  - Implement Document tags ingestion;
@@ -62,7 +68,7 @@ Improve Investment asset universe price setup
  - use latest investment service api 1.3.0;
  - move customization of specs into an investment package;
 
-## [9.5.0]
+## [9.5.0](https://github.com/Backbase/stream-services/compare/9.4.0...9.5.0)
 ### Added
  - investment service intraday generation and ingestion function
  - ingest images for investment service (asset logo, asset category image, news content image)
@@ -73,7 +79,7 @@ Improve Investment asset universe price setup
  - Added resttemplate client for investment service to fix request multipart/form-data to django server.
    - Django & WebFlux don't work OOTB
 
-## [9.4.x]
+## [9.4.x](https://github.com/Backbase/stream-services/compare/9.3.0...9.4.x)
 ### Changed
 
 ## [9.3.0](https://github.com/Backbase/stream-services/compare/9.2.0...9.3.0)
