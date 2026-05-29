@@ -97,7 +97,8 @@ class InvestmentSagaTest {
             investmentModelPortfolioService,
             investmentPortfolioProductService,
             asyncTaskService,
-            configurationProperties
+            configurationProperties,
+            null
         );
     }
 
