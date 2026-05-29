@@ -50,7 +50,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentPortfolioProductService {
 
-    public static final int PRODCUT_PAGE_SIZE = 50;
     private final InvestmentProductsApi productsApi;
     private final IngestConfigProperties config;
     private final InvestmentModelPortfolioService modelPortfolioService;
@@ -172,7 +171,7 @@ public class InvestmentPortfolioProductService {
 
         ProductTypeEnum productType = portfolioProduct.getProductType();
 
-        int pageSize = PRODCUT_PAGE_SIZE;
+        int pageSize = config.getPortfolio().getListProductPageSize();
         AtomicInteger pageCounter = new AtomicInteger(0);
         return productsApi.listPortfolioProducts(List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
                 null, null,

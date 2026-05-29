@@ -74,7 +74,8 @@ class InvestmentServiceConfigurationTest {
         void investmentModelPortfolioService_returnsModelPortfolioService() {
             assertThat(config.investmentModelPortfolioService(
                 mock(FinancialAdviceApi.class),
-                mock(InvestmentRestModelPortfolioService.class)))
+                mock(InvestmentRestModelPortfolioService.class),
+                mock(IngestConfigProperties.class)))
                 .isNotNull().isInstanceOf(InvestmentModelPortfolioService.class);
         }
 

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
 import com.backbase.investment.api.service.v1.model.PaginatedOASModelPortfolioResponseList;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelAsset;
@@ -53,6 +54,9 @@ class InvestmentModelPortfolioServiceTest {
     @Mock
     private InvestmentRestModelPortfolioService investmentRestModelPortfolioService;
 
+    @Mock
+    private IngestConfigProperties ingestConfigProperties;
+
     private InvestmentModelPortfolioService service;
 
     private AutoCloseable mocks;
@@ -60,7 +64,7 @@ class InvestmentModelPortfolioServiceTest {
     @BeforeEach
     void setUp() {
         mocks = MockitoAnnotations.openMocks(this);
-        service = new InvestmentModelPortfolioService(financialAdviceApi, investmentRestModelPortfolioService);
+        service = new InvestmentModelPortfolioService(financialAdviceApi, investmentRestModelPortfolioService, ingestConfigProperties);
     }
 
     @AfterEach

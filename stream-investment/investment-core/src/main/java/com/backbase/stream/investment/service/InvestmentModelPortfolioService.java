@@ -3,6 +3,7 @@ package com.backbase.stream.investment.service;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
@@ -39,10 +40,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentModelPortfolioService {
 
-    public static final int MODELS_PAGE_SIZE = 50;
-
     private final FinancialAdviceApi financialAdviceApi;
     private final InvestmentRestModelPortfolioService investmentRestModelPortfolioService;
+    private final IngestConfigProperties config;
     private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
         Mappers.getMapper(RestTemplateModelPortfolioMapper.class);
 
@@ -69,7 +69,8 @@ public class InvestmentModelPortfolioService {
         Objects.requireNonNull(modelPortfolio, "ModelPortfolio must not be null");
 
         ModelPortfolio map = modelPortfolioMapper.map(modelPortfolio);
-        if(map.getAllocations().stream().map(Allocation::weight).mapToDouble(a -> a).sum() + map.getCashWeight() != 1d) {
+        if (map.getAllocations().stream().map(Allocation::weight).mapToDouble(a -> a).sum() + map.getCashWeight()
+            != 1d) {
             log.info("failure");
         }
         return upsertModelPortfolio(map)
@@ -128,7 +129,7 @@ public class InvestmentModelPortfolioService {
      */
     private Mono<OASModelPortfolioResponse> listExistingModelPortfolios(String name, Integer riskLevel) {
         return financialAdviceApi.listModelPortfolio(
-                null, null, null, MODELS_PAGE_SIZE, name, null, null, null, null, null)
+                null, null, null, config.getPortfolio().getListModelPageSize(), name, null, null, null, null, null)
             .doOnSuccess(models -> log.debug(
                 "List model portfolios query completed: name={}, riskLevel={}, found={} results",
                 name, riskLevel, models != null ? models.getResults().size() : 0))

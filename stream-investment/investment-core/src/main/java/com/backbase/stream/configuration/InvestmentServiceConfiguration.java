@@ -60,8 +60,10 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentModelPortfolioService investmentModelPortfolioService(FinancialAdviceApi financialAdviceApi,
-        InvestmentRestModelPortfolioService investmentRestModelPortfolioService) {
-        return new InvestmentModelPortfolioService(financialAdviceApi, investmentRestModelPortfolioService);
+        InvestmentRestModelPortfolioService investmentRestModelPortfolioService,
+        IngestConfigProperties portfolioProperties) {
+        return new InvestmentModelPortfolioService(financialAdviceApi, investmentRestModelPortfolioService,
+            portfolioProperties);
     }
 
     @Bean
