@@ -134,11 +134,12 @@ public class InvestmentServiceConfiguration {
         InvestmentModelPortfolioService investmentModelPortfolioService,
         InvestmentPortfolioProductService investmentPortfolioProductService,
         InvestmentPortfolioAllocationService investmentPortfolioAllocationService, AsyncTaskService asyncTaskService,
-        InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
+        InvestmentIngestionConfigurationProperties coreConfigurationProperties,
+        AssetUniverseApi assetUniverseApi) {
         return new InvestmentSaga(investmentClientService, investmentRiskAssessmentService,
             investmentRiskQuestionaryService, investmentPortfolioService, investmentPortfolioAllocationService,
             investmentModelPortfolioService, investmentPortfolioProductService, asyncTaskService,
-            coreConfigurationProperties);
+            coreConfigurationProperties, assetUniverseApi);
     }
 
     @Bean

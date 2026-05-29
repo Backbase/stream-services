@@ -174,7 +174,7 @@ class InvestmentServiceConfigurationTest {
                 mock(InvestmentPortfolioProductService.class),
                 mock(InvestmentPortfolioAllocationService.class),
                 mock(AsyncTaskService.class),
-                new InvestmentIngestionConfigurationProperties()))
+                new InvestmentIngestionConfigurationProperties(), null))
                 .isNotNull().isInstanceOf(InvestmentSaga.class);
         }
 

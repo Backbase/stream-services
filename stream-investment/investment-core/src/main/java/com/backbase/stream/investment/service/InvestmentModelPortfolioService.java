@@ -39,6 +39,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentModelPortfolioService {
 
+    public static final int MODELS_PAGE_SIZE = 50;
+
     private final FinancialAdviceApi financialAdviceApi;
     private final InvestmentRestModelPortfolioService investmentRestModelPortfolioService;
     private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
@@ -126,7 +128,7 @@ public class InvestmentModelPortfolioService {
      */
     private Mono<OASModelPortfolioResponse> listExistingModelPortfolios(String name, Integer riskLevel) {
         return financialAdviceApi.listModelPortfolio(
-                null, null, null, 1, name, null, null, null, riskLevel, null)
+                null, null, null, MODELS_PAGE_SIZE, name, null, null, null, null, null)
             .doOnSuccess(models -> log.debug(
                 "List model portfolios query completed: name={}, riskLevel={}, found={} results",
                 name, riskLevel, models != null ? models.getResults().size() : 0))

@@ -1,8 +1,10 @@
 package com.backbase.stream.investment.saga;
 
+import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.BaseAssessmentRequest;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
+import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.PortfolioRiskAssessment;
@@ -84,6 +86,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     private final InvestmentPortfolioProductService investmentPortfolioProductService;
     private final AsyncTaskService asyncTaskService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
+    private final AssetUniverseApi assetUniverseApi;
 
     @Override
     public Mono<InvestmentTask> executeTask(InvestmentTask streamTask) {
@@ -95,6 +98,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
         return this.upsertInvestmentPortfolioModels(streamTask)
+            .flatMap(this::loadAssets)
             .flatMap(this::upsertClients)
             .flatMap(this::upsertRiskQuestions)
             .flatMap(this::upsertRiskAssessments)
@@ -247,6 +251,25 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment portfolio models: " + throwable.getMessage());
             });
+    }
+
+
+    private Mono<InvestmentTask> loadAssets(InvestmentTask investmentTask) {
+        if (coreConfigurationProperties.isAssetUniverseEnabled()) {
+            log.debug("Skip loading assets. Assets have to be provided on previous step");
+            return Mono.just(investmentTask);
+        }
+        log.info("Loading assets");
+        List<Asset> assets = investmentTask.getData().getInvestmentAssetData().getAssets();
+        return Flux.fromIterable(assets)
+            .flatMap(asset -> assetUniverseApi.getAsset(asset.getKeyString(), null, null, null)
+                .map(a -> {
+                    asset.setUuid(a.getUuid());
+                    return asset;
+                }))
+            .collectList()
+            .map(o -> investmentTask);
+
     }
 
     /**

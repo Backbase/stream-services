@@ -139,7 +139,7 @@ public class InvestmentRestModelPortfolioService {
         ParameterizedTypeReference<OASModelPortfolioResponse> returnType =
             new ParameterizedTypeReference<OASModelPortfolioResponse>() {};
 
-        return apiClient.invokeAPI(MODEL_PORTFOLIO_BY_UUID_PATH, HttpMethod.PATCH,
+        return apiClient.invokeAPI(MODEL_PORTFOLIO_BY_UUID_PATH, HttpMethod.PUT,
                 uriVariables, queryParams, null, headerParams,
                 cookieParams, formParams, accept, contentType, new String[]{}, returnType)
             .getBody();
