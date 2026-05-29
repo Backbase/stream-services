@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -112,20 +113,37 @@ public class InvestmentPortfolioProductService {
             )
             .collectList()
             .flatMap(products -> {
-                investmentArrangements.forEach(a -> products.stream()
-                    .sorted(Comparator.nullsLast(Comparator.comparing(PortfolioProduct::getOrder)))
-                    .filter(p -> p.getProductType().toString().equalsIgnoreCase(a.getProductTypeExternalId())
-                        && Optional.ofNullable(a.getRiskLevel())
-                        .map(r -> r.equals(p.getModelPortfolio().getRiskLevel()))
-                        .orElse(true))
-                    .findAny().ifPresent(p -> {
+                investmentArrangements.forEach(a -> {
+                    List<PortfolioProduct> typeProducts = products.stream()
+                        .sorted(Comparator.nullsLast(Comparator.comparing(PortfolioProduct::getOrder)))
+                        .filter(p -> p.getProductType().toString().equalsIgnoreCase(a.getProductTypeExternalId()))
+                        .toList();
+                    if (typeProducts.isEmpty()) {
+                        return;
+                    }
+                    Optional<PortfolioProduct> fitProduct;
+                    if (StringUtils.hasText(a.getProductPortfolioName())) {
+                        Optional<PortfolioProduct> product = typeProducts.stream()
+                            .filter(p -> a.getProductPortfolioName().equals(p.getName()))
+                            .min(Comparator.nullsLast(Comparator.comparing(PortfolioProduct::getOrder)));
+                        if (product.isEmpty()) {
+                            product = typeProducts.stream()
+                                .min(Comparator.nullsLast(Comparator.comparing(PortfolioProduct::getOrder)));
+                        }
+                        fitProduct = product;
+                    } else {
+                        fitProduct = typeProducts.stream()
+                            .min(Comparator.nullsLast(Comparator.comparing(PortfolioProduct::getOrder)));
+                    }
+                    fitProduct.ifPresent(p -> {
                         log.info(
                             "Assign portfolio product to arrangement: engine={}, productType={}, model={}, arrangementName={}",
                             p.getAdviceEngine(), p.getProductType(),
                             Optional.ofNullable(p.getModelPortfolio())
                                 .map(InvestorModelPortfolio::getName).orElse(""), a.getName());
                         a.setInvestmentProductId(p.getUuid());
-                    }));
+                    });
+                });
                 return Mono.just(products);
             })
             .doOnSuccess(products -> {
