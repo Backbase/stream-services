@@ -153,7 +153,7 @@ class ProductControllerIT {
     @Test
     void pushIngestArrangement_Success() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode node = mapper.readTree(readContentFromClasspath("integration-data/arrangement-response.json"))
+        JsonNode node = mapper.readTree(readContentFromClasspath("integration-data/arrangement-response-additions.json"))
                 .get("arrangement");
         com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut arrangementItemPut =
                 mapper.treeToValue(node, com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut.class);
