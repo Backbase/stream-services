@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.4.0]
+### Changed
+- Upgrade `customer-profile-api` version from `1.17.1` to `2.6.0`.
+
 ## [10.3.0]
 ### Changed
 - Upgrade `investment-service-api` version from `1.4.1` to `1.6.0`; regenerate API clients and fix all compilation errors in production and test sources.
