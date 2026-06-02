@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.3.0]
+### Changed
+- Upgrade `investment-service-api` version from `1.4.1` to `1.6.0`; regenerate API clients and fix all compilation errors in production and test sources.
+
 ## [10.1.1](https://github.com/Backbase/stream-services/compare/10.1.0...10.1.1)
 ### Changed
 - Added dependency validation to stream-compositions services pom.xml to fix product validation issues for arrangements with additional properties.

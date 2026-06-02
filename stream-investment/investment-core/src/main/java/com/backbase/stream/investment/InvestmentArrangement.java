@@ -17,6 +17,7 @@ public class InvestmentArrangement {
     private String externalUserId;
     private String productTypeExternalId;
     private String currency;
+    private String productPortfolioName;
     private BigDecimal initialCash;
 
     private UUID investmentProductId;

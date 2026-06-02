@@ -632,7 +632,7 @@ class InvestmentPortfolioAllocationServiceTest {
         }).toList();
 
         InvestorModelPortfolio investorModel = new InvestorModelPortfolio(
-            modelUuid, null, cashWeight, null, apiAllocations, null);
+            modelUuid, null, cashWeight, null, apiAllocations, null, null);
 
         PortfolioProduct product = mock(PortfolioProduct.class);
         when(product.getUuid()).thenReturn(productUuid);

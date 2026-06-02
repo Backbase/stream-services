@@ -1,5 +1,7 @@
 package com.backbase.stream.investment.service.resttemplate;
 
+import com.backbase.investment.api.service.v1.model.AssetModelPortfolio;
+import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.OASAssetModelPortfolioRequestRequest;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioRequestDataRequest;
 import com.backbase.stream.investment.Allocation;
@@ -48,5 +50,16 @@ public interface RestTemplateModelPortfolioMapper {
                 .weight(m.weight()))
             .toList();
     }
+
+    @Mapping(target = "allocations", source = "allocation")
+    ModelPortfolio map(InvestorModelPortfolio modelPortfolio);
+
+    List<Allocation> mapAssetModel(List<AssetModelPortfolio> modelPortfolio);
+
+    default InvestorModelPortfolio map(ModelPortfolio md) {
+        return new InvestorModelPortfolio(md.getUuid(), md.getName(), md.getCashWeight(), md.getRiskLevel(), null, null,
+            null);
+    }
+
 }
 

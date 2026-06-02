@@ -24,6 +24,7 @@ import com.backbase.stream.investment.service.InvestmentCurrencyService;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
+import com.backbase.stream.investment.service.InvestmentPortfolioProductService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
 import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
@@ -31,6 +32,7 @@ import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUn
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestDocumentContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
+import com.backbase.stream.investment.service.resttemplate.InvestmentRestProductPortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -58,16 +60,26 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentModelPortfolioService investmentModelPortfolioService(FinancialAdviceApi financialAdviceApi,
-        InvestmentRestModelPortfolioService investmentRestModelPortfolioService) {
-        return new InvestmentModelPortfolioService(financialAdviceApi, investmentRestModelPortfolioService);
+        InvestmentRestModelPortfolioService investmentRestModelPortfolioService,
+        IngestConfigProperties portfolioProperties) {
+        return new InvestmentModelPortfolioService(financialAdviceApi, investmentRestModelPortfolioService,
+            portfolioProperties);
     }
 
     @Bean
-    public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
-        InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi,
+    public InvestmentPortfolioProductService investmentPortfolioProductService(
+        InvestmentProductsApi investmentProductsApi, IngestConfigProperties portfolioProperties,
+        InvestmentModelPortfolioService modelPortfolioService,
+        InvestmentRestProductPortfolioService investmentRestProductPortfolioService) {
+        return new InvestmentPortfolioProductService(investmentProductsApi, portfolioProperties, modelPortfolioService,
+            investmentRestProductPortfolioService);
+    }
+
+    @Bean
+    public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi, PaymentsApi paymentsApi,
         PortfolioTradingAccountsApi portfolioTradingAccountsApi,
         IngestConfigProperties portfolioProperties) {
-        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi,
+        return new InvestmentPortfolioService(portfolioApi, paymentsApi,
             portfolioTradingAccountsApi, portfolioProperties);
     }
 
@@ -122,11 +134,14 @@ public class InvestmentServiceConfiguration {
         InvestmentRiskQuestionaryService investmentRiskQuestionaryService,
         InvestmentPortfolioService investmentPortfolioService,
         InvestmentModelPortfolioService investmentModelPortfolioService,
+        InvestmentPortfolioProductService investmentPortfolioProductService,
         InvestmentPortfolioAllocationService investmentPortfolioAllocationService, AsyncTaskService asyncTaskService,
-        InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
+        InvestmentIngestionConfigurationProperties coreConfigurationProperties,
+        AssetUniverseApi assetUniverseApi) {
         return new InvestmentSaga(investmentClientService, investmentRiskAssessmentService,
             investmentRiskQuestionaryService, investmentPortfolioService, investmentPortfolioAllocationService,
-            investmentModelPortfolioService, asyncTaskService, coreConfigurationProperties);
+            investmentModelPortfolioService, investmentPortfolioProductService, asyncTaskService,
+            coreConfigurationProperties, assetUniverseApi);
     }
 
     @Bean

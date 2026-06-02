@@ -10,7 +10,6 @@ import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.CurrencyApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentApi;
-import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.investment.api.service.v1.PortfolioTradingAccountsApi;
@@ -26,6 +25,7 @@ import com.backbase.stream.investment.service.InvestmentCurrencyService;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
+import com.backbase.stream.investment.service.InvestmentPortfolioProductService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
 import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
@@ -42,8 +42,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests for {@link InvestmentServiceConfiguration}.
  *
  * <p>Each {@code @Bean} factory method is invoked directly (no Spring context) to verify
- * that it returns a non-null, correctly typed bean when provided with mocked or default
- * dependency instances.
+ * that it returns a non-null, correctly typed bean when provided with mocked or default dependency instances.
  */
 @DisplayName("InvestmentServiceConfiguration")
 class InvestmentServiceConfigurationTest {
@@ -74,8 +73,9 @@ class InvestmentServiceConfigurationTest {
         @DisplayName("investmentModelPortfolioService — returns non-null InvestmentModelPortfolioService")
         void investmentModelPortfolioService_returnsModelPortfolioService() {
             assertThat(config.investmentModelPortfolioService(
-                    mock(FinancialAdviceApi.class),
-                    mock(InvestmentRestModelPortfolioService.class)))
+                mock(FinancialAdviceApi.class),
+                mock(InvestmentRestModelPortfolioService.class),
+                mock(IngestConfigProperties.class)))
                 .isNotNull().isInstanceOf(InvestmentModelPortfolioService.class);
         }
 
@@ -83,11 +83,10 @@ class InvestmentServiceConfigurationTest {
         @DisplayName("investmentPortfolioService — returns non-null InvestmentPortfolioService")
         void investmentPortfolioService_returnsPortfolioService() {
             assertThat(config.investmentPortfolioService(
-                    mock(PortfolioApi.class),
-                    mock(InvestmentProductsApi.class),
-                    mock(PaymentsApi.class),
-                    mock(PortfolioTradingAccountsApi.class),
-                    new IngestConfigProperties()))
+                mock(PortfolioApi.class),
+                mock(PaymentsApi.class),
+                mock(PortfolioTradingAccountsApi.class),
+                new IngestConfigProperties()))
                 .isNotNull().isInstanceOf(InvestmentPortfolioService.class);
         }
 
@@ -95,8 +94,8 @@ class InvestmentServiceConfigurationTest {
         @DisplayName("investmentAssetUniverseService — returns non-null InvestmentAssetUniverseService")
         void investmentAssetUniverseService_returnsAssetUniverseService() {
             assertThat(config.investmentAssetUniverseService(
-                    mock(AssetUniverseApi.class),
-                    mock(InvestmentRestAssetUniverseService.class)))
+                mock(AssetUniverseApi.class),
+                mock(InvestmentRestAssetUniverseService.class)))
                 .isNotNull().isInstanceOf(InvestmentAssetUniverseService.class);
         }
 
@@ -125,10 +124,10 @@ class InvestmentServiceConfigurationTest {
         @DisplayName("investmentPortfolioAllocationService — returns non-null InvestmentPortfolioAllocationService")
         void investmentPortfolioAllocationService_returnsAllocationService() {
             assertThat(config.investmentPortfolioAllocationService(
-                    mock(AllocationsApi.class),
-                    mock(AssetUniverseApi.class),
-                    mock(InvestmentApi.class),
-                    new IngestConfigProperties()))
+                mock(AllocationsApi.class),
+                mock(AssetUniverseApi.class),
+                mock(InvestmentApi.class),
+                new IngestConfigProperties()))
                 .isNotNull().isInstanceOf(InvestmentPortfolioAllocationService.class);
         }
 
@@ -150,8 +149,8 @@ class InvestmentServiceConfigurationTest {
         @DisplayName("investmentRiskQuestionaryService — returns non-null InvestmentRiskQuestionaryService")
         void investmentRiskQuestionaryService_returnsRiskQuestionaryService() {
             assertThat(config.investmentRiskQuestionaryService(
-                    mock(RiskAssessmentApi.class),
-                    new IngestConfigProperties()))
+                mock(RiskAssessmentApi.class),
+                new IngestConfigProperties()))
                 .isNotNull().isInstanceOf(InvestmentRiskQuestionaryService.class);
         }
     }
@@ -168,14 +167,15 @@ class InvestmentServiceConfigurationTest {
         @DisplayName("investmentSaga — returns non-null InvestmentSaga")
         void investmentSaga_returnsInvestmentSaga() {
             assertThat(config.investmentSaga(
-                    mock(InvestmentClientService.class),
-                    mock(InvestmentRiskAssessmentService.class),
-                    mock(InvestmentRiskQuestionaryService.class),
-                    mock(InvestmentPortfolioService.class),
-                    mock(InvestmentModelPortfolioService.class),
-                    mock(InvestmentPortfolioAllocationService.class),
-                    mock(AsyncTaskService.class),
-                    new InvestmentIngestionConfigurationProperties()))
+                mock(InvestmentClientService.class),
+                mock(InvestmentRiskAssessmentService.class),
+                mock(InvestmentRiskQuestionaryService.class),
+                mock(InvestmentPortfolioService.class),
+                mock(InvestmentModelPortfolioService.class),
+                mock(InvestmentPortfolioProductService.class),
+                mock(InvestmentPortfolioAllocationService.class),
+                mock(AsyncTaskService.class),
+                new InvestmentIngestionConfigurationProperties(), null))
                 .isNotNull().isInstanceOf(InvestmentSaga.class);
         }
 
@@ -183,13 +183,13 @@ class InvestmentServiceConfigurationTest {
         @DisplayName("investmentStaticDataSaga — returns non-null InvestmentAssetUniverseSaga")
         void investmentStaticDataSaga_returnsAssetUniverseSaga() {
             assertThat(config.investmentStaticDataSaga(
-                    mock(InvestmentAssetUniverseService.class),
-                    mock(InvestmentAssetPriceService.class),
-                    mock(InvestmentIntradayAssetPriceService.class),
-                    mock(InvestmentCurrencyService.class),
-                    mock(AsyncTaskService.class),
-                    new InvestmentIngestionConfigurationProperties(),
-                    new IngestConfigProperties()))
+                mock(InvestmentAssetUniverseService.class),
+                mock(InvestmentAssetPriceService.class),
+                mock(InvestmentIntradayAssetPriceService.class),
+                mock(InvestmentCurrencyService.class),
+                mock(AsyncTaskService.class),
+                new InvestmentIngestionConfigurationProperties(),
+                new IngestConfigProperties()))
                 .isNotNull().isInstanceOf(InvestmentAssetUniverseSaga.class);
         }
 
@@ -197,9 +197,9 @@ class InvestmentServiceConfigurationTest {
         @DisplayName("investmentContentSaga — returns non-null InvestmentContentSaga")
         void investmentContentSaga_returnsContentSaga() {
             assertThat(config.investmentContentSaga(
-                    mock(InvestmentRestNewsContentService.class),
-                    mock(InvestmentRestDocumentContentService.class),
-                    new InvestmentIngestionConfigurationProperties()))
+                mock(InvestmentRestNewsContentService.class),
+                mock(InvestmentRestDocumentContentService.class),
+                new InvestmentIngestionConfigurationProperties()))
                 .isNotNull().isInstanceOf(InvestmentContentSaga.class);
         }
     }

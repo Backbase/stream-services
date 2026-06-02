@@ -1,8 +1,10 @@
 package com.backbase.stream.investment.saga;
 
+import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.BaseAssessmentRequest;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
+import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.PortfolioRiskAssessment;
@@ -14,6 +16,7 @@ import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
+import com.backbase.stream.investment.service.InvestmentPortfolioProductService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
 import com.backbase.stream.investment.service.InvestmentRiskQuestionaryService;
@@ -80,8 +83,10 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     private final InvestmentPortfolioService investmentPortfolioService;
     private final InvestmentPortfolioAllocationService investmentPortfolioAllocationService;
     private final InvestmentModelPortfolioService investmentModelPortfolioService;
+    private final InvestmentPortfolioProductService investmentPortfolioProductService;
     private final AsyncTaskService asyncTaskService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
+    private final AssetUniverseApi assetUniverseApi;
 
     @Override
     public Mono<InvestmentTask> executeTask(InvestmentTask streamTask) {
@@ -93,6 +98,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
         return this.upsertInvestmentPortfolioModels(streamTask)
+            .flatMap(this::loadAssets)
             .flatMap(this::upsertClients)
             .flatMap(this::upsertRiskQuestions)
             .flatMap(this::upsertRiskAssessments)
@@ -149,7 +155,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .thenMany(Flux.fromIterable(Objects.requireNonNullElse(data.getPortfolios(), List.of()))
                 .flatMap(
                     p -> investmentPortfolioAllocationService.generateAllocations(p,
-                        data.getPortfolioProducts(),
+                        data.getIngestedPortfolioProducts(),
                         investmentTask.getData().getInvestmentAssetData())))
             .collectList()
             .doOnError(throwable -> {
@@ -161,7 +167,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
             })
-            .map(o -> investmentTask);
+            .map(_ -> investmentTask);
     }
 
     /**
@@ -247,6 +253,25 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             });
     }
 
+
+    private Mono<InvestmentTask> loadAssets(InvestmentTask investmentTask) {
+        if (coreConfigurationProperties.isAssetUniverseEnabled()) {
+            log.debug("Skip loading assets. Assets have to be provided on previous step");
+            return Mono.just(investmentTask);
+        }
+        log.info("Loading assets");
+        List<Asset> assets = investmentTask.getData().getInvestmentAssetData().getAssets();
+        return Flux.fromIterable(assets)
+            .flatMap(asset -> assetUniverseApi.getAsset(asset.getKeyString(), null, null, null)
+                .map(a -> {
+                    asset.setUuid(a.getUuid());
+                    return asset;
+                }))
+            .collectList()
+            .map(o -> investmentTask);
+
+    }
+
     /**
      * Upserts investment products for all investment arrangements.
      *
@@ -269,12 +294,12 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, null, investmentTask.getName(),
             investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment products");
 
-        return investmentPortfolioService.upsertInvestmentProducts(data, data.getInvestmentArrangements())
+        return investmentPortfolioProductService.upsertInvestmentProducts(data, data.getInvestmentArrangements())
             .map(products -> {
                 investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
                     UPSERTED_PREFIX + products.size() + " investment products");
-                data.setPortfoliosProducts(products);
+                data.addPortfoliosProducts(products);
                 log.info("Successfully upserted all investment products: taskId={}, productCount={}",
                     investmentTask.getId(), products.size());
 

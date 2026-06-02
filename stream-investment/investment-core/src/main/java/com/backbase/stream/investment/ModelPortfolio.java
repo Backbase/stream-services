@@ -2,6 +2,7 @@ package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,8 @@ public class ModelPortfolio {
     private double cashWeight;
     private int riskLevel;
     private List<Allocation> allocations;
+    private UUID createdFor;
+    private Map<String, String> extraData;
 
     public void uuid(UUID uuid) {
         this.uuid = uuid;

@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *   bootstrap:
  *     ingestions:
  *       investment:
- *         service:
+ *         config:
  *           portfolio:
  *             default-currency: USD
  *             activation-past-months: 3
@@ -64,6 +64,10 @@ public class IngestConfigProperties {
          * the portfolio is considered to have been activated 1 month ago.
          */
         private int activationPastMonths = 1;
+
+        private int listProductPageSize = 50;
+        private int listModelPageSize = 50;
+        private boolean ingestImages = true;
     }
 
     // -------------------------------------------------------------------------
