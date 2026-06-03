@@ -193,8 +193,7 @@ public class InvestmentPortfolioProductService {
         int pageSize = config.getPortfolio().getListProductPageSize();
         AtomicInteger pageCounter = new AtomicInteger(0);
         return productsApi.listPortfolioProducts(List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
-                null, null,
-                pageSize, null, null, null, null, null, "-model_portfolio__risk_level",
+                null, null, null, pageSize, null, null, null, null, null, "-model_portfolio__risk_level",
                 List.of(productType.getValue()), null, null)
             .expand(response -> {
                 if (response.getNext() == null) {
@@ -204,8 +203,8 @@ public class InvestmentPortfolioProductService {
 
                 return productsApi.listPortfolioProducts(
                     List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
-                    null, null,
-                    pageSize, null, riskLevel, null, nextPage * pageSize,
+                    null, null, null, pageSize, null, riskLevel,
+                    null, nextPage * pageSize,
                     null, "-model_portfolio__risk_level", List.of(productType.getValue()), List.of(productCategory),
                     null);
             })
