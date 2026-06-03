@@ -3,9 +3,12 @@ package com.backbase.stream.investment.service.resttemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.investment.api.service.sync.ApiClient;
+import com.backbase.investment.api.service.v1.model.OASModelPortfolioRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
 import com.backbase.stream.investment.ModelPortfolio;
 import java.util.UUID;
@@ -14,18 +17,28 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class InvestmentRestModelPortfolioServiceTest {
 
+    private static final String FORM_PARAM_DATA = "data";
+
     @Mock
     private ApiClient apiClient;
+
+    @Captor
+    @SuppressWarnings("unchecked")
+    private ArgumentCaptor<MultiValueMap<String, Object>> formParamsCaptor;
 
     private InvestmentRestModelPortfolioService service;
 
@@ -52,8 +65,9 @@ class InvestmentRestModelPortfolioServiceTest {
             response.setName("Conservative");
             response.setRiskLevel(3);
 
-            when(apiClient.invokeAPI(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any())).thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
+            when(apiClient.invokeAPI(anyString(), eq(HttpMethod.POST), any(), any(), any(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
 
             StepVerifier.create(service.createModelPortfolio(modelPortfolio))
                 .assertNext(result -> {
@@ -62,6 +76,29 @@ class InvestmentRestModelPortfolioServiceTest {
                     assertThat(result.getRiskLevel()).isEqualTo(3);
                 })
                 .verifyComplete();
+
+            assertThat(formParamsCaptor.getValue().containsKey(FORM_PARAM_DATA)).isTrue();
+            assertThat(formParamsCaptor.getValue().getFirst(FORM_PARAM_DATA))
+                .isInstanceOf(OASModelPortfolioRequestDataRequest.class);
+            OASModelPortfolioRequestDataRequest dataRequest =
+                (OASModelPortfolioRequestDataRequest) formParamsCaptor.getValue().getFirst(FORM_PARAM_DATA);
+            assertThat(dataRequest.getName()).isEqualTo("Conservative");
+            assertThat(dataRequest.getRiskLevel()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("create sends multipart form field named 'data'")
+        void createUsesDataFormParamName() {
+            ModelPortfolio modelPortfolio = buildModelPortfolio("Growth", 7);
+
+            when(apiClient.invokeAPI(anyString(), eq(HttpMethod.POST), any(), any(), any(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(
+                    new OASModelPortfolioResponse(UUID.randomUUID()), HttpStatus.OK));
+
+            StepVerifier.create(service.createModelPortfolio(modelPortfolio)).expectNextCount(1).verifyComplete();
+
+            assertThat(formParamsCaptor.getValue().keySet()).containsExactly(FORM_PARAM_DATA);
         }
 
         @Test
@@ -109,8 +146,9 @@ class InvestmentRestModelPortfolioServiceTest {
             response.setName("Dynamic");
             response.setRiskLevel(8);
 
-            when(apiClient.invokeAPI(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                any())).thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
+            when(apiClient.invokeAPI(anyString(), eq(HttpMethod.PUT), any(), any(), any(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
 
             StepVerifier.create(service.patchModelPortfolio(existingUuid.toString(), modelPortfolio))
                 .assertNext(result -> {
@@ -119,6 +157,35 @@ class InvestmentRestModelPortfolioServiceTest {
                     assertThat(result.getRiskLevel()).isEqualTo(8);
                 })
                 .verifyComplete();
+
+            assertThat(formParamsCaptor.getValue().containsKey(FORM_PARAM_DATA)).isTrue();
+            assertThat(formParamsCaptor.getValue().getFirst(FORM_PARAM_DATA))
+                .isInstanceOf(OASModelPortfolioRequestDataRequest.class);
+            OASModelPortfolioRequestDataRequest dataRequest =
+                (OASModelPortfolioRequestDataRequest) formParamsCaptor.getValue().getFirst(FORM_PARAM_DATA);
+            assertThat(dataRequest.getName()).isEqualTo("Dynamic");
+            assertThat(dataRequest.getRiskLevel()).isEqualTo(8);
+        }
+
+        @Test
+        @DisplayName("patch sends multipart form field named 'data'")
+        void patchUsesDataFormParamName() {
+            UUID existingUuid = UUID.randomUUID();
+            ModelPortfolio modelPortfolio = buildModelPortfolio("Income", 2);
+
+            when(apiClient.invokeAPI(anyString(), eq(HttpMethod.PUT), any(), any(), any(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(
+                    new OASModelPortfolioResponse(existingUuid), HttpStatus.OK));
+
+            StepVerifier.create(service.patchModelPortfolio(existingUuid.toString(), modelPortfolio))
+                .expectNextCount(1)
+                .verifyComplete();
+
+            assertThat(formParamsCaptor.getValue().keySet()).containsExactly(FORM_PARAM_DATA);
+            verify(apiClient).invokeAPI(
+                eq("/service-api/v2/advice-engines/model-portfolio/model_portfolios/{uuid}/"),
+                eq(HttpMethod.PUT), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
         }
 
         @Test
