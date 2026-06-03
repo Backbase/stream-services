@@ -1,5 +1,18 @@
 package com.backbase.stream.investment.service.resttemplate;
 
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_ADVICE_ENGINE;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_BADGE;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_DESCRIPTION;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_EXTERNAL_ID;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_EXTRA_DATA;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_IMAGE;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_MODEL_PORTFOLIO;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_NAME;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_ORDER;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_CATEGORY;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_TYPE;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_STATUS;
+
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.ApiClient.CollectionFormat;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
@@ -12,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -24,7 +36,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -70,16 +81,15 @@ public class InvestmentRestProductPortfolioService {
     }
 
     /**
-     * Patches an existing portfolio product via {@code PATCH /service-api/v2/products/portfolio/{uuid}/}.
+     * Updates an existing portfolio product via {@code PATCH /service-api/v2/products/portfolio/{uuid}/}.
      *
      * @param uuid          the UUID of the portfolio product to patch (must not be {@code null})
      * @param expand        optional fields to expand in the response
      * @param updateRequest the stream portfolio product with updated values
      * @return {@link Mono} emitting the patched {@link PortfolioProduct}
      */
-    public Mono<PortfolioProduct> patchPortfolioProduct(String uuid, List<String> expand,
-        ProductPortfolio updateRequest)
-        throws WebClientResponseException {
+    public Mono<PortfolioProduct> updatePortfolioProduct(String uuid, List<String> expand,
+        ProductPortfolio updateRequest) {
         log.info("Starting portfolio product patch: uuid={}, name='{}', productType={}",
             uuid, updateRequest.getName(), updateRequest.getProductType());
 
@@ -88,7 +98,7 @@ public class InvestmentRestProductPortfolioService {
                     throw new HttpClientErrorException(HttpStatus.BAD_REQUEST,
                         "Missing the required parameter 'uuid' when calling patchPortfolioProduct");
                 }
-                return Mono.just(invokePatch(uuid, expand, updateRequest));
+                return Mono.just(invokeUpdate(uuid, expand, updateRequest));
             })
             .map(patched -> {
                 log.info("Portfolio product patched successfully: uuid={}, name='{}', productType={}",
@@ -123,7 +133,7 @@ public class InvestmentRestProductPortfolioService {
             .getBody();
     }
 
-    private PortfolioProduct invokePatch(String uuid, List<String> expand, ProductPortfolio data) {
+    private PortfolioProduct invokeUpdate(String uuid, List<String> expand, ProductPortfolio data) {
         final Map<String, Object> pathParams = new HashMap<String, Object>();
         pathParams.put("uuid", uuid);
         final MultiValueMap<String, Object> formParams = productPortfolioParams(data);
@@ -148,32 +158,30 @@ public class InvestmentRestProductPortfolioService {
     private @NonNull MultiValueMap<String, Object> productPortfolioParams(ProductPortfolio data) {
         final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
         Optional.ofNullable(data.getName())
-            .ifPresent(v -> formParams.add("name", v));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_NAME, v));
         Optional.ofNullable(data.getDescription())
-            .ifPresent(v -> formParams.add("description", v + " 2"));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_DESCRIPTION, v));
         Optional.ofNullable(data.getBadge())
-            .ifPresent(v -> {
-                formParams.add("badge", apiClient.parameterToMultiValueMap(null, "badge", v));
-            });
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_BADGE, v));
         Optional.ofNullable(data.getExternalId())
-            .ifPresent(v -> formParams.add("external_id", v));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_EXTERNAL_ID, v));
         Optional.ofNullable(data.getStatus())
-            .ifPresent(v -> formParams.add("status", v.getValue()));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_STATUS, v));
         Optional.ofNullable(data.getOrder())
-            .ifPresent(v -> formParams.add("order", v));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_ORDER, v));
         Optional.ofNullable(data.getAdviceEngine())
-            .ifPresent(v -> formParams.add("advice_engine", v));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_ADVICE_ENGINE, v));
         Optional.ofNullable(data.getModelPortfolio())
-            .ifPresent(v -> formParams.add("model_portfolio",
-                Optional.ofNullable(v).map(InvestorModelPortfolio::getUuid).map(UUID::toString).orElse(null)));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_MODEL_PORTFOLIO,
+                Optional.of(v).map(InvestorModelPortfolio::getUuid).orElse(null)));
         Optional.ofNullable(data.getProductType())
-            .ifPresent(v -> formParams.add("product_type", v.getValue()));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_PRODUCT_TYPE, v.getValue()));
         Optional.ofNullable(data.getProductCategory())
-            .ifPresent(v -> formParams.add("product_category", v));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_PRODUCT_CATEGORY, v));
         Optional.ofNullable(data.getExtraData())
-            .ifPresent(v -> formParams.add("extra_data", v));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_EXTRA_DATA, v));
         if (ingestProperties.getPortfolio().isIngestImages()) {
-            Optional.ofNullable(data.getImageResource()).ifPresent(v -> formParams.add("image", v));
+            Optional.ofNullable(data.getImageResource()).ifPresent(v -> formParams.add(JSON_PROPERTY_IMAGE, v));
         }
         return formParams;
     }

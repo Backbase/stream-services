@@ -42,6 +42,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentModelPortfolioService {
 
+    private static final double WEIGHT_SUM_TOLERANCE = 1e-6;
+
     private final FinancialAdviceApi financialAdviceApi;
     private final InvestmentRestModelPortfolioService investmentRestModelPortfolioService;
     private final IngestConfigProperties config;
@@ -50,21 +52,8 @@ public class InvestmentModelPortfolioService {
 
     public Flux<OASModelPortfolioResponse> upsertModels(InvestmentData investmentData) {
         return Flux.fromIterable(Objects.requireNonNullElse(investmentData.getModelPortfolios(), List.of()))
-            .flatMap(modelPortfolioTemplate -> {
-                log.debug("Upserting investment portfolio model: name={}, riskLevel={}",
-                    modelPortfolioTemplate.getName(), modelPortfolioTemplate.getRiskLevel());
-
-                return upsertModelPortfolio(modelPortfolioTemplate)
-                    .doOnSuccess(modelPortfolio -> {
-                        modelPortfolioTemplate.uuid(modelPortfolio.getUuid());
-                        log.debug(
-                            "Successfully upserted investment portfolio model: modelUuid={}, name={}, riskLevel={}",
-                            modelPortfolio.getUuid(), modelPortfolio.getName(), modelPortfolio.getRiskLevel());
-                    })
-                    .doOnError(throwable -> log.error(
-                        "Failed to upsert investment portfolio model: name={}, riskLevel={}",
-                        modelPortfolioTemplate.getName(), modelPortfolioTemplate.getRiskLevel(), throwable));
-            });
+            .flatMap(modelPortfolioTemplate -> upsertModelPortfolio(modelPortfolioTemplate)
+                .doOnSuccess(modelPortfolio -> modelPortfolioTemplate.uuid(modelPortfolio.getUuid())));
     }
 
     public Mono<ModelPortfolio> upsertModelPortfolio(InvestorModelPortfolio modelPortfolio) {
@@ -76,16 +65,9 @@ public class InvestmentModelPortfolioService {
                 map.uuid(mp.getUuid());
                 return map;
             })
-            .doOnSuccess(mp -> {
-                log.debug("Successfully upserted investment portfolio model: modelUuid={}, name={}, riskLevel={}",
-                    mp.getUuid(), mp.getName(), mp.getRiskLevel());
-            })
-            .doOnError(throwable -> log.error(
-                "Failed to upsert investment portfolio model: name={}, riskLevel={}",
-                map.getName(), map.getRiskLevel(), throwable))
-            .onErrorResume(WebClientResponseException.class, throwable -> {
-                log.warn("Continuing without portfolio model: name={}, riskLevel={}", map.getName(),
-                    map.getRiskLevel());
+            .onErrorResume(WebClientResponseException.class, ex -> {
+                log.warn("Continuing without portfolio model: name={}, riskLevel={}, status={}",
+                    map.getName(), map.getRiskLevel(), ex.getStatusCode());
                 return Mono.empty();
             });
     }
@@ -110,7 +92,7 @@ public class InvestmentModelPortfolioService {
         String modelName = modelPortfolio.getName();
         Integer riskLevel = modelPortfolio.getRiskLevel();
 
-        log.info("Upserting model portfolio: name={}, riskLevel={}", modelName, riskLevel);
+        log.debug("Upserting model portfolio: name={}, riskLevel={}", modelName, riskLevel);
 
         return listExistingModelPortfolios(modelName, riskLevel)
             .flatMap(pm -> {
@@ -119,7 +101,7 @@ public class InvestmentModelPortfolioService {
                     modelPortfolio.setCashWeight(pm.getCashWeight());
                 } else {
                     log.error(
-                        "The stored model target asset weight and cash weight is incorrect for uuid={}, name={}, riskLevel={}",
+                        "Stored model target asset weight and cash weight are incorrect for uuid={}, name={}, riskLevel={}",
                         pm.getUuid(), pm.getName(), pm.getRiskLevel());
                 }
                 return patchModelPortfolio(pm.getUuid(), modelPortfolio);
@@ -127,16 +109,14 @@ public class InvestmentModelPortfolioService {
             .switchIfEmpty(Mono.defer(() -> createNewModelPortfolio(modelPortfolio)))
             .doOnSuccess(upserted -> log.info(
                 "Successfully upserted model portfolio: uuid={}, name={}, riskLevel={}",
-                upserted.getUuid(), upserted.getName(), upserted.getRiskLevel()))
-            .doOnError(throwable -> log.error(
-                "Failed to upsert model portfolio: name={}, riskLevel={}",
-                modelName, riskLevel, throwable));
+                upserted.getUuid(), upserted.getName(), upserted.getRiskLevel()));
     }
 
     private boolean isTargetAssetWeightCorrect(InvestorModelPortfolio pm) {
+        double cashWeight = Optional.ofNullable(pm.getCashWeight()).orElse(0d);
         double assetsWeight = Optional.ofNullable(pm.getAllocation()).orElse(List.of()).stream()
             .mapToDouble(AssetModelPortfolio::getWeight).sum();
-        return assetsWeight + pm.getCashWeight() == 1d;
+        return Math.abs(assetsWeight + cashWeight - 1d) <= WEIGHT_SUM_TOLERANCE;
     }
 
     /**
@@ -183,8 +163,8 @@ public class InvestmentModelPortfolioService {
      * @return Mono emitting the newly created model portfolio
      */
     private Mono<OASModelPortfolioResponse> createNewModelPortfolio(ModelPortfolio modelPortfolio) {
-        log.debug("Creating new model portfolio: name={}, riskLevel={}, details={}",
-            modelPortfolio.getName(), modelPortfolio.getRiskLevel(), modelPortfolio);
+        log.info("Creating new model portfolio: name={}, riskLevel={}",
+            modelPortfolio.getName(), modelPortfolio.getRiskLevel());
         return investmentRestModelPortfolioService.createModelPortfolio(modelPortfolio)
             .doOnError(throwable -> logModelPortfolioError("create",
                 modelPortfolio.getName(), modelPortfolio.getRiskLevel(), throwable));
@@ -208,7 +188,7 @@ public class InvestmentModelPortfolioService {
      * @param riskLevel the risk level of the model portfolio
      * @param throwable the exception that occurred
      */
-    private void logModelPortfolioError(String operation, String name, int riskLevel, Throwable throwable) {
+    private void logModelPortfolioError(String operation, String name, Integer riskLevel, Throwable throwable) {
         if (throwable instanceof WebClientResponseException ex) {
             log.error("Failed to {} model portfolio: name={}, riskLevel={}, status={}, body={}",
                 operation, name, riskLevel, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
