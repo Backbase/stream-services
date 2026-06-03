@@ -97,11 +97,12 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         }
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
-        return this.upsertInvestmentPortfolioModels(streamTask)
+        return this.loadAssets(streamTask)
             .flatMap(this::loadAssets)
             .flatMap(this::upsertClients)
             .flatMap(this::upsertRiskQuestions)
             .flatMap(this::upsertRiskAssessments)
+            .flatMap(this::upsertInvestmentPortfolioModels)
             .flatMap(this::upsertInvestmentProducts)
             .flatMap(this::upsertInvestmentPortfolios)
             .flatMap(this::upsertPortfolioTradingAccounts)
@@ -118,7 +119,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     "Investment saga failed: " + throwable.getMessage());
                 streamTask.setState(State.FAILED);
             })
-            .onErrorResume(throwable -> Mono.just(streamTask));
+            .onErrorResume(_ -> Mono.just(streamTask));
     }
 
     private Mono<InvestmentTask> upsertInvestmentPortfolioDeposits(InvestmentTask investmentTask) {

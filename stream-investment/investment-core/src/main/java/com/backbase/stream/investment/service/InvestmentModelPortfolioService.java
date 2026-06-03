@@ -1,6 +1,7 @@
 package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
+import com.backbase.investment.api.service.v1.model.AssetModelPortfolio;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
 import com.backbase.stream.configuration.IngestConfigProperties;
@@ -11,6 +12,7 @@ import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPo
 import com.backbase.stream.investment.service.resttemplate.RestTemplateModelPortfolioMapper;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +82,12 @@ public class InvestmentModelPortfolioService {
             })
             .doOnError(throwable -> log.error(
                 "Failed to upsert investment portfolio model: name={}, riskLevel={}",
-                map.getName(), map.getRiskLevel(), throwable));
+                map.getName(), map.getRiskLevel(), throwable))
+            .onErrorResume(WebClientResponseException.class, throwable -> {
+                log.warn("Continuing without portfolio model: name={}, riskLevel={}", map.getName(),
+                    map.getRiskLevel());
+                return Mono.empty();
+            });
     }
 
     /**
@@ -107,8 +114,14 @@ public class InvestmentModelPortfolioService {
 
         return listExistingModelPortfolios(modelName, riskLevel)
             .flatMap(pm -> {
-                modelPortfolio.setAllocations(modelPortfolioMapper.mapAssetModel(pm.getAllocation()));
-                modelPortfolio.setCashWeight(pm.getCashWeight());
+                if (isTargetAssetWeightCorrect(pm)) {
+                    modelPortfolio.setAllocations(modelPortfolioMapper.mapAssetModel(pm.getAllocation()));
+                    modelPortfolio.setCashWeight(pm.getCashWeight());
+                } else {
+                    log.error(
+                        "The stored model target asset weight and cash weight is incorrect for uuid={}, name={}, riskLevel={}",
+                        pm.getUuid(), pm.getName(), pm.getRiskLevel());
+                }
                 return patchModelPortfolio(pm.getUuid(), modelPortfolio);
             })
             .switchIfEmpty(Mono.defer(() -> createNewModelPortfolio(modelPortfolio)))
@@ -118,6 +131,12 @@ public class InvestmentModelPortfolioService {
             .doOnError(throwable -> log.error(
                 "Failed to upsert model portfolio: name={}, riskLevel={}",
                 modelName, riskLevel, throwable));
+    }
+
+    private boolean isTargetAssetWeightCorrect(InvestorModelPortfolio pm) {
+        double assetsWeight = Optional.ofNullable(pm.getAllocation()).orElse(List.of()).stream()
+            .mapToDouble(AssetModelPortfolio::getWeight).sum();
+        return assetsWeight + pm.getCashWeight() == 1d;
     }
 
     /**

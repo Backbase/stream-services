@@ -5,7 +5,6 @@ import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
-import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
@@ -263,28 +262,12 @@ public class InvestmentPortfolioProductService {
         ProductPortfolio portfolioProduct, InvestmentData investmentData) {
         UUID productUuid = existingProduct.getUuid();
 
-        PortfolioProductCreateUpdateRequest patch = new PortfolioProductCreateUpdateRequest()
-            .image(null)
-            .name(portfolioProduct.getName())
-            .description(portfolioProduct.getDescription())
-            .badge(portfolioProduct.getBadge())
-            .externalId(portfolioProduct.getExternalId())
-            .status(portfolioProduct.getStatus())
-            .order(portfolioProduct.getOrder())
-            .adviceEngine(portfolioProduct.getAdviceEngine())
-            .modelPortfolio(Optional.ofNullable(portfolioProduct.getModelPortfolio())
-                .map(InvestorModelPortfolio::getUuid)
-                .orElse(null))
-            .productType(portfolioProduct.getProductType())
-            .productCategory(portfolioProduct.getProductCategory())
-            .extraData(portfolioProduct.getExtraData());
-
         log.debug("Patching existing portfolio product: uuid={}, name={}, productType={}",
             productUuid, portfolioProduct.getName(), portfolioProduct.getProductType());
 
-        return productsApi.updatePortfolioProduct(productUuid.toString(), patch,
+        return investmentRestProductPortfolioService.patchPortfolioProduct(productUuid.toString(),
                 List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
-                null, null)
+                portfolioProduct)
             .doOnSuccess(updated -> {
                 log.info("Successfully patched portfolio product: uuid={}, name={}, productType={}",
                     updated.getUuid(), updated.getName(), updated.getProductType());
@@ -306,36 +289,6 @@ public class InvestmentPortfolioProductService {
             .onErrorResume(WebClientResponseException.class, ex -> Mono.just(existingProduct));
     }
 
-    // This is next step for implementation
-    /*private Mono<PortfolioProduct> updateExistingPortfolioProduct(PortfolioProduct existingProduct,
-        ProductPortfolio portfolioProduct, InvestmentData investmentData) {
-        UUID productUuid = existingProduct.getUuid();
-
-        log.debug("Attempting to patch existing portfolio product: uuid={}, productType={}",
-            productUuid, portfolioProduct.getProductType());
-
-        return investmentRestProductPortfolioService.patchPortfolioProduct(productUuid.toString(),
-                List.of(config.getAllocation().getModelPortfolioAllocationAsset()), portfolioProduct)
-            .doOnSuccess(updated -> {
-                log.info("Successfully patched existing investment product: uuid={}", updated.getUuid());
-                investmentData.addPortfolioProducts(updated);
-            })
-            .doOnError(throwable -> {
-                if (throwable instanceof WebClientResponseException ex) {
-                    log.warn(
-                        "PATCH portfolio product failed (falling back to existing): uuid={}, status={}, body={}",
-                        productUuid, ex.getStatusCode(), ex.getResponseBodyAsString());
-                } else {
-                    log.warn("PATCH portfolio product failed (falling back to existing): uuid={}",
-                        productUuid, throwable);
-                }
-            })
-            .onErrorResume(WebClientResponseException.class, ex -> {
-                log.info("Using existing product data due to patch failure: uuid={}", productUuid);
-                return Mono.just(existingProduct);
-            });
-    }*/
-
     /**
      * Creates a portfolio product with an optional model portfolio UUID.
      *
@@ -352,22 +305,8 @@ public class InvestmentPortfolioProductService {
         log.info("Creating portfolio product: name={}, productType={}, modelPortfolioUuid={}",
             portfolioProduct.getName(), productType, modelPortfolioUuid);
 
-        PortfolioProductCreateUpdateRequest request = new PortfolioProductCreateUpdateRequest()
-            .image(null)
-            .name(portfolioProduct.getName())
-            .description(portfolioProduct.getDescription())
-            .badge(portfolioProduct.getBadge())
-            .externalId(portfolioProduct.getExternalId())
-            .status(portfolioProduct.getStatus())
-            .order(portfolioProduct.getOrder())
-            .adviceEngine(portfolioProduct.getAdviceEngine())
-            .modelPortfolio(modelPortfolioUuid)
-            .productType(portfolioProduct.getProductType())
-            .productCategory(portfolioProduct.getProductCategory())
-            .extraData(portfolioProduct.getExtraData());
-
-        return productsApi.createPortfolioProduct(request,
-                List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null)
+        return investmentRestProductPortfolioService.createPortfolioProduct(portfolioProduct,
+                List.of(config.getAllocation().getModelPortfolioAllocationAsset()))
             .retry(2)
             .retryWhen(reactor.util.retry.Retry.fixedDelay(1, java.time.Duration.ofSeconds(1)))
             .doOnSuccess(created -> {
@@ -379,29 +318,6 @@ public class InvestmentPortfolioProductService {
             .doOnError(throwable -> logPortfolioProductCreationError(
                 portfolioProduct.getName(), productType, throwable));
     }
-
-    // This is next step for implementation
-    /*private Mono<PortfolioProduct> createPortfolioProductWithModel(ProductPortfolio portfolioProduct,
-        InvestmentData investmentData) {
-
-        String productType = portfolioProduct.getProductType().getValue();
-        UUID modelPortfolioUuid = Optional.ofNullable(portfolioProduct.getModelPortfolio())
-            .map(InvestorModelPortfolio::getUuid).orElse(null);
-        log.info("Creating portfolio product: productType={}, modelPortfolioUuid={}",
-            productType, modelPortfolioUuid);
-
-        return investmentRestProductPortfolioService.createPortfolioProduct(portfolioProduct,
-                List.of(config.getAllocation().getModelPortfolioAllocationAsset()))
-            .retry(2)
-            .retryWhen(reactor.util.retry.Retry.fixedDelay(1, java.time.Duration.ofSeconds(1)))
-            .doOnSuccess(created -> {
-                log.info(
-                    "Successfully created portfolio product: uuid={}, productType={}, modelPortfolio={}",
-                    created.getUuid(), created.getProductType(), modelPortfolioUuid);
-                investmentData.addPortfolioProducts(created);
-            })
-            .doOnError(throwable -> logPortfolioProductCreationError(productType, throwable));
-    }*/
 
     /**
      * Logs portfolio product creation errors with detailed information about the failure.

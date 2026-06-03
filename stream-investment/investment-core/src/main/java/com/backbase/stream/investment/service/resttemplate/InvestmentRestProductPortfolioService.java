@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -139,7 +140,7 @@ public class InvestmentRestProductPortfolioService {
 
         ParameterizedTypeReference<PortfolioProduct> localVarReturnType = new ParameterizedTypeReference<>() {
         };
-        return apiClient.invokeAPI("/service-api/v2/products/portfolio/{uuid}/", HttpMethod.PATCH, pathParams,
+        return apiClient.invokeAPI("/service-api/v2/products/portfolio/{uuid}/", HttpMethod.PUT, pathParams,
             queryParams, null, headerParams, cookieParams, formParams, localVarAccept, localVarContentType,
             new String[]{}, localVarReturnType).getBody();
     }
@@ -149,20 +150,22 @@ public class InvestmentRestProductPortfolioService {
         Optional.ofNullable(data.getName())
             .ifPresent(v -> formParams.add("name", v));
         Optional.ofNullable(data.getDescription())
-            .ifPresent(v -> formParams.add("description", v));
+            .ifPresent(v -> formParams.add("description", v + " 2"));
         Optional.ofNullable(data.getBadge())
-            .ifPresent(v -> formParams.add("badge", v));
+            .ifPresent(v -> {
+                formParams.add("badge", apiClient.parameterToMultiValueMap(null, "badge", v));
+            });
         Optional.ofNullable(data.getExternalId())
             .ifPresent(v -> formParams.add("external_id", v));
         Optional.ofNullable(data.getStatus())
-            .ifPresent(v -> formParams.add("status", v));
+            .ifPresent(v -> formParams.add("status", v.getValue()));
         Optional.ofNullable(data.getOrder())
             .ifPresent(v -> formParams.add("order", v));
         Optional.ofNullable(data.getAdviceEngine())
             .ifPresent(v -> formParams.add("advice_engine", v));
         Optional.ofNullable(data.getModelPortfolio())
             .ifPresent(v -> formParams.add("model_portfolio",
-                Optional.ofNullable(v).map(InvestorModelPortfolio::getUuid).orElse(null)));
+                Optional.ofNullable(v).map(InvestorModelPortfolio::getUuid).map(UUID::toString).orElse(null)));
         Optional.ofNullable(data.getProductType())
             .ifPresent(v -> formParams.add("product_type", v.getValue()));
         Optional.ofNullable(data.getProductCategory())
