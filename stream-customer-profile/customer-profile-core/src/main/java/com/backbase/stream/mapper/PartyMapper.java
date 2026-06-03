@@ -23,6 +23,6 @@ public interface PartyMapper {
     @ValueMapping(source = "POSTAL", target = "POSTAL")
     @ValueMapping(source = "RESIDENTIAL", target = "RESIDENTIAL")
     @ValueMapping(source = "STATEMENT", target = "STATEMENT")
-    PostalAddressDto mapPostalAddressType(PartyPostalAddress partyPostalAddress);
+    PostalAddressDto.TypeEnum mapPostalAddressType(PartyPostalAddress.TypeEnum partyPostalAddress);
 
 }

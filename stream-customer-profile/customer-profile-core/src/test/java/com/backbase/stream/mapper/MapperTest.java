@@ -7,12 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.backbase.customerprofile.api.integration.v1.model.PostalAddressDto;
 import com.backbase.stream.legalentity.model.Party;
+import com.backbase.stream.legalentity.model.PartyPostalAddress;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -118,6 +124,7 @@ class MapperTest {
         var party = fixtureMonkey.giveMeBuilder(Party.class)
             .size("phoneNumbers", 2)
             .size("postalAddresses", 1)
+            .set("postalAddresses[0].type", PartyPostalAddress.TypeEnum.BUSINESS)
             .size("customFields", 3)
             .size("partyPartyRelationships", 1)
             .sample();
@@ -129,6 +136,7 @@ class MapperTest {
 
         assertNotNull(resultDto.getPostalAddresses());
         assertEquals(1, resultDto.getPostalAddresses().size());
+        assertEquals(PostalAddressDto.TypeEnum.BUSINESS, resultDto.getPostalAddresses().getFirst().getType());
 
         assertNotNull(resultDto.getAdditions());
         assertEquals(3, resultDto.getAdditions().size());
@@ -199,4 +207,24 @@ class MapperTest {
         assertTrue(resultDto.getElectronicAddresses().getUrls().isEmpty());
     }
 
+    @ParameterizedTest
+    @DisplayName("Should map address type correctly")
+    @MethodSource("addressTypes")
+    void shouldMapAddressType(PostalAddressDto.TypeEnum expectedType, PartyPostalAddress.TypeEnum actualType) {
+        var mapped = partyMapper.mapPostalAddressType(actualType);
+        assertEquals(expectedType, mapped);
+    }
+
+    private static Stream<Arguments> addressTypes() {
+        return Stream.of(
+            Arguments.of(PostalAddressDto.TypeEnum.BUSINESS, PartyPostalAddress.TypeEnum.BUSINESS),
+            Arguments.of(PostalAddressDto.TypeEnum.CORRESPONDENCE, PartyPostalAddress.TypeEnum.CORRESPONDENCE),
+            Arguments.of(PostalAddressDto.TypeEnum.DELIVERYTO, PartyPostalAddress.TypeEnum.DELIVERY_TO),
+            Arguments.of(PostalAddressDto.TypeEnum.MAILTO, PartyPostalAddress.TypeEnum.MAIL_TO),
+            Arguments.of(PostalAddressDto.TypeEnum.PO_BOX, PartyPostalAddress.TypeEnum.PO_BOX),
+            Arguments.of(PostalAddressDto.TypeEnum.POSTAL, PartyPostalAddress.TypeEnum.POSTAL),
+            Arguments.of(PostalAddressDto.TypeEnum.RESIDENTIAL, PartyPostalAddress.TypeEnum.RESIDENTIAL),
+            Arguments.of(PostalAddressDto.TypeEnum.STATEMENT, PartyPostalAddress.TypeEnum.STATEMENT)
+        );
+    }
 }
