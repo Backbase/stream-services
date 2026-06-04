@@ -164,8 +164,8 @@ public class InvestmentRestProductPortfolioService {
             .ifPresent(v -> formParams.add(JSON_PROPERTY_DESCRIPTION, v));
         Optional.ofNullable(data.getBadge())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_BADGE, v));
-        Optional.ofNullable(data.getExternalId())
-            .ifPresent(v -> formParams.add(JSON_PROPERTY_EXTERNAL_ID, v));
+        formParams.add(JSON_PROPERTY_EXTERNAL_ID, Optional.ofNullable(data.getExternalId())
+            .orElse(UUID.randomUUID().toString()));
         Optional.ofNullable(data.getStatus())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_STATUS, v.getValue()));
         Optional.ofNullable(data.getOrder())
