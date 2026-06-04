@@ -69,6 +69,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     public static final String RESULT_FAILED = "failed";
 
     private static final String INVESTMENT_PRODUCTS = "investment-products";
+    private static final String INVESTMENT_PORTFOLIO_ALLOCATIONS = "investment-portfolio-allocations";
     private static final String INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS = "investment-portfolio-trading-accounts";
     private static final String INVESTMENT_RISK_ASSESSMENTS = "investment-risk-assessments";
     private static final String INVESTMENT_RISK_QUESTIONS = "investment-risk-questions";
@@ -97,19 +98,21 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         }
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
-        return this.upsertInvestmentPortfolioModels(streamTask)
-            .flatMap(this::loadAssets)
+        return this.loadAssets(streamTask)
             .flatMap(this::upsertClients)
             .flatMap(this::upsertRiskQuestions)
             .flatMap(this::upsertRiskAssessments)
+            .flatMap(this::upsertInvestmentPortfolioModels)
             .flatMap(this::upsertInvestmentProducts)
             .flatMap(this::upsertInvestmentPortfolios)
             .flatMap(this::upsertPortfolioTradingAccounts)
             .flatMap(this::upsertInvestmentPortfolioDeposits)
             .flatMap(this::upsertPortfoliosAllocations)
-            .doOnNext(completedTask -> log.info(
-                "Successfully completed investment saga: taskId={}, taskName={}, state={}",
-                completedTask.getId(), completedTask.getName(), completedTask.getState()))
+            .doOnSuccess(completedTask -> {
+                streamTask.setState(State.COMPLETED);
+                log.info("Successfully completed investment saga: taskId={}, taskName={}, state={}",
+                    completedTask.getId(), completedTask.getName(), completedTask.getState());
+            })
             .doOnError(throwable -> {
                 log.error("Failed to execute investment saga: taskId={}, taskName={}",
                     streamTask.getId(), streamTask.getName(), throwable);
@@ -118,19 +121,19 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     "Investment saga failed: " + throwable.getMessage());
                 streamTask.setState(State.FAILED);
             })
-            .onErrorResume(throwable -> Mono.just(streamTask));
+            .onErrorResume(_ -> Mono.just(streamTask));
     }
 
     private Mono<InvestmentTask> upsertInvestmentPortfolioDeposits(InvestmentTask investmentTask) {
         return Flux.fromIterable(Objects.requireNonNullElse(investmentTask.getData().getPortfolios(), List.of()))
             .flatMap(investmentPortfolioService::upsertDeposits)
             .onErrorResume(throwable -> {
-                log.warn("Failed to create deposit for portfolio", throwable);
+                log.warn("Failed to create deposit for portfolio: taskId={}", investmentTask.getId(), throwable);
                 return Mono.empty();
             })
             .flatMap(investmentPortfolioAllocationService::createDepositAllocation)
             .collectList()
-            .map(o -> investmentTask);
+            .map(_ -> investmentTask);
     }
 
     /**
@@ -140,7 +143,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
      * Manual cleanup should be performed if necessary through the Investment Service API.
      *
      * @param streamTask the task to rollback
-     * @return null - rollback not implemented
+     * @return empty {@link Mono} — rollback not implemented
      */
     @Override
     public Mono<InvestmentTask> rollBack(InvestmentTask streamTask) {
@@ -151,21 +154,27 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
     private Mono<InvestmentTask> upsertPortfoliosAllocations(InvestmentTask investmentTask) {
         InvestmentData data = investmentTask.getData();
+        List<InvestmentPortfolio> portfolios = Objects.requireNonNullElse(data.getPortfolios(), List.of());
         return asyncTaskService.checkPriceAsyncTasksFinished(data.getPriceAsyncTasks())
-            .thenMany(Flux.fromIterable(Objects.requireNonNullElse(data.getPortfolios(), List.of()))
+            .thenMany(Flux.fromIterable(portfolios)
                 .flatMap(
                     p -> investmentPortfolioAllocationService.generateAllocations(p,
                         data.getIngestedPortfolioProducts(),
                         investmentTask.getData().getInvestmentAssetData())))
             .collectList()
             .doOnError(throwable -> {
-                log.error("Allocation generation failed for portfolios:{} taskId={}",
-                    data.getPortfolios().stream().map(InvestmentPortfolio::getPortfolio).map(PortfolioList::getUuid)
-                        .toList(), investmentTask.getId(),
+                log.error("Allocation generation failed: taskId={}, portfolioUuids={}",
+                    investmentTask.getId(),
+                    portfolios.stream()
+                        .map(InvestmentPortfolio::getPortfolio)
+                        .filter(Objects::nonNull)
+                        .map(PortfolioList::getUuid)
+                        .toList(),
                     throwable);
-                investmentTask.error(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_FAILED,
+                investmentTask.error(INVESTMENT_PORTFOLIO_ALLOCATIONS, OP_UPSERT, RESULT_FAILED,
                     investmentTask.getName(), investmentTask.getId(),
-                    "Failed to upsert investment portfolio trading accounts: " + throwable.getMessage());
+                    "Failed to generate investment portfolio allocations: " + throwable.getMessage());
+                investmentTask.setState(State.FAILED);
             })
             .map(_ -> investmentTask);
     }
@@ -204,7 +213,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 investmentTask.info(INVESTMENT_PORTFOLIOS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
                     UPSERTED_PREFIX + portfolios.size() + " investment portfolios");
-                investmentTask.setState(State.COMPLETED);
+
                 investmentTask.setPortfolios(portfolios);
 
                 log.info("Successfully upserted all investment portfolios: taskId={}, portfolioCount={}",
@@ -218,7 +227,6 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 investmentTask.error(INVESTMENT_PORTFOLIOS, OP_UPSERT, RESULT_FAILED,
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment portfolios: " + throwable.getMessage());
-                investmentTask.setState(State.FAILED);
             });
     }
 
@@ -239,7 +247,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     investmentTask.getName(), investmentTask.getId(),
                     UPSERTED_PREFIX + modelPortfolio.size() + " investment portfolio models");
 
-                log.info("Successfully upserted all investment portfolio models: taskId={}, productCount={}",
+                log.info("Successfully upserted all investment portfolio models: taskId={}, modelCount={}",
                     investmentTask.getId(), modelPortfolio.size());
 
                 return investmentTask;
@@ -256,11 +264,22 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
     private Mono<InvestmentTask> loadAssets(InvestmentTask investmentTask) {
         if (coreConfigurationProperties.isAssetUniverseEnabled()) {
-            log.debug("Skip loading assets. Assets have to be provided on previous step");
+            log.debug("Skipping asset load in investment saga; asset universe ingestion enabled: taskId={}",
+                investmentTask.getId());
             return Mono.just(investmentTask);
         }
-        log.info("Loading assets");
-        List<Asset> assets = investmentTask.getData().getInvestmentAssetData().getAssets();
+        InvestmentData data = investmentTask.getData();
+        if (data.getInvestmentAssetData() == null) {
+            log.debug("Skipping asset load; no investment asset data on task: taskId={}", investmentTask.getId());
+            return Mono.just(investmentTask);
+        }
+        List<Asset> assets = Objects.requireNonNullElse(data.getInvestmentAssetData().getAssets(), List.of());
+        if (assets.isEmpty()) {
+            log.debug("Skipping asset load; asset list is empty: taskId={}", investmentTask.getId());
+            return Mono.just(investmentTask);
+        }
+        log.info("Loading assets from asset universe API: taskId={}, assetCount={}",
+            investmentTask.getId(), assets.size());
         return Flux.fromIterable(assets)
             .flatMap(asset -> assetUniverseApi.getAsset(asset.getKeyString(), null, null, null)
                 .map(a -> {
@@ -268,7 +287,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     return asset;
                 }))
             .collectList()
-            .map(o -> investmentTask);
+            .map(_ -> investmentTask);
 
     }
 
@@ -406,11 +425,11 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     }
 
     private Mono<InvestmentTask> upsertPortfolioTradingAccounts(InvestmentTask investmentTask) {
-        List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts = investmentTask.getData()
-            .getInvestmentPortfolioTradingAccounts();
+        List<InvestmentPortfolioTradingAccount> investmentPortfolioTradingAccounts = Objects.requireNonNullElse(
+            investmentTask.getData().getInvestmentPortfolioTradingAccounts(), List.of());
         int accountsCount = investmentPortfolioTradingAccounts.size();
 
-        log.info("Starting investment portfolio trading accounts upsert: taskId={}, arrangementCount={}",
+        log.info("Starting investment portfolio trading accounts upsert: taskId={}, accountsCount={}",
             investmentTask.getId(), accountsCount);
 
         investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, null, investmentTask.getName(),
@@ -421,12 +440,12 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 investmentTask.info(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
                     UPSERTED_PREFIX + products.size() + " investment portfolio trading accounts");
-                log.info("Successfully upserted all investment portfolio trading accounts: taskId={}, productCount={}",
+                log.info("Successfully upserted all investment portfolio trading accounts: taskId={}, accountsCount={}",
                     investmentTask.getId(), products.size());
             })
             .thenReturn(investmentTask)
             .doOnError(throwable -> {
-                log.error("Failed to upsert investment portfolio trading accounts: taskId={}, arrangementCount={}",
+                log.error("Failed to upsert investment portfolio trading accounts: taskId={}, accountsCount={}",
                     investmentTask.getId(), accountsCount, throwable);
                 investmentTask.error(INVESTMENT_PORTFOLIO_TRADING_ACCOUNTS, OP_UPSERT, RESULT_FAILED,
                     investmentTask.getName(), investmentTask.getId(),
@@ -472,7 +491,6 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 streamTask.data(clients);
                 streamTask.info(INVESTMENT, OP_UPSERT, RESULT_CREATED, streamTask.getName(), streamTask.getId(),
                     UPSERTED_PREFIX + clients.size() + " investment clients");
-                streamTask.setState(State.COMPLETED);
 
                 log.info("Successfully upserted all clients: taskId={}, clientCount={}, successCount={}",
                     streamTask.getId(), clientCount, clients.size());
@@ -485,7 +503,6 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 streamTask.error(INVESTMENT, OP_UPSERT, RESULT_FAILED,
                     streamTask.getName(), streamTask.getId(),
                     "Failed to upsert investment clients: " + throwable.getMessage());
-                streamTask.setState(State.FAILED);
             });
     }
 

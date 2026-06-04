@@ -4,18 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
+import com.backbase.investment.api.service.v1.model.AssetModelPortfolio;
+import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
-import com.backbase.investment.api.service.v1.model.PaginatedOASModelPortfolioResponseList;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelAsset;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.model.PaginatedExpandedModelPortfolioList;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPortfolioService;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -48,14 +52,16 @@ import reactor.test.StepVerifier;
  */
 class InvestmentModelPortfolioServiceTest {
 
+    private static final String ALLOCATION_ASSET_EXPAND = "model_portfolio.allocation.asset";
+    private static final int LIST_MODEL_PAGE_SIZE = 50;
+
     @Mock
     private FinancialAdviceApi financialAdviceApi;
 
     @Mock
     private InvestmentRestModelPortfolioService investmentRestModelPortfolioService;
 
-    @Mock
-    private IngestConfigProperties ingestConfigProperties;
+    private final IngestConfigProperties ingestConfigProperties = new IngestConfigProperties();
 
     private InvestmentModelPortfolioService service;
 
@@ -64,7 +70,8 @@ class InvestmentModelPortfolioServiceTest {
     @BeforeEach
     void setUp() {
         mocks = MockitoAnnotations.openMocks(this);
-        service = new InvestmentModelPortfolioService(financialAdviceApi, investmentRestModelPortfolioService, ingestConfigProperties);
+        service = new InvestmentModelPortfolioService(
+            financialAdviceApi, investmentRestModelPortfolioService, ingestConfigProperties);
     }
 
     @AfterEach
@@ -87,7 +94,7 @@ class InvestmentModelPortfolioServiceTest {
 
             StepVerifier.create(service.upsertModels(data)).verifyComplete();
 
-            verify(financialAdviceApi, never()).listModelPortfolio(
+            verify(financialAdviceApi, never()).listModelPortfolioWithResponseSpec(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
             verify(investmentRestModelPortfolioService, never()).createModelPortfolio(any());
         }
@@ -99,7 +106,7 @@ class InvestmentModelPortfolioServiceTest {
 
             StepVerifier.create(service.upsertModels(data)).verifyComplete();
 
-            verify(financialAdviceApi, never()).listModelPortfolio(
+            verify(financialAdviceApi, never()).listModelPortfolioWithResponseSpec(
                 any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
         }
 
@@ -110,7 +117,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Conservative", 3, 0.1);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            stubListReturnsEmpty("Conservative", 3);
+            stubListReturnsEmpty("Conservative");
             OASModelPortfolioResponse created = buildResponse(expectedUuid, "Conservative", 3);
             when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
                 .thenReturn(Mono.just(created));
@@ -132,8 +139,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Balanced", 5, 0.2);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            OASModelPortfolioResponse existing = buildResponse(existingUuid, "Balanced", 5);
-            stubListReturnsOne("Balanced", 5, existing);
+            stubListReturnsOne("Balanced", 5, 0.2, existingUuid);
 
             OASModelPortfolioResponse patched = buildResponse(existingUuid, "Balanced", 5);
             when(investmentRestModelPortfolioService.patchModelPortfolio(
@@ -156,8 +162,8 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio t2 = buildModelPortfolio("Aggressive", 8, 0.05);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(t1, t2)).build();
 
-            stubListReturnsEmpty("Conservative", 3);
-            stubListReturnsEmpty("Aggressive", 8);
+            stubListReturnsEmpty("Conservative");
+            stubListReturnsEmpty("Aggressive");
 
             when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
                 .thenReturn(
@@ -179,7 +185,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Conservative", 3, 0.1);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            stubListReturnsEmpty("Conservative", 3);
+            stubListReturnsEmpty("Conservative");
             when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
                 .thenReturn(Mono.error(new RuntimeException("create failed")));
 
@@ -198,7 +204,7 @@ class InvestmentModelPortfolioServiceTest {
                 .name("Growth").riskLevel(7).cashWeight(0.25).allocations(List.of(allocation)).build();
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            stubListReturnsEmpty("Growth", 7);
+            stubListReturnsEmpty("Growth");
 
             ArgumentCaptor<ModelPortfolio> requestCaptor = ArgumentCaptor.forClass(ModelPortfolio.class);
             when(investmentRestModelPortfolioService.createModelPortfolio(requestCaptor.capture()))
@@ -235,7 +241,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Conservative", 2, 0.15);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            stubListReturnsEmpty("Conservative", 2);
+            stubListReturnsEmpty("Conservative");
             when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
                 .thenReturn(Mono.just(buildResponse(expectedUuid, "Conservative", 2)));
 
@@ -251,8 +257,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Moderate", 5, 0.3);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            OASModelPortfolioResponse existing = buildResponse(existingUuid, "Moderate", 5);
-            stubListReturnsOne("Moderate", 5, existing);
+            stubListReturnsOne("Moderate", 5, 0.3, existingUuid);
             OASModelPortfolioResponse patched = buildResponse(existingUuid, "Moderate", 5);
             when(investmentRestModelPortfolioService.patchModelPortfolio(
                 eq(existingUuid.toString()), any(ModelPortfolio.class)))
@@ -273,14 +278,13 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Balanced", 6, 0.2);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            OASModelPortfolioResponse first = buildResponse(firstUuid, "Balanced", 6);
-            OASModelPortfolioResponse second = buildResponse(secondUuid, "Balanced", 6);
-            PaginatedOASModelPortfolioResponseList page = new PaginatedOASModelPortfolioResponseList()
-                .count(2).results(List.of(first, second));
-            when(financialAdviceApi.listModelPortfolio(
-                isNull(), isNull(), isNull(), eq(1), eq("Balanced"),
-                isNull(), isNull(), isNull(), eq(6), isNull()))
-                .thenReturn(Mono.just(page));
+            InvestorModelPortfolio first = buildInvestorModelPortfolio(firstUuid, "Balanced", 6, 0.2);
+            InvestorModelPortfolio second = buildInvestorModelPortfolio(secondUuid, "Balanced", 6, 0.2);
+            PaginatedExpandedModelPortfolioList page = PaginatedExpandedModelPortfolioList.builder()
+                .count(2)
+                .results(List.of(first, second))
+                .build();
+            stubListReturns(page, "Balanced");
 
             OASModelPortfolioResponse patched = buildResponse(firstUuid, "Balanced", 6);
             when(investmentRestModelPortfolioService.patchModelPortfolio(
@@ -300,9 +304,12 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Balanced", 5, 0.2);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            when(financialAdviceApi.listModelPortfolio(
-                isNull(), isNull(), isNull(), eq(1), eq("Balanced"),
-                isNull(), isNull(), isNull(), eq(5), isNull()))
+            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+            when(financialAdviceApi.listModelPortfolioWithResponseSpec(
+                eq(List.of(ALLOCATION_ASSET_EXPAND)), isNull(), isNull(), eq(LIST_MODEL_PAGE_SIZE),
+                eq("Balanced"), isNull(), isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(responseSpec);
+            when(responseSpec.bodyToMono(PaginatedExpandedModelPortfolioList.class))
                 .thenReturn(Mono.error(new RuntimeException("list API failed")));
 
             StepVerifier.create(service.upsertModels(data))
@@ -326,7 +333,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Income", 2, 0.4);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            stubListReturnsEmpty("Income", 2);
+            stubListReturnsEmpty("Income");
             OASModelPortfolioResponse created = buildResponse(newUuid, "Income", 2);
             when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
                 .thenReturn(Mono.just(created));
@@ -346,7 +353,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Income", 2, 0.4);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            stubListReturnsEmpty("Income", 2);
+            stubListReturnsEmpty("Income");
             WebClientResponseException ex = WebClientResponseException.create(
                 HttpStatus.BAD_REQUEST.value(), "Bad Request", null, null, null);
             when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
@@ -363,7 +370,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Income", 2, 0.4);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            stubListReturnsEmpty("Income", 2);
+            stubListReturnsEmpty("Income");
             when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
                 .thenReturn(Mono.error(new IllegalStateException("unexpected")));
 
@@ -388,8 +395,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Dynamic", 9, 0.05);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            OASModelPortfolioResponse existing = buildResponse(existingUuid, "Dynamic", 9);
-            stubListReturnsOne("Dynamic", 9, existing);
+            stubListReturnsOne("Dynamic", 9, 0.05, existingUuid);
             OASModelPortfolioResponse patched = buildResponse(existingUuid, "Dynamic", 9);
             when(investmentRestModelPortfolioService.patchModelPortfolio(
                 eq(existingUuid.toString()), any(ModelPortfolio.class)))
@@ -413,8 +419,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Stable", 4, 0.3);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            OASModelPortfolioResponse existing = buildResponse(existingUuid, "Stable", 4);
-            stubListReturnsOne("Stable", 4, existing);
+            stubListReturnsOne("Stable", 4, 0.3, existingUuid);
 
             ArgumentCaptor<String> uuidCaptor = ArgumentCaptor.forClass(String.class);
             OASModelPortfolioResponse patched = buildResponse(existingUuid, "Stable", 4);
@@ -436,8 +441,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Dynamic", 9, 0.05);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            OASModelPortfolioResponse existing = buildResponse(existingUuid, "Dynamic", 9);
-            stubListReturnsOne("Dynamic", 9, existing);
+            stubListReturnsOne("Dynamic", 9, 0.05, existingUuid);
             WebClientResponseException ex = WebClientResponseException.create(
                 HttpStatus.NOT_FOUND.value(), "Not Found", null, null, null);
             when(investmentRestModelPortfolioService.patchModelPortfolio(
@@ -456,8 +460,7 @@ class InvestmentModelPortfolioServiceTest {
             ModelPortfolio template = buildModelPortfolio("Dynamic", 9, 0.05);
             InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
 
-            OASModelPortfolioResponse existing = buildResponse(existingUuid, "Dynamic", 9);
-            stubListReturnsOne("Dynamic", 9, existing);
+            stubListReturnsOne("Dynamic", 9, 0.05, existingUuid);
             when(investmentRestModelPortfolioService.patchModelPortfolio(
                 eq(existingUuid.toString()), any(ModelPortfolio.class)))
                 .thenReturn(Mono.error(new RuntimeException("patch failed")));
@@ -486,20 +489,38 @@ class InvestmentModelPortfolioServiceTest {
         return response;
     }
 
-    private void stubListReturnsEmpty(String name, int riskLevel) {
-        PaginatedOASModelPortfolioResponseList emptyPage = new PaginatedOASModelPortfolioResponseList()
-            .count(0).results(Collections.emptyList());
-        when(financialAdviceApi.listModelPortfolio(
-            any(), any(), any(), eq(1), eq(name), any(), any(), any(), eq(riskLevel), any()))
-            .thenReturn(Mono.just(emptyPage));
+    private InvestorModelPortfolio buildInvestorModelPortfolio(
+        UUID uuid, String name, int riskLevel, double cashWeight) {
+        double assetWeight = 1.0 - cashWeight;
+        AssetModelPortfolio allocation = new AssetModelPortfolio().weight(assetWeight);
+        return new InvestorModelPortfolio(
+            uuid, name, cashWeight, riskLevel, List.of(allocation), null, null);
     }
 
-    private void stubListReturnsOne(String name, int riskLevel, OASModelPortfolioResponse response) {
-        PaginatedOASModelPortfolioResponseList page = new PaginatedOASModelPortfolioResponseList()
-            .count(1).results(List.of(response));
-        when(financialAdviceApi.listModelPortfolio(
-            any(), any(), any(), eq(1), eq(name), any(), any(), any(), eq(riskLevel), any()))
+    private void stubListReturnsEmpty(String name) {
+        PaginatedExpandedModelPortfolioList emptyPage = PaginatedExpandedModelPortfolioList.builder()
+            .count(0)
+            .results(Collections.emptyList())
+            .build();
+        stubListReturns(emptyPage, name);
+    }
+
+    private void stubListReturnsOne(String name, int riskLevel, double cashWeight, UUID uuid) {
+        InvestorModelPortfolio existing = buildInvestorModelPortfolio(uuid, name, riskLevel, cashWeight);
+        PaginatedExpandedModelPortfolioList page = PaginatedExpandedModelPortfolioList.builder()
+            .count(1)
+            .results(List.of(existing))
+            .build();
+        stubListReturns(page, name);
+    }
+
+    private void stubListReturns(PaginatedExpandedModelPortfolioList page, String name) {
+        WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+        when(financialAdviceApi.listModelPortfolioWithResponseSpec(
+            eq(List.of(ALLOCATION_ASSET_EXPAND)), isNull(), isNull(), eq(LIST_MODEL_PAGE_SIZE),
+            eq(name), isNull(), isNull(), isNull(), isNull(), isNull()))
+            .thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(PaginatedExpandedModelPortfolioList.class))
             .thenReturn(Mono.just(page));
     }
 }
-

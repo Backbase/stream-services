@@ -1,11 +1,9 @@
 package com.backbase.stream.investment.service;
 
-import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
-import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
@@ -14,6 +12,7 @@ import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.ProductPortfolio;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestProductPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.RestTemplateModelPortfolioMapper;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -26,23 +25,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 /**
- * Service wrapper around generated {@link FinancialAdviceApi} providing guarded create/patch operations with logging,
- * minimal idempotency helpers and consistent error handling.
+ * Service wrapper around {@link InvestmentProductsApi} and {@link InvestmentRestProductPortfolioService} providing
+ * guarded create/patch operations with logging, minimal idempotency helpers and consistent error handling.
  *
  * <p>This service manages:
  * <ul>
- *   <li>Investment portfolio model creation and updates</li>
+ *   <li>Investment portfolio product creation and updates</li>
  * </ul>
  *
  * <p>Design notes:
  * <ul>
  *   <li>Side-effecting operations are logged at info (create) or debug (patch) levels</li>
- *   <li>Exceptions from the underlying WebClient are propagated (caller decides retry strategy)</li>
+ *   <li>Exceptions from the underlying API clients are propagated (caller decides retry strategy)</li>
  *   <li>All reactive operations include proper success and error handlers for observability</li>
  * </ul>
  */
@@ -72,14 +73,15 @@ public class InvestmentPortfolioProductService {
      *   <li>Updates the arrangement with the product UUID</li>
      * </ol>
      *
-     * @param investmentArrangements the investment arrangement to associate with the product (must not be null)
-     * @return Mono emitting the created or updated portfolio product
-     * @throws NullPointerException if investmentArrangement is null
+     * @param investmentData         the investment data context containing portfolio product templates
+     * @param investmentArrangements the investment arrangements to associate with products (must not be null)
+     * @return Mono emitting the created or updated portfolio products
+     * @throws NullPointerException if investmentArrangements is null
      */
     public Mono<List<PortfolioProduct>> upsertInvestmentProducts(InvestmentData investmentData,
         List<InvestmentArrangement> investmentArrangements) {
         if (investmentArrangements == null) {
-            return Mono.error(new NullPointerException("InvestmentArrangement must not be null"));
+            return Mono.error(new NullPointerException("investmentArrangements must not be null"));
         }
         return enrichPortfolioProductsWithModels(investmentData)
             .flatMapIterable(this::distinctProducts)
@@ -114,10 +116,9 @@ public class InvestmentPortfolioProductService {
             .flatMap(pp -> {
                 Mono<ModelPortfolio> modelPortfolio = upsertPortfolioModel(pp);
                 return modelPortfolio
-                    // todo: improve upsert load
                     .map(mp -> {
-                        InvestorModelPortfolio map = modelPortfolioMapper.map(mp);
-                        pp.setModelPortfolio(map);
+                        InvestorModelPortfolio mappedModelPortfolio = modelPortfolioMapper.map(mp);
+                        pp.setModelPortfolio(mappedModelPortfolio);
                         return pp;
                     })
                     .switchIfEmpty(Mono.just(pp));
@@ -187,12 +188,12 @@ public class InvestmentPortfolioProductService {
             .map(InvestorModelPortfolio::getRiskLevel).orElse(null);
 
         ProductTypeEnum productType = portfolioProduct.getProductType();
+        String productCategory = portfolioProduct.getProductCategory();
 
         int pageSize = config.getPortfolio().getListProductPageSize();
         AtomicInteger pageCounter = new AtomicInteger(0);
         return productsApi.listPortfolioProducts(List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
-                null, null,
-                pageSize, null, null, null, null, null, "-model_portfolio__risk_level",
+                null, null, null, pageSize, null, null, null, null, null, "-model_portfolio__risk_level",
                 List.of(productType.getValue()), null, null)
             .expand(response -> {
                 if (response.getNext() == null) {
@@ -202,9 +203,10 @@ public class InvestmentPortfolioProductService {
 
                 return productsApi.listPortfolioProducts(
                     List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
-                    null, null,
-                    pageSize, null, null, riskLevel, nextPage * pageSize,
-                    null, "-model_portfolio__risk_level", List.of(productType.getValue()), null, null);
+                    null, null, null, pageSize, null, riskLevel,
+                    null, nextPage * pageSize,
+                    null, "-model_portfolio__risk_level", List.of(productType.getValue()), List.of(productCategory),
+                    null);
             })
             .collectList()
             .doOnSuccess(products -> log.debug(
@@ -231,19 +233,14 @@ public class InvestmentPortfolioProductService {
                         portfolioProduct.getName(), productType);
                     return Mono.empty();
                 }
-                portfolioProducts = List.of(portfolioProducts.getLast());
                 int resultCount = portfolioProducts.size();
                 if (resultCount > 1) {
-                    log.error("Data setup issue: found {} portfolio products with name={}, productType={}, "
-                            + "expected exactly 1",
+                    // TODO: verify duplicate portfolio product selection strategy (getLast vs fail)
+                    log.warn("Found {} portfolio products matching name={}, productType={}, using most recent one",
                         resultCount, portfolioProduct.getName(), productType);
-                    return Mono.error(new IllegalStateException(
-                        String.format("Data setup issue: Found %d portfolio products with name=%s, productType=%s, "
-                                + "expected exactly 1. Please review product configuration.",
-                            resultCount, portfolioProduct.getName(), productType)));
                 }
 
-                PortfolioProduct existingProduct = portfolioProducts.get(0);
+                PortfolioProduct existingProduct = portfolioProducts.getLast();
                 log.info("Found existing portfolio product: uuid={}, name={}, productType={}",
                     existingProduct.getUuid(), existingProduct.getName(), productType);
                 return Mono.just(existingProduct);
@@ -263,78 +260,21 @@ public class InvestmentPortfolioProductService {
         ProductPortfolio portfolioProduct, InvestmentData investmentData) {
         UUID productUuid = existingProduct.getUuid();
 
-        PortfolioProductCreateUpdateRequest patch = new PortfolioProductCreateUpdateRequest()
-            .image(null)
-            .name(portfolioProduct.getName())
-            .description(portfolioProduct.getDescription())
-            .badge(portfolioProduct.getBadge())
-            .externalId(portfolioProduct.getExternalId())
-            .status(portfolioProduct.getStatus())
-            .order(portfolioProduct.getOrder())
-            .adviceEngine(portfolioProduct.getAdviceEngine())
-            .modelPortfolio(Optional.ofNullable(portfolioProduct.getModelPortfolio())
-                .map(InvestorModelPortfolio::getUuid)
-                .orElse(null))
-            .productType(portfolioProduct.getProductType())
-            .productCategory(portfolioProduct.getProductCategory())
-            .extraData(portfolioProduct.getExtraData());
-
         log.debug("Patching existing portfolio product: uuid={}, name={}, productType={}",
             productUuid, portfolioProduct.getName(), portfolioProduct.getProductType());
 
-        return productsApi.updatePortfolioProduct(productUuid.toString(), patch,
+        return investmentRestProductPortfolioService.updatePortfolioProduct(productUuid.toString(),
                 List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
-                null, null)
+                portfolioProduct)
             .doOnSuccess(updated -> {
-                log.info("Successfully patched portfolio product: uuid={}, name={}, productType={}",
+                log.debug("Successfully patched portfolio product: uuid={}, name={}, productType={}",
                     updated.getUuid(), updated.getName(), updated.getProductType());
                 investmentData.addPortfolioProducts(updated);
             })
-            .doOnError(throwable -> {
-                if (throwable instanceof WebClientResponseException ex) {
-                    log.warn(
-                        "PATCH portfolio product failed, using existing product: uuid={}, name={}, "
-                            + "productType={}, status={}, body={}",
-                        productUuid, portfolioProduct.getName(), portfolioProduct.getProductType(),
-                        ex.getStatusCode(), ex.getResponseBodyAsString());
-                } else {
-                    log.warn(
-                        "PATCH portfolio product failed, using existing product: uuid={}, name={}, productType={}",
-                        productUuid, portfolioProduct.getName(), portfolioProduct.getProductType(), throwable);
-                }
-            })
-            .onErrorResume(WebClientResponseException.class, ex -> Mono.just(existingProduct));
+            .doOnError(throwable -> logPortfolioProductPatchError(
+                productUuid, portfolioProduct.getName(), portfolioProduct.getProductType(), throwable))
+            .onErrorResume(HttpClientErrorException.class, ex -> Mono.just(existingProduct));
     }
-
-    // This is next step for implementation
-    /*private Mono<PortfolioProduct> updateExistingPortfolioProduct(PortfolioProduct existingProduct,
-        ProductPortfolio portfolioProduct, InvestmentData investmentData) {
-        UUID productUuid = existingProduct.getUuid();
-
-        log.debug("Attempting to patch existing portfolio product: uuid={}, productType={}",
-            productUuid, portfolioProduct.getProductType());
-
-        return investmentRestProductPortfolioService.patchPortfolioProduct(productUuid.toString(),
-                List.of(config.getAllocation().getModelPortfolioAllocationAsset()), portfolioProduct)
-            .doOnSuccess(updated -> {
-                log.info("Successfully patched existing investment product: uuid={}", updated.getUuid());
-                investmentData.addPortfolioProducts(updated);
-            })
-            .doOnError(throwable -> {
-                if (throwable instanceof WebClientResponseException ex) {
-                    log.warn(
-                        "PATCH portfolio product failed (falling back to existing): uuid={}, status={}, body={}",
-                        productUuid, ex.getStatusCode(), ex.getResponseBodyAsString());
-                } else {
-                    log.warn("PATCH portfolio product failed (falling back to existing): uuid={}",
-                        productUuid, throwable);
-                }
-            })
-            .onErrorResume(WebClientResponseException.class, ex -> {
-                log.info("Using existing product data due to patch failure: uuid={}", productUuid);
-                return Mono.just(existingProduct);
-            });
-    }*/
 
     /**
      * Creates a portfolio product with an optional model portfolio UUID.
@@ -352,26 +292,11 @@ public class InvestmentPortfolioProductService {
         log.info("Creating portfolio product: name={}, productType={}, modelPortfolioUuid={}",
             portfolioProduct.getName(), productType, modelPortfolioUuid);
 
-        PortfolioProductCreateUpdateRequest request = new PortfolioProductCreateUpdateRequest()
-            .image(null)
-            .name(portfolioProduct.getName())
-            .description(portfolioProduct.getDescription())
-            .badge(portfolioProduct.getBadge())
-            .externalId(portfolioProduct.getExternalId())
-            .status(portfolioProduct.getStatus())
-            .order(portfolioProduct.getOrder())
-            .adviceEngine(portfolioProduct.getAdviceEngine())
-            .modelPortfolio(modelPortfolioUuid)
-            .productType(portfolioProduct.getProductType())
-            .productCategory(portfolioProduct.getProductCategory())
-            .extraData(portfolioProduct.getExtraData());
-
-        return productsApi.createPortfolioProduct(request,
-                List.of(config.getAllocation().getModelPortfolioAllocationAsset()), null, null)
-            .retry(2)
-            .retryWhen(reactor.util.retry.Retry.fixedDelay(1, java.time.Duration.ofSeconds(1)))
+        return investmentRestProductPortfolioService.createPortfolioProduct(portfolioProduct,
+                List.of(config.getAllocation().getModelPortfolioAllocationAsset()))
+            .retryWhen(Retry.fixedDelay(2, Duration.ofSeconds(1)))
             .doOnSuccess(created -> {
-                log.info(
+                log.debug(
                     "Successfully created portfolio product: uuid={}, name={}, productType={}, modelPortfolioUuid={}",
                     created.getUuid(), created.getName(), created.getProductType(), modelPortfolioUuid);
                 investmentData.addPortfolioProducts(created);
@@ -380,40 +305,46 @@ public class InvestmentPortfolioProductService {
                 portfolioProduct.getName(), productType, throwable));
     }
 
-    // This is next step for implementation
-    /*private Mono<PortfolioProduct> createPortfolioProductWithModel(ProductPortfolio portfolioProduct,
-        InvestmentData investmentData) {
-
-        String productType = portfolioProduct.getProductType().getValue();
-        UUID modelPortfolioUuid = Optional.ofNullable(portfolioProduct.getModelPortfolio())
-            .map(InvestorModelPortfolio::getUuid).orElse(null);
-        log.info("Creating portfolio product: productType={}, modelPortfolioUuid={}",
-            productType, modelPortfolioUuid);
-
-        return investmentRestProductPortfolioService.createPortfolioProduct(portfolioProduct,
-                List.of(config.getAllocation().getModelPortfolioAllocationAsset()))
-            .retry(2)
-            .retryWhen(reactor.util.retry.Retry.fixedDelay(1, java.time.Duration.ofSeconds(1)))
-            .doOnSuccess(created -> {
-                log.info(
-                    "Successfully created portfolio product: uuid={}, productType={}, modelPortfolio={}",
-                    created.getUuid(), created.getProductType(), modelPortfolioUuid);
-                investmentData.addPortfolioProducts(created);
-            })
-            .doOnError(throwable -> logPortfolioProductCreationError(productType, throwable));
-    }*/
+    /**
+     * Logs portfolio product patch errors with detailed information about the failure.
+     *
+     * @param productUuid the UUID of the portfolio product being patched
+     * @param productName the name of the portfolio product being patched
+     * @param productType the product type being patched
+     * @param throwable   the exception that occurred during patching
+     */
+    private void logPortfolioProductPatchError(UUID productUuid, String productName, ProductTypeEnum productType,
+        Throwable throwable) {
+        if (throwable instanceof WebClientResponseException ex) {
+            log.warn(
+                "PATCH portfolio product failed, falling back to existing product: uuid={}, name={}, "
+                    + "productType={}, status={}, body={}",
+                productUuid, productName, productType, ex.getStatusCode(), ex.getResponseBodyAsString());
+        } else if (throwable instanceof HttpClientErrorException ex) {
+            log.warn(
+                "PATCH portfolio product failed: uuid={}, name={}, productType={}, status={}, body={}",
+                productUuid, productName, productType, ex.getStatusCode(), ex.getResponseBodyAsString());
+        } else {
+            log.error("PATCH portfolio product failed: uuid={}, name={}, productType={}",
+                productUuid, productName, productType, throwable);
+        }
+    }
 
     /**
      * Logs portfolio product creation errors with detailed information about the failure.
      *
-     * <p>Provides enhanced error context for WebClient exceptions including
+     * <p>Provides enhanced error context for HTTP client exceptions including
      * HTTP status code and response body.
      *
+     * @param productName the name of the portfolio product being created
      * @param productType the product type being created
      * @param throwable   the exception that occurred during creation
      */
     private void logPortfolioProductCreationError(String productName, String productType, Throwable throwable) {
         if (throwable instanceof WebClientResponseException ex) {
+            log.error("Failed to create portfolio product: name={}, productType={}, status={}, body={}",
+                productName, productType, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
+        } else if (throwable instanceof HttpClientErrorException ex) {
             log.error("Failed to create portfolio product: name={}, productType={}, status={}, body={}",
                 productName, productType, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
         } else {

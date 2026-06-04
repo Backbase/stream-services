@@ -1,5 +1,12 @@
 package com.backbase.stream.investment;
 
+import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON_PROPERTY_ADVICE_ENGINE;
+import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON_PROPERTY_EXTERNAL_ID;
+import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON_PROPERTY_EXTRA_DATA;
+import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON_PROPERTY_MODEL_PORTFOLIO;
+import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_CATEGORY;
+import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_TYPE;
+
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioProductBadge;
 import com.backbase.investment.api.service.v1.model.PortfolioProductStatusEnum;
@@ -30,19 +37,19 @@ public class ProductPortfolio {
     private Resource imageResource;
     private Integer order;
     private PortfolioProductBadge badge;
-    @JsonProperty("external_id")
+    @JsonProperty(JSON_PROPERTY_EXTERNAL_ID)
     private String externalId;
     private PortfolioProductStatusEnum status = PortfolioProductStatusEnum.ACTIVE;
-    @JsonProperty("product_category")
+    @JsonProperty(JSON_PROPERTY_PRODUCT_CATEGORY)
     private String productCategory;
     private UUID uuid;
-    @JsonProperty("advice_engine")
+    @JsonProperty(JSON_PROPERTY_ADVICE_ENGINE)
     private String adviceEngine;
-    @JsonProperty("model_portfolio")
+    @JsonProperty(JSON_PROPERTY_MODEL_PORTFOLIO)
     private InvestorModelPortfolio modelPortfolio;
-    @JsonProperty("product_type")
+    @JsonProperty(JSON_PROPERTY_PRODUCT_TYPE)
     private ProductTypeEnum productType;
-    @JsonProperty("extra_data")
+    @JsonProperty(JSON_PROPERTY_EXTRA_DATA)
     private Map<String, String> extraData = new HashMap<>();
 
 }

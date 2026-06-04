@@ -2,16 +2,23 @@ package com.backbase.stream.investment.saga;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.backbase.investment.api.service.v1.AssetUniverseApi;
+import com.backbase.investment.api.service.v1.model.Deposit;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
+import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.ClientUser;
 import com.backbase.stream.investment.InvestmentArrangement;
+import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.ModelPortfolio;
@@ -80,6 +87,9 @@ class InvestmentSagaTest {
     @Mock
     private InvestmentIngestionConfigurationProperties configurationProperties;
 
+    @Mock
+    private AssetUniverseApi assetUniverseApi;
+
     private InvestmentSaga investmentSaga;
 
     private AutoCloseable mocks;
@@ -98,7 +108,7 @@ class InvestmentSagaTest {
             investmentPortfolioProductService,
             asyncTaskService,
             configurationProperties,
-            null
+            assetUniverseApi
         );
     }
 
@@ -148,6 +158,100 @@ class InvestmentSagaTest {
             StepVerifier.create(investmentSaga.executeTask(task))
                 .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
                 .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("should skip saga when wealth ingestion is disabled")
+        void executeTask_wealthDisabled_skipsPipeline() {
+            when(configurationProperties.isWealthEnabled()).thenReturn(false);
+            InvestmentTask task = createFullTask();
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isNotEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            verify(clientService, never()).upsertClients(any());
+            verify(investmentPortfolioProductService, never()).upsertInvestmentProducts(any(), any());
+            verify(assetUniverseApi, never()).getAsset(any(), any(), any(), any());
+        }
+    }
+
+    // =========================================================================
+    // loadAssets
+    // =========================================================================
+
+    @Nested
+    @DisplayName("loadAssets")
+    class LoadAssetsTests {
+
+        @Test
+        @DisplayName("should skip asset load when asset universe ingestion is enabled")
+        void loadAssets_assetUniverseEnabled_skipsApiCall() {
+            when(configurationProperties.isAssetUniverseEnabled()).thenReturn(true);
+            InvestmentTask task = createTaskWithAssets();
+            wireTrivialPipelineAfterModelPortfolios();
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            verify(assetUniverseApi, never()).getAsset(any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("should skip asset load when investment asset data is null")
+        void loadAssets_noAssetData_skipsApiCall() {
+            when(configurationProperties.isAssetUniverseEnabled()).thenReturn(false);
+            InvestmentTask task = createMinimalTask();
+            wireTrivialPipelineAfterModelPortfolios();
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            verify(assetUniverseApi, never()).getAsset(any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("should skip asset load when asset list is empty")
+        void loadAssets_emptyAssetList_skipsApiCall() {
+            when(configurationProperties.isAssetUniverseEnabled()).thenReturn(false);
+            InvestmentTask task = new InvestmentTask("empty-assets", InvestmentData.builder()
+                .investmentAssetData(InvestmentAssetData.builder().assets(List.of()).build())
+                .investmentArrangements(List.of())
+                .clientUsers(List.of())
+                .portfolios(List.of())
+                .build());
+            wireTrivialPipelineAfterModelPortfolios();
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            verify(assetUniverseApi, never()).getAsset(any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("should resolve asset UUIDs from asset universe API before upserting clients")
+        void loadAssets_withAssets_resolvesUuids() {
+            when(configurationProperties.isAssetUniverseEnabled()).thenReturn(false);
+            Asset streamAsset = Asset.builder().isin("US0378331005").market("XNAS").currency("USD").build();
+            UUID resolvedUuid = UUID.randomUUID();
+            com.backbase.investment.api.service.v1.model.Asset apiAsset =
+                new com.backbase.investment.api.service.v1.model.Asset(resolvedUuid);
+
+            when(assetUniverseApi.getAsset(eq("US0378331005_XNAS_USD"), isNull(), isNull(), isNull()))
+                .thenReturn(reactor.core.publisher.Mono.just(apiAsset));
+
+            InvestmentTask task = createTaskWithAssets(streamAsset);
+            wireTrivialPipelineAfterModelPortfolios();
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            assertThat(streamAsset.getUuid()).isEqualTo(resolvedUuid);
+            verify(assetUniverseApi).getAsset(eq("US0378331005_XNAS_USD"), isNull(), isNull(), isNull());
         }
     }
 
@@ -261,7 +365,7 @@ class InvestmentSagaTest {
             when(investmentModelPortfolioService.upsertModels(any()))
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
-                .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+                .thenReturn(Mono.just(List.of(clientWithId())));
             when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
                 .thenReturn(Mono.just(List.of()));
             when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
@@ -345,11 +449,18 @@ class InvestmentSagaTest {
         @DisplayName("should upsert clients and mark task COMPLETED")
         void upsertClients_success() {
             InvestmentTask task = createFullTask();
+            ClientUser client = ClientUser.builder()
+                .investmentClientId(UUID.randomUUID())
+                .legalEntityId(LE_INTERNAL_ID)
+                .build();
             stubAllServicesSuccess();
+            when(clientService.upsertClients(any())).thenReturn(Mono.just(List.of(client)));
 
             StepVerifier.create(investmentSaga.executeTask(task))
                 .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
                 .verifyComplete();
+
+            assertThat(task.getData().getClientUsers()).containsExactly(client);
         }
 
         @Test
@@ -369,16 +480,16 @@ class InvestmentSagaTest {
     }
 
     // =========================================================================
-    // upsertArrangements
+    // upsertInvestmentProducts
     // =========================================================================
 
     @Nested
-    @DisplayName("upsertArrangements")
-    class UpsertArrangementsTests {
+    @DisplayName("upsertInvestmentProducts")
+    class UpsertInvestmentProductsTests {
 
         @Test
-        @DisplayName("should complete successfully without calling service when arrangement list is empty")
-        void upsertArrangements_emptyList_completesSuccessfully() {
+        @DisplayName("should complete successfully when arrangement list is empty")
+        void upsertInvestmentProducts_emptyList_completesSuccessfully() {
             InvestmentTask task = createMinimalTask();
             wireTrivialPipelineAfterModelPortfolios();
 
@@ -386,18 +497,37 @@ class InvestmentSagaTest {
                 .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
                 .verifyComplete();
 
-//            verify(investmentPortfolioService).upsertInvestmentProducts(any(), any());
+            verify(investmentPortfolioProductService).upsertInvestmentProducts(any(), any());
         }
 
         @Test
-        @DisplayName("should mark task FAILED when arrangement upsert throws an error")
-        void upsertArrangements_error_marksTaskFailed() {
+        @DisplayName("should upsert products and register them on investment data")
+        void upsertInvestmentProducts_success_registersProducts() {
+            InvestmentTask task = createFullTask();
+            UUID productUuid = UUID.randomUUID();
+            PortfolioProduct product = new PortfolioProduct(
+                "Robo", null, null, 1, null, "retail", productUuid, null, null, ProductTypeEnum.ROBO_ADVISOR);
+            stubAllServicesSuccess();
+            when(investmentPortfolioProductService.upsertInvestmentProducts(any(), any()))
+                .thenReturn(Mono.just(List.of(product)));
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            verify(investmentPortfolioProductService).upsertInvestmentProducts(task.getData(), task.getData().getInvestmentArrangements());
+            assertThat(task.getData().getIngestedPortfolioProducts()).containsExactly(product);
+        }
+
+        @Test
+        @DisplayName("should mark task FAILED when product upsert throws an error")
+        void upsertInvestmentProducts_error_marksTaskFailed() {
             InvestmentTask task = createFullTask();
 
             when(investmentModelPortfolioService.upsertModels(any()))
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
-                .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+                .thenReturn(Mono.just(List.of(clientWithId())));
             when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
                 .thenReturn(Mono.just(List.of()));
             when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
@@ -433,6 +563,22 @@ class InvestmentSagaTest {
         }
 
         @Test
+        @DisplayName("should set portfolios on task data after successful upsert")
+        void upsertPortfolios_success_setsPortfoliosOnTask() {
+            InvestmentTask task = createFullTask();
+            InvestmentPortfolio portfolio = InvestmentPortfolio.builder().portfolio(new PortfolioList()).build();
+            stubAllServicesSuccess();
+            when(investmentPortfolioService.upsertPortfolios(any(), any()))
+                .thenReturn(Mono.just(List.of(portfolio)));
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            assertThat(task.getData().getPortfolios()).containsExactly(portfolio);
+        }
+
+        @Test
         @DisplayName("should mark task FAILED when portfolio upsert throws an error")
         void upsertPortfolios_error_marksTaskFailed() {
             InvestmentTask task = createFullTask();
@@ -440,7 +586,7 @@ class InvestmentSagaTest {
             when(investmentModelPortfolioService.upsertModels(any()))
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
-                .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+                .thenReturn(Mono.just(List.of(clientWithId())));
             when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
                 .thenReturn(Mono.just(List.of()));
             when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
@@ -496,7 +642,7 @@ class InvestmentSagaTest {
             when(investmentModelPortfolioService.upsertModels(any()))
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
-                .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+                .thenReturn(Mono.just(List.of(clientWithId())));
             when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
                 .thenReturn(Mono.just(List.of()));
             when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
@@ -531,6 +677,42 @@ class InvestmentSagaTest {
             StepVerifier.create(investmentSaga.executeTask(task))
                 .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
                 .verifyComplete();
+
+            verify(investmentPortfolioService).upsertDeposits(any());
+            verify(investmentPortfolioAllocationService).createDepositAllocation(any());
+            verify(asyncTaskService).checkPriceAsyncTasksFinished(any());
+        }
+
+        @Test
+        @DisplayName("should continue when deposit upsert fails for a portfolio")
+        void upsertDeposits_depositFailure_continuesAndCompletes() {
+            InvestmentTask task = createFullTask();
+            when(investmentModelPortfolioService.upsertModels(any()))
+                .thenReturn(Flux.just(new OASModelPortfolioResponse()));
+            when(clientService.upsertClients(any()))
+                .thenReturn(Mono.just(List.of(clientWithId())));
+            when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentPortfolioProductService.upsertInvestmentProducts(any(), any()))
+                .thenReturn(Mono.just(List.of(new PortfolioProduct())));
+            when(investmentPortfolioService.upsertPortfolios(any(), any()))
+                .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
+            when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
+                .thenReturn(Mono.just(List.of()));
+            when(investmentPortfolioService.upsertDeposits(any()))
+                .thenReturn(Mono.error(new RuntimeException("deposit failed")));
+            when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
+                .thenReturn(Mono.empty());
+            when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
+                .thenReturn(Mono.empty());
+
+            StepVerifier.create(investmentSaga.executeTask(task))
+                .assertNext(result -> assertThat(result.getState()).isEqualTo(State.COMPLETED))
+                .verifyComplete();
+
+            verify(investmentPortfolioAllocationService, never()).createDepositAllocation(any());
         }
 
         @Test
@@ -541,7 +723,7 @@ class InvestmentSagaTest {
             when(investmentModelPortfolioService.upsertModels(any()))
                 .thenReturn(Flux.just(new OASModelPortfolioResponse()));
             when(clientService.upsertClients(any()))
-                .thenReturn(Mono.just(List.of(ClientUser.builder().build())));
+                .thenReturn(Mono.just(List.of(clientWithId())));
             when(investmentRiskQuestionaryService.upsertRiskQuestions(any()))
                 .thenReturn(Mono.just(List.of()));
             when(investmentRiskAssessmentService.upsertRiskAssessments(any(), any()))
@@ -551,9 +733,11 @@ class InvestmentSagaTest {
             when(investmentPortfolioService.upsertPortfolios(any(), any()))
                 .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
             when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
-                .thenReturn(Mono.empty());
+                .thenReturn(Mono.just(List.of()));
             when(investmentPortfolioService.upsertDeposits(any()))
-                .thenReturn(Mono.empty());
+                .thenReturn(Mono.just(new Deposit()));
+            when(investmentPortfolioAllocationService.createDepositAllocation(any()))
+                .thenReturn(Mono.just(new Deposit()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.empty());
             when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
@@ -610,6 +794,20 @@ class InvestmentSagaTest {
             .build());
     }
 
+    private InvestmentTask createTaskWithAssets(Asset... assets) {
+        return new InvestmentTask("asset-task", InvestmentData.builder()
+            .investmentAssetData(InvestmentAssetData.builder().assets(List.of(assets)).build())
+            .clientUsers(Collections.emptyList())
+            .investmentArrangements(Collections.emptyList())
+            .portfolios(Collections.emptyList())
+            .build());
+    }
+
+    private InvestmentTask createTaskWithAssets() {
+        return createTaskWithAssets(
+            Asset.builder().isin("US0378331005").market("XNAS").currency("USD").build());
+    }
+
     private InvestmentTask createFullTask() {
         return new InvestmentTask("full-task", InvestmentData.builder()
             .clientUsers(List.of(ClientUser.builder()
@@ -648,13 +846,19 @@ class InvestmentSagaTest {
         when(investmentPortfolioService.upsertPortfolios(any(), any()))
             .thenReturn(Mono.just(List.of(InvestmentPortfolio.builder().build())));
         when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
-            .thenReturn(Mono.empty());
+            .thenReturn(Mono.just(List.of()));
         when(investmentPortfolioService.upsertDeposits(any()))
-            .thenReturn(Mono.empty());
+            .thenReturn(Mono.just(new Deposit()));
+        when(investmentPortfolioAllocationService.createDepositAllocation(any()))
+            .thenReturn(Mono.just(new Deposit()));
         when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
             .thenReturn(Mono.empty());
         when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
             .thenReturn(Mono.empty());
+    }
+
+    private ClientUser clientWithId() {
+        return ClientUser.builder().investmentClientId(UUID.randomUUID()).legalEntityId(LE_INTERNAL_ID).build();
     }
 
     private void wireTrivialPipelineAfterModelPortfolios() {
@@ -669,7 +873,7 @@ class InvestmentSagaTest {
         when(investmentPortfolioService.upsertPortfolios(any(), any()))
             .thenReturn(Mono.just(List.of()));
         when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
-            .thenReturn(Mono.empty());
+            .thenReturn(Mono.just(List.of()));
         when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
             .thenReturn(Mono.empty());
         when(asyncTaskService.checkPriceAsyncTasksFinished(any()))

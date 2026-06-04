@@ -15,7 +15,7 @@
 
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
-        <investment-service-api.version>1.6.0</investment-service-api.version>
+        <investment-service-api.version>1.6.2</investment-service-api.version>
     </properties>
 
     <dependencyManagement>
