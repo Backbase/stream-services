@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -166,14 +167,14 @@ public class InvestmentRestProductPortfolioService {
         Optional.ofNullable(data.getExternalId())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_EXTERNAL_ID, v));
         Optional.ofNullable(data.getStatus())
-            .ifPresent(v -> formParams.add(JSON_PROPERTY_STATUS, v));
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_STATUS, v.getValue()));
         Optional.ofNullable(data.getOrder())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_ORDER, v));
         Optional.ofNullable(data.getAdviceEngine())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_ADVICE_ENGINE, v));
         Optional.ofNullable(data.getModelPortfolio())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_MODEL_PORTFOLIO,
-                Optional.of(v).map(InvestorModelPortfolio::getUuid).orElse(null)));
+                Optional.of(v).map(InvestorModelPortfolio::getUuid).map(UUID::toString).orElse(null)));
         Optional.ofNullable(data.getProductType())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_PRODUCT_TYPE, v.getValue()));
         Optional.ofNullable(data.getProductCategory())
