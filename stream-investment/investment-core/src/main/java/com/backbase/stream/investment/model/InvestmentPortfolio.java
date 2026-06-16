@@ -16,9 +16,15 @@ public class InvestmentPortfolio {
 
     private PortfolioList portfolio;
     private BigDecimal initialCash;
+    private BigDecimal withdrawalAmount;
 
     public double getInitialCashOrDefault(double defaultAmount) {
         return Optional.ofNullable(initialCash).map(BigDecimal::doubleValue)
+            .orElse(defaultAmount);
+    }
+
+    public double getWithdrawalAmountOrDefault(double defaultAmount) {
+        return Optional.ofNullable(withdrawalAmount).map(BigDecimal::doubleValue)
             .orElse(defaultAmount);
     }
 

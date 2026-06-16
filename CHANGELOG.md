@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.5.0]
+### Added
+- Added withdrawals to investment service ingestion
+
 ## [10.4.0]
 ### Changed
 - Upgrade `customer-profile-api` version from `1.17.1` to `2.6.0`.
