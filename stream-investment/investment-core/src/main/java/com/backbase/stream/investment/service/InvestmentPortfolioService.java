@@ -348,6 +348,8 @@ public class InvestmentPortfolioService {
             return Mono.empty();
         }
 
+        log.debug("Listing existing withdrawals for portfolio: uuid={}, targetWithdrawalAmount={}",
+            portfolio.getUuid(), withdrawalAmount);
         return paymentsApi.listWithdrawals(null, null, null, null, null,
                 null, portfolio.getUuid(), null)
             .filter(Objects::nonNull)
@@ -359,6 +361,8 @@ public class InvestmentPortfolioService {
             .flatMap(withdrawals -> {
                 double withdrawn = withdrawals.stream().mapToDouble(IntegrationWithdrawalList::getAmount).sum();
                 double remaining = withdrawalAmount - withdrawn;
+                log.debug("Portfolio withdrawal check: uuid={}, existing={}, target={}, remaining={}",
+                    portfolio.getUuid(), withdrawn, withdrawalAmount, remaining);
                 if (remaining > 0) {
                     return createWithdrawal(portfolio, remaining);
                 }
@@ -369,12 +373,18 @@ public class InvestmentPortfolioService {
                     .completedAt(last.getCompletedAt()));
             })
             .switchIfEmpty(Mono.defer(() -> createWithdrawal(portfolio, withdrawalAmount)))
-            .onErrorResume(ex -> Mono.just(new IntegrationWithdrawalCreate()
+            .onErrorResume(ex -> {
+                if (ex instanceof WebClientResponseException wce) {
+                    log.error("listWithdrawals API call failed for portfolio: uuid={}, status={}, body={}",
+                        portfolio.getUuid(), wce.getStatusCode(), wce.getResponseBodyAsString(), wce);
+                } else {
+                    log.error("Failed to process withdrawal for portfolio: uuid={}", portfolio.getUuid(), ex);
+                }
+                return Mono.just(new IntegrationWithdrawalCreate()
                     .portfolio(portfolio.getUuid())
                     .amount(withdrawalAmount)
-                    .completedAt(portfolio.getActivated().plusDays(4))
-                )
-            );
+                    .completedAt(portfolio.getActivated().plusDays(4)));
+            });
     }
 
     /**

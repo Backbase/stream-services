@@ -152,13 +152,22 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
      * @return Mono emitting the unchanged task after all withdrawals have been processed
      */
     private Mono<InvestmentTask> upsertInvestmentPortfolioWithdrawals(InvestmentTask investmentTask) {
-        log.info("Starting upsert of investment portfolio withdrawals: taskId={}", investmentTask.getId());
-        return Flux.fromIterable(Objects.requireNonNullElse(investmentTask.getData().getPortfolios(), List.of()))
-            .flatMap(investmentPortfolioService::upsertWithdrawals)
-            .onErrorResume(throwable -> {
-                log.warn("Failed to create withdrawal for portfolio: taskId={}", investmentTask.getId(), throwable);
-                return Mono.empty();
-            })
+        List<InvestmentPortfolio> portfolios =
+            Objects.requireNonNullElse(investmentTask.getData().getPortfolios(), List.of());
+        log.info("Starting upsert of investment portfolio withdrawals: taskId={}, portfolioCount={}",
+            investmentTask.getId(), portfolios.size());
+        if (portfolios.isEmpty()) {
+            log.warn("No portfolios found for withdrawal upsert — skipping: taskId={}", investmentTask.getId());
+            return Mono.just(investmentTask);
+        }
+        return Flux.fromIterable(portfolios)
+            .flatMap(portfolio -> investmentPortfolioService.upsertWithdrawals(portfolio)
+                .onErrorResume(throwable -> {
+                    log.warn("Failed to upsert withdrawal for portfolio: portfolioUuid={}, taskId={}",
+                        portfolio.getPortfolio() != null ? portfolio.getPortfolio().getUuid() : "unknown",
+                        investmentTask.getId(), throwable);
+                    return Mono.empty();
+                }))
             .collectList()
             .map(_ -> investmentTask);
     }
