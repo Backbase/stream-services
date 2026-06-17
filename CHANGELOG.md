@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [10.5.0]
+## [10.6.0]
 ### Added
 - Added withdrawals to investment service ingestion
 
