@@ -41,6 +41,7 @@ public class IngestConfigProperties {
     private PortfolioConfig portfolio = new PortfolioConfig();
     private AllocationConfig allocation = new AllocationConfig();
     private DepositConfig deposit = new DepositConfig();
+    private WithdrawalConfig withdrawal = new WithdrawalConfig();
     private AssetConfig asset = new AssetConfig();
     private AssessmentConfig assessment = new AssessmentConfig();
 
@@ -114,7 +115,33 @@ public class IngestConfigProperties {
     }
 
     // -------------------------------------------------------------------------
-    // Deposit
+    // Withdrawal
+    // -------------------------------------------------------------------------
+
+    /**
+     * Settings that govern the automatic seed withdrawal created for portfolios during ingestion.
+     *
+     * <p>Withdrawals are only created when {@code defaultAmount} is greater than zero, or when an
+     * explicit {@code withdrawalAmount} is set on the {@code InvestmentPortfolio}.
+     */
+    @Data
+    public static class WithdrawalConfig {
+
+        /**
+         * The payment provider identifier sent with every withdrawal request. Set this to the real
+         * provider name for non-mock environments.
+         */
+        private String provider = null;
+
+        /**
+         * The monetary amount used as the withdrawal amount when no explicit value is set on the
+         * portfolio. Defaults to {@code 500.0} (5% of {@code DEFAULT_INIT_CASH}).
+         */
+        private double defaultAmount = DEFAULT_INIT_CASH * 0.05d;
+    }
+
+    // -------------------------------------------------------------------------
+    // Asset
     // -------------------------------------------------------------------------
 
     /**

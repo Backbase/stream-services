@@ -15,7 +15,10 @@ import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.investment.api.service.v1.PortfolioTradingAccountsApi;
 import com.backbase.investment.api.service.v1.model.Deposit;
 import com.backbase.investment.api.service.v1.model.DepositRequest;
+import com.backbase.investment.api.service.v1.model.IntegrationWithdrawalCreate;
+import com.backbase.investment.api.service.v1.model.IntegrationWithdrawalList;
 import com.backbase.investment.api.service.v1.model.PaginatedDepositList;
+import com.backbase.investment.api.service.v1.model.PaginatedIntegrationWithdrawalListList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioListList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioTradingAccountList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
@@ -29,6 +32,7 @@ import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -885,6 +889,223 @@ class InvestmentPortfolioServiceTest {
                 .verifyComplete();
 
             verify(paymentsApi, never()).createDeposit(any());
+        }
+    }
+
+    // =========================================================================
+    // upsertWithdrawals
+    // =========================================================================
+
+    /**
+     * Tests for {@link InvestmentPortfolioService#upsertWithdrawals(InvestmentPortfolio)}.
+     *
+     * <p>Covers:
+     * <ul>
+     *   <li>Withdrawal amount is zero → returns empty Mono, no API call</li>
+     *   <li>No existing withdrawals → creates withdrawal for full configured amount</li>
+     *   <li>Existing withdrawals less than target → creates top-up for remaining amount</li>
+     *   <li>Existing withdrawals equal to or exceed target → returns existing, no new creation</li>
+     *   <li>Null results in paginated response → creates default withdrawal</li>
+     *   <li>{@link WebClientResponseException} from listWithdrawals → returns dummy, no create called</li>
+     *   <li>Generic exception from listWithdrawals → returns dummy, no create called</li>
+     * </ul>
+     */
+    @Nested
+    @DisplayName("upsertWithdrawals")
+    class UpsertWithdrawalsTests {
+
+        @Test
+        @DisplayName("withdrawal amount is zero — returns empty Mono without calling any API")
+        void upsertWithdrawals_zeroWithdrawalAmount_returnsEmpty() {
+            // Arrange — explicit BigDecimal.ZERO overrides the config default
+            UUID portfolioUuid = UUID.randomUUID();
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-W-ZERO",
+                OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder()
+                .portfolio(portfolio)
+                .withdrawalAmount(BigDecimal.ZERO)
+                .build();
+
+            // Act & Assert
+            StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
+                .verifyComplete();
+
+            verify(paymentsApi, never()).listWithdrawals(any(), any(), any(), any(), any(), any(), any(), any());
+            verify(paymentsApi, never()).createWithdrawal(any());
+        }
+
+        @Test
+        @DisplayName("no existing withdrawals — creates withdrawal for full configured default amount")
+        void upsertWithdrawals_noExistingWithdrawals_createsFullAmount() {
+            // Arrange
+            UUID portfolioUuid = UUID.randomUUID();
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-W-NEW",
+                OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder()
+                .portfolio(portfolio)
+                .build();
+
+            when(paymentsApi.listWithdrawals(isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), eq(portfolioUuid), isNull()))
+                .thenReturn(Mono.just(new PaginatedIntegrationWithdrawalListList().results(List.of())));
+
+            IntegrationWithdrawalCreate created = new IntegrationWithdrawalCreate()
+                .portfolio(portfolioUuid)
+                .amount(500d);
+            when(paymentsApi.createWithdrawal(any()))
+                .thenReturn(Mono.just(created));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
+                .expectNextMatches(w -> portfolioUuid.equals(w.getPortfolio()) && w.getAmount() == 500d)
+                .verifyComplete();
+
+            verify(paymentsApi).createWithdrawal(any());
+        }
+
+        @Test
+        @DisplayName("existing withdrawals sum less than target — creates top-up withdrawal for remaining amount")
+        void upsertWithdrawals_existingWithdrawalsPartial_topsUpRemainingAmount() {
+            // Arrange — default target is 500; existing sum is 200 → remaining 300
+            UUID portfolioUuid = UUID.randomUUID();
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-W-TOPUP",
+                OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder()
+                .portfolio(portfolio)
+                .build();
+
+            IntegrationWithdrawalList existing = Mockito.mock(IntegrationWithdrawalList.class);
+            when(existing.getAmount()).thenReturn(200d);
+
+            when(paymentsApi.listWithdrawals(isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), eq(portfolioUuid), isNull()))
+                .thenReturn(Mono.just(new PaginatedIntegrationWithdrawalListList().results(List.of(existing))));
+
+            IntegrationWithdrawalCreate topUp = new IntegrationWithdrawalCreate()
+                .portfolio(portfolioUuid)
+                .amount(300d);
+            when(paymentsApi.createWithdrawal(any()))
+                .thenReturn(Mono.just(topUp));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
+                .expectNextMatches(w -> w.getAmount() == 300d)
+                .verifyComplete();
+
+            verify(paymentsApi).createWithdrawal(argThat(req -> req.getAmount() == 300d));
+        }
+
+        @Test
+        @DisplayName("existing withdrawals equal to target — returns existing withdrawal without creating new one")
+        void upsertWithdrawals_existingWithdrawalsFull_returnsExistingWithoutCreating() {
+            // Arrange — existing sum equals default target of 500
+            UUID portfolioUuid = UUID.randomUUID();
+            OffsetDateTime completedAt = OffsetDateTime.now().minusDays(10);
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-W-FULL",
+                OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder()
+                .portfolio(portfolio)
+                .build();
+
+            IntegrationWithdrawalList existing = Mockito.mock(IntegrationWithdrawalList.class);
+            when(existing.getAmount()).thenReturn(500d);
+            when(existing.getPortfolio()).thenReturn(portfolioUuid);
+            when(existing.getCompletedAt()).thenReturn(completedAt);
+
+            when(paymentsApi.listWithdrawals(isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), eq(portfolioUuid), isNull()))
+                .thenReturn(Mono.just(new PaginatedIntegrationWithdrawalListList().results(List.of(existing))));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
+                .expectNextMatches(w -> portfolioUuid.equals(w.getPortfolio())
+                    && w.getAmount() == 500d
+                    && completedAt.equals(w.getCompletedAt()))
+                .verifyComplete();
+
+            verify(paymentsApi, never()).createWithdrawal(any());
+        }
+
+        @Test
+        @DisplayName("null results in paginated response — creates withdrawal for full amount")
+        void upsertWithdrawals_nullResultsList_createsWithdrawal() {
+            // Arrange
+            UUID portfolioUuid = UUID.randomUUID();
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-W-NULL",
+                OffsetDateTime.now().minusMonths(6));
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder()
+                .portfolio(portfolio)
+                .build();
+
+            when(paymentsApi.listWithdrawals(isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), eq(portfolioUuid), isNull()))
+                .thenReturn(Mono.just(new PaginatedIntegrationWithdrawalListList().results(null)));
+
+            IntegrationWithdrawalCreate created = new IntegrationWithdrawalCreate()
+                .portfolio(portfolioUuid)
+                .amount(500d);
+            when(paymentsApi.createWithdrawal(any()))
+                .thenReturn(Mono.just(created));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
+                .expectNextMatches(w -> portfolioUuid.equals(w.getPortfolio()))
+                .verifyComplete();
+
+            verify(paymentsApi).createWithdrawal(any());
+        }
+
+        @Test
+        @DisplayName("listWithdrawals throws WebClientResponseException — returns dummy withdrawal, no create call")
+        void upsertWithdrawals_listWithdrawalsThrowsWebClientException_returnsDummyWithdrawal() {
+            // Arrange
+            UUID portfolioUuid = UUID.randomUUID();
+            OffsetDateTime activated = OffsetDateTime.now().minusMonths(6);
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-W-ERR-WCE", activated);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder()
+                .portfolio(portfolio)
+                .build();
+
+            when(paymentsApi.listWithdrawals(isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), eq(portfolioUuid), isNull()))
+                .thenReturn(Mono.error(WebClientResponseException.create(
+                    HttpStatus.SERVICE_UNAVAILABLE.value(), "Service Unavailable",
+                    HttpHeaders.EMPTY, "downstream error".getBytes(StandardCharsets.UTF_8),
+                    StandardCharsets.UTF_8)));
+
+            // Act & Assert — dummy object: same portfolioUuid, default withdrawal amount, activated + 4 days
+            StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
+                .expectNextMatches(w -> portfolioUuid.equals(w.getPortfolio())
+                    && w.getAmount() == 500d
+                    && activated.plusDays(4).equals(w.getCompletedAt()))
+                .verifyComplete();
+
+            verify(paymentsApi, never()).createWithdrawal(any());
+        }
+
+        @Test
+        @DisplayName("listWithdrawals throws generic exception — returns dummy withdrawal, no create call")
+        void upsertWithdrawals_listWithdrawalsThrowsGenericException_returnsDummyWithdrawal() {
+            // Arrange
+            UUID portfolioUuid = UUID.randomUUID();
+            OffsetDateTime activated = OffsetDateTime.now().minusMonths(6);
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid, "EXT-W-ERR-GEN", activated);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder()
+                .portfolio(portfolio)
+                .build();
+
+            when(paymentsApi.listWithdrawals(isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), eq(portfolioUuid), isNull()))
+                .thenReturn(Mono.error(new RuntimeException("unexpected failure")));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
+                .expectNextMatches(w -> portfolioUuid.equals(w.getPortfolio())
+                    && w.getAmount() == 500d
+                    && activated.plusDays(4).equals(w.getCompletedAt()))
+                .verifyComplete();
+
+            verify(paymentsApi, never()).createWithdrawal(any());
         }
     }
 

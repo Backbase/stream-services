@@ -19,6 +19,7 @@ public class InvestmentArrangement {
     private String currency;
     private String productPortfolioName;
     private BigDecimal initialCash;
+    private BigDecimal withdrawalAmount;
 
     private UUID investmentProductId;
     private List<String> legalEntityIds;

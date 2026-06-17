@@ -7,6 +7,9 @@ import com.backbase.investment.api.service.v1.PortfolioTradingAccountsApi;
 import com.backbase.investment.api.service.v1.model.Deposit;
 import com.backbase.investment.api.service.v1.model.DepositRequest;
 import com.backbase.investment.api.service.v1.model.DepositTypeEnum;
+import com.backbase.investment.api.service.v1.model.IntegrationWithdrawalCreate;
+import com.backbase.investment.api.service.v1.model.IntegrationWithdrawalCreateRequest;
+import com.backbase.investment.api.service.v1.model.IntegrationWithdrawalList;
 import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRequest;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioTradingAccountList;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioUpdateRequest;
@@ -15,6 +18,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioTradingAccount;
 import com.backbase.investment.api.service.v1.model.PortfolioTradingAccountRequest;
 import com.backbase.investment.api.service.v1.model.Status08fEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
+import com.backbase.investment.api.service.v1.model.StatusDa8Enum;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
@@ -74,6 +78,7 @@ public class InvestmentPortfolioService {
                         .builder()
                         .portfolio(p)
                         .initialCash(arrangement.getInitialCash())
+                        .withdrawalAmount(arrangement.getWithdrawalAmount())
                         .build())
                     .doOnSuccess(ip -> log.debug(
                         "Successfully upserted investment portfolio: portfolioUuid={}, externalId={}, name={}",
@@ -309,6 +314,111 @@ public class InvestmentPortfolioService {
                         portfolio.getUuid(), ex.getStatusCode(), ex.getResponseBodyAsString());
                 } else {
                     log.warn("Portfolio deposit create failed: uuid={}",
+                        portfolio.getUuid(), throwable);
+                }
+            });
+    }
+
+    /**
+     * Creates or updates a withdrawal for the given investment portfolio.
+     *
+     * <p>Implements the same idempotent upsert pattern as {@link #upsertDeposits}:
+     * <ol>
+     *   <li>Skips processing entirely when the configured withdrawal amount is {@code <= 0}</li>
+     *   <li>Queries existing withdrawals for the portfolio</li>
+     *   <li>If the sum of existing withdrawals is less than the target amount, creates an
+     *       additional withdrawal for the remaining difference</li>
+     *   <li>If the target has already been met, returns the last existing withdrawal</li>
+     *   <li>If no withdrawals exist, creates one for the full target amount</li>
+     *   <li>On error, returns a synthetic {@link IntegrationWithdrawalCreate} to allow
+     *       downstream allocation steps to proceed</li>
+     * </ol>
+     *
+     * @param investmentPortfolio the portfolio to process (must not be null)
+     * @return Mono emitting the created or existing withdrawal, or empty if amount is {@code <= 0}
+     */
+    public Mono<IntegrationWithdrawalCreate> upsertWithdrawals(InvestmentPortfolio investmentPortfolio) {
+        PortfolioList portfolio = investmentPortfolio.getPortfolio();
+        double withdrawalAmount = investmentPortfolio.getWithdrawalAmountOrDefault(
+            config.getWithdrawal().getDefaultAmount());
+
+        if (withdrawalAmount <= 0) {
+            log.info("Skipping withdrawal for portfolio: uuid={}, withdrawalAmount={}",
+                portfolio.getUuid(), withdrawalAmount);
+            return Mono.empty();
+        }
+
+        log.debug("Listing existing withdrawals for portfolio: uuid={}, targetWithdrawalAmount={}",
+            portfolio.getUuid(), withdrawalAmount);
+        return paymentsApi.listWithdrawals(null, null, null, null, null,
+                null, portfolio.getUuid(), null)
+            .filter(Objects::nonNull)
+            // Use flatMap with Mono.justOrEmpty() to safely handle null results without NPE,
+            // ensuring switchIfEmpty fallback triggers for both null and empty withdrawal lists.
+            .flatMap(paginatedResult ->
+                Mono.justOrEmpty(paginatedResult.getResults())
+                    .filter(list -> !list.isEmpty()))
+            .flatMap(withdrawals -> {
+                double withdrawn = withdrawals.stream().mapToDouble(IntegrationWithdrawalList::getAmount).sum();
+                double remaining = withdrawalAmount - withdrawn;
+                log.debug("Portfolio withdrawal check: uuid={}, existing={}, target={}, remaining={}",
+                    portfolio.getUuid(), withdrawn, withdrawalAmount, remaining);
+                if (remaining > 0) {
+                    return createWithdrawal(portfolio, remaining);
+                }
+                IntegrationWithdrawalList last = withdrawals.getLast();
+                return Mono.just(new IntegrationWithdrawalCreate()
+                    .portfolio(last.getPortfolio())
+                    .amount(last.getAmount())
+                    .completedAt(last.getCompletedAt()));
+            })
+            .switchIfEmpty(Mono.defer(() -> createWithdrawal(portfolio, withdrawalAmount)))
+            .onErrorResume(ex -> {
+                if (ex instanceof WebClientResponseException wce) {
+                    log.error("listWithdrawals API call failed for portfolio: uuid={}, status={}, body={}",
+                        portfolio.getUuid(), wce.getStatusCode(), wce.getResponseBodyAsString(), wce);
+                } else {
+                    log.error("Failed to process withdrawal for portfolio: uuid={}", portfolio.getUuid(), ex);
+                }
+                return Mono.just(new IntegrationWithdrawalCreate()
+                    .portfolio(portfolio.getUuid())
+                    .amount(withdrawalAmount)
+                    .completedAt(portfolio.getActivated().plusDays(4)));
+            });
+    }
+
+    /**
+     * Creates a new withdrawal for the given portfolio via the payments API.
+     *
+     * <p>The withdrawal is created with:
+     * <ul>
+     *   <li>Status {@code COMPLETED}</li>
+     *   <li>Completion date set to portfolio activation date + 3 days</li>
+     *   <li>Provider from configuration</li>
+     * </ul>
+     *
+     * @param portfolio the portfolio to create the withdrawal for
+     * @param amount    the withdrawal amount
+     * @return Mono emitting the created withdrawal
+     */
+    @Nonnull
+    private Mono<IntegrationWithdrawalCreate> createWithdrawal(PortfolioList portfolio, double amount) {
+        return paymentsApi.createWithdrawal(new IntegrationWithdrawalCreateRequest()
+                .portfolio(portfolio.getUuid())
+                .provider(config.getWithdrawal().getProvider())
+                .status(StatusDa8Enum.COMPLETED)
+                .completedAt(portfolio.getActivated().plusDays(3))
+                .amount(amount)
+            )
+            .doOnSuccess(withdrawal -> log.info("Created withdrawal {} for portfolio {}",
+                withdrawal.getUuid(), portfolio.getUuid()))
+            .doOnError(throwable -> {
+                if (throwable instanceof WebClientResponseException ex) {
+                    log.warn(
+                        "Portfolio withdrawal create failed: uuid={}, status={}, body={}",
+                        portfolio.getUuid(), ex.getStatusCode(), ex.getResponseBodyAsString());
+                } else {
+                    log.warn("Portfolio withdrawal create failed: uuid={}",
                         portfolio.getUuid(), throwable);
                 }
             });

@@ -108,6 +108,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .flatMap(this::upsertPortfolioTradingAccounts)
             .flatMap(this::upsertInvestmentPortfolioDeposits)
             .flatMap(this::upsertPortfoliosAllocations)
+            .flatMap(this::upsertInvestmentPortfolioWithdrawals)
             .doOnSuccess(completedTask -> {
                 streamTask.setState(State.COMPLETED);
                 log.info("Successfully completed investment saga: taskId={}, taskName={}, state={}",
@@ -132,6 +133,41 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 return Mono.empty();
             })
             .flatMap(investmentPortfolioAllocationService::createDepositAllocation)
+            .collectList()
+            .map(_ -> investmentTask);
+    }
+
+    /**
+     * Upserts withdrawals for all investment portfolios in the task.
+     *
+     * <ol>
+     *   <li>Iterates over every portfolio tracked in the task</li>
+     *   <li>Calls {@link com.backbase.stream.investment.service.InvestmentPortfolioService#upsertWithdrawals}
+     *       for each — portfolios with a zero or null withdrawal amount are silently skipped</li>
+     *   <li>Per-portfolio errors are caught, logged as warnings, and skipped so that the rest of
+     *       the batch is unaffected</li>
+     * </ol>
+     *
+     * @param investmentTask the task containing the portfolios to process
+     * @return Mono emitting the unchanged task after all withdrawals have been processed
+     */
+    private Mono<InvestmentTask> upsertInvestmentPortfolioWithdrawals(InvestmentTask investmentTask) {
+        List<InvestmentPortfolio> portfolios =
+            Objects.requireNonNullElse(investmentTask.getData().getPortfolios(), List.of());
+        log.info("Starting upsert of investment portfolio withdrawals: taskId={}, portfolioCount={}",
+            investmentTask.getId(), portfolios.size());
+        if (portfolios.isEmpty()) {
+            log.warn("No portfolios found for withdrawal upsert — skipping: taskId={}", investmentTask.getId());
+            return Mono.just(investmentTask);
+        }
+        return Flux.fromIterable(portfolios)
+            .flatMap(portfolio -> investmentPortfolioService.upsertWithdrawals(portfolio)
+                .onErrorResume(throwable -> {
+                    log.warn("Failed to upsert withdrawal for portfolio: portfolioUuid={}, taskId={}",
+                        portfolio.getPortfolio() != null ? portfolio.getPortfolio().getUuid() : "unknown",
+                        investmentTask.getId(), throwable);
+                    return Mono.empty();
+                }))
             .collectList()
             .map(_ -> investmentTask);
     }
