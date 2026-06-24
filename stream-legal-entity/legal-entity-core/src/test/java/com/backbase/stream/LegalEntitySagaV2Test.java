@@ -1,17 +1,21 @@
 package com.backbase.stream;
 
 import static com.backbase.stream.FixtureUtils.reflectiveAlphaFixtureMonkey;
+import static com.backbase.stream.mapper.UserToCdpEventMapper.PROFILE_CREATED_EVENT;
 import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.backbase.cdp.ingestion.api.service.v1.model.CdpEvent;
 import com.backbase.customerprofile.api.integration.v1.model.PartyResponseUpsertDto;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
@@ -23,20 +27,28 @@ import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.audiences.UserKindSegmentationTask;
+import com.backbase.stream.cdp.CdpSaga;
+import com.backbase.stream.cdp.CdpTask;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
+import com.backbase.stream.legalentity.model.Address;
 import com.backbase.stream.legalentity.model.CustomerCategory;
+import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.ExternalAccountInformation;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
+import com.backbase.stream.legalentity.model.Name;
 import com.backbase.stream.legalentity.model.Party;
+import com.backbase.stream.legalentity.model.PersonalInformation;
+import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.UserProfile;
 import com.backbase.stream.mapper.LegalEntityV2toV1Mapper;
 import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
 import com.backbase.stream.service.AccessGroupService;
@@ -49,6 +61,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -57,6 +70,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -91,6 +105,9 @@ class LegalEntitySagaV2Test {
 
     @Mock
     private UserKindSegmentationSaga userKindSegmentationSaga;
+
+    @Mock
+    private CdpSaga cdpSaga;
 
     @Mock
     private CustomerProfileService customerProfileService;
@@ -356,19 +373,46 @@ class LegalEntitySagaV2Test {
 
         Assertions.assertNotNull(result);
         Assertions.assertNotNull(result.getData().getUsers());
-        Assertions.assertNotNull(result.getData().getUsers().get(0));
+        Assertions.assertNotNull(result.getData().getUsers().getFirst());
         Assertions.assertEquals(newRegularUser.getFullName(),
-            result.getData().getUsers().get(0).getFullName());
+            result.getData().getUsers().getFirst().getFullName());
     }
 
     void getMockLegalEntity() {
-        regularUser = new User().internalId("someRegularUserInId")
-            .externalId(regularUserExId);
+        String userInternalId = UUID.randomUUID().toString();
+        regularUser = new User().internalId(userInternalId)
+            .externalId(regularUserExId)
+            .fullName("User Full Name")
+            .userProfile(new UserProfile()
+                .userId(userInternalId)
+                .externalId(regularUserExId)
+                .name(new Name()
+                    .familyName("User")
+                    .givenName("Name")
+                    .middleName("Full")
+                    .formatted("Full Name User"))
+                .active(true)
+                .addresses(List.of(new Address()
+                    .streetAddress("Some street 1")
+                    .locality("Some city")
+                    .postalCode("02147")
+                    .country("Some country")))
+                .personalInformation(new PersonalInformation()
+                    .dateOfBirth("1990-01-01")
+                    .employer("BACKBASE")
+                    .gender("male")
+                    .maritalStatus("single")))
+            .legalEntityId(leInternalId)
+            .emailAddress(new EmailAddress("home", "home", regularUserExId.concat("@domain.com")))
+            .mobileNumber(new PhoneNumber("home", "home", "1234567890"));
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
         ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
         legalEntityV2 = new LegalEntityV2()
             .internalId(leInternalId)
             .externalId(leExternalId)
+            .legalEntityType(LegalEntityType.CUSTOMER)
+            .name("le-name")
+            .customerCategory(CustomerCategory.RETAIL)
             .parties(fixtureMonkey.giveMe(Party.class, PARTY_SIZE))
             .addAdministratorsItem(adminUser)
             .parentExternalId(leParentExternalId)
@@ -412,7 +456,7 @@ class LegalEntitySagaV2Test {
         legalEntityV2.setContacts(Collections.singletonList(contact));
         result = legalEntitySaga.executeTask(task).block();
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(leExternalId, result.getData().getContacts().get(0).getExternalId());
+        Assertions.assertEquals(leExternalId, result.getData().getContacts().getFirst().getExternalId());
     }
 
     @Test
@@ -541,6 +585,48 @@ class LegalEntitySagaV2Test {
     }
 
     @Test
+    void cdpIsDisabled() {
+        getMockLegalEntity();
+
+        when(cdpSaga.isEnabled()).thenReturn(false);
+
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntityV2)).block();
+
+        verify(cdpSaga, never()).executeTask(Mockito.any());
+    }
+
+    @Test
+    void cdpIsEnabledTestMappings() {
+        ArgumentCaptor<CdpTask> argumentCaptor = ArgumentCaptor.forClass(CdpTask.class);
+        getMockLegalEntity();
+
+        when(cdpSaga.isEnabled()).thenReturn(true);
+        when(legalEntitySagaConfigurationProperties.isUserProfileEnabled()).thenReturn(false);
+
+        legalEntityV2.setLegalEntityType(LegalEntityType.CUSTOMER);
+
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+
+        when(cdpSaga.executeTask(any())).thenReturn(
+            Mono.just(Mockito.mock(com.backbase.stream.cdp.CdpTask.class)));
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntityV2)).block();
+
+        verify(cdpSaga, atLeastOnce()).executeTask(Mockito.any());
+        verify(cdpSaga).executeTask(argumentCaptor.capture());
+        CdpTask capturedCdpTask = argumentCaptor.getValue();
+        assertThat(capturedCdpTask).isNotNull();
+        assertThat(capturedCdpTask.getCdpEvents()).isNotNull();
+        assertThat(capturedCdpTask.getCdpEvents().getCdpEvents()).isNotNull().hasSize(1);
+        CdpEvent cdpEvent = capturedCdpTask.getCdpEvents().getCdpEvents().getFirst();
+        assertThat(cdpEvent.getEventType()).isEqualTo(PROFILE_CREATED_EVENT);
+    }
+
+    @Test
     void testSetupParties_IfPartyFound_ThenUpsertParty() {
         getMockLegalEntity();
         var task = mockLegalEntityTask(legalEntityV2);
@@ -590,7 +676,7 @@ class LegalEntitySagaV2Test {
 
         // Then
         verify(legalEntityService).getLegalEntityByExternalId(any());
-        org.assertj.core.api.Assertions.assertThat(stEx)
+        assertThat(stEx)
             .isNotNull()
             .extracting(e -> e.getTask().getHistory().get(1).getErrorMessage())
             .isEqualTo(error);
