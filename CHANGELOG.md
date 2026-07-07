@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.6.1]
+### Changed
+- Updated plan manager ingestion logic to attempt to retrieve plans if they don't exist in the pre-filled map.
+
 ## [10.6.0]
 ### Added
 - Added withdrawals to investment service ingestion
