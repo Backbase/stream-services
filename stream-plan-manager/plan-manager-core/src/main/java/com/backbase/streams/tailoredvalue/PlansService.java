@@ -49,24 +49,44 @@ public class PlansService {
     }
 
     public Mono<Void> updateUserPlan(String internalUserId, UserPlanUpdateRequestBody userPlanUpdateRequestBody, String planName) {
+        return resolvePlanId(planName)
+                .flatMap(planId -> {
+                    userPlanUpdateRequestBody.setId(planId);
+                    log.info("Started ingestion of plans {} for user {}", planId, internalUserId);
+                    return userPlansApi.updateUserPlan(internalUserId, userPlanUpdateRequestBody)
+                            .doOnNext(response -> log.info("Plan updated: {}", response))
+                            .onErrorResume(throwable -> {
+                                log.error("Error updating plan", throwable);
+                                return Mono.error(new PlanManagerException(throwable, "Error updating plan"));
+                            })
+                            .then();
+                });
+    }
 
-        if (!plansMap.containsKey(planName)) {
-            log.warn("No PlanId found for planName = " + planName);
-            return Mono.error(new PlanManagerException("No PlanId found for planName = " + planName));
+    private Mono<String> resolvePlanId(String planName) {
+        if (plansMap.containsKey(planName)) {
+            return Mono.just(plansMap.get(planName));
         }
-        // Set planId
-        userPlanUpdateRequestBody.setId(plansMap.get(planName));
-        log.info("Started ingestion of plans {} for user {}",
-                userPlanUpdateRequestBody.getId(), internalUserId);
-        return userPlansApi.updateUserPlan(internalUserId, userPlanUpdateRequestBody)
-                .map(userPlanUpdateResponseBody -> {
-                    log.info("Plan updated: {}", userPlanUpdateResponseBody.toString());
-                    return Mono.empty();
-                })
-                .onErrorResume(throwable -> {
-                    log.error("Error updating plan", throwable);
-                    return Mono.error(new PlanManagerException(throwable, "Error updating plan"));
-                }).then();
+        return plansApi.getPlans(null, null, planName)
+                .flatMap(responseBody -> {
+                    if (responseBody == null || responseBody.getPlans() == null || responseBody.getPlans().isEmpty()) {
+                        return planIdNotFound(planName);
+                    }
+                    return responseBody.getPlans().stream()
+                            .filter(plan -> planName.equals(plan.getName()))
+                            .findFirst()
+                            .map(plan -> {
+                                plansMap.put(plan.getName(), plan.getId());
+                                return plan.getId();
+                            })
+                            .map(Mono::just)
+                            .orElseGet(() -> planIdNotFound(planName));
+                });
+    }
+
+    private Mono<String> planIdNotFound(String planName) {
+        log.warn("No PlanId found for planName = {}", planName);
+        return Mono.error(new PlanManagerException("No PlanId found for planName = " + planName));
     }
 
     private void processPlans(PlansGetResponseBody responseBody) {
