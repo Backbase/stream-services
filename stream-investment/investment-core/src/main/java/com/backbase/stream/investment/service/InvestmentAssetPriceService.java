@@ -8,6 +8,7 @@ import com.backbase.investment.api.service.v1.model.OASCreatePriceRequest;
 import com.backbase.investment.api.service.v1.model.OASPrice;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.TypeEnum;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.RandomParam;
 import java.security.SecureRandom;
@@ -38,6 +39,7 @@ public class InvestmentAssetPriceService {
     private final SecureRandom random = new SecureRandom();
 
     private final AssetUniverseApi assetUniverseApi;
+    private final IngestConfigProperties ingestProperties;
 
     public Mono<List<GroupResult>> ingestPrices(List<Asset> assets) {
         return generatePrices(assets)
@@ -95,7 +97,7 @@ public class InvestmentAssetPriceService {
                             });
                     })
                     .filter(Predicate.not(CollectionUtils::isEmpty));
-            })
+            }, ingestProperties.getAsset().getPriceConcurrency())
             .collectList();
     }
 

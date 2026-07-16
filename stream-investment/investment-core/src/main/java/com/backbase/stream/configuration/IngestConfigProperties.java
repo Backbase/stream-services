@@ -155,6 +155,9 @@ public class IngestConfigProperties {
         private int marketSpecialDayConcurrency = 5;
         private int assetCategoryConcurrency = 5;
         private int assetCategoryTypeConcurrency = 5;
+        private int assetUpsertConcurrency = 5;
+        private int priceConcurrency = 5;
+        private int intradayPriceConcurrency = 5;
 
     }
 

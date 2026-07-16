@@ -4,6 +4,7 @@ import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.OASCreatePriceRequest;
 import com.backbase.investment.api.service.v1.model.TypeEnum;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.model.AssetWithMarketAndLatestPrice;
 import com.backbase.stream.investment.model.ExpandedLatestPrice;
 import com.backbase.stream.investment.model.PaginatedExpandedAssetList;
@@ -43,6 +44,7 @@ import reactor.core.publisher.Mono;
 public class InvestmentIntradayAssetPriceService {
 
     private final AssetUniverseApi assetUniverseApi;
+    private final IngestConfigProperties ingestProperties;
 
     /**
      * Generates and triggers ingestion of intraday prices for all assets that have a latest price.
@@ -109,7 +111,7 @@ public class InvestmentIntradayAssetPriceService {
                                 )
                             )
                             .onErrorResume(e -> Mono.empty());
-                    })
+                    }, ingestProperties.getAsset().getIntradayPriceConcurrency())
                     .collectList();
             })
             .doOnError(error -> {

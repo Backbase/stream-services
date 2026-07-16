@@ -635,6 +635,57 @@ class InvestmentPortfolioServiceTest {
         }
 
         @Test
+        @DisplayName("create fails with already-exists conflict — re-lists and patches existing portfolio")
+        void upsertInvestmentPortfolios_createAlreadyExists_relistsAndPatches() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String externalId = "PORTFOLIO-EXT-EXISTS";
+            String leExternalId = "LE-EXISTS";
+            UUID clientUuid = UUID.randomUUID();
+
+            InvestmentArrangement arrangement = buildArrangement(externalId, "Existing Portfolio", productId, leExternalId);
+            PortfolioList existing = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
+            PortfolioList patched = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
+
+            String alreadyExistsBody = """
+                {"code":"INVALID_INPUT","message":"The following fields contain input errors",\
+                "errors":{"arrangement_id":["portfolio with this arrangement id already exists."],\
+                "external_id":["portfolio with this external id already exists."]}}""";
+
+            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(emptyList.getResults()).thenReturn(List.of());
+
+            PaginatedPortfolioListList existingList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(existingList.getResults()).thenReturn(List.of(existing));
+
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(emptyList))
+                .thenReturn(Mono.just(existingList));
+
+            when(portfolioApi.createPortfolio(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.error(WebClientResponseException.create(
+                    HttpStatus.BAD_REQUEST.value(), "Bad Request",
+                    HttpHeaders.EMPTY, alreadyExistsBody.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8)));
+
+            when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
+                .thenReturn(Mono.just(patched));
+
+            Map<String, List<UUID>> clientsByLeExternalId = Map.of(leExternalId, List.of(clientUuid));
+
+            StepVerifier.create(service.upsertInvestmentPortfolios(arrangement, clientsByLeExternalId))
+                .expectNextMatches(p -> portfolioUuid.equals(p.getUuid()))
+                .verifyComplete();
+
+            verify(portfolioApi, Mockito.times(2)).listPortfolios(
+                isNull(), isNull(), isNull(), isNull(), eq(externalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull());
+            verify(portfolioApi).createPortfolio(any(), isNull(), isNull(), isNull());
+            verify(portfolioApi).patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any());
+        }
+
+        @Test
         @DisplayName("multiple portfolios returned for same externalId — returns IllegalStateException")
         void upsertInvestmentPortfolios_multipleExistingPortfolios_returnsError() {
             // Arrange
@@ -728,6 +779,47 @@ class InvestmentPortfolioServiceTest {
             // Act & Assert
             StepVerifier.create(service.upsertPortfolios(List.of(arrangement1, arrangement2), clientsByLeExternalId))
                 .expectNextMatches(list -> list.size() == 2)
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("single arrangement fails in batch — remaining arrangements still processed")
+        void upsertPortfolios_singleFailure_doesNotStopBatch() {
+            UUID portfolioUuid1 = UUID.randomUUID();
+            UUID portfolioUuid2 = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String externalId1 = "EXT-BATCH-FAIL";
+            String externalId2 = "EXT-BATCH-OK";
+            String leExternalId = "LE-BATCH";
+            UUID clientUuid = UUID.randomUUID();
+
+            InvestmentArrangement arrangement1 = buildArrangement(externalId1, "Portfolio Fail", productId, leExternalId);
+            InvestmentArrangement arrangement2 = buildArrangement(externalId2, "Portfolio OK", productId, leExternalId);
+
+            PaginatedPortfolioListList emptyList1 = Mockito.mock(PaginatedPortfolioListList.class);
+            when(emptyList1.getResults()).thenReturn(List.of());
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId1), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(emptyList1));
+
+            PaginatedPortfolioListList emptyList2 = Mockito.mock(PaginatedPortfolioListList.class);
+            when(emptyList2.getResults()).thenReturn(List.of());
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId2), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(emptyList2));
+
+            PortfolioList created2 = buildPortfolioList(portfolioUuid2, externalId2, OffsetDateTime.now().minusMonths(6));
+            when(portfolioApi.createPortfolio(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.error(new RuntimeException("API failure for portfolio 1")))
+                .thenReturn(Mono.just(created2));
+
+            Map<String, List<UUID>> clientsByLeExternalId = Map.of(leExternalId, List.of(clientUuid));
+
+            StepVerifier.create(service.upsertPortfolios(List.of(arrangement1, arrangement2), clientsByLeExternalId))
+                .expectNextMatches(list -> list.size() == 1
+                    && portfolioUuid2.equals(list.getFirst().getPortfolio().getUuid()))
                 .verifyComplete();
         }
 

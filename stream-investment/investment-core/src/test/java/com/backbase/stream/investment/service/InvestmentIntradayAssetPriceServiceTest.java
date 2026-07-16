@@ -13,6 +13,7 @@ import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.OASCreatePriceRequest;
 import com.backbase.investment.api.service.v1.model.TypeEnum;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.model.AssetWithMarketAndLatestPrice;
 import com.backbase.stream.investment.model.ExpandedLatestPrice;
 import com.backbase.stream.investment.model.ExpandedMarket;
@@ -59,7 +60,7 @@ class InvestmentIntradayAssetPriceServiceTest {
     @BeforeEach
     void setUp() {
         assetUniverseApi = mock(AssetUniverseApi.class);
-        service = new InvestmentIntradayAssetPriceService(assetUniverseApi);
+        service = new InvestmentIntradayAssetPriceService(assetUniverseApi, new IngestConfigProperties());
     }
 
     // =========================================================================

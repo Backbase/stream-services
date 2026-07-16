@@ -21,10 +21,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.text.DateFormat;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -60,8 +60,7 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     /**
      * Configuration for Investment service REST client (ClientApi).
      */
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean("investmentApiClient")
     public ApiClient investmentApiClient(WebClient interServiceWebClient,
         @Qualifier("investmentHttpClient") HttpClient investmentHttpClient,
         ObjectMapper objectMapper,
@@ -69,7 +68,8 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
         ObjectMapper mapper = objectMapper.copy();
         mapper.setSerializationInclusion(Include.NON_EMPTY);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        Builder mutate = interServiceWebClient.mutate();
+        Builder mutate = interServiceWebClient.mutate()
+            .clientConnector(new ReactorClientHttpConnector(investmentHttpClient));
         mutate.codecs(clientCodecConfigurer -> {
             Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(mapper, MediaType.APPLICATION_JSON);
             Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON);
@@ -81,80 +81,69 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public ClientApi clientApi(ApiClient investmentApiClient) {
+    public ClientApi clientApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new ClientApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public InvestmentProductsApi investmentProductsApi(ApiClient investmentApiClient) {
+    public InvestmentProductsApi investmentProductsApi(
+        @Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new InvestmentProductsApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public PortfolioApi portfolioApi(ApiClient investmentApiClient) {
+    public PortfolioApi portfolioApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new PortfolioApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public FinancialAdviceApi financialAdviceApi(ApiClient investmentApiClient) {
+    public FinancialAdviceApi financialAdviceApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new FinancialAdviceApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public AssetUniverseApi assetUniverseApi(ApiClient investmentApiClient) {
+    public AssetUniverseApi assetUniverseApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new AssetUniverseApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public AllocationsApi allocationsApi(ApiClient investmentApiClient) {
+    public AllocationsApi allocationsApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new AllocationsApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public InvestmentApi investmentApi(ApiClient investmentApiClient) {
+    public InvestmentApi investmentApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new InvestmentApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public ContentApi contentApi(ApiClient investmentApiClient) {
+    public ContentApi contentApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new ContentApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public PaymentsApi paymentsApi(ApiClient investmentApiClient) {
+    public PaymentsApi paymentsApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new PaymentsApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public PortfolioTradingAccountsApi portfolioTradingAccountsApi(ApiClient investmentApiClient) {
+    public PortfolioTradingAccountsApi portfolioTradingAccountsApi(
+        @Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new PortfolioTradingAccountsApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public CurrencyApi currencyApi(ApiClient investmentApiClient) {
+    public CurrencyApi currencyApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new CurrencyApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public RiskAssessmentApi riskAssessmentApi(ApiClient investmentApiClient) {
+    public RiskAssessmentApi riskAssessmentApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new RiskAssessmentApi(investmentApiClient);
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public AsyncBulkGroupsApi asyncBulkGroupsApi(ApiClient investmentApiClient) {
+    public AsyncBulkGroupsApi asyncBulkGroupsApi(@Qualifier("investmentApiClient") ApiClient investmentApiClient) {
         return new AsyncBulkGroupsApi(investmentApiClient);
     }
 

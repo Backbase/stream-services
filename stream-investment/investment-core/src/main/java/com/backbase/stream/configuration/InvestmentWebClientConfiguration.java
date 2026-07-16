@@ -56,8 +56,9 @@ public class InvestmentWebClientConfiguration {
             .build();
 
         log.info("Configured investment ConnectionProvider: maxConnections={}, maxIdleTime={}min,"
-                + " pendingAcquireMaxCount={}",
-            props.getMaxConnections(), props.getMaxIdleTimeMinutes(), props.getMaxPendingAcquires());
+                + " pendingAcquireMaxCount={}, pendingAcquireTimeout={}ms",
+            props.getMaxConnections(), props.getMaxIdleTimeMinutes(), props.getMaxPendingAcquires(),
+            props.getPendingAcquireTimeoutMillis());
 
         return provider;
     }

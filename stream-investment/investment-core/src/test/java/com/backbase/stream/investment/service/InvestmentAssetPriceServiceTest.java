@@ -13,6 +13,7 @@ import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.OASPrice;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.RandomParam;
 import java.nio.charset.StandardCharsets;
@@ -57,7 +58,7 @@ class InvestmentAssetPriceServiceTest {
     @BeforeEach
     void setUp() {
         assetUniverseApi = Mockito.mock(AssetUniverseApi.class);
-        service = new InvestmentAssetPriceService(assetUniverseApi);
+        service = new InvestmentAssetPriceService(assetUniverseApi, new IngestConfigProperties());
     }
 
     // =========================================================================

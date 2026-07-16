@@ -9,6 +9,7 @@ import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryList;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
 import java.net.URI;
@@ -36,6 +37,7 @@ public class InvestmentAssetUniverseService {
 
     private final AssetUniverseApi assetUniverseApi;
     private final InvestmentRestAssetUniverseService investmentRestAssetUniverseService;
+    private final IngestConfigProperties ingestProperties;
     private final AssetMapper assetMapper = Mappers.getMapper(AssetMapper.class);
 
     /**
@@ -262,7 +264,7 @@ public class InvestmentAssetUniverseService {
                             .doBeforeRetry(signal -> log.warn(
                                 "Retrying asset upsert: key={}, attempt={}",
                                 asset.getKeyString(), signal.totalRetries() + 1))),
-                        5);
+                        ingestProperties.getAsset().getAssetUpsertConcurrency());
             });
     }
 
