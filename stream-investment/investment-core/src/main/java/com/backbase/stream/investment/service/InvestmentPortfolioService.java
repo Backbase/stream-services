@@ -33,7 +33,9 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -69,25 +71,36 @@ public class InvestmentPortfolioService {
     public Mono<List<InvestmentPortfolio>> upsertPortfolios(List<InvestmentArrangement> investmentArrangements,
         Map<String, List<UUID>> clientsByLeExternalId) {
         return Flux.fromIterable(investmentArrangements)
-            .flatMap(arrangement -> {
-                log.debug("Upserting investment portfolio for arrangement: externalId={}, name={}, productId={}",
-                    arrangement.getExternalId(), arrangement.getName(), arrangement.getInvestmentProductId());
-
-                return upsertInvestmentPortfolios(arrangement, clientsByLeExternalId)
-                    .map(p -> InvestmentPortfolio
-                        .builder()
-                        .portfolio(p)
-                        .initialCash(arrangement.getInitialCash())
-                        .withdrawalAmount(arrangement.getWithdrawalAmount())
-                        .build())
-                    .doOnSuccess(ip -> log.debug(
-                        "Successfully upserted investment portfolio: portfolioUuid={}, externalId={}, name={}",
-                        ip.getPortfolio().getUuid(), ip.getPortfolio().getExternalId(), ip.getPortfolio().getName()))
-                    .doOnError(throwable -> log.error(
-                        "Failed to upsert investment portfolio: arrangementExternalId={}, arrangementName={}",
-                        arrangement.getExternalId(), arrangement.getName(), throwable));
-            })
+            .flatMap(arrangement -> upsertSinglePortfolio(arrangement, clientsByLeExternalId))
             .collectList();
+    }
+
+    /**
+     * Upserts a single portfolio derived from an investment arrangement.
+     *
+     * <p>Errors are logged and result in an empty Mono so a single portfolio failure does not
+     * abort processing of the remaining arrangements in the batch.
+     */
+    private Mono<InvestmentPortfolio> upsertSinglePortfolio(InvestmentArrangement arrangement,
+        Map<String, List<UUID>> clientsByLeExternalId) {
+        log.debug("Upserting investment portfolio for arrangement: externalId={}, name={}, productId={}",
+            arrangement.getExternalId(), arrangement.getName(), arrangement.getInvestmentProductId());
+
+        return upsertInvestmentPortfolios(arrangement, clientsByLeExternalId)
+            .map(p -> InvestmentPortfolio
+                .builder()
+                .portfolio(p)
+                .initialCash(arrangement.getInitialCash())
+                .withdrawalAmount(arrangement.getWithdrawalAmount())
+                .build())
+            .doOnSuccess(ip -> log.debug(
+                "Successfully upserted investment portfolio: portfolioUuid={}, externalId={}, name={}",
+                ip.getPortfolio().getUuid(), ip.getPortfolio().getExternalId(), ip.getPortfolio().getName()))
+            .onErrorResume(throwable -> {
+                log.warn("Skipping portfolio due to error: externalId={}, name={}",
+                    arrangement.getExternalId(), arrangement.getName(), throwable);
+                return Mono.empty();
+            });
     }
 
     /**
@@ -237,12 +250,26 @@ public class InvestmentPortfolioService {
             .status(StatusA3dEnum.ACTIVE)
             .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()));
 
+        String externalId = investmentArrangement.getExternalId();
         return portfolioApi.createPortfolio(request, null, null, null)
             .doOnSuccess(created -> log.info(
                 "Successfully created investment portfolio: uuid={}, externalId={}, name={}, clients={}",
                 created.getUuid(), created.getExternalId(), created.getName(), associatedClients.size()))
-            .doOnError(throwable -> logPortfolioCreationError(
-                investmentArrangement.getExternalId(), investmentArrangement.getName(), throwable));
+            .onErrorResume(WebClientResponseException.class, ex -> {
+                if (!isPortfolioAlreadyExistsError(ex)) {
+                    logPortfolioCreationError(externalId, investmentArrangement.getName(), ex);
+                    return Mono.error(ex);
+                }
+                log.info("Portfolio create conflict (already exists); re-fetching by externalId={}", externalId);
+                return listExistingPortfolios(externalId)
+                    .flatMap(existing -> patchPortfolio(existing, investmentArrangement, clientsByLeId))
+                    .switchIfEmpty(Mono.defer(() -> {
+                        log.warn(
+                            "Portfolio create reported already exists but none found on re-list: externalId={}",
+                            externalId);
+                        return Mono.error(ex);
+                    }));
+            });
     }
 
     /**
@@ -729,6 +756,17 @@ public class InvestmentPortfolioService {
             log.error("Failed to create investment portfolio: externalId={}, name={}",
                 externalId, name, throwable);
         }
+    }
+
+    /**
+     * Detects portfolio-create conflicts where the portfolio already exists (e.g. arrangement or external ID taken).
+     */
+    private static boolean isPortfolioAlreadyExistsError(WebClientResponseException ex) {
+        if (!HttpStatus.BAD_REQUEST.equals(ex.getStatusCode())) {
+            return false;
+        }
+        String body = ex.getResponseBodyAsString();
+        return StringUtils.hasText(body) && body.toLowerCase().contains("already exists");
     }
 
 }

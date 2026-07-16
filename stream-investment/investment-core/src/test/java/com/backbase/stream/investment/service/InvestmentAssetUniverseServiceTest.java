@@ -22,6 +22,7 @@ import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryList;
 import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryTypeList;
 import com.backbase.investment.api.service.v1.model.PaginatedMarketSpecialDayList;
+import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService;
 import java.net.URI;
@@ -67,7 +68,8 @@ class InvestmentAssetUniverseServiceTest {
     void setUp() {
         assetUniverseApi = mock(AssetUniverseApi.class);
         investmentRestAssetUniverseService = mock(InvestmentRestAssetUniverseService.class);
-        service = new InvestmentAssetUniverseService(assetUniverseApi, investmentRestAssetUniverseService);
+        service = new InvestmentAssetUniverseService(assetUniverseApi, investmentRestAssetUniverseService,
+            new IngestConfigProperties());
     }
 
     // =========================================================================

@@ -95,7 +95,8 @@ class InvestmentServiceConfigurationTest {
         void investmentAssetUniverseService_returnsAssetUniverseService() {
             assertThat(config.investmentAssetUniverseService(
                 mock(AssetUniverseApi.class),
-                mock(InvestmentRestAssetUniverseService.class)))
+                mock(InvestmentRestAssetUniverseService.class),
+                new IngestConfigProperties()))
                 .isNotNull().isInstanceOf(InvestmentAssetUniverseService.class);
         }
 
@@ -109,14 +110,15 @@ class InvestmentServiceConfigurationTest {
         @Test
         @DisplayName("investmentAssetPriceService — returns non-null InvestmentAssetPriceService")
         void investmentAssetPriceService_returnsAssetPriceService() {
-            assertThat(config.investmentAssetPriceService(mock(AssetUniverseApi.class)))
+            assertThat(config.investmentAssetPriceService(mock(AssetUniverseApi.class), new IngestConfigProperties()))
                 .isNotNull().isInstanceOf(InvestmentAssetPriceService.class);
         }
 
         @Test
         @DisplayName("investmentIntradayAssetPriceService — returns non-null InvestmentIntradayAssetPriceService")
         void investmentIntradayAssetPriceService_returnsIntradayAssetPriceService() {
-            assertThat(config.investmentIntradayAssetPriceService(mock(AssetUniverseApi.class)))
+            assertThat(config.investmentIntradayAssetPriceService(mock(AssetUniverseApi.class),
+                new IngestConfigProperties()))
                 .isNotNull().isInstanceOf(InvestmentIntradayAssetPriceService.class);
         }
 

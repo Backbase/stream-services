@@ -14,10 +14,10 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,8 +37,7 @@ public class InvestmentRestServiceApiConfiguration {
     /**
      * Configuration for Investment service REST client (ClientApi).
      */
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean("restInvestmentApiClient")
     public com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient(
         @Qualifier("interServiceRestTemplate") RestTemplate restTemplate,
         @Qualifier("restInvestmentObjectMapper") ObjectMapper restInvestmentObjectMapper) {
@@ -55,8 +54,7 @@ public class InvestmentRestServiceApiConfiguration {
         return apiClient;
     }
 
-    @Bean
-    @Qualifier("restInvestmentObjectMapper")
+    @Bean("restInvestmentObjectMapper")
     public ObjectMapper restInvestmentObjectMapper(ObjectMapper legacyObjectMapper) {
         ObjectMapper mapper = legacyObjectMapper.copy();
         mapper.setSerializationInclusion(Include.NON_EMPTY);
@@ -64,47 +62,59 @@ public class InvestmentRestServiceApiConfiguration {
         return mapper;
     }
 
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean("restContentApi")
     public com.backbase.investment.api.service.sync.v1.ContentApi restContentApi(
+        @Qualifier("restInvestmentApiClient")
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
         return new com.backbase.investment.api.service.sync.v1.ContentApi(restInvestmentApiClient);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean("restAssetUniverseApi")
     public com.backbase.investment.api.service.sync.v1.AssetUniverseApi restAssetUniverseApi(
+        @Qualifier("restInvestmentApiClient")
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
         return new com.backbase.investment.api.service.sync.v1.AssetUniverseApi(restInvestmentApiClient);
     }
 
     @Bean
-    public InvestmentRestNewsContentService investmentNewsContentService(ContentApi restContentApi,
+    @Primary
+    public InvestmentRestNewsContentService investmentNewsContentService(
+        @Qualifier("restContentApi") ContentApi restContentApi,
+        @Qualifier("restInvestmentApiClient")
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
         return new InvestmentRestNewsContentService(restContentApi, restInvestmentApiClient);
     }
 
     @Bean
-    public InvestmentRestDocumentContentService investmentRestContentDocumentService(ContentApi restContentApi,
+    @Primary
+    public InvestmentRestDocumentContentService investmentRestContentDocumentService(
+        @Qualifier("restContentApi") ContentApi restContentApi,
+        @Qualifier("restInvestmentApiClient")
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
         return new InvestmentRestDocumentContentService(restContentApi, restInvestmentApiClient);
     }
 
     @Bean
+    @Primary
     public InvestmentRestAssetUniverseService investmentRestAssetUniverseService(
+        @Qualifier("restInvestmentApiClient")
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient,
         IngestConfigProperties portfolioProperties) {
         return new InvestmentRestAssetUniverseService(restInvestmentApiClient, portfolioProperties);
     }
 
     @Bean
+    @Primary
     public InvestmentRestModelPortfolioService investmentRestModelPortfolioService(
+        @Qualifier("restInvestmentApiClient")
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
         return new InvestmentRestModelPortfolioService(restInvestmentApiClient);
     }
 
     @Bean
+    @Primary
     public InvestmentRestProductPortfolioService investmentRestProductPortfolioService(
+        @Qualifier("restInvestmentApiClient")
         com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient,
         IngestConfigProperties portfolioProperties) {
         return new InvestmentRestProductPortfolioService(restInvestmentApiClient, portfolioProperties);
