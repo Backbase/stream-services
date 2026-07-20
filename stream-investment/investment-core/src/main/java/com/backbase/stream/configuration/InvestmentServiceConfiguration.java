@@ -39,10 +39,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 @Import({
     DbsApiClientsAutoConfiguration.class,
-    InvestmentClientConfig.class
+    InvestmentClientConfig.class,
+    InvestmentWebClientConfiguration.class,
+    InvestmentRestServiceApiConfiguration.class
 })
 @EnableConfigurationProperties({
     InvestmentIngestionConfigurationProperties.class,
@@ -50,15 +53,17 @@ import org.springframework.context.annotation.Import;
 })
 @RequiredArgsConstructor
 @Configuration
-@ConditionalOnProperty(name = "backbase.bootstrap.ingestions.investment.enabled")
+@ConditionalOnProperty(name = "backbase.bootstrap.ingestions.investment.enabled", havingValue = "true")
 public class InvestmentServiceConfiguration {
 
     @Bean
+    @Primary
     public InvestmentClientService investmentClientService(ClientApi clientApi) {
         return new InvestmentClientService(clientApi);
     }
 
     @Bean
+    @Primary
     public InvestmentModelPortfolioService investmentModelPortfolioService(FinancialAdviceApi financialAdviceApi,
         InvestmentRestModelPortfolioService investmentRestModelPortfolioService,
         IngestConfigProperties portfolioProperties) {
@@ -67,6 +72,7 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    @Primary
     public InvestmentPortfolioProductService investmentPortfolioProductService(
         InvestmentProductsApi investmentProductsApi, IngestConfigProperties portfolioProperties,
         InvestmentModelPortfolioService modelPortfolioService,
@@ -76,6 +82,7 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    @Primary
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi, PaymentsApi paymentsApi,
         PortfolioTradingAccountsApi portfolioTradingAccountsApi,
         IngestConfigProperties portfolioProperties) {
@@ -84,27 +91,32 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    @Primary
     public InvestmentAssetUniverseService investmentAssetUniverseService(AssetUniverseApi assetUniverseApi,
         InvestmentRestAssetUniverseService investmentRestAssetUniverseService) {
         return new InvestmentAssetUniverseService(assetUniverseApi, investmentRestAssetUniverseService);
     }
 
     @Bean
+    @Primary
     public AsyncTaskService asyncTaskService(AsyncBulkGroupsApi asyncBulkGroupsApi) {
         return new AsyncTaskService(asyncBulkGroupsApi);
     }
 
     @Bean
+    @Primary
     public InvestmentAssetPriceService investmentAssetPriceService(AssetUniverseApi assetUniverseApi) {
         return new InvestmentAssetPriceService(assetUniverseApi);
     }
 
     @Bean
+    @Primary
     public InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService(AssetUniverseApi assetUniverseApi) {
         return new InvestmentIntradayAssetPriceService(assetUniverseApi);
     }
 
     @Bean
+    @Primary
     public InvestmentPortfolioAllocationService investmentPortfolioAllocationService(AllocationsApi allocationsApi,
         AssetUniverseApi assetUniverseApi, InvestmentApi investmentApi,
         IngestConfigProperties portfolioProperties) {
@@ -113,22 +125,26 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    @Primary
     public InvestmentCurrencyService investmentCurrencyService(CurrencyApi currencyApi) {
         return new InvestmentCurrencyService(currencyApi);
     }
 
     @Bean
+    @Primary
     public InvestmentRiskAssessmentService investmentRiskAssessmentService(RiskAssessmentApi riskAssessmentApi) {
         return new InvestmentRiskAssessmentService(riskAssessmentApi);
     }
 
     @Bean
+    @Primary
     public InvestmentRiskQuestionaryService investmentRiskQuestionaryService(RiskAssessmentApi riskAssessmentApi,
         IngestConfigProperties portfolioProperties) {
         return new InvestmentRiskQuestionaryService(riskAssessmentApi, portfolioProperties);
     }
 
     @Bean
+    @Primary
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
         InvestmentRiskAssessmentService investmentRiskAssessmentService,
         InvestmentRiskQuestionaryService investmentRiskQuestionaryService,
@@ -145,7 +161,8 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
-    public InvestmentAssetUniverseSaga investmentStaticDataSaga(
+    @Primary
+    public InvestmentAssetUniverseSaga investmentAssetUniverseSaga(
         InvestmentAssetUniverseService investmentAssetUniverseService,
         InvestmentAssetPriceService investmentAssetPriceService,
         InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService,
@@ -159,6 +176,7 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    @Primary
     public InvestmentContentSaga investmentContentSaga(
         InvestmentRestNewsContentService investmentRestNewsContentService,
         InvestmentRestDocumentContentService investmentRestDocumentContentService,

@@ -83,9 +83,11 @@ public class InvestmentPortfolioService {
                     .doOnSuccess(ip -> log.debug(
                         "Successfully upserted investment portfolio: portfolioUuid={}, externalId={}, name={}",
                         ip.getPortfolio().getUuid(), ip.getPortfolio().getExternalId(), ip.getPortfolio().getName()))
-                    .doOnError(throwable -> log.error(
-                        "Failed to upsert investment portfolio: arrangementExternalId={}, arrangementName={}",
-                        arrangement.getExternalId(), arrangement.getName(), throwable));
+                    .onErrorResume(throwable -> {
+                        log.warn("Skipping investment portfolio due to error: arrangementExternalId={}, arrangementName={}",
+                            arrangement.getExternalId(), arrangement.getName(), throwable);
+                        return Mono.empty();
+                    });
             })
             .collectList();
     }

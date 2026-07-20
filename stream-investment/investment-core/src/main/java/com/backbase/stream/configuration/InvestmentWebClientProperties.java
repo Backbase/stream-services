@@ -1,39 +1,42 @@
 package com.backbase.stream.configuration;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Configuration properties for the Investment service HTTP client connection pool and timeouts.
  *
- * <p>All values can be overridden via {@code application.yml} / {@code application.properties}
- * using the prefix {@code backbase.communication.services.investment.http-client}.
+ * <p>Bound via {@code backbase.communication.services.investment.http-client} and
+ * {@code backbase.communication.services.investment-caboose.http-client}.
  *
- * <p>Example:
+ * <p>Example (values shown are illustrative; defaults are in field JavaDoc below):
  * <pre>
  * backbase:
  *   communication:
  *     services:
  *       investment:
  *         http-client:
- *           max-connections: 20
+ *           max-connections: 50
  *           max-idle-time-minutes: 5
- *           max-pending-acquires: 100
- *           pending-acquire-timeout-millis: 45000
+ *           max-life-time-minutes: 30
+ *           max-pending-acquires: -1
+ *           pending-acquire-timeout-millis: 90000
+ *           evict-in-background-seconds: 120
  *           connect-timeout-seconds: 10
  *           read-timeout-seconds: 30
  *           write-timeout-seconds: 30
+ *       investment-caboose:
+ *         http-client:
+ *           max-connections: 50
  * </pre>
  */
 @Data
-@ConfigurationProperties(prefix = "backbase.communication.services.investment.http-client")
 public class InvestmentWebClientProperties {
 
     /**
      * Maximum number of open TCP connections to the Investment service.
      * Limiting this prevents the service from being overwhelmed (which causes 503 responses).
      */
-    private int maxConnections = 20;
+    private int maxConnections = 50;
 
     /**
      * Maximum time (in minutes) that a connection can remain idle in the pool before being evicted.
@@ -46,15 +49,24 @@ public class InvestmentWebClientProperties {
     private long maxLifeTimeMinutes = 30;
 
     /**
-     * Maximum number of requests that can be queued waiting for a connection.
-     * Bounds the in-memory queue so callers receive a fast failure rather than an unbounded backlog.
+     * Maximum number of requests that can wait for a free connection.
+     *
+     * <p>{@code -1} means no queue limit — callers block up to
+     * {@link #pendingAcquireTimeoutMillis} instead of failing fast with
+     * "Pending acquire queue has reached its maximum size".
+     *
+     * <p>Pair with application-level {@code flatMap} concurrency limits in the ingestion
+     * services so the queue does not grow without bound.
      */
-    private int maxPendingAcquires = 100;
+    private int maxPendingAcquires = -1;
 
     /**
      * Maximum time (in milliseconds) a request will wait to acquire a connection from the pool.
+     *
+     * <p>When all {@link #maxConnections} are in use, new requests wait here rather than
+     * opening additional connections or failing immediately.
      */
-    private long pendingAcquireTimeoutMillis = 45_000;
+    private long pendingAcquireTimeoutMillis = 90_000;
 
     /**
      * Background eviction interval (in seconds) for idle/expired connections in the pool.

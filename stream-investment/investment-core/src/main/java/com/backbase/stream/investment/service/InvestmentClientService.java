@@ -54,6 +54,7 @@ public class InvestmentClientService {
      *   <li>Limits concurrent requests to avoid overwhelming the service and triggering 503 errors</li>
      *   <li>Implements exponential backoff retry with 503 and 409 conflict handling</li>
      *   <li>Processes clients sequentially through the same ExecutorService to maintain order and prevent race conditions</li>
+     *   <li>Failed clients are logged and skipped to prevent batch failures</li>
      * </ul>
      *
      * @param clientUsers the list of clients to upsert
@@ -99,10 +100,12 @@ public class InvestmentClientService {
                     .doOnSuccess(upsertedClient -> log.debug(
                         "Successfully upserted client: investmentClientId={}, internalUserId={}",
                         upsertedClient.getInvestmentClientId(), upsertedClient.getInternalUserId()))
-                    .doOnError(throwable -> log.error(
-                        "Failed to upsert client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
-                        clientUser.getInternalUserId(), clientUser.getExternalUserId(),
-                        clientUser.getLegalEntityId(), throwable));
+                    .onErrorResume(throwable -> {
+                        log.warn("Skipping client due to error: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
+                            clientUser.getInternalUserId(), clientUser.getExternalUserId(),
+                            clientUser.getLegalEntityId(), throwable);
+                        return Mono.empty();
+                    });
 
             }, 5)
             // Max 5 concurrent requests to avoid overwhelming the service

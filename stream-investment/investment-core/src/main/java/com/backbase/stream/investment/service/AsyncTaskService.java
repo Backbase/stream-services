@@ -22,20 +22,23 @@ public class AsyncTaskService {
             return Mono.just(List.of());
         }
         return Flux.interval(java.time.Duration.ofSeconds(5))
-            // Poll the status of all tasks
             .flatMap(
                 tick -> Flux.fromIterable(asyncTasks)
                     .flatMap(gr -> this.groupResultStatus(gr.getUuid()))
                     .collectList()
+                    .doOnNext(results -> {
+                        long pending = results.stream()
+                            .filter(gr -> "PENDING".equalsIgnoreCase(gr.getStatus()))
+                            .count();
+                        if (pending > 0) {
+                            log.info("Waiting for price async tasks: pending={}/{}", pending, asyncTasks.size());
+                        }
+                    })
             )
             .filter(results -> results.stream().noneMatch(gr -> "PENDING".equalsIgnoreCase(gr.getStatus())))
             .next()
-            .timeout(java.time.Duration.ofMinutes(5))
-            .doOnSuccess(tasks -> {
-                log.info("Prices tasks finished added");
-                log.debug("Price async tasks failure: {}",
-                    tasks.stream().filter(gr -> "FAILURE".equalsIgnoreCase(gr.getStatus())).toList());
-            })
+            .timeout(java.time.Duration.ofMinutes(10))
+            .doOnSuccess(tasks -> log.info("Prices tasks finished, added"))
             .onErrorResume(throwable -> {
                 log.error("Timeout or error waiting for GroupResult tasks: taskIds={}",
                     asyncTasks.stream().map(GroupResult::getUuid).toList(), throwable);

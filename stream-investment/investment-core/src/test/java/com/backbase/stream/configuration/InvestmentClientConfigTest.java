@@ -71,7 +71,7 @@ class InvestmentClientConfigTest {
         WebClient webClient = WebClient.builder().build();
         ObjectMapper objectMapper = new ObjectMapper();
         DateFormat dateFormat = mock(DateFormat.class);
-        HttpClient httpClient = mock(HttpClient.class); // declared parameter; not used by the method body
+        HttpClient httpClient = HttpClient.create();
 
         ApiClient result = config.investmentApiClient(webClient, httpClient, objectMapper, dateFormat);
 
