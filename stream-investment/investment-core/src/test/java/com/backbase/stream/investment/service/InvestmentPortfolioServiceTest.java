@@ -740,6 +740,80 @@ class InvestmentPortfolioServiceTest {
 
             verifyNoInteractions(portfolioApi);
         }
+
+        @Test
+        @DisplayName("single arrangement fails — skips failed arrangement and returns successful ones")
+        void upsertPortfolios_singleFailure_skipsFailedArrangement() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String successExternalId = "EXT-BATCH-OK";
+            String failExternalId = "EXT-BATCH-FAIL";
+            String leExternalId = "LE-BATCH";
+            UUID clientUuid = UUID.randomUUID();
+
+            InvestmentArrangement successArrangement = buildArrangement(
+                successExternalId, "Success Portfolio", productId, leExternalId);
+            InvestmentArrangement failArrangement = buildArrangement(
+                failExternalId, "Fail Portfolio", productId, leExternalId);
+
+            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(emptyList.getResults()).thenReturn(List.of());
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(successExternalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(emptyList));
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(failExternalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.error(new RuntimeException("list portfolios failed")));
+
+            PortfolioList created = buildPortfolioList(portfolioUuid, successExternalId,
+                OffsetDateTime.now().minusMonths(6));
+            when(portfolioApi.createPortfolio(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(created));
+
+            Map<String, List<UUID>> clientsByLeExternalId = Map.of(leExternalId, List.of(clientUuid));
+
+            StepVerifier.create(service.upsertPortfolios(
+                    List.of(successArrangement, failArrangement), clientsByLeExternalId))
+                .expectNextMatches(list -> list.size() == 1
+                    && portfolioUuid.equals(list.getFirst().getPortfolio().getUuid()))
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("successful upsert — maps initial cash and withdrawal amount from arrangement")
+        void upsertPortfolios_success_mapsCashAndWithdrawalAmount() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String externalId = "EXT-BATCH-CASH";
+            String leExternalId = "LE-CASH";
+            UUID clientUuid = UUID.randomUUID();
+
+            InvestmentArrangement arrangement = buildArrangement(
+                externalId, "Cash Portfolio", productId, leExternalId);
+            when(arrangement.getInitialCash()).thenReturn(BigDecimal.valueOf(25_000));
+            when(arrangement.getWithdrawalAmount()).thenReturn(BigDecimal.valueOf(1_500));
+
+            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(emptyList.getResults()).thenReturn(List.of());
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(emptyList));
+
+            PortfolioList created = buildPortfolioList(portfolioUuid, externalId,
+                OffsetDateTime.now().minusMonths(6));
+            when(portfolioApi.createPortfolio(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(created));
+
+            StepVerifier.create(service.upsertPortfolios(
+                    List.of(arrangement), Map.of(leExternalId, List.of(clientUuid))))
+                .expectNextMatches(list -> list.size() == 1
+                    && BigDecimal.valueOf(25_000).equals(list.getFirst().getInitialCash())
+                    && BigDecimal.valueOf(1_500).equals(list.getFirst().getWithdrawalAmount()))
+                .verifyComplete();
+        }
     }
 
     // =========================================================================
