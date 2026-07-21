@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>10.6.1</version>
+        <version>10.7.0</version>
         <relativePath>../stream-sdk/stream-starter</relativePath>
     </parent>
 
