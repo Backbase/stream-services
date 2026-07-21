@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.6.2]
+### Changed
+- Updated stream-investment to be able to seed to investment caboose
+
 ## [10.6.1]
 ### Changed
 - Updated plan manager ingestion logic to attempt to retrieve plans if they don't exist in the pre-filled map.

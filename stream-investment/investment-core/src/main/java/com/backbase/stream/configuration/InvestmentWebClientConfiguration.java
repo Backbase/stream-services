@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.netty.http.client.HttpClient;
@@ -31,8 +31,13 @@ import reactor.netty.resources.ConnectionProvider;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(InvestmentWebClientProperties.class)
 public class InvestmentWebClientConfiguration {
+
+    @Bean("investmentWebClientProperties")
+    @ConfigurationProperties("backbase.communication.services.investment.http-client")
+    public InvestmentWebClientProperties investmentWebClientProperties() {
+        return new InvestmentWebClientProperties();
+    }
 
     /**
      * Dedicated {@link ConnectionProvider} for the Investment service client pool.
@@ -45,7 +50,8 @@ public class InvestmentWebClientConfiguration {
      * @return investment-specific ConnectionProvider
      */
     @Bean("investmentConnectionProvider")
-    public ConnectionProvider investmentConnectionProvider(InvestmentWebClientProperties props) {
+    public ConnectionProvider investmentConnectionProvider(
+        @Qualifier("investmentWebClientProperties") InvestmentWebClientProperties props) {
         ConnectionProvider provider = ConnectionProvider.builder("investment-client-pool")
             .maxConnections(props.getMaxConnections())
             .maxIdleTime(Duration.ofMinutes(props.getMaxIdleTimeMinutes()))
@@ -81,7 +87,7 @@ public class InvestmentWebClientConfiguration {
     @Bean("investmentHttpClient")
     public HttpClient investmentHttpClient(
         @Qualifier("investmentConnectionProvider") ConnectionProvider connectionProvider,
-        InvestmentWebClientProperties props) {
+        @Qualifier("investmentWebClientProperties") InvestmentWebClientProperties props) {
         return HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, props.getConnectTimeoutSeconds() * 1000)
             .option(ChannelOption.SO_KEEPALIVE, true)

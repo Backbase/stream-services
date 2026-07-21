@@ -180,9 +180,9 @@ class InvestmentServiceConfigurationTest {
         }
 
         @Test
-        @DisplayName("investmentStaticDataSaga — returns non-null InvestmentAssetUniverseSaga")
-        void investmentStaticDataSaga_returnsAssetUniverseSaga() {
-            assertThat(config.investmentStaticDataSaga(
+        @DisplayName("investmentAssetUniverseSaga — returns non-null InvestmentAssetUniverseSaga")
+        void investmentAssetUniverseSaga_returnsAssetUniverseSaga() {
+            assertThat(config.investmentAssetUniverseSaga(
                 mock(InvestmentAssetUniverseService.class),
                 mock(InvestmentAssetPriceService.class),
                 mock(InvestmentIntradayAssetPriceService.class),
