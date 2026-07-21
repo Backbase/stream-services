@@ -16,7 +16,7 @@
 
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
-        <wiremock.version>3.0.1</wiremock.version>
+        <wiremock.version>3.0.3</wiremock.version>
         <archunit.skip>true</archunit.skip>
     </properties>
 
