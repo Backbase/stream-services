@@ -57,14 +57,6 @@ public class InvestmentRestServiceApiConfiguration {
         return apiClient;
     }
 
-    /**
-     * Dedicated {@link ObjectMapper} for investment RestTemplate calls.
-     *
-     * <p>Uses {@link Include#NON_EMPTY} to omit blank optional fields in multipart requests.
-     * JSON content entry create serialises payloads to {@code byte[]} explicitly in
-     * {@link InvestmentRestNewsContentService} to avoid {@code RestTemplate} {@code ObjectNode}
-     * serialisation issues.
-     */
     @Bean
     @Qualifier("restInvestmentObjectMapper")
     public ObjectMapper restInvestmentObjectMapper(ObjectMapper legacyObjectMapper) {
@@ -88,10 +80,6 @@ public class InvestmentRestServiceApiConfiguration {
         return new com.backbase.investment.api.service.sync.v1.AssetUniverseApi(restInvestmentApiClient);
     }
 
-    /**
-     * RestTemplate-based news content service. Requires {@code restInvestmentObjectMapper} for
-     * manual JSON serialisation in {@link InvestmentRestNewsContentService}.
-     */
     @Bean
     @Primary
     public InvestmentRestNewsContentService investmentNewsContentService(

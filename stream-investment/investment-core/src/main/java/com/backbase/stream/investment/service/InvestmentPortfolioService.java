@@ -187,10 +187,11 @@ public class InvestmentPortfolioService {
             .name(investmentArrangement.getName())
             .clients(associatedClients)
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()));
+            .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()))
+            .extraData(investmentArrangement.getExtraData());
 
-        log.debug("Attempting to patch existing portfolio: uuid={}, externalId={}",
-            uuid, investmentArrangement.getExternalId());
+        log.debug("Attempting to patch existing portfolio: uuid={}, externalId={}, extraData={}",
+            uuid, investmentArrangement.getExternalId(), investmentArrangement.getExtraData());
 
         return portfolioApi.patchPortfolio(uuid, null, null, null, patchedPortfolioUpdateRequest)
             .doOnSuccess(updated -> {
@@ -237,7 +238,11 @@ public class InvestmentPortfolioService {
             .currency(Optional.ofNullable(investmentArrangement.getCurrency())
                 .orElse(config.getPortfolio().getDefaultCurrency()))
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()));
+            .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()))
+            .extraData(investmentArrangement.getExtraData());
+
+        log.debug("Creating investment portfolio: externalId={}, name={}, extraData={}",
+            investmentArrangement.getExternalId(), investmentArrangement.getName(), investmentArrangement.getExtraData());
 
         return portfolioApi.createPortfolio(request, null, null, null)
             .doOnSuccess(created -> log.info(
