@@ -11,7 +11,6 @@ import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdate;
 import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest;
 import com.backbase.investment.api.service.sync.v1.model.EntryTagRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedEntryTagRequest;
-import com.backbase.investment.api.service.sync.v1.model.RelatedAssetSerializerWithAssetCategoriesRequest;
 import com.backbase.stream.investment.model.MarketNewsEntry;
 import com.backbase.stream.investment.model.ContentTag;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,9 +20,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -36,29 +35,32 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * RestTemplate-based service for market news content and tags against the Investment service
- * {@code /service-api/v2/content/} endpoints.
+ * REST client service for upserting market news content and tags via the Investment Content API.
  *
- * <p>This service avoids serialisation issues present in the auto-generated
- * {@code ContentApi#createContentEntry} client introduced with investment-service-api 1.6.x:
+ * <p>This service manages:
  * <ul>
- *   <li>explicit {@code thumbnail: null} is rejected by the investment API</li>
- *   <li>empty {@code assets} arrays must be present on create</li>
- *   <li>multipart create does not reliably transmit JSON array fields</li>
- *   <li>{@code ObjectNode} request bodies are not always serialised by {@code RestTemplate}</li>
+ *   <li>Market news tag creation and updates</li>
+ *   <li>Market news content entry creation (skips duplicates by title)</li>
+ *   <li>Thumbnail attachment for newly created content entries</li>
  * </ul>
  *
  * <p>Content entry create uses JSON {@code POST /service-api/v2/content/entries/} via
- * {@link ApiClient#invokeAPI}; optional thumbnail upload uses multipart
- * {@code PATCH /service-api/v2/content/entries/{uuid}/}. Mapping from the stream
- * {@link MarketNewsEntry} model is handled by {@link ContentMapper}.
+ * {@link ApiClient#invokeAPI} instead of the generated {@code ContentApi#createContentEntry},
+ * because investment-service-api 1.6.x rejects explicit {@code thumbnail: null}, requires an
+ * {@code assets} array (including empty), and multipart create does not reliably transmit JSON
+ * array fields. Thumbnail upload remains a multipart PATCH.
  *
- * @see InvestmentRestDocumentContentService
+ * <p>Design notes (see CODING_RULES_COPILOT.md):
+ * <ul>
+ *   <li>No direct manipulation of generated API classes beyond construction and mapping</li>
+ *   <li>Side-effecting operations are logged at info (create) or debug (patch) levels</li>
+ *   <li>Individual entry failures are logged and swallowed so batch processing continues</li>
+ *   <li>All reactive operations include proper success and error handlers for observability</li>
+ * </ul>
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -68,10 +70,7 @@ public class InvestmentRestNewsContentService {
     public static final int CONTENT_RETRIEVE_LIMIT = 100;
 
     private static final String CREATE_CONTENT_ENTRY_PATH = "/service-api/v2/content/entries/";
-    private static final String PATCH_CONTENT_ENTRY_PATH = "/service-api/v2/content/entries/{uuid}/";
-
     private static final String[] JSON_CONTENT_TYPES = {"application/json"};
-    private static final String[] MULTIPART_CONTENT_TYPES = {"multipart/form-data"};
 
     private final ContentApi contentApi;
     private final ApiClient apiClient;
@@ -79,10 +78,12 @@ public class InvestmentRestNewsContentService {
     private final ContentMapper contentMapper = Mappers.getMapper(ContentMapper.class);
 
     /**
-     * Creates or updates market news tags via {@code ContentApi} entry-tag endpoints.
+     * Upserts a batch of content tags. For each tag, checks whether a tag with the same code already exists.
+     * If found, patches it; otherwise creates a new tag. Tags with blank code or value are skipped.
+     * Individual failures are logged and swallowed so remaining tags continue processing.
      *
-     * @param tagEntries tags to upsert
-     * @return {@link Mono} that completes when all tags have been processed
+     * @param tagEntries list of tags to upsert
+     * @return Mono that completes when all tags have been processed
      */
     public Mono<Void> upsertTags(List<ContentTag> tagEntries) {
         log.info("Starting tag upsert batch operation: totalEntriesSubmitted={}", tagEntries.size());
@@ -101,31 +102,19 @@ public class InvestmentRestNewsContentService {
     }
 
     /**
-     * Creates new market news content entries that are not already present in the investment service.
+     * Upserts a single tag entry using the ContentApi tag endpoints. Implementation follows the upsert pattern:
+     * <ol>
+     *   <li>List existing tag entries to check if the tag code already exists</li>
+     *   <li>If tag exists, patch it with the new value</li>
+     *   <li>If not found, create a new tag entry</li>
+     * </ol>
      *
-     * @param contentEntries news entries to upsert
-     * @return {@link Mono} that completes when all new entries have been processed
+     * @param marketNewsTag the tag to upsert
+     * @return Mono that completes with the tag when processed, or empty if validation fails or an error occurs
      */
-    public Mono<Void> upsertContent(List<MarketNewsEntry> contentEntries) {
-        log.info("Starting content upsert batch operation: totalEntriesSubmitted={}", contentEntries.size());
-        log.debug("Content upsert batch details: entries={}", contentEntries);
-
-        return findEntriesNewContent(contentEntries)
-            .flatMap(this::upsertSingleEntry)
-            .count()
-            .doOnNext(entriesCreated -> log.info(
-                "Content upsert batch completed successfully: totalEntriesSubmitted={}, entriesCreated={}",
-                contentEntries.size(), entriesCreated))
-            .doOnError(error -> log.error(
-                "Content upsert batch failed: totalEntriesSubmitted={}, errorType={}, errorMessage={}",
-                contentEntries.size(), error.getClass().getSimpleName(), error.getMessage(), error))
-            .then();
-    }
-
     private Mono<ContentTag> upsertSingleTag(ContentTag marketNewsTag) {
         log.debug("Processing tag: code='{}', value='{}'", marketNewsTag.getCode(), marketNewsTag.getValue());
 
-        // Validation
         if (marketNewsTag.getCode() == null || marketNewsTag.getCode().isBlank()) {
             log.warn("Skipping tag with empty code: value='{}'", marketNewsTag.getValue());
             return Mono.empty();
@@ -139,8 +128,8 @@ public class InvestmentRestNewsContentService {
         log.debug("Checking if tag entry exists: code='{}', value='{}'",
             marketNewsTag.getCode(), marketNewsTag.getValue());
 
-        // Check if tag entry already exists
-        return Mono.fromCallable(() -> contentApi.contentEntryTagList(CONTENT_RETRIEVE_LIMIT, 0))
+        return Mono.fromCallable(() ->
+                contentApi.contentEntryTagList(CONTENT_RETRIEVE_LIMIT, 0))
             .map(paginatedList -> paginatedList.getResults().stream()
                 .filter(Objects::nonNull)
                 .filter(entry -> marketNewsTag.getCode().equals(entry.getCode()))
@@ -166,6 +155,12 @@ public class InvestmentRestNewsContentService {
             });
     }
 
+    /**
+     * Creates a new tag entry using the ContentApi.
+     *
+     * @param contentTag the tag to create an entry for
+     * @return Mono of the created tag
+     */
     private Mono<ContentTag> createTagEntry(ContentTag contentTag) {
         EntryTagRequest request = new EntryTagRequest()
             .code(contentTag.getCode())
@@ -182,6 +177,12 @@ public class InvestmentRestNewsContentService {
             .thenReturn(contentTag);
     }
 
+    /**
+     * Patches an existing tag entry with updated values.
+     *
+     * @param contentTag the tag with updated values to patch
+     * @return Mono of the patched tag
+     */
     private Mono<ContentTag> patchTagEntry(ContentTag contentTag) {
         PatchedEntryTagRequest request = new PatchedEntryTagRequest()
             .code(contentTag.getCode())
@@ -198,11 +199,46 @@ public class InvestmentRestNewsContentService {
             .thenReturn(contentTag);
     }
 
+    /**
+     * Creates new market news content entries. Entries whose title matches an existing entry are skipped.
+     * Individual failures are logged and swallowed so remaining entries continue processing.
+     *
+     * @param contentEntries list of content entries to create
+     * @return Mono that completes when all eligible entries have been processed
+     */
+    public Mono<Void> upsertContent(List<MarketNewsEntry> contentEntries) {
+        log.info("Starting content entries upsert batch operation: totalEntriesSubmitted={}", contentEntries.size());
+        log.debug("Content upsert batch details: entries={}", contentEntries);
+
+        return findEntriesNewContent(contentEntries)
+            .flatMap(this::upsertSingleEntry)
+            .count()
+            .doOnNext(entriesCreated -> log.info(
+                "Content upsert batch completed successfully: totalEntriesSubmitted={}, entriesCreated={}",
+                contentEntries.size(), entriesCreated))
+            .doOnError(error -> log.error(
+                "Content upsert batch failed: totalEntriesSubmitted={}, errorType={}, errorMessage={}",
+                contentEntries.size(), error.getClass().getSimpleName(), error.getMessage(), error))
+            .then();
+    }
+
+    /**
+     * Creates a single market news content entry and optionally attaches a thumbnail.
+     * Callers must supply entries that have already been filtered as non-duplicates.
+     * Errors are logged and swallowed to allow processing of remaining entries.
+     *
+     * @param request the content entry to create
+     * @return Mono that completes with the created entry, or empty if creation fails
+     */
     private Mono<EntryCreateUpdate> upsertSingleEntry(MarketNewsEntry request) {
         log.debug("Creating content entry: title='{}', hasThumbnail={}", request.getTitle(),
             request.getThumbnailResource() != null);
 
-        return Mono.defer(() -> Mono.fromCallable(() -> invokeCreateContentEntry(request)))
+        EntryCreateUpdateRequest createUpdateRequest = contentMapper.map(request);
+        log.debug("Content entry request mapped: title='{}', request={}", request.getTitle(), createUpdateRequest);
+
+        return Mono.defer(() -> Mono.fromCallable(() -> createContentEntry(createUpdateRequest)))
+            .flatMap(entry -> addThumbnail(entry, request.getThumbnailResource()))
             .doOnSuccess(created -> log.info(
                 "Content entry created successfully: title='{}', uuid={}, thumbnailAttached={}",
                 request.getTitle(), created.getUuid(), request.getThumbnailResource() != null))
@@ -213,26 +249,26 @@ public class InvestmentRestNewsContentService {
     }
 
     /**
-     * Creates a content entry and optionally attaches a thumbnail file.
+     * Creates a content entry via JSON POST.
      *
-     * @throws RestClientException if the investment service returns an error
+     * <p>{@code thumbnail} is omitted (investment rejects explicit null) and {@code assets} is always
+     * included, even when empty. The payload is serialised to {@code byte[]} because
+     * {@code RestTemplate} does not reliably serialise {@link ObjectNode} bodies.
      */
-    private EntryCreateUpdate invokeCreateContentEntry(MarketNewsEntry entry) throws RestClientException {
-        EntryCreateUpdateRequest request = contentMapper.map(entry);
-        EntryCreateUpdate created = invokeCreate(request);
+    private EntryCreateUpdate createContentEntry(EntryCreateUpdateRequest request) {
+        ObjectNode requestBody = objectMapper.valueToTree(request);
+        requestBody.remove(JSON_PROPERTY_THUMBNAIL);
+        requestBody.set(JSON_PROPERTY_ASSETS, objectMapper.valueToTree(
+            Objects.requireNonNullElse(request.getAssets(), List.of())));
 
-        Resource thumbnail = entry.getThumbnailResource();
-        if (thumbnail != null) {
-            return invokePatchThumbnail(created.getUuid(), thumbnail);
+        final byte[] bodyBytes;
+        try {
+            bodyBytes = objectMapper.writeValueAsBytes(requestBody);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Failed to serialize content entry create request", exception);
         }
-        return created;
-    }
 
-    private EntryCreateUpdate invokeCreate(EntryCreateUpdateRequest request) throws RestClientException {
-        byte[] bodyBytes = buildCreateRequestBodyBytes(request);
-        log.debug("Creating content entry JSON payload: title='{}'", request.getTitle());
-
-        final List<MediaType> accept = apiClient.selectHeaderAccept(new String[]{"application/json"});
+        final List<MediaType> accept = apiClient.selectHeaderAccept(JSON_CONTENT_TYPES);
         final MediaType contentType = apiClient.selectHeaderContentType(JSON_CONTENT_TYPES);
         ParameterizedTypeReference<EntryCreateUpdate> returnType = new ParameterizedTypeReference<>() {
         };
@@ -253,56 +289,13 @@ public class InvestmentRestNewsContentService {
             .getBody();
     }
 
-    private EntryCreateUpdate invokePatchThumbnail(UUID uuid, Resource thumbnail) throws RestClientException {
-        final Map<String, Object> uriVariables = new HashMap<>();
-        uriVariables.put("uuid", uuid.toString());
-
-        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<>();
-        log.debug("Patching content entry thumbnail: uuid={}, thumbnailFile='{}'",
-            uuid, getFileNameForLog(thumbnail));
-        formParams.add(JSON_PROPERTY_THUMBNAIL, thumbnail);
-
-        final List<MediaType> accept = apiClient.selectHeaderAccept(new String[]{"application/json"});
-        final MediaType contentType = apiClient.selectHeaderContentType(MULTIPART_CONTENT_TYPES);
-        ParameterizedTypeReference<EntryCreateUpdate> returnType = new ParameterizedTypeReference<>() {
-        };
-
-        return apiClient.invokeAPI(
-                PATCH_CONTENT_ENTRY_PATH,
-                HttpMethod.PATCH,
-                uriVariables,
-                new LinkedMultiValueMap<>(),
-                null,
-                new HttpHeaders(),
-                new LinkedMultiValueMap<>(),
-                formParams,
-                accept,
-                contentType,
-                new String[]{},
-                returnType)
-            .getBody();
-    }
-
     /**
-     * Builds JSON request bytes for content entry create.
+     * Filters the supplied content entries to those not already present in the system.
+     * An entry is considered a duplicate when its title contains an existing entry title.
      *
-     * <p>{@code thumbnail} is omitted (investment rejects explicit null) and {@code assets} is always
-     * included, even when empty. The payload is serialised to {@code byte[]} because
-     * {@code RestTemplate} does not reliably serialise {@link ObjectNode} bodies.
+     * @param contentEntries entries to filter
+     * @return Flux of entries that should be created
      */
-    private byte[] buildCreateRequestBodyBytes(EntryCreateUpdateRequest request) {
-        ObjectNode requestBody = objectMapper.valueToTree(request);
-        requestBody.remove(JSON_PROPERTY_THUMBNAIL);
-        requestBody.set(JSON_PROPERTY_ASSETS, objectMapper.valueToTree(
-            Objects.requireNonNullElse(request.getAssets(), List.of())));
-
-        try {
-            return objectMapper.writeValueAsBytes(requestBody);
-        } catch (JsonProcessingException exception) {
-            throw new IllegalStateException("Failed to serialize content entry create request", exception);
-        }
-    }
-
     private Flux<MarketNewsEntry> findEntriesNewContent(List<MarketNewsEntry> contentEntries) {
         Map<String, MarketNewsEntry> entryByTitle = contentEntries.stream()
             .collect(Collectors.toMap(MarketNewsEntry::getTitle, Function.identity()));
@@ -332,4 +325,61 @@ public class InvestmentRestNewsContentService {
 
         return Flux.fromIterable(newEntries);
     }
+
+    /**
+     * Attaches a thumbnail to a content entry via multipart PATCH when a thumbnail resource is provided.
+     * Failures are logged and swallowed so the created entry is retained without a thumbnail.
+     *
+     * @param entry the created content entry
+     * @param thumbnail optional thumbnail resource
+     * @return Mono emitting the entry (unchanged on success or when attachment is skipped or fails)
+     */
+    private Mono<EntryCreateUpdate> addThumbnail(EntryCreateUpdate entry, Resource thumbnail) {
+        UUID uuid = entry.getUuid();
+
+        if (thumbnail == null) {
+            log.debug("Skipping thumbnail attachment: uuid={}, title='{}'", uuid, entry.getTitle());
+            return Mono.just(entry);
+        }
+
+        log.debug("Attaching thumbnail to content entry: uuid={}, title='{}', thumbnailFile='{}'", uuid,
+            entry.getTitle(), getFileNameForLog(thumbnail));
+
+        return Mono.defer(() -> {
+                Map<String, Object> uriVariables = new HashMap<>();
+                uriVariables.put("uuid", uuid);
+
+                MultiValueMap<String, String> localVarQueryParams = new LinkedMultiValueMap<>();
+                HttpHeaders localVarHeaderParams = new HttpHeaders();
+                MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<>();
+                MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<>();
+
+                localVarFormParams.add(JSON_PROPERTY_THUMBNAIL, thumbnail);
+
+                final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(JSON_CONTENT_TYPES);
+                final String[] localVarContentTypes = {"multipart/form-data"};
+                final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+
+                String[] localVarAuthNames = new String[]{};
+
+                ParameterizedTypeReference<EntryCreateUpdate> localReturnType = new ParameterizedTypeReference<>() {
+                };
+                apiClient.invokeAPI("/service-api/v2/content/entries/{uuid}/", HttpMethod.PATCH, uriVariables,
+                    localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
+                    localVarAccept, localVarContentType, localVarAuthNames, localReturnType);
+
+                log.debug("Thumbnail attached successfully: uuid={}, title='{}', thumbnailFile='{}'", uuid,
+                    entry.getTitle(), getFileNameForLog(thumbnail));
+                return Mono.just(entry);
+            }).doOnError(error -> log.error(
+                "Thumbnail attachment failed: uuid={}, title='{}', thumbnailFile='{}', errorType={}, errorMessage={}",
+                uuid, entry.getTitle(), getFileNameForLog(thumbnail), error.getClass().getSimpleName(),
+                error.getMessage(), error))
+            .onErrorResume(error -> {
+                log.warn("Content entry created without thumbnail: uuid={}, title='{}', reason={}", uuid,
+                    entry.getTitle(), error.getMessage());
+                return Mono.just(entry);
+            });
+    }
+
 }

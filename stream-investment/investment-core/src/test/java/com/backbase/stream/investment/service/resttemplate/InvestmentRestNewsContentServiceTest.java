@@ -48,12 +48,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import reactor.test.StepVerifier;
 
-/**
- * Unit tests for {@link InvestmentRestNewsContentService}.
- *
- * <p>Verifies tag upsert via generated {@code ContentApi} clients and content entry create via
- * manual {@code ApiClient} calls (JSON POST with {@code byte[]} body, optional multipart thumbnail PATCH).
- */
 @ExtendWith(MockitoExtension.class)
 class InvestmentRestNewsContentServiceTest {
 
@@ -105,7 +99,7 @@ class InvestmentRestNewsContentServiceTest {
         when(apiClient.invokeAPI(
             eq("/service-api/v2/content/entries/{uuid}/"),
             eq(HttpMethod.PATCH),
-            eq(Map.of("uuid", uuid.toString())),
+            eq(Map.of("uuid", uuid)),
             any(),
             isNull(),
             any(),
@@ -119,9 +113,9 @@ class InvestmentRestNewsContentServiceTest {
 
     static Stream<org.junit.jupiter.params.provider.Arguments> invalidTags() {
         return Stream.of(
-            org.junit.jupiter.params.provider.Arguments.of("  ", "someValue"),
-            org.junit.jupiter.params.provider.Arguments.of("code1", null),
-            org.junit.jupiter.params.provider.Arguments.of("code1", "  ")
+            org.junit.jupiter.params.provider.Arguments.of("  ", "someValue"),  // blank code
+            org.junit.jupiter.params.provider.Arguments.of("code1", null),      // null value
+            org.junit.jupiter.params.provider.Arguments.of("code1", "  ")       // blank value
         );
     }
 
@@ -151,9 +145,12 @@ class InvestmentRestNewsContentServiceTest {
                 .verifyComplete();
 
             verify(contentApi, never()).contentEntryTagList(anyInt(), anyInt());
+            verify(contentApi, never()).contentEntryTagCreate(any());
+            verify(contentApi, never()).contentEntryTagPartialUpdate(any(), any());
         }
 
         @ParameterizedTest(name = "tag skipped when code=''{0}'' value=''{1}''")
+        @DisplayName("tag with blank/null code or blank/null value is skipped")
         @MethodSource("com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentServiceTest#invalidTags")
         void tagWithInvalidCodeOrValueIsSkipped(String code, String value) {
             ContentTag tag = new ContentTag(code, value);
@@ -162,6 +159,7 @@ class InvestmentRestNewsContentServiceTest {
                 .verifyComplete();
 
             verify(contentApi, never()).contentEntryTagList(anyInt(), anyInt());
+            verify(contentApi, never()).contentEntryTagCreate(any());
         }
 
         @Test
@@ -178,6 +176,65 @@ class InvestmentRestNewsContentServiceTest {
                 .verifyComplete();
 
             verify(contentApi, times(1)).contentEntryTagCreate(any());
+            verify(contentApi, never()).contentEntryTagPartialUpdate(any(), any());
+        }
+
+        @Test
+        @DisplayName("existing tag triggers patch")
+        void existingTagTriggersPatch() {
+            ContentTag tag = new ContentTag("code1", "value1");
+            EntryTag existingTag = new EntryTag().code("code1").value("oldValue");
+            PaginatedEntryTagList page = new PaginatedEntryTagList().results(List.of(existingTag));
+            EntryTag patchedTag = new EntryTag().code("code1").value("value1");
+
+            when(contentApi.contentEntryTagList(anyInt(), anyInt())).thenReturn(page);
+            when(contentApi.contentEntryTagPartialUpdate(anyString(), any())).thenReturn(patchedTag);
+
+            StepVerifier.create(service.upsertTags(List.of(tag)))
+                .verifyComplete();
+
+            verify(contentApi, times(1)).contentEntryTagPartialUpdate(anyString(), any());
+            verify(contentApi, never()).contentEntryTagCreate(any());
+        }
+
+        @Test
+        @DisplayName("API failure on tag create is swallowed and processing continues")
+        void apiFailureOnTagCreateIsSwallowed() {
+            ContentTag tag1 = new ContentTag("code1", "value1");
+            ContentTag tag2 = new ContentTag("code2", "value2");
+            PaginatedEntryTagList emptyPage = new PaginatedEntryTagList().results(List.of());
+            EntryTag createdTag2 = new EntryTag().code("code2").value("value2");
+
+            when(contentApi.contentEntryTagList(anyInt(), anyInt())).thenReturn(emptyPage);
+            when(contentApi.contentEntryTagCreate(any()))
+                .thenThrow(new RuntimeException("API error"))
+                .thenReturn(createdTag2);
+
+            StepVerifier.create(service.upsertTags(List.of(tag1, tag2)))
+                .verifyComplete();
+
+            verify(contentApi, times(2)).contentEntryTagCreate(any());
+        }
+
+        @Test
+        @DisplayName("multiple tags: existing gets patched, new gets created")
+        void multipleTagsAllProcessed() {
+            ContentTag tag1 = new ContentTag("code1", "value1");
+            ContentTag tag2 = new ContentTag("code2", "value2");
+            EntryTag existingTag1 = new EntryTag().code("code1").value("old1");
+            PaginatedEntryTagList page = new PaginatedEntryTagList().results(List.of(existingTag1));
+            EntryTag patchedTag = new EntryTag().code("code1").value("value1");
+            EntryTag createdTag = new EntryTag().code("code2").value("value2");
+
+            when(contentApi.contentEntryTagList(anyInt(), anyInt())).thenReturn(page);
+            when(contentApi.contentEntryTagPartialUpdate(anyString(), any())).thenReturn(patchedTag);
+            when(contentApi.contentEntryTagCreate(any())).thenReturn(createdTag);
+
+            StepVerifier.create(service.upsertTags(List.of(tag1, tag2)))
+                .verifyComplete();
+
+            verify(contentApi, times(1)).contentEntryTagPartialUpdate(anyString(), any());
+            verify(contentApi, times(1)).contentEntryTagCreate(any());
         }
     }
 
@@ -190,8 +247,23 @@ class InvestmentRestNewsContentServiceTest {
     class UpsertContent {
 
         @Test
-        @DisplayName("no thumbnail uses JSON POST without thumbnail field")
-        void noThumbnailUsesJsonPost() throws Exception {
+        @DisplayName("empty list completes without calling API")
+        void emptyListCompletesWithoutApiCall() {
+            PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
+
+            StepVerifier.create(service.upsertContent(List.of()))
+                .verifyComplete();
+
+            verify(apiClient, never()).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("no existing entries - all entries are created via JSON POST")
+        void noExistingEntriesAllCreated() throws Exception {
             MarketNewsEntry entry = new MarketNewsEntry();
             entry.setTitle("News Title");
             entry.setTags(List.of("INVESTOR_AREA"));
@@ -207,6 +279,10 @@ class InvestmentRestNewsContentServiceTest {
             StepVerifier.create(service.upsertContent(List.of(entry)))
                 .verifyComplete();
 
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
+
             byte[] bodyBytes = (byte[]) jsonBodyCaptor.getValue();
             JsonNode body = objectMapper.readTree(bodyBytes);
             assertThat(body.has(JSON_PROPERTY_THUMBNAIL)).isFalse();
@@ -215,40 +291,7 @@ class InvestmentRestNewsContentServiceTest {
         }
 
         @Test
-        @DisplayName("thumbnail resource uses JSON create then multipart PATCH for thumbnail")
-        void thumbnailUsesJsonCreateThenMultipartPatch() {
-            MarketNewsEntry entry = new MarketNewsEntry();
-            entry.setTitle("News Title");
-            entry.setTags(List.of("INVESTOR_AREA"));
-            entry.setThumbnailResource(new ByteArrayResource("image".getBytes(), "example.png"));
-
-            PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
-            UUID createdUuid = UUID.randomUUID();
-            EntryCreateUpdate created = new EntryCreateUpdate(createdUuid, null, null);
-            created.setTitle("News Title");
-            EntryCreateUpdate patched = new EntryCreateUpdate(createdUuid, null, null);
-            patched.setTitle("News Title");
-
-            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
-                isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
-            stubJsonContentEntryCreate(created);
-            stubMultipartContentEntryPatch(createdUuid, patched);
-
-            StepVerifier.create(service.upsertContent(List.of(entry)))
-                .verifyComplete();
-
-            verify(apiClient, times(1)).invokeAPI(
-                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
-                any(), eq(MediaType.APPLICATION_JSON), any(), any());
-            verify(apiClient, times(1)).invokeAPI(
-                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH), eq(Map.of("uuid", createdUuid.toString())),
-                any(), isNull(), any(), any(), any(), any(), eq(MediaType.MULTIPART_FORM_DATA), any(), any());
-            assertThat(formParamsCaptor.getValue().get(JSON_PROPERTY_THUMBNAIL)).hasSize(1);
-            assertThat(formParamsCaptor.getValue().get(JSON_PROPERTY_ASSETS)).isNull();
-        }
-
-        @Test
-        @DisplayName("existing entries with matching title are skipped")
+        @DisplayName("existing entries with matching title are skipped (not duplicated)")
         void existingEntriesWithMatchingTitleAreSkipped() {
             MarketNewsEntry entry = new MarketNewsEntry();
             entry.setTitle("Existing News");
@@ -266,6 +309,33 @@ class InvestmentRestNewsContentServiceTest {
             verify(apiClient, never()).invokeAPI(
                 eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("only new entries (not matching existing) are created")
+        void onlyNewEntriesAreCreated() {
+            MarketNewsEntry existingEntry = new MarketNewsEntry();
+            existingEntry.setTitle("Existing News");
+            MarketNewsEntry newEntry = new MarketNewsEntry();
+            newEntry.setTitle("Brand New News");
+            newEntry.setTags(List.of("INVESTOR_AREA"));
+
+            Entry serverEntry = new Entry(UUID.randomUUID(), "Existing News",
+                null, null, null, null, null, null, null, null);
+            PaginatedEntryList page = new PaginatedEntryList().results(List.of(serverEntry));
+            EntryCreateUpdate created = new EntryCreateUpdate(UUID.randomUUID(), null, null);
+            created.setTitle("Brand New News");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(page);
+            stubJsonContentEntryCreate(created);
+
+            StepVerifier.create(service.upsertContent(List.of(existingEntry, newEntry)))
+                .verifyComplete();
+
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
         }
 
         @Test
@@ -308,6 +378,110 @@ class InvestmentRestNewsContentServiceTest {
             verify(apiClient, times(2)).invokeAPI(
                 eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
                 any(), eq(MediaType.APPLICATION_JSON), any(), any());
+        }
+
+        @Test
+        @DisplayName("entry without thumbnail skips thumbnail PATCH call via apiClient")
+        void entryWithoutThumbnailSkipsThumbnailAttachment() {
+            MarketNewsEntry entry = new MarketNewsEntry();
+            entry.setTitle("No Thumbnail News");
+            entry.setTags(List.of("INVESTOR_AREA"));
+
+            PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
+            EntryCreateUpdate created = new EntryCreateUpdate(UUID.randomUUID(), null, null);
+            created.setTitle("No Thumbnail News");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
+            stubJsonContentEntryCreate(created);
+
+            StepVerifier.create(service.upsertContent(List.of(entry)))
+                .verifyComplete();
+
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
+            verify(apiClient, never()).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("thumbnail resource uses JSON create then multipart PATCH for thumbnail")
+        void thumbnailUsesJsonCreateThenMultipartPatch() {
+            MarketNewsEntry entry = new MarketNewsEntry();
+            entry.setTitle("News Title");
+            entry.setTags(List.of("INVESTOR_AREA"));
+            entry.setThumbnailResource(new ByteArrayResource("image".getBytes(), "example.png"));
+
+            PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
+            UUID createdUuid = UUID.randomUUID();
+            EntryCreateUpdate created = new EntryCreateUpdate(createdUuid, null, null);
+            created.setTitle("News Title");
+            EntryCreateUpdate patched = new EntryCreateUpdate(createdUuid, null, null);
+            patched.setTitle("News Title");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
+            stubJsonContentEntryCreate(created);
+            stubMultipartContentEntryPatch(createdUuid, patched);
+
+            StepVerifier.create(service.upsertContent(List.of(entry)))
+                .verifyComplete();
+
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH),
+                eq(Map.of("uuid", createdUuid)), any(), isNull(), any(), any(), any(), any(),
+                eq(MediaType.MULTIPART_FORM_DATA), any(), any());
+            assertThat(formParamsCaptor.getValue().get(JSON_PROPERTY_THUMBNAIL)).hasSize(1);
+            assertThat(formParamsCaptor.getValue().get(JSON_PROPERTY_ASSETS)).isNull();
+        }
+
+        @Test
+        @DisplayName("thumbnail PATCH failure retains created entry")
+        void thumbnailPatchFailureRetainsCreatedEntry() {
+            MarketNewsEntry entry = new MarketNewsEntry();
+            entry.setTitle("News Title");
+            entry.setTags(List.of("INVESTOR_AREA"));
+            entry.setThumbnailResource(new ByteArrayResource("image".getBytes(), "example.png"));
+
+            PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
+            UUID createdUuid = UUID.randomUUID();
+            EntryCreateUpdate created = new EntryCreateUpdate(createdUuid, null, null);
+            created.setTitle("News Title");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
+            stubJsonContentEntryCreate(created);
+            when(apiClient.selectHeaderContentType(new String[]{"multipart/form-data"}))
+                .thenReturn(MediaType.MULTIPART_FORM_DATA);
+            when(apiClient.invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"),
+                eq(HttpMethod.PATCH),
+                eq(Map.of("uuid", createdUuid)),
+                any(),
+                isNull(),
+                any(),
+                any(),
+                any(),
+                any(),
+                eq(MediaType.MULTIPART_FORM_DATA),
+                any(),
+                any())).thenThrow(new RuntimeException("thumbnail upload failed"));
+
+            StepVerifier.create(service.upsertContent(List.of(entry)))
+                .verifyComplete();
+
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH),
+                eq(Map.of("uuid", createdUuid)), any(), isNull(), any(), any(), any(), any(),
+                eq(MediaType.MULTIPART_FORM_DATA), any(), any());
         }
     }
 }

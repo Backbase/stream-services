@@ -1,7 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [10.6.2]
+## [10.7.1]
+### Changed
+- Updated stream-investment to be able to seed extra_data to investment portfolio
+- fix content entry seeding issue
+
+## [10.7.0]
 ### Changed
 - Updated stream-investment to be able to seed to investment caboose
 
