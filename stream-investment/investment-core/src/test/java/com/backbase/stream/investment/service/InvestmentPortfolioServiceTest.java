@@ -1,5 +1,6 @@
 package com.backbase.stream.investment.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,12 +16,14 @@ import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.investment.api.service.v1.PortfolioTradingAccountsApi;
 import com.backbase.investment.api.service.v1.model.Deposit;
 import com.backbase.investment.api.service.v1.model.DepositRequest;
+import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRequest;
 import com.backbase.investment.api.service.v1.model.IntegrationWithdrawalCreate;
 import com.backbase.investment.api.service.v1.model.IntegrationWithdrawalList;
 import com.backbase.investment.api.service.v1.model.PaginatedDepositList;
 import com.backbase.investment.api.service.v1.model.PaginatedIntegrationWithdrawalListList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioListList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioTradingAccountList;
+import com.backbase.investment.api.service.v1.model.PatchedPortfolioUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioTradingAccount;
@@ -42,6 +45,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -597,6 +601,115 @@ class InvestmentPortfolioServiceTest {
 
             verify(portfolioApi).createPortfolio(any(), isNull(), isNull(), isNull());
             verify(portfolioApi, never()).patchPortfolio(any(), any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("create portfolio — forwards arrangement extraData on create request")
+        void upsertInvestmentPortfolios_create_forwardsExtraData() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String externalId = "PORTFOLIO-EXT-EXTRA-CREATE";
+            String leExternalId = "LE-EXTRA-CREATE";
+            UUID clientUuid = UUID.randomUUID();
+            Map<String, String> extraData = Map.of("riskLevel", "Low", "ignoreMarketHoursForTest", "false");
+
+            InvestmentArrangement arrangement = buildArrangement(externalId, "Extra Create Portfolio", productId,
+                leExternalId);
+            when(arrangement.getExtraData()).thenReturn(extraData);
+
+            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(emptyList.getResults()).thenReturn(List.of());
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(emptyList));
+
+            PortfolioList created = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
+            when(portfolioApi.createPortfolio(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(created));
+
+            StepVerifier.create(service.upsertInvestmentPortfolios(arrangement,
+                    Map.of(leExternalId, List.of(clientUuid))))
+                .expectNextMatches(p -> portfolioUuid.equals(p.getUuid()))
+                .verifyComplete();
+
+            ArgumentCaptor<IntegrationPortfolioCreateRequest> requestCaptor =
+                ArgumentCaptor.forClass(IntegrationPortfolioCreateRequest.class);
+            verify(portfolioApi).createPortfolio(requestCaptor.capture(), isNull(), isNull(), isNull());
+            assertThat(requestCaptor.getValue().getExtraData()).isEqualTo(extraData);
+        }
+
+        @Test
+        @DisplayName("patch portfolio — forwards arrangement extraData on patch request")
+        void upsertInvestmentPortfolios_patch_forwardsExtraData() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String externalId = "PORTFOLIO-EXT-EXTRA-PATCH";
+            String leExternalId = "LE-EXTRA-PATCH";
+            UUID clientUuid = UUID.randomUUID();
+            Map<String, String> extraData = Map.of("riskLevel", "High");
+
+            InvestmentArrangement arrangement = buildArrangement(externalId, "Extra Patch Portfolio", productId,
+                leExternalId);
+            when(arrangement.getExtraData()).thenReturn(extraData);
+
+            PortfolioList existing = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
+            PortfolioList patched = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
+
+            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(paginatedList.getResults()).thenReturn(List.of(existing));
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(paginatedList));
+            when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
+                .thenReturn(Mono.just(patched));
+
+            StepVerifier.create(service.upsertInvestmentPortfolios(arrangement,
+                    Map.of(leExternalId, List.of(clientUuid))))
+                .expectNextMatches(p -> portfolioUuid.equals(p.getUuid()))
+                .verifyComplete();
+
+            ArgumentCaptor<PatchedPortfolioUpdateRequest> requestCaptor =
+                ArgumentCaptor.forClass(PatchedPortfolioUpdateRequest.class);
+            verify(portfolioApi).patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(),
+                requestCaptor.capture());
+            assertThat(requestCaptor.getValue().getExtraData()).isEqualTo(extraData);
+        }
+
+        @Test
+        @DisplayName("create portfolio — leaves extraData null when arrangement has none")
+        void upsertInvestmentPortfolios_create_nullExtraDataWhenAbsent() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String externalId = "PORTFOLIO-EXT-NO-EXTRA";
+            String leExternalId = "LE-NO-EXTRA";
+            UUID clientUuid = UUID.randomUUID();
+
+            InvestmentArrangement arrangement = buildArrangement(externalId, "No Extra Portfolio", productId,
+                leExternalId);
+            when(arrangement.getExtraData()).thenReturn(null);
+
+            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(emptyList.getResults()).thenReturn(List.of());
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(emptyList));
+
+            PortfolioList created = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
+            when(portfolioApi.createPortfolio(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(created));
+
+            StepVerifier.create(service.upsertInvestmentPortfolios(arrangement,
+                    Map.of(leExternalId, List.of(clientUuid))))
+                .expectNextMatches(p -> portfolioUuid.equals(p.getUuid()))
+                .verifyComplete();
+
+            ArgumentCaptor<IntegrationPortfolioCreateRequest> requestCaptor =
+                ArgumentCaptor.forClass(IntegrationPortfolioCreateRequest.class);
+            verify(portfolioApi).createPortfolio(requestCaptor.capture(), isNull(), isNull(), isNull());
+            assertThat(requestCaptor.getValue().getExtraData()).isNull();
         }
 
         @Test

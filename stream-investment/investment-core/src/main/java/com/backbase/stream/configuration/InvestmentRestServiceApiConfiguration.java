@@ -84,8 +84,9 @@ public class InvestmentRestServiceApiConfiguration {
     @Primary
     public InvestmentRestNewsContentService investmentNewsContentService(
         @Qualifier("restContentApi") ContentApi restContentApi,
-        @Qualifier("restInvestmentApiClient") com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient) {
-        return new InvestmentRestNewsContentService(restContentApi, restInvestmentApiClient);
+        @Qualifier("restInvestmentApiClient") com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient,
+        @Qualifier("restInvestmentObjectMapper") ObjectMapper restInvestmentObjectMapper) {
+        return new InvestmentRestNewsContentService(restContentApi, restInvestmentApiClient, restInvestmentObjectMapper);
     }
 
     @Bean

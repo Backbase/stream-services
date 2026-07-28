@@ -1,5 +1,7 @@
 package com.backbase.stream.investment.service.resttemplate;
 
+import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_ASSETS;
+import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_THUMBNAIL;
 import static com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService.getFileNameForLog;
 
 import com.backbase.investment.api.service.sync.ApiClient;
@@ -11,6 +13,10 @@ import com.backbase.investment.api.service.sync.v1.model.EntryTagRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedEntryTagRequest;
 import com.backbase.stream.investment.model.MarketNewsEntry;
 import com.backbase.stream.investment.model.ContentTag;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +48,12 @@ import reactor.core.publisher.Mono;
  *   <li>Thumbnail attachment for newly created content entries</li>
  * </ul>
  *
+ * <p>Content entry create uses JSON {@code POST /service-api/v2/content/entries/} via
+ * {@link ApiClient#invokeAPI} instead of the generated {@code ContentApi#createContentEntry},
+ * because investment-service-api 1.6.x rejects explicit {@code thumbnail: null}, requires an
+ * {@code assets} array (including empty), and multipart create does not reliably transmit JSON
+ * array fields. Thumbnail upload remains a multipart PATCH.
+ *
  * <p>Design notes (see CODING_RULES_COPILOT.md):
  * <ul>
  *   <li>No direct manipulation of generated API classes beyond construction and mapping</li>
@@ -56,8 +68,13 @@ public class InvestmentRestNewsContentService {
 
     /** Maximum number of content or tag entries retrieved in a single list call. */
     public static final int CONTENT_RETRIEVE_LIMIT = 100;
+
+    private static final String CREATE_CONTENT_ENTRY_PATH = "/service-api/v2/content/entries/";
+    private static final String[] JSON_CONTENT_TYPES = {"application/json"};
+
     private final ContentApi contentApi;
     private final ApiClient apiClient;
+    private final ObjectMapper objectMapper;
     private final ContentMapper contentMapper = Mappers.getMapper(ContentMapper.class);
 
     /**
@@ -190,7 +207,7 @@ public class InvestmentRestNewsContentService {
      * @return Mono that completes when all eligible entries have been processed
      */
     public Mono<Void> upsertContent(List<MarketNewsEntry> contentEntries) {
-        log.info("Starting content upsert batch operation: totalEntriesSubmitted={}", contentEntries.size());
+        log.info("Starting content entries upsert batch operation: totalEntriesSubmitted={}", contentEntries.size());
         log.debug("Content upsert batch details: entries={}", contentEntries);
 
         return findEntriesNewContent(contentEntries)
@@ -220,7 +237,7 @@ public class InvestmentRestNewsContentService {
         EntryCreateUpdateRequest createUpdateRequest = contentMapper.map(request);
         log.debug("Content entry request mapped: title='{}', request={}", request.getTitle(), createUpdateRequest);
 
-        return Mono.defer(() -> Mono.just(contentApi.createContentEntry(createUpdateRequest)))
+        return Mono.defer(() -> Mono.fromCallable(() -> createContentEntry(createUpdateRequest)))
             .flatMap(entry -> addThumbnail(entry, request.getThumbnailResource()))
             .doOnSuccess(created -> log.info(
                 "Content entry created successfully: title='{}', uuid={}, thumbnailAttached={}",
@@ -229,6 +246,47 @@ public class InvestmentRestNewsContentService {
                 "Content entry creation failed: title='{}', errorType={}, errorMessage={}",
                 request.getTitle(), error.getClass().getSimpleName(), error.getMessage(), error))
             .onErrorResume(error -> Mono.empty());
+    }
+
+    /**
+     * Creates a content entry via JSON POST.
+     *
+     * <p>{@code thumbnail} is omitted (investment rejects explicit null) and {@code assets} is always
+     * included, even when empty. The payload is serialised to {@code byte[]} because
+     * {@code RestTemplate} does not reliably serialise {@link ObjectNode} bodies.
+     */
+    private EntryCreateUpdate createContentEntry(EntryCreateUpdateRequest request) {
+        ObjectNode requestBody = objectMapper.valueToTree(request);
+        requestBody.remove(JSON_PROPERTY_THUMBNAIL);
+        requestBody.set(JSON_PROPERTY_ASSETS, objectMapper.valueToTree(
+            Objects.requireNonNullElse(request.getAssets(), List.of())));
+
+        final byte[] bodyBytes;
+        try {
+            bodyBytes = objectMapper.writeValueAsBytes(requestBody);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Failed to serialize content entry create request", exception);
+        }
+
+        final List<MediaType> accept = apiClient.selectHeaderAccept(JSON_CONTENT_TYPES);
+        final MediaType contentType = apiClient.selectHeaderContentType(JSON_CONTENT_TYPES);
+        ParameterizedTypeReference<EntryCreateUpdate> returnType = new ParameterizedTypeReference<>() {
+        };
+
+        return apiClient.invokeAPI(
+                CREATE_CONTENT_ENTRY_PATH,
+                HttpMethod.POST,
+                Collections.emptyMap(),
+                new LinkedMultiValueMap<>(),
+                bodyBytes,
+                new HttpHeaders(),
+                new LinkedMultiValueMap<>(),
+                new LinkedMultiValueMap<>(),
+                accept,
+                contentType,
+                new String[]{},
+                returnType)
+            .getBody();
     }
 
     /**
@@ -296,10 +354,9 @@ public class InvestmentRestNewsContentService {
                 MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<>();
                 MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<>();
 
-                localVarFormParams.add("thumbnail", thumbnail);
+                localVarFormParams.add(JSON_PROPERTY_THUMBNAIL, thumbnail);
 
-                final String[] localVarAccepts = {"application/json"};
-                final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+                final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(JSON_CONTENT_TYPES);
                 final String[] localVarContentTypes = {"multipart/form-data"};
                 final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
 

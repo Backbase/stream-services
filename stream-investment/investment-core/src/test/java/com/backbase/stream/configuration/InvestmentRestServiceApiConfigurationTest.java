@@ -70,7 +70,8 @@ class InvestmentRestServiceApiConfigurationTest {
     @Test
     @DisplayName("investmentNewsContentService returns non-null InvestmentRestNewsContentService")
     void investmentNewsContentService_returnsNewsContentService() {
-        assertThat(config.investmentNewsContentService(mock(ContentApi.class), syncApiClient))
+        assertThat(config.investmentNewsContentService(
+                mock(ContentApi.class), syncApiClient, config.restInvestmentObjectMapper(new ObjectMapper())))
             .isNotNull().isInstanceOf(InvestmentRestNewsContentService.class);
     }
 

@@ -1,8 +1,12 @@
 package com.backbase.stream.investment.service.resttemplate;
 
+import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_ASSETS;
+import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_THUMBNAIL;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -18,7 +22,12 @@ import com.backbase.investment.api.service.sync.v1.model.PaginatedEntryList;
 import com.backbase.investment.api.service.sync.v1.model.PaginatedEntryTagList;
 import com.backbase.stream.investment.model.ContentTag;
 import com.backbase.stream.investment.model.MarketNewsEntry;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +37,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,11 +57,58 @@ class InvestmentRestNewsContentServiceTest {
     @Mock
     private ApiClient apiClient;
 
+    @Captor
+    private ArgumentCaptor<Object> jsonBodyCaptor;
+
+    @Captor
+    private ArgumentCaptor<MultiValueMap<String, Object>> formParamsCaptor;
+
+    private ObjectMapper objectMapper;
     private InvestmentRestNewsContentService service;
 
     @BeforeEach
     void setUp() {
-        service = new InvestmentRestNewsContentService(contentApi, apiClient);
+        objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        service = new InvestmentRestNewsContentService(contentApi, apiClient, objectMapper);
+    }
+
+    private void stubJsonContentEntryCreate(EntryCreateUpdate created) {
+        when(apiClient.selectHeaderAccept(any())).thenReturn(List.of(MediaType.APPLICATION_JSON));
+        when(apiClient.selectHeaderContentType(new String[]{"application/json"})).thenReturn(MediaType.APPLICATION_JSON);
+        when(apiClient.invokeAPI(
+            eq("/service-api/v2/content/entries/"),
+            eq(HttpMethod.POST),
+            any(),
+            any(),
+            jsonBodyCaptor.capture(),
+            any(),
+            any(),
+            any(),
+            any(),
+            eq(MediaType.APPLICATION_JSON),
+            any(),
+            any())).thenReturn(ResponseEntity.ok(created));
+    }
+
+    private void stubMultipartContentEntryPatch(UUID uuid, EntryCreateUpdate patched) {
+        when(apiClient.selectHeaderAccept(any())).thenReturn(List.of(MediaType.APPLICATION_JSON));
+        when(apiClient.selectHeaderContentType(new String[]{"multipart/form-data"}))
+            .thenReturn(MediaType.MULTIPART_FORM_DATA);
+        when(apiClient.invokeAPI(
+            eq("/service-api/v2/content/entries/{uuid}/"),
+            eq(HttpMethod.PATCH),
+            eq(Map.of("uuid", uuid)),
+            any(),
+            isNull(),
+            any(),
+            any(),
+            formParamsCaptor.capture(),
+            any(),
+            eq(MediaType.MULTIPART_FORM_DATA),
+            any(),
+            any())).thenReturn(ResponseEntity.ok(patched));
     }
 
     static Stream<org.junit.jupiter.params.provider.Arguments> invalidTags() {
@@ -193,28 +256,38 @@ class InvestmentRestNewsContentServiceTest {
             StepVerifier.create(service.upsertContent(List.of()))
                 .verifyComplete();
 
-            verify(contentApi, never()).createContentEntry(any());
+            verify(apiClient, never()).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
         }
 
         @Test
-        @DisplayName("no existing entries - all entries are created")
-        void noExistingEntriesAllCreated() {
+        @DisplayName("no existing entries - all entries are created via JSON POST")
+        void noExistingEntriesAllCreated() throws Exception {
             MarketNewsEntry entry = new MarketNewsEntry();
             entry.setTitle("News Title");
+            entry.setTags(List.of("INVESTOR_AREA"));
 
             PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
-            // EntryCreateUpdate: uuid/assets/createdBy are constructor-only; title has setTitle()
             EntryCreateUpdate created = new EntryCreateUpdate(UUID.randomUUID(), null, null);
             created.setTitle("News Title");
 
             when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
                 isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
-            when(contentApi.createContentEntry(any())).thenReturn(created);
+            stubJsonContentEntryCreate(created);
 
             StepVerifier.create(service.upsertContent(List.of(entry)))
                 .verifyComplete();
 
-            verify(contentApi, times(1)).createContentEntry(any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
+
+            byte[] bodyBytes = (byte[]) jsonBodyCaptor.getValue();
+            JsonNode body = objectMapper.readTree(bodyBytes);
+            assertThat(body.has(JSON_PROPERTY_THUMBNAIL)).isFalse();
+            assertThat(body.get(JSON_PROPERTY_ASSETS).isArray()).isTrue();
+            assertThat(body.get(JSON_PROPERTY_ASSETS)).isEmpty();
         }
 
         @Test
@@ -223,7 +296,6 @@ class InvestmentRestNewsContentServiceTest {
             MarketNewsEntry entry = new MarketNewsEntry();
             entry.setTitle("Existing News");
 
-            // Entry: uuid and title are constructor-only (both in @JsonCreator)
             Entry existingEntry = new Entry(UUID.randomUUID(), "Existing News",
                 null, null, null, null, null, null, null, null);
             PaginatedEntryList page = new PaginatedEntryList().results(List.of(existingEntry));
@@ -234,7 +306,9 @@ class InvestmentRestNewsContentServiceTest {
             StepVerifier.create(service.upsertContent(List.of(entry)))
                 .verifyComplete();
 
-            verify(contentApi, never()).createContentEntry(any());
+            verify(apiClient, never()).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
         }
 
         @Test
@@ -244,6 +318,7 @@ class InvestmentRestNewsContentServiceTest {
             existingEntry.setTitle("Existing News");
             MarketNewsEntry newEntry = new MarketNewsEntry();
             newEntry.setTitle("Brand New News");
+            newEntry.setTags(List.of("INVESTOR_AREA"));
 
             Entry serverEntry = new Entry(UUID.randomUUID(), "Existing News",
                 null, null, null, null, null, null, null, null);
@@ -253,12 +328,14 @@ class InvestmentRestNewsContentServiceTest {
 
             when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
                 isNull(), isNull(), isNull(), isNull())).thenReturn(page);
-            when(contentApi.createContentEntry(any())).thenReturn(created);
+            stubJsonContentEntryCreate(created);
 
             StepVerifier.create(service.upsertContent(List.of(existingEntry, newEntry)))
                 .verifyComplete();
 
-            verify(contentApi, times(1)).createContentEntry(any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
         }
 
         @Test
@@ -266,8 +343,10 @@ class InvestmentRestNewsContentServiceTest {
         void apiFailureOnCreateIsSwallowed() {
             MarketNewsEntry entry1 = new MarketNewsEntry();
             entry1.setTitle("News 1");
+            entry1.setTags(List.of("INVESTOR_AREA"));
             MarketNewsEntry entry2 = new MarketNewsEntry();
             entry2.setTitle("News 2");
+            entry2.setTags(List.of("INVESTOR_AREA"));
 
             PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
             EntryCreateUpdate created = new EntryCreateUpdate(UUID.randomUUID(), null, null);
@@ -275,14 +354,30 @@ class InvestmentRestNewsContentServiceTest {
 
             when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
                 isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
-            when(contentApi.createContentEntry(any()))
+            when(apiClient.selectHeaderAccept(any())).thenReturn(List.of(MediaType.APPLICATION_JSON));
+            when(apiClient.selectHeaderContentType(new String[]{"application/json"})).thenReturn(MediaType.APPLICATION_JSON);
+            when(apiClient.invokeAPI(
+                eq("/service-api/v2/content/entries/"),
+                eq(HttpMethod.POST),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                eq(MediaType.APPLICATION_JSON),
+                any(),
+                any()))
                 .thenThrow(new RuntimeException("API failure"))
-                .thenReturn(created);
+                .thenReturn(ResponseEntity.ok(created));
 
             StepVerifier.create(service.upsertContent(List.of(entry1, entry2)))
                 .verifyComplete();
 
-            verify(contentApi, times(2)).createContentEntry(any());
+            verify(apiClient, times(2)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
         }
 
         @Test
@@ -290,7 +385,7 @@ class InvestmentRestNewsContentServiceTest {
         void entryWithoutThumbnailSkipsThumbnailAttachment() {
             MarketNewsEntry entry = new MarketNewsEntry();
             entry.setTitle("No Thumbnail News");
-            // thumbnailResource is null by default
+            entry.setTags(List.of("INVESTOR_AREA"));
 
             PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
             EntryCreateUpdate created = new EntryCreateUpdate(UUID.randomUUID(), null, null);
@@ -298,15 +393,95 @@ class InvestmentRestNewsContentServiceTest {
 
             when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
                 isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
-            when(contentApi.createContentEntry(any())).thenReturn(created);
+            stubJsonContentEntryCreate(created);
 
             StepVerifier.create(service.upsertContent(List.of(entry)))
                 .verifyComplete();
 
-            // No thumbnail PATCH via apiClient
-            verify(apiClient, never()).invokeAPI(anyString(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
+            verify(apiClient, never()).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("thumbnail resource uses JSON create then multipart PATCH for thumbnail")
+        void thumbnailUsesJsonCreateThenMultipartPatch() {
+            MarketNewsEntry entry = new MarketNewsEntry();
+            entry.setTitle("News Title");
+            entry.setTags(List.of("INVESTOR_AREA"));
+            entry.setThumbnailResource(new ByteArrayResource("image".getBytes(), "example.png"));
+
+            PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
+            UUID createdUuid = UUID.randomUUID();
+            EntryCreateUpdate created = new EntryCreateUpdate(createdUuid, null, null);
+            created.setTitle("News Title");
+            EntryCreateUpdate patched = new EntryCreateUpdate(createdUuid, null, null);
+            patched.setTitle("News Title");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
+            stubJsonContentEntryCreate(created);
+            stubMultipartContentEntryPatch(createdUuid, patched);
+
+            StepVerifier.create(service.upsertContent(List.of(entry)))
+                .verifyComplete();
+
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH),
+                eq(Map.of("uuid", createdUuid)), any(), isNull(), any(), any(), any(), any(),
+                eq(MediaType.MULTIPART_FORM_DATA), any(), any());
+            assertThat(formParamsCaptor.getValue().get(JSON_PROPERTY_THUMBNAIL)).hasSize(1);
+            assertThat(formParamsCaptor.getValue().get(JSON_PROPERTY_ASSETS)).isNull();
+        }
+
+        @Test
+        @DisplayName("thumbnail PATCH failure retains created entry")
+        void thumbnailPatchFailureRetainsCreatedEntry() {
+            MarketNewsEntry entry = new MarketNewsEntry();
+            entry.setTitle("News Title");
+            entry.setTags(List.of("INVESTOR_AREA"));
+            entry.setThumbnailResource(new ByteArrayResource("image".getBytes(), "example.png"));
+
+            PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
+            UUID createdUuid = UUID.randomUUID();
+            EntryCreateUpdate created = new EntryCreateUpdate(createdUuid, null, null);
+            created.setTitle("News Title");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
+            stubJsonContentEntryCreate(created);
+            when(apiClient.selectHeaderContentType(new String[]{"multipart/form-data"}))
+                .thenReturn(MediaType.MULTIPART_FORM_DATA);
+            when(apiClient.invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"),
+                eq(HttpMethod.PATCH),
+                eq(Map.of("uuid", createdUuid)),
+                any(),
+                isNull(),
+                any(),
+                any(),
+                any(),
+                any(),
+                eq(MediaType.MULTIPART_FORM_DATA),
+                any(),
+                any())).thenThrow(new RuntimeException("thumbnail upload failed"));
+
+            StepVerifier.create(service.upsertContent(List.of(entry)))
+                .verifyComplete();
+
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), eq(MediaType.APPLICATION_JSON), any(), any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH),
+                eq(Map.of("uuid", createdUuid)), any(), isNull(), any(), any(), any(), any(),
+                eq(MediaType.MULTIPART_FORM_DATA), any(), any());
         }
     }
 }
-
