@@ -6,7 +6,7 @@ Stream Services are an Open-Source accelerator to connect with Backbase "out-of-
 The orchestration of calling different services is written in a functional programming style on project reactor enabling resiliency and scalability. 
 Stream Services are packaged as libraries that can be included in any project, REST Service and/or Spring Cloud Data Flow Applications.
 
-The Services are listed with Service name and how they are packaged.
+The Services are listed with Service name and how they are packaged. 
 
 Currently, the following DBS services are exposed as Stream Components:
 * [Stream Legal Entity](stream-legal-entity) (Lib, Rest, Task) → Legal Entity Ingestion Service that orchestrate all calls to DBS from a single aggregate model. This service is exposed as a library and a REST full service. Supports retry of the aggregate and uses the Legal Entity Ingestion Model to have a single interface into DBS. Requires Access Control, Product Summary
