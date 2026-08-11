@@ -58,6 +58,7 @@ public class InvestmentPortfolioProductService {
     private final IngestConfigProperties config;
     private final InvestmentModelPortfolioService modelPortfolioService;
     private final InvestmentRestProductPortfolioService investmentRestProductPortfolioService;
+    private final InvestmentPortfolioProductDocumentService investmentPortfolioProductDocumentService;
     private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
         Mappers.getMapper(RestTemplateModelPortfolioMapper.class);
 
@@ -88,6 +89,7 @@ public class InvestmentPortfolioProductService {
             .flatMap(p -> listExistingPortfolioProducts(p)
                 .flatMap(existingProduct -> updateExistingPortfolioProduct(existingProduct, p, investmentData))
                 .switchIfEmpty(Mono.defer(() -> createPortfolioProductWithModel(p, investmentData)))
+                .flatMap(product -> investmentPortfolioProductDocumentService.linkProductDocuments(p, product))
                 .doOnSuccess(product -> log.info(
                     "Successfully upserted portfolio product: uuid={}, name={}, engine={}, productType={}, model={}",
                     product.getUuid(), product.getName(), product.getAdviceEngine(), product.getProductType(),

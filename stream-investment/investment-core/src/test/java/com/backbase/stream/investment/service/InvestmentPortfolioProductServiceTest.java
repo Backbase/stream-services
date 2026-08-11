@@ -54,6 +54,9 @@ class InvestmentPortfolioProductServiceTest {
     @Mock
     private InvestmentRestProductPortfolioService investmentRestProductPortfolioService;
 
+    @Mock
+    private InvestmentPortfolioProductDocumentService investmentPortfolioProductDocumentService;
+
     private final IngestConfigProperties ingestConfigProperties = new IngestConfigProperties();
 
     private InvestmentPortfolioProductService service;
@@ -67,7 +70,10 @@ class InvestmentPortfolioProductServiceTest {
             productsApi,
             ingestConfigProperties,
             modelPortfolioService,
-            investmentRestProductPortfolioService);
+            investmentRestProductPortfolioService,
+            investmentPortfolioProductDocumentService);
+        when(investmentPortfolioProductDocumentService.linkProductDocuments(any(), any()))
+            .thenAnswer(invocation -> Mono.just(invocation.getArgument(1)));
     }
 
     @AfterEach
