@@ -51,5 +51,6 @@ public class ProductPortfolio {
     private ProductTypeEnum productType;
     @JsonProperty(JSON_PROPERTY_EXTRA_DATA)
     private Map<String, String> extraData = new HashMap<>();
+    private String document;
 
 }

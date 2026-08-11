@@ -24,6 +24,7 @@ import com.backbase.stream.investment.service.InvestmentCurrencyService;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
+import com.backbase.stream.investment.service.InvestmentPortfolioProductDocumentService;
 import com.backbase.stream.investment.service.InvestmentPortfolioProductService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.investment.service.InvestmentRiskAssessmentService;
@@ -34,6 +35,7 @@ import com.backbase.stream.investment.service.resttemplate.InvestmentRestModelPo
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestNewsContentService;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestProductPortfolioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -73,12 +75,21 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     @Primary
+    public InvestmentPortfolioProductDocumentService investmentPortfolioProductDocumentService(
+        InvestmentProductsApi investmentProductsApi,
+        @Qualifier("restContentApi") com.backbase.investment.api.service.sync.v1.ContentApi restContentApi) {
+        return new InvestmentPortfolioProductDocumentService(investmentProductsApi, restContentApi);
+    }
+
+    @Bean
+    @Primary
     public InvestmentPortfolioProductService investmentPortfolioProductService(
         InvestmentProductsApi investmentProductsApi, IngestConfigProperties portfolioProperties,
         InvestmentModelPortfolioService modelPortfolioService,
-        InvestmentRestProductPortfolioService investmentRestProductPortfolioService) {
+        InvestmentRestProductPortfolioService investmentRestProductPortfolioService,
+        InvestmentPortfolioProductDocumentService investmentPortfolioProductDocumentService) {
         return new InvestmentPortfolioProductService(investmentProductsApi, portfolioProperties, modelPortfolioService,
-            investmentRestProductPortfolioService);
+            investmentRestProductPortfolioService, investmentPortfolioProductDocumentService);
     }
 
     @Bean

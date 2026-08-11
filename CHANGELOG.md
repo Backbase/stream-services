@@ -1,10 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [10.7.1]
+## [10.9.0]
+### Changed
+- Add product-document links in investment
+
+## [10.8.0]
 ### Changed
 - Updated stream-investment to be able to seed extra_data to investment portfolio
-- fix content entry seeding issue
+- fix content entry seeding issue in investment
 
 ## [10.7.0]
 ### Changed
