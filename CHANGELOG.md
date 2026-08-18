@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.10.0]
+### Changed
+- Add partyGroups to party ingestion
+
 ## [10.9.0]
 ### Changed
 - Add product-document links in investment

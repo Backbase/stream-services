@@ -47,6 +47,15 @@ class MapperTest {
         assertEquals(party.getOpeningDateTime(), resultDto.getOpeningDateTime());
         assertEquals(party.getLiveDateTime(), resultDto.getLiveDateTime());
 
+        assertNotNull(resultDto.getGroups());
+        assertEquals(party.getGroups().getFirst().getId(), resultDto.getGroups().getFirst().getId());
+        assertEquals(party.getGroups().getFirst().getName(), resultDto.getGroups().getFirst().getName());
+        assertEquals(party.getGroups().getFirst().getType(), resultDto.getGroups().getFirst().getType());
+        assertEquals(party.getGroups().getFirst().getRole(), resultDto.getGroups().getFirst().getRole());
+        assertEquals(party.getGroups().getFirst().getStatus().getValue(), resultDto.getGroups().getFirst().getStatus().getValue());
+        assertEquals(party.getGroups().getFirst().getIsPrimary(), resultDto.getGroups().getFirst().getIsPrimary());
+
+
         assertNotNull(resultDto.getPartyType());
         assertEquals(party.getPartyType().getValue(), resultDto.getPartyType().getValue());
         assertNotNull(resultDto.getState());
@@ -127,6 +136,7 @@ class MapperTest {
             .set("postalAddresses[0].type", PartyPostalAddress.TypeEnum.BUSINESS)
             .size("customFields", 3)
             .size("partyPartyRelationships", 1)
+            .size("partyGroups", 2)
             .sample();
 
         var resultDto = partyMapper.partyToPartyUpsertDto(party);
@@ -143,6 +153,9 @@ class MapperTest {
 
         assertNotNull(resultDto.getPartyPartyRelationships());
         assertEquals(1, resultDto.getPartyPartyRelationships().size());
+
+        assertNotNull(resultDto.getGroups());
+        assertEquals(2, resultDto.getGroups().size());
     }
 
     @Test
@@ -153,6 +166,7 @@ class MapperTest {
             .set("postalAddresses", new ArrayList<>())
             .set("customFields", new HashMap<>())
             .set("partyPartyRelationships", new ArrayList<>())
+            .set("partyGroups", new ArrayList<>())
             .sample();
 
         var resultDto = partyMapper.partyToPartyUpsertDto(party);
@@ -168,6 +182,9 @@ class MapperTest {
 
         assertNotNull(resultDto.getPartyPartyRelationships());
         assertTrue(resultDto.getPartyPartyRelationships().isEmpty());
+
+        assertNotNull(resultDto.getGroups());
+        assertTrue(resultDto.getGroups().isEmpty());
     }
 
     @Test
@@ -179,6 +196,8 @@ class MapperTest {
             .setNull("postalAddresses")
             .setNull("customFields")
             .setNull("partyPartyRelationships")
+            .setNull("partyGroups")
+            .setNull("groups")
             .setNull("electronicAddresses.emails")
             .setNull("electronicAddresses.urls")
             .setNull("person.identifications")
@@ -198,6 +217,9 @@ class MapperTest {
 
         assertNotNull(resultDto.getPartyPartyRelationships());
         assertTrue(resultDto.getPartyPartyRelationships().isEmpty());
+
+        assertNotNull(resultDto.getGroups());
+        assertTrue(resultDto.getGroups().isEmpty());
 
         assertNotNull(resultDto.getElectronicAddresses());
         assertNotNull(resultDto.getElectronicAddresses().getEmails());
