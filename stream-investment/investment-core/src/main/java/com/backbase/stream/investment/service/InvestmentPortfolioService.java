@@ -24,6 +24,7 @@ import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -722,7 +723,7 @@ public class InvestmentPortfolioService {
     }
 
     private OffsetDateTime computePortfolioActivationDate() {
-        return OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths());
+        return OffsetDateTime.now(ZoneOffset.UTC).minusMonths(config.getPortfolio().getActivationPastMonths());
     }
 
     /**

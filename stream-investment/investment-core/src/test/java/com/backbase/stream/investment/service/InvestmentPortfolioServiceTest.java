@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -46,7 +47,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -80,10 +80,10 @@ class InvestmentPortfolioServiceTest {
 
     @BeforeEach
     void setUp() {
-        productsApi = Mockito.mock(InvestmentProductsApi.class);
-        portfolioApi = Mockito.mock(PortfolioApi.class);
-        paymentsApi = Mockito.mock(PaymentsApi.class);
-        portfolioTradingAccountsApi = Mockito.mock(PortfolioTradingAccountsApi.class);
+        productsApi = mock(InvestmentProductsApi.class);
+        portfolioApi = mock(PortfolioApi.class);
+        paymentsApi = mock(PaymentsApi.class);
+        portfolioTradingAccountsApi = mock(PortfolioTradingAccountsApi.class);
         config = new IngestConfigProperties();
         service = new InvestmentPortfolioService(
             portfolioApi, paymentsApi, portfolioTradingAccountsApi, config);
@@ -116,11 +116,11 @@ class InvestmentPortfolioServiceTest {
             UUID existingUuid = UUID.randomUUID();
             UUID portfolioUuid = UUID.randomUUID();
 
-            PortfolioTradingAccount existing = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
             when(existing.getUuid()).thenReturn(existingUuid);
             when(existing.getExternalAccountId()).thenReturn("EXT-001");
 
-            PortfolioTradingAccount patched = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount patched = mock(PortfolioTradingAccount.class);
             when(patched.getUuid()).thenReturn(existingUuid);
             when(patched.getExternalAccountId()).thenReturn("EXT-001");
 
@@ -159,7 +159,7 @@ class InvestmentPortfolioServiceTest {
             UUID newUuid = UUID.randomUUID();
             UUID portfolioUuid = UUID.randomUUID();
 
-            PortfolioTradingAccount created = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount created = mock(PortfolioTradingAccount.class);
             when(created.getUuid()).thenReturn(newUuid);
             when(created.getExternalAccountId()).thenReturn("EXT-002");
 
@@ -193,7 +193,7 @@ class InvestmentPortfolioServiceTest {
             UUID existingUuid = UUID.randomUUID();
             UUID portfolioUuid = UUID.randomUUID();
 
-            PortfolioTradingAccount existing = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
             when(existing.getUuid()).thenReturn(existingUuid);
             when(existing.getExternalAccountId()).thenReturn("EXT-003");
 
@@ -235,7 +235,7 @@ class InvestmentPortfolioServiceTest {
             UUID existingUuid = UUID.randomUUID();
             UUID portfolioUuid = UUID.randomUUID();
 
-            PortfolioTradingAccount existing = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
             when(existing.getUuid()).thenReturn(existingUuid);
             when(existing.getExternalAccountId()).thenReturn("EXT-004");
 
@@ -270,9 +270,9 @@ class InvestmentPortfolioServiceTest {
             // Arrange
             UUID portfolioUuid = UUID.randomUUID();
 
-            PortfolioTradingAccount acc1 = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount acc1 = mock(PortfolioTradingAccount.class);
             when(acc1.getUuid()).thenReturn(UUID.randomUUID());
-            PortfolioTradingAccount acc2 = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount acc2 = mock(PortfolioTradingAccount.class);
             when(acc2.getUuid()).thenReturn(UUID.randomUUID());
 
             PortfolioTradingAccountRequest request = new PortfolioTradingAccountRequest()
@@ -380,7 +380,7 @@ class InvestmentPortfolioServiceTest {
 
             // Account 2: list returns empty → create succeeds
             UUID createdUuid = UUID.randomUUID();
-            PortfolioTradingAccount created = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount created = mock(PortfolioTradingAccount.class);
             when(created.getUuid()).thenReturn(createdUuid);
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
                 eq(1), isNull(), isNull(), eq("ACC-OK-002"), isNull(), isNull(), isNull()))
@@ -467,7 +467,7 @@ class InvestmentPortfolioServiceTest {
             UUID portfolioUuid = UUID.randomUUID();
             UUID newUuid = UUID.randomUUID();
 
-            PortfolioTradingAccount created = Mockito.mock(PortfolioTradingAccount.class);
+            PortfolioTradingAccount created = mock(PortfolioTradingAccount.class);
             when(created.getUuid()).thenReturn(newUuid);
             when(created.getExternalAccountId()).thenReturn("EXT-NEW");
 
@@ -547,7 +547,7 @@ class InvestmentPortfolioServiceTest {
             PortfolioList patched = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
             PortfolioList fallbackCreated = buildPortfolioList(UUID.randomUUID(), externalId, OffsetDateTime.now().minusMonths(6));
 
-            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList paginatedList = mock(PaginatedPortfolioListList.class);
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -585,7 +585,7 @@ class InvestmentPortfolioServiceTest {
             PortfolioList existing = buildPortfolioList(portfolioUuid, externalId, existingActivated);
             PortfolioList patched = buildPortfolioList(portfolioUuid, externalId, existingActivated);
 
-            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList paginatedList = mock(PaginatedPortfolioListList.class);
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -622,7 +622,7 @@ class InvestmentPortfolioServiceTest {
             PortfolioList existing = buildPortfolioList(portfolioUuid, externalId, depositDate.minusDays(2));
             PortfolioList patched = buildPortfolioList(portfolioUuid, externalId, depositDate);
 
-            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList paginatedList = mock(PaginatedPortfolioListList.class);
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -631,9 +631,9 @@ class InvestmentPortfolioServiceTest {
             when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
                 .thenReturn(Mono.just(patched));
 
-            Deposit existingDeposit = Mockito.mock(Deposit.class);
+            Deposit existingDeposit = mock(Deposit.class);
             when(existingDeposit.getCompletedAt()).thenReturn(depositDate);
-            PaginatedDepositList depositList = Mockito.mock(PaginatedDepositList.class);
+            PaginatedDepositList depositList = mock(PaginatedDepositList.class);
             when(depositList.getResults()).thenReturn(List.of(existingDeposit));
             when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
@@ -663,7 +663,7 @@ class InvestmentPortfolioServiceTest {
 
             InvestmentArrangement arrangement = buildArrangement(externalId, "New Portfolio", productId, leExternalId);
 
-            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList emptyList = mock(PaginatedPortfolioListList.class);
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -699,7 +699,7 @@ class InvestmentPortfolioServiceTest {
                 leExternalId);
             when(arrangement.getExtraData()).thenReturn(extraData);
 
-            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList emptyList = mock(PaginatedPortfolioListList.class);
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -738,7 +738,7 @@ class InvestmentPortfolioServiceTest {
             PortfolioList existing = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
             PortfolioList patched = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
 
-            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList paginatedList = mock(PaginatedPortfolioListList.class);
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -773,7 +773,7 @@ class InvestmentPortfolioServiceTest {
                 leExternalId);
             when(arrangement.getExtraData()).thenReturn(null);
 
-            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList emptyList = mock(PaginatedPortfolioListList.class);
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -808,7 +808,7 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement arrangement = buildArrangement(externalId, "Patch Fail Portfolio", productId, leExternalId);
             PortfolioList existing = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
 
-            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList paginatedList = mock(PaginatedPortfolioListList.class);
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -844,7 +844,7 @@ class InvestmentPortfolioServiceTest {
             PortfolioList p1 = buildPortfolioList(UUID.randomUUID(), externalId, OffsetDateTime.now().minusMonths(6));
             PortfolioList p2 = buildPortfolioList(UUID.randomUUID(), externalId, OffsetDateTime.now().minusMonths(6));
 
-            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList paginatedList = mock(PaginatedPortfolioListList.class);
             when(paginatedList.getResults()).thenReturn(List.of(p1, p2));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -899,14 +899,14 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement arrangement2 = buildArrangement(externalId2, "Portfolio 2", productId, leExternalId);
 
             // Stub listPortfolios per externalId — both return empty (no existing portfolio)
-            PaginatedPortfolioListList emptyList1 = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList emptyList1 = mock(PaginatedPortfolioListList.class);
             when(emptyList1.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId1), isNull(), isNull(), eq(1),
                 isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList1));
 
-            PaginatedPortfolioListList emptyList2 = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList emptyList2 = mock(PaginatedPortfolioListList.class);
             when(emptyList2.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId2), isNull(), isNull(), eq(1),
@@ -953,7 +953,7 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement failArrangement = buildArrangement(
                 failExternalId, "Fail Portfolio", productId, leExternalId);
 
-            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList emptyList = mock(PaginatedPortfolioListList.class);
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(successExternalId), isNull(), isNull(), eq(1),
@@ -992,7 +992,7 @@ class InvestmentPortfolioServiceTest {
             when(arrangement.getInitialCash()).thenReturn(BigDecimal.valueOf(25_000));
             when(arrangement.getWithdrawalAmount()).thenReturn(BigDecimal.valueOf(1_500));
 
-            PaginatedPortfolioListList emptyList = Mockito.mock(PaginatedPortfolioListList.class);
+            PaginatedPortfolioListList emptyList = mock(PaginatedPortfolioListList.class);
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
@@ -1007,8 +1007,8 @@ class InvestmentPortfolioServiceTest {
             StepVerifier.create(service.upsertPortfolios(
                     List.of(arrangement), Map.of(leExternalId, List.of(clientUuid))))
                 .expectNextMatches(list -> list.size() == 1
-                    && BigDecimal.valueOf(25_000).equals(list.getFirst().getInitialCash())
-                    && BigDecimal.valueOf(1_500).equals(list.getFirst().getWithdrawalAmount()))
+                    && BigDecimal.valueOf(25_000).compareTo(list.getFirst().getInitialCash()) == 0
+                    && BigDecimal.valueOf(1_500).compareTo(list.getFirst().getWithdrawalAmount()) == 0)
                 .verifyComplete();
         }
     }
@@ -1046,7 +1046,7 @@ class InvestmentPortfolioServiceTest {
                 isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(new PaginatedDepositList().results(List.of())));
 
-            Deposit created = Mockito.mock(Deposit.class);
+            Deposit created = mock(Deposit.class);
             when(created.getAmount()).thenReturn(10_000d);
             when(paymentsApi.createDeposit(any(DepositRequest.class)))
                 .thenReturn(Mono.just(created));
@@ -1068,14 +1068,14 @@ class InvestmentPortfolioServiceTest {
                 OffsetDateTime.now().minusMonths(6));
             InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
 
-            Deposit existingDeposit = Mockito.mock(Deposit.class);
+            Deposit existingDeposit = mock(Deposit.class);
             when(existingDeposit.getAmount()).thenReturn(4_000d);
 
             when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(new PaginatedDepositList().results(List.of(existingDeposit))));
 
-            Deposit topUpDeposit = Mockito.mock(Deposit.class);
+            Deposit topUpDeposit = mock(Deposit.class);
             when(topUpDeposit.getAmount()).thenReturn(6_000d);
             when(paymentsApi.createDeposit(any(DepositRequest.class)))
                 .thenReturn(Mono.just(topUpDeposit));
@@ -1097,14 +1097,14 @@ class InvestmentPortfolioServiceTest {
                 OffsetDateTime.now().minusMonths(6));
             InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
 
-            Deposit existingDeposit = Mockito.mock(Deposit.class);
+            Deposit existingDeposit = mock(Deposit.class);
             when(existingDeposit.getAmount()).thenReturn(10_000d);
 
             when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
                 isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(new PaginatedDepositList().results(List.of(existingDeposit))));
 
-            Deposit fallbackDeposit = Mockito.mock(Deposit.class);
+            Deposit fallbackDeposit = mock(Deposit.class);
             when(paymentsApi.createDeposit(any())).thenReturn(Mono.just(fallbackDeposit));
             // Act & Assert
             StepVerifier.create(service.upsertDeposits(investmentPortfolio))
@@ -1127,7 +1127,7 @@ class InvestmentPortfolioServiceTest {
                 isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(new PaginatedDepositList().results(null)));
 
-            Deposit created = Mockito.mock(Deposit.class);
+            Deposit created = mock(Deposit.class);
             when(created.getAmount()).thenReturn(10_000d);
             when(paymentsApi.createDeposit(any(DepositRequest.class)))
                 .thenReturn(Mono.just(created));
@@ -1245,7 +1245,7 @@ class InvestmentPortfolioServiceTest {
                 .portfolio(portfolio)
                 .build();
 
-            IntegrationWithdrawalList existing = Mockito.mock(IntegrationWithdrawalList.class);
+            IntegrationWithdrawalList existing = mock(IntegrationWithdrawalList.class);
             when(existing.getAmount()).thenReturn(200d);
 
             when(paymentsApi.listWithdrawals(isNull(), isNull(), isNull(), isNull(), isNull(),
@@ -1278,7 +1278,7 @@ class InvestmentPortfolioServiceTest {
                 .portfolio(portfolio)
                 .build();
 
-            IntegrationWithdrawalList existing = Mockito.mock(IntegrationWithdrawalList.class);
+            IntegrationWithdrawalList existing = mock(IntegrationWithdrawalList.class);
             when(existing.getAmount()).thenReturn(500d);
             when(existing.getPortfolio()).thenReturn(portfolioUuid);
             when(existing.getCompletedAt()).thenReturn(completedAt);
@@ -1409,7 +1409,7 @@ class InvestmentPortfolioServiceTest {
             // Arrange
             InvestmentArrangement arrangement = buildArrangementWithProductType(
                 "ARR-UNKNOWN-TYPE", "Unknown Type Arrangement", "UNKNOWN_TYPE");
-            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+            InvestmentData investmentData = mock(InvestmentData.class);
 
             // Act & Assert
             StepVerifier.create(service.upsertInvestmentProducts(investmentData, List.of(arrangement)))
@@ -1426,14 +1426,14 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement arrangement = buildArrangementWithProductType(
                 externalId, "Self Trading Patch", ProductTypeEnum.SELF_TRADING.getValue());
 
-            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+            InvestmentData investmentData = mock(InvestmentData.class);
             when(investmentData.getModelPortfolios()).thenReturn(List.of());
 
             PortfolioProduct existingProduct = buildPortfolioProduct(productUuid, ProductTypeEnum.SELF_TRADING);
             PortfolioProduct patched = buildPortfolioProduct(productUuid, ProductTypeEnum.SELF_TRADING);
             PortfolioProduct fallbackCreated = buildPortfolioProduct(UUID.randomUUID(), ProductTypeEnum.SELF_TRADING);
 
-            PaginatedPortfolioProductList productList = Mockito.mock(PaginatedPortfolioProductList.class);
+            PaginatedPortfolioProductList productList = mock(PaginatedPortfolioProductList.class);
             when(productList.getResults()).thenReturn(List.of(existingProduct));
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), isNull(), isNull(), isNull(), any(),
@@ -1465,10 +1465,10 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement arrangement = buildArrangementWithProductType(
                 externalId, "Self Trading New", ProductTypeEnum.SELF_TRADING.getValue());
 
-            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+            InvestmentData investmentData = mock(InvestmentData.class);
             when(investmentData.getModelPortfolios()).thenReturn(List.of());
 
-            PaginatedPortfolioProductList emptyList = Mockito.mock(PaginatedPortfolioProductList.class);
+            PaginatedPortfolioProductList emptyList = mock(PaginatedPortfolioProductList.class);
             when(emptyList.getResults()).thenReturn(List.of());
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), isNull(), isNull(), isNull(), any(),
@@ -1499,15 +1499,15 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement arrangement = buildArrangementWithProductType(
                 externalId, "Robo Arrangement", ProductTypeEnum.ROBO_ADVISOR.getValue());
 
-            ModelPortfolio modelPortfolio = Mockito.mock(ModelPortfolio.class);
+            ModelPortfolio modelPortfolio = mock(ModelPortfolio.class);
             when(modelPortfolio.getUuid()).thenReturn(modelUuid);
             when(modelPortfolio.getRiskLevel()).thenReturn(3);
             when(modelPortfolio.getProductTypeEnum()).thenReturn(ProductTypeEnum.ROBO_ADVISOR);
 
-            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+            InvestmentData investmentData = mock(InvestmentData.class);
             when(investmentData.getModelPortfolios()).thenReturn(List.of(modelPortfolio));
 
-            PaginatedPortfolioProductList emptyList = Mockito.mock(PaginatedPortfolioProductList.class);
+            PaginatedPortfolioProductList emptyList = mock(PaginatedPortfolioProductList.class);
             when(emptyList.getResults()).thenReturn(List.of());
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), eq(3), isNull(), isNull(), any(),
@@ -1535,7 +1535,7 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement arrangement = buildArrangementWithProductType(
                 externalId, "Robo No Model", ProductTypeEnum.ROBO_ADVISOR.getValue());
 
-            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+            InvestmentData investmentData = mock(InvestmentData.class);
             when(investmentData.getModelPortfolios()).thenReturn(List.of());
 
             // Act & Assert
@@ -1554,10 +1554,10 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement arr2 = buildArrangementWithProductType(
                 "ARR-DEDUP-002", "Dedup 2", ProductTypeEnum.SELF_TRADING.getValue());
 
-            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+            InvestmentData investmentData = mock(InvestmentData.class);
             when(investmentData.getModelPortfolios()).thenReturn(List.of());
 
-            PaginatedPortfolioProductList emptyList = Mockito.mock(PaginatedPortfolioProductList.class);
+            PaginatedPortfolioProductList emptyList = mock(PaginatedPortfolioProductList.class);
             when(emptyList.getResults()).thenReturn(List.of());
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), isNull(), isNull(), isNull(), any(),
@@ -1584,12 +1584,12 @@ class InvestmentPortfolioServiceTest {
             InvestmentArrangement arrangement = buildArrangementWithProductType(
                 "ARR-PATCH-FAIL", "Patch Fail", ProductTypeEnum.SELF_TRADING.getValue());
 
-            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+            InvestmentData investmentData = mock(InvestmentData.class);
             when(investmentData.getModelPortfolios()).thenReturn(List.of());
 
             PortfolioProduct existingProduct = buildPortfolioProduct(productUuid, ProductTypeEnum.SELF_TRADING);
 
-            PaginatedPortfolioProductList productList = Mockito.mock(PaginatedPortfolioProductList.class);
+            PaginatedPortfolioProductList productList = mock(PaginatedPortfolioProductList.class);
             when(productList.getResults()).thenReturn(List.of(existingProduct));
             when(productsApi.listPortfolioProducts(any(), isNull(), isNull(),
                 eq(1), isNull(), isNull(), isNull(), isNull(), isNull(), any(),
@@ -1613,7 +1613,7 @@ class InvestmentPortfolioServiceTest {
 //        @Test
 //        @DisplayName("null arrangements list — throws NullPointerException immediately")
 //        void upsertInvestmentProducts_nullArrangements_throwsNullPointerException() {
-//            InvestmentData investmentData = Mockito.mock(InvestmentData.class);
+//            InvestmentData investmentData = mock(InvestmentData.class);
 //            StepVerifier.create(service.upsertInvestmentProducts(investmentData, null))
 //                .expectError(NullPointerException.class)
 //                .verify();
@@ -1628,7 +1628,7 @@ class InvestmentPortfolioServiceTest {
      * Builds a mocked {@link PortfolioList} with the given UUID, externalId, and activation date.
      */
     private PortfolioList buildPortfolioList(UUID portfolioUuid, String externalId, OffsetDateTime activated) {
-        PortfolioList portfolio = Mockito.mock(PortfolioList.class);
+        PortfolioList portfolio = mock(PortfolioList.class);
         when(portfolio.getUuid()).thenReturn(portfolioUuid);
         when(portfolio.getExternalId()).thenReturn(externalId);
         when(portfolio.getActivated()).thenReturn(activated);
@@ -1637,7 +1637,7 @@ class InvestmentPortfolioServiceTest {
     }
 
     private void mockNoExistingDeposits() {
-        PaginatedDepositList emptyDeposits = Mockito.mock(PaginatedDepositList.class);
+        PaginatedDepositList emptyDeposits = mock(PaginatedDepositList.class);
         when(emptyDeposits.getResults()).thenReturn(List.of());
         when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
             isNull(), any(UUID.class), isNull(), isNull(), isNull()))
@@ -1650,7 +1650,7 @@ class InvestmentPortfolioServiceTest {
      * should override these stubs for non-SELF_TRADING types.
      */
     private PortfolioProduct buildPortfolioProduct(UUID uuid, ProductTypeEnum productType) {
-        PortfolioProduct product = Mockito.mock(PortfolioProduct.class);
+        PortfolioProduct product = mock(PortfolioProduct.class);
         when(product.getUuid()).thenReturn(uuid);
         when(product.getProductType()).thenReturn(productType);
         when(product.getAdviceEngine()).thenReturn(null);
@@ -1665,7 +1665,7 @@ class InvestmentPortfolioServiceTest {
      */
     private InvestmentArrangement buildArrangement(String externalId, String name,
         UUID productId, String legalEntityExternalId) {
-        InvestmentArrangement arrangement = Mockito.mock(InvestmentArrangement.class);
+        InvestmentArrangement arrangement = mock(InvestmentArrangement.class);
         when(arrangement.getExternalId()).thenReturn(externalId);
         when(arrangement.getName()).thenReturn(name);
         when(arrangement.getInvestmentProductId()).thenReturn(productId);
@@ -1681,7 +1681,7 @@ class InvestmentPortfolioServiceTest {
      */
     private InvestmentArrangement buildArrangementWithProductType(String externalId, String name,
         String productTypeValue) {
-        InvestmentArrangement arrangement = Mockito.mock(InvestmentArrangement.class);
+        InvestmentArrangement arrangement = mock(InvestmentArrangement.class);
         when(arrangement.getExternalId()).thenReturn(externalId);
         when(arrangement.getName()).thenReturn(name);
         when(arrangement.getProductTypeExternalId()).thenReturn(productTypeValue);
@@ -1699,7 +1699,7 @@ class InvestmentPortfolioServiceTest {
     private void mockPortfolioFound(String externalId, UUID portfolioUuid) {
         PortfolioList portfolioList = buildPortfolioList(portfolioUuid, externalId,
             OffsetDateTime.now().minusMonths(6));
-        PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+        PaginatedPortfolioListList paginatedList = mock(PaginatedPortfolioListList.class);
         when(paginatedList.getResults()).thenReturn(List.of(portfolioList));
 
         when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
