@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.10.0]
+### Changed
+- Updated stream-investment to be able to seed intraday prices to all the assets
+- fix valuation and activation date in investment
+
 ## [10.9.0]
 ### Changed
 - Add product-document links in investment
