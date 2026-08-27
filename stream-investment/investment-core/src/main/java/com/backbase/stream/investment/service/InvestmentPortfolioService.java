@@ -24,6 +24,7 @@ import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -181,19 +182,20 @@ public class InvestmentPortfolioService {
         String uuid = existingProduct.getUuid().toString();
         List<UUID> associatedClients = getClients(investmentArrangement, clientsByLeId);
 
-        PatchedPortfolioUpdateRequest patchedPortfolioUpdateRequest = new PatchedPortfolioUpdateRequest()
-            .product(investmentArrangement.getInvestmentProductId())
-            .externalId(investmentArrangement.getExternalId())
-            .name(investmentArrangement.getName())
-            .clients(associatedClients)
-            .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()))
-            .extraData(investmentArrangement.getExtraData());
-
         log.debug("Attempting to patch existing portfolio: uuid={}, externalId={}, extraData={}",
             uuid, investmentArrangement.getExternalId(), investmentArrangement.getExtraData());
 
-        return portfolioApi.patchPortfolio(uuid, null, null, null, patchedPortfolioUpdateRequest)
+        return resolveActivationDate(existingProduct)
+            .map(activated -> new PatchedPortfolioUpdateRequest()
+                .product(investmentArrangement.getInvestmentProductId())
+                .externalId(investmentArrangement.getExternalId())
+                .name(investmentArrangement.getName())
+                .clients(associatedClients)
+                .status(StatusA3dEnum.ACTIVE)
+                .activated(activated)
+                .extraData(investmentArrangement.getExtraData()))
+            .flatMap(patchedPortfolioUpdateRequest -> portfolioApi.patchPortfolio(
+                uuid, null, null, null, patchedPortfolioUpdateRequest))
             .doOnSuccess(updated -> {
                 log.info("Successfully patched existing investment portfolio: uuid={}", updated.getUuid());
                 investmentArrangement.setInvestmentProductId(updated.getUuid());
@@ -238,7 +240,7 @@ public class InvestmentPortfolioService {
             .currency(Optional.ofNullable(investmentArrangement.getCurrency())
                 .orElse(config.getPortfolio().getDefaultCurrency()))
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusMonths(config.getPortfolio().getActivationPastMonths()))
+            .activated(computePortfolioActivationDate())
             .extraData(investmentArrangement.getExtraData());
 
         log.debug("Creating investment portfolio: externalId={}, name={}, extraData={}",
@@ -275,14 +277,7 @@ public class InvestmentPortfolioService {
     public Mono<Deposit> upsertDeposits(InvestmentPortfolio investmentPortfolio) {
         PortfolioList portfolio = investmentPortfolio.getPortfolio();
         double initAmount = investmentPortfolio.getInitialCashOrDefault(config.getDeposit().getDefaultAmount());
-        return paymentsApi.listDeposits(null, null, null, null, null,
-                null, portfolio.getUuid(), null, null, null)
-            .filter(Objects::nonNull)
-            // Use flatMap with Mono.justOrEmpty() to safely handle null results without NPE,
-            // ensuring switchIfEmpty fallback triggers for both null and empty deposit lists.
-            .flatMap(paginatedResult ->
-                Mono.justOrEmpty(paginatedResult.getResults())
-                    .filter(list -> !list.isEmpty()))
+        return listPortfolioDeposits(portfolio.getUuid())
             .flatMap(deposits -> {
                 double deposited = deposits.stream().mapToDouble(Deposit::getAmount).sum();
                 double remaining = initAmount - deposited;
@@ -294,20 +289,29 @@ public class InvestmentPortfolioService {
             .onErrorResume(ex -> Mono.just(new Deposit()
                     .portfolio(portfolio.getUuid())
                     .amount(initAmount)
-                    .completedAt(portfolio.getActivated().plusDays(2))
+                    .completedAt(portfolio.getActivated())
                 )
             );
     }
 
+    private Mono<List<Deposit>> listPortfolioDeposits(UUID portfolioUuid) {
+        return paymentsApi.listDeposits(null, null, null, null, null,
+                null, portfolioUuid, null, null, null)
+            .filter(Objects::nonNull)
+            .flatMap(paginatedResult ->
+                Mono.justOrEmpty(paginatedResult.getResults())
+                    .filter(list -> !list.isEmpty()));
+    }
+
     @Nonnull
     private Mono<Deposit> createDeposit(PortfolioList portfolio, double defaultAmount) {
+        OffsetDateTime activated = portfolio.getActivated();
         return paymentsApi.createDeposit(new DepositRequest()
                 .portfolio(portfolio.getUuid())
                 .provider(config.getDeposit().getProvider())
-                .reason(UUID.randomUUID().toString())
                 .status(Status08fEnum.COMPLETED)
-                .transactedAt(portfolio.getActivated().plusDays(1))
-                .completedAt(portfolio.getActivated().plusDays(2))
+                .transactedAt(activated)
+                .completedAt(activated)
                 .amount(defaultAmount)
                 .depositType(DepositTypeEnum.TRANSFER)
                 .reason("Initial deposit")
@@ -716,6 +720,37 @@ public class InvestmentPortfolioService {
         } else {
             log.error("Portfolio trading account {} failed: {}={}", operation, idLabel, idValue, throwable);
         }
+    }
+
+    private OffsetDateTime computePortfolioActivationDate() {
+        return OffsetDateTime.now(ZoneOffset.UTC).minusMonths(config.getPortfolio().getActivationPastMonths());
+    }
+
+    /**
+     * Resolves the activation timestamp for an existing portfolio.
+     *
+     * <p>Priority: earliest deposit date, then the portfolio's current activation date,
+     * then {@link #computePortfolioActivationDate()} for portfolios without either.
+     */
+    private Mono<OffsetDateTime> resolveActivationDate(PortfolioList existingPortfolio) {
+        UUID portfolioUuid = existingPortfolio.getUuid();
+        OffsetDateTime fallback = Optional.ofNullable(existingPortfolio.getActivated())
+            .orElseGet(this::computePortfolioActivationDate);
+
+        return listPortfolioDeposits(portfolioUuid)
+            .map(deposits -> earliestDepositDate(deposits).orElse(fallback))
+            .defaultIfEmpty(fallback)
+            .onErrorResume(ex -> {
+                log.warn("Failed to resolve activation date for portfolio: uuid={}", portfolioUuid, ex);
+                return Mono.just(fallback);
+            });
+    }
+
+    private Optional<OffsetDateTime> earliestDepositDate(List<Deposit> deposits) {
+        return deposits.stream()
+            .map(deposit -> Optional.ofNullable(deposit.getCompletedAt()).orElse(deposit.getTransactedAt()))
+            .filter(Objects::nonNull)
+            .min(OffsetDateTime::compareTo);
     }
 
     /**

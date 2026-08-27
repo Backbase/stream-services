@@ -17,7 +17,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,10 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentIntradayAssetPriceService {
 
+    static final int LIST_ASSET_PAGE_SIZE = 50;
+    private static final List<String> ASSET_EXPAND_FIELDS = List.of("market", "latest_price");
+    private static final String ASSET_LIST_FIELDS = "uuid,market,latest_price";
+
     private final AssetUniverseApi assetUniverseApi;
 
     /**
@@ -62,55 +68,31 @@ public class InvestmentIntradayAssetPriceService {
     @Nonnull
     private Mono<List<List<GroupResult>>> generateIntradayPrices() {
         log.info("Generating Intraday Prices for Assets");
-        return assetUniverseApi.listAssetsWithResponseSpec(
-                null, null, null, null,
-                List.of("market", "latest_price"),
-                null, null,
-                "uuid,market,latest_price",
-                null, null, null, null, null,
-                null, null, null, null
-            ) // Above API returns custom projection with market and latest price expanded only, hence needs a custom return type.
-            .bodyToMono(PaginatedExpandedAssetList.class)
-            .flatMap(paginatedAssetList -> {
+        AtomicInteger pageCounter = new AtomicInteger(0);
+        AtomicInteger assetCount = new AtomicInteger(0);
 
-                if (paginatedAssetList.getCount() == 0) {
-                    log.warn("No assets found with latest prices to generate intraday prices");
-                    return Mono.just(List.<List<GroupResult>>of());
+        return listAssetsPage(LIST_ASSET_PAGE_SIZE, 0)
+            .expand(page -> {
+                if (page.getNext() == null) {
+                    return Mono.empty();
                 }
-
-                return Flux.fromIterable(paginatedAssetList.getResults())
-                    .flatMap(assetWithMarketAndLatestPrice -> {
-                        List<OASCreatePriceRequest> requests =
-                            generateIntradayPricesForAsset(assetWithMarketAndLatestPrice);
-
-                        log.debug("Generated intraday price requests: {}", requests.size());
-                        log.trace("Generated intraday price requests: {}", requests);
-
-                        if (requests.isEmpty()) {
-                            return Mono.empty();
-                        }
-
-                        return assetUniverseApi.bulkCreateIntradayAssetPrice(requests, null, null, null)
-                            .collectList()
-                            .doOnSuccess(created ->
-                                log.info(
-                                    "Successfully triggered creation of {} intraday prices for asset ({})",
-                                    requests.size(),
-                                    assetWithMarketAndLatestPrice.uuid()
-                                )
-                            )
-                            .doOnError(WebClientResponseException.class, ex ->
-                                log.error(
-                                    "Failed to create intraday prices for asset ({}): status={}, body={}",
-                                    assetWithMarketAndLatestPrice.uuid(),
-                                    ex.getStatusCode(),
-                                    ex.getResponseBodyAsString(),
-                                    ex
-                                )
-                            )
-                            .onErrorResume(e -> Mono.empty());
-                    })
-                    .collectList();
+                int nextOffset = pageCounter.incrementAndGet() * LIST_ASSET_PAGE_SIZE;
+                return listAssetsPage(LIST_ASSET_PAGE_SIZE, nextOffset);
+            })
+            .flatMap(page -> {
+                List<AssetWithMarketAndLatestPrice> results =
+                    Objects.requireNonNullElse(page.getResults(), List.of());
+                assetCount.addAndGet(results.size());
+                return Flux.fromIterable(results);
+            })
+            .flatMap(this::createIntradayPricesForAssetIfPresent)
+            .collectList()
+            .doOnSuccess(results -> {
+                if (assetCount.get() == 0) {
+                    log.warn("No assets found with latest prices to generate intraday prices");
+                } else {
+                    log.debug("Processed {} assets for intraday price generation", assetCount.get());
+                }
             })
             .doOnError(error -> {
                 if (error instanceof WebClientResponseException w) {
@@ -127,7 +109,50 @@ public class InvestmentIntradayAssetPriceService {
                     );
                 }
             });
+    }
 
+    private Mono<PaginatedExpandedAssetList> listAssetsPage(int limit, int offset) {
+        return assetUniverseApi.listAssetsWithResponseSpec(
+                null, null, null, null,
+                ASSET_EXPAND_FIELDS,
+                null, null,
+                ASSET_LIST_FIELDS,
+                null, limit, null, null, offset,
+                null, null, null, null)
+            // Above API returns custom projection with market and latest price expanded only, hence needs a custom return type.
+            .bodyToMono(PaginatedExpandedAssetList.class);
+    }
+
+    private Mono<List<GroupResult>> createIntradayPricesForAssetIfPresent(
+        AssetWithMarketAndLatestPrice assetWithMarketAndLatestPrice) {
+        List<OASCreatePriceRequest> requests = generateIntradayPricesForAsset(assetWithMarketAndLatestPrice);
+
+        log.debug("Generated intraday price requests: {}", requests.size());
+        log.trace("Generated intraday price requests: {}", requests);
+
+        if (requests.isEmpty()) {
+            return Mono.empty();
+        }
+
+        return assetUniverseApi.bulkCreateIntradayAssetPrice(requests, null, null, null)
+            .collectList()
+            .doOnSuccess(created ->
+                log.info(
+                    "Successfully triggered creation of {} intraday prices for asset ({})",
+                    requests.size(),
+                    assetWithMarketAndLatestPrice.uuid()
+                )
+            )
+            .doOnError(WebClientResponseException.class, ex ->
+                log.error(
+                    "Failed to create intraday prices for asset ({}): status={}, body={}",
+                    assetWithMarketAndLatestPrice.uuid(),
+                    ex.getStatusCode(),
+                    ex.getResponseBodyAsString(),
+                    ex
+                )
+            )
+            .onErrorResume(e -> Mono.empty());
     }
 
     /**

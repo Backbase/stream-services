@@ -3,9 +3,11 @@ package com.backbase.stream.investment.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +20,7 @@ import com.backbase.stream.investment.model.ExpandedLatestPrice;
 import com.backbase.stream.investment.model.ExpandedMarket;
 import com.backbase.stream.investment.model.PaginatedExpandedAssetList;
 import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService.Ohlc;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -52,6 +55,8 @@ import reactor.test.StepVerifier;
  */
 @DisplayName("InvestmentIntradayAssetPriceService")
 class InvestmentIntradayAssetPriceServiceTest {
+
+    private static final int PAGE_SIZE = InvestmentIntradayAssetPriceService.LIST_ASSET_PAGE_SIZE;
 
     private AssetUniverseApi assetUniverseApi;
     private InvestmentIntradayAssetPriceService service;
@@ -237,20 +242,12 @@ class InvestmentIntradayAssetPriceServiceTest {
         @DisplayName("zero assets (count == 0) — returns empty list, bulkCreate never called")
         void ingestIntradayPrices_zeroAssets_returnsEmptyList() {
             // Arrange
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
             PaginatedExpandedAssetList emptyPage = PaginatedExpandedAssetList.builder()
                 .count(0)
                 .results(List.of())
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.just(emptyPage));
+            stubListAssetsPage(0, emptyPage);
 
             // Act & Assert
             StepVerifier.create(service.ingestIntradayPrices())
@@ -267,20 +264,12 @@ class InvestmentIntradayAssetPriceServiceTest {
             AssetWithMarketAndLatestPrice assetWithNullLatestPrice =
                 new AssetWithMarketAndLatestPrice(UUID.randomUUID(), buildExpandedMarket(), null);
 
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
             PaginatedExpandedAssetList page = PaginatedExpandedAssetList.builder()
                 .count(1)
                 .results(List.of(assetWithNullLatestPrice))
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.just(page));
+            stubListAssetsPage(0, page);
 
             // Act & Assert
             StepVerifier.create(service.ingestIntradayPrices())
@@ -299,20 +288,12 @@ class InvestmentIntradayAssetPriceServiceTest {
             AssetWithMarketAndLatestPrice asset =
                 new AssetWithMarketAndLatestPrice(UUID.randomUUID(), buildExpandedMarket(), latestPriceWithNullClose);
 
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
             PaginatedExpandedAssetList page = PaginatedExpandedAssetList.builder()
                 .count(1)
                 .results(List.of(asset))
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.just(page));
+            stubListAssetsPage(0, page);
 
             // Act & Assert
             StepVerifier.create(service.ingestIntradayPrices())
@@ -330,20 +311,12 @@ class InvestmentIntradayAssetPriceServiceTest {
             AssetWithMarketAndLatestPrice asset = buildValidAsset(assetUuid, 150.0);
             GroupResult groupResult = buildGroupResult();
 
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
             PaginatedExpandedAssetList page = PaginatedExpandedAssetList.builder()
                 .count(1)
                 .results(List.of(asset))
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.just(page));
+            stubListAssetsPage(0, page);
             when(assetUniverseApi.bulkCreateIntradayAssetPrice(any(), isNull(), isNull(), isNull()))
                 .thenReturn(Flux.just(groupResult));
 
@@ -366,20 +339,12 @@ class InvestmentIntradayAssetPriceServiceTest {
             AssetWithMarketAndLatestPrice asset = buildValidAsset(assetUuid, 50.0);
             GroupResult groupResult = buildGroupResult();
 
-            var responseSpec = mock(WebClient.ResponseSpec.class);
-            PaginatedExpandedAssetList page = PaginatedExpandedAssetList.builder()
+            var page = PaginatedExpandedAssetList.builder()
                 .count(1)
                 .results(List.of(asset))
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.just(page));
+            stubListAssetsPage(0, page);
             when(assetUniverseApi.bulkCreateIntradayAssetPrice(any(), isNull(), isNull(), isNull()))
                 .thenAnswer(invocation -> {
                     List<OASCreatePriceRequest> requests = invocation.getArgument(0);
@@ -407,20 +372,12 @@ class InvestmentIntradayAssetPriceServiceTest {
             GroupResult groupResult1 = buildGroupResult();
             GroupResult groupResult2 = buildGroupResult();
 
-            var responseSpec = mock(WebClient.ResponseSpec.class);
-            PaginatedExpandedAssetList page = PaginatedExpandedAssetList.builder()
+            var page = PaginatedExpandedAssetList.builder()
                 .count(2)
                 .results(List.of(asset1, asset2))
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class)) // bodyToMono with custom type
-                .thenReturn(Mono.just(page));
+            stubListAssetsPage(0, page);
             when(assetUniverseApi.bulkCreateIntradayAssetPrice(any(), isNull(), isNull(), isNull()))
                 .thenReturn(Flux.just(groupResult1))
                 .thenReturn(Flux.just(groupResult2));
@@ -440,20 +397,12 @@ class InvestmentIntradayAssetPriceServiceTest {
                 new AssetWithMarketAndLatestPrice(UUID.randomUUID(), buildExpandedMarket(), null);
             GroupResult groupResult = buildGroupResult();
 
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
             PaginatedExpandedAssetList page = PaginatedExpandedAssetList.builder()
                 .count(2)
                 .results(List.of(validAsset, invalidAsset))
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.just(page));
+            stubListAssetsPage(0, page);
             when(assetUniverseApi.bulkCreateIntradayAssetPrice(any(), isNull(), isNull(), isNull()))
                 .thenReturn(Flux.just(groupResult));
 
@@ -471,20 +420,12 @@ class InvestmentIntradayAssetPriceServiceTest {
             // Arrange
             AssetWithMarketAndLatestPrice asset = buildValidAsset(UUID.randomUUID(), 120.0);
 
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
             PaginatedExpandedAssetList page = PaginatedExpandedAssetList.builder()
                 .count(1)
                 .results(List.of(asset))
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.just(page));
+            stubListAssetsPage(0, page);
             when(assetUniverseApi.bulkCreateIntradayAssetPrice(any(), isNull(), isNull(), isNull()))
                 .thenReturn(Flux.error(notFound()));
 
@@ -500,20 +441,12 @@ class InvestmentIntradayAssetPriceServiceTest {
             // Arrange
             AssetWithMarketAndLatestPrice asset = buildValidAsset(UUID.randomUUID(), 75.0);
 
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
             PaginatedExpandedAssetList page = PaginatedExpandedAssetList.builder()
                 .count(1)
                 .results(List.of(asset))
                 .build();
 
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.just(page));
+            stubListAssetsPage(0, page);
             when(assetUniverseApi.bulkCreateIntradayAssetPrice(any(), isNull(), isNull(), isNull()))
                 .thenReturn(Flux.error(new RuntimeException("unexpected failure")));
 
@@ -524,19 +457,47 @@ class InvestmentIntradayAssetPriceServiceTest {
         }
 
         @Test
+        @DisplayName("multiple pages — assets from every page are processed")
+        void ingestIntradayPrices_multiplePages_allAssetsProcessed() {
+            // Arrange
+            AssetWithMarketAndLatestPrice asset1 = buildValidAsset(UUID.randomUUID(), 100.0);
+            AssetWithMarketAndLatestPrice asset2 = buildValidAsset(UUID.randomUUID(), 200.0);
+            GroupResult groupResult1 = buildGroupResult();
+            GroupResult groupResult2 = buildGroupResult();
+
+            PaginatedExpandedAssetList page1 = PaginatedExpandedAssetList.builder()
+                .count(2)
+                .next(URI.create("http://example.com/assets?offset=50"))
+                .results(List.of(asset1))
+                .build();
+            PaginatedExpandedAssetList page2 = PaginatedExpandedAssetList.builder()
+                .count(2)
+                .results(List.of(asset2))
+                .build();
+
+            stubListAssetsPage(0, page1);
+            stubListAssetsPage(PAGE_SIZE, page2);
+            when(assetUniverseApi.bulkCreateIntradayAssetPrice(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Flux.just(groupResult1))
+                .thenReturn(Flux.just(groupResult2));
+
+            // Act & Assert
+            StepVerifier.create(service.ingestIntradayPrices())
+                .assertNext(result -> assertThat(result).hasSize(2))
+                .verifyComplete();
+
+            verify(assetUniverseApi, times(2)).listAssetsWithResponseSpec(
+                isNull(), isNull(), isNull(), isNull(),
+                any(), isNull(), isNull(), any(),
+                isNull(), eq(PAGE_SIZE), isNull(), isNull(), any(Integer.class),
+                isNull(), isNull(), isNull(), isNull());
+        }
+
+        @Test
         @DisplayName("listAssetsWithResponseSpec fails with WebClientResponseException — error propagated")
         void ingestIntradayPrices_listAssetsFails_webClientError_errorPropagated() {
             // Arrange
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.error(notFound()));
+            stubListAssetsPageError(0, notFound());
 
             // Act & Assert
             StepVerifier.create(service.ingestIntradayPrices())
@@ -549,16 +510,7 @@ class InvestmentIntradayAssetPriceServiceTest {
         @DisplayName("listAssetsWithResponseSpec fails with generic RuntimeException — error propagated")
         void ingestIntradayPrices_listAssetsFails_runtimeError_errorPropagated() {
             // Arrange
-            WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-
-            when(assetUniverseApi.listAssetsWithResponseSpec(
-                isNull(), isNull(), isNull(), isNull(),
-                any(), isNull(), isNull(), any(),
-                isNull(), isNull(), isNull(), isNull(), isNull(),
-                isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(responseSpec);
-            when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
-                .thenReturn(Mono.error(new RuntimeException("connection refused")));
+            stubListAssetsPageError(0, new RuntimeException("connection refused"));
 
             // Act & Assert
             StepVerifier.create(service.ingestIntradayPrices())
@@ -571,6 +523,36 @@ class InvestmentIntradayAssetPriceServiceTest {
     // =========================================================================
     // Helpers
     // =========================================================================
+
+    /**
+     * Stubs a single list-assets page at the given offset.
+     */
+    private void stubListAssetsPage(int offset, PaginatedExpandedAssetList page) {
+        WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+        when(assetUniverseApi.listAssetsWithResponseSpec(
+            isNull(), isNull(), isNull(), isNull(),
+            any(), isNull(), isNull(), any(),
+            isNull(), eq(PAGE_SIZE), isNull(), isNull(), eq(offset),
+            isNull(), isNull(), isNull(), isNull()))
+            .thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
+            .thenReturn(Mono.just(page));
+    }
+
+    /**
+     * Stubs a failed list-assets page at the given offset.
+     */
+    private void stubListAssetsPageError(int offset, Throwable error) {
+        WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
+        when(assetUniverseApi.listAssetsWithResponseSpec(
+            isNull(), isNull(), isNull(), isNull(),
+            any(), isNull(), isNull(), any(),
+            isNull(), eq(PAGE_SIZE), isNull(), isNull(), eq(offset),
+            isNull(), isNull(), isNull(), isNull()))
+            .thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(PaginatedExpandedAssetList.class))
+            .thenReturn(Mono.error(error));
+    }
 
     /**
      * Builds a 404 NOT_FOUND {@link WebClientResponseException}.
