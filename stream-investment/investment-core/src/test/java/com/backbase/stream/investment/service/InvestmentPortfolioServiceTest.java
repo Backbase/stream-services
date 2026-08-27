@@ -557,6 +557,7 @@ class InvestmentPortfolioServiceTest {
                 .thenReturn(Mono.just(fallbackCreated));
             when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
                 .thenReturn(Mono.just(patched));
+            mockNoExistingDeposits();
 
             Map<String, List<UUID>> clientsByLeExternalId = Map.of(leExternalId, List.of(clientUuid));
 
@@ -567,6 +568,87 @@ class InvestmentPortfolioServiceTest {
 
             verify(portfolioApi).patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any());
             verify(portfolioApi, never()).createPortfolio(any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("patch portfolio — preserves existing activated date when no deposits exist")
+        void upsertInvestmentPortfolios_patch_preservesExistingActivatedWithoutDeposits() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String externalId = "PORTFOLIO-EXT-KEEP-ACTIVATED";
+            String leExternalId = "LE-KEEP-ACTIVATED";
+            UUID clientUuid = UUID.randomUUID();
+            OffsetDateTime existingActivated = OffsetDateTime.now().minusMonths(6);
+
+            InvestmentArrangement arrangement = buildArrangement(externalId, "Keep Activated Portfolio", productId,
+                leExternalId);
+            PortfolioList existing = buildPortfolioList(portfolioUuid, externalId, existingActivated);
+            PortfolioList patched = buildPortfolioList(portfolioUuid, externalId, existingActivated);
+
+            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(paginatedList.getResults()).thenReturn(List.of(existing));
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(paginatedList));
+            when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
+                .thenReturn(Mono.just(patched));
+            mockNoExistingDeposits();
+
+            StepVerifier.create(service.upsertInvestmentPortfolios(arrangement,
+                    Map.of(leExternalId, List.of(clientUuid))))
+                .expectNextMatches(p -> portfolioUuid.equals(p.getUuid()))
+                .verifyComplete();
+
+            ArgumentCaptor<PatchedPortfolioUpdateRequest> requestCaptor =
+                ArgumentCaptor.forClass(PatchedPortfolioUpdateRequest.class);
+            verify(portfolioApi).patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(),
+                requestCaptor.capture());
+            assertThat(requestCaptor.getValue().getActivated()).isEqualTo(existingActivated);
+        }
+
+        @Test
+        @DisplayName("patch portfolio — aligns activated with earliest existing deposit date")
+        void upsertInvestmentPortfolios_patch_alignsActivatedWithFirstDeposit() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productId = UUID.randomUUID();
+            String externalId = "PORTFOLIO-EXT-ACTIVATED-DEPOSIT";
+            String leExternalId = "LE-ACTIVATED-DEPOSIT";
+            UUID clientUuid = UUID.randomUUID();
+            OffsetDateTime depositDate = OffsetDateTime.now().minusMonths(6);
+
+            InvestmentArrangement arrangement = buildArrangement(externalId, "Activated Deposit Portfolio", productId,
+                leExternalId);
+            PortfolioList existing = buildPortfolioList(portfolioUuid, externalId, depositDate.minusDays(2));
+            PortfolioList patched = buildPortfolioList(portfolioUuid, externalId, depositDate);
+
+            PaginatedPortfolioListList paginatedList = Mockito.mock(PaginatedPortfolioListList.class);
+            when(paginatedList.getResults()).thenReturn(List.of(existing));
+            when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
+                isNull(), eq(externalId), isNull(), isNull(), eq(1),
+                isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(paginatedList));
+            when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
+                .thenReturn(Mono.just(patched));
+
+            Deposit existingDeposit = Mockito.mock(Deposit.class);
+            when(existingDeposit.getCompletedAt()).thenReturn(depositDate);
+            PaginatedDepositList depositList = Mockito.mock(PaginatedDepositList.class);
+            when(depositList.getResults()).thenReturn(List.of(existingDeposit));
+            when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), eq(portfolioUuid), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(depositList));
+
+            StepVerifier.create(service.upsertInvestmentPortfolios(arrangement,
+                    Map.of(leExternalId, List.of(clientUuid))))
+                .expectNextMatches(p -> portfolioUuid.equals(p.getUuid()))
+                .verifyComplete();
+
+            ArgumentCaptor<PatchedPortfolioUpdateRequest> requestCaptor =
+                ArgumentCaptor.forClass(PatchedPortfolioUpdateRequest.class);
+            verify(portfolioApi).patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(),
+                requestCaptor.capture());
+            assertThat(requestCaptor.getValue().getActivated()).isEqualTo(depositDate);
         }
 
         @Test
@@ -664,6 +746,7 @@ class InvestmentPortfolioServiceTest {
                 .thenReturn(Mono.just(paginatedList));
             when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
                 .thenReturn(Mono.just(patched));
+            mockNoExistingDeposits();
 
             StepVerifier.create(service.upsertInvestmentPortfolios(arrangement,
                     Map.of(leExternalId, List.of(clientUuid))))
@@ -736,6 +819,7 @@ class InvestmentPortfolioServiceTest {
                 .thenReturn(Mono.error(WebClientResponseException.create(
                     HttpStatus.UNPROCESSABLE_ENTITY.value(), "Unprocessable Entity",
                     HttpHeaders.EMPTY, "patch error".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8)));
+            mockNoExistingDeposits();
 
             Map<String, List<UUID>> clientsByLeExternalId = Map.of(leExternalId, List.of(clientUuid));
 
@@ -1550,6 +1634,14 @@ class InvestmentPortfolioServiceTest {
         when(portfolio.getActivated()).thenReturn(activated);
         when(portfolio.getStatus()).thenReturn(StatusA3dEnum.ACTIVE);
         return portfolio;
+    }
+
+    private void mockNoExistingDeposits() {
+        PaginatedDepositList emptyDeposits = Mockito.mock(PaginatedDepositList.class);
+        when(emptyDeposits.getResults()).thenReturn(List.of());
+        when(paymentsApi.listDeposits(isNull(), isNull(), isNull(), isNull(), isNull(),
+            isNull(), any(UUID.class), isNull(), isNull(), isNull()))
+            .thenReturn(Mono.just(emptyDeposits));
     }
 
     /**

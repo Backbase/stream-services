@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
@@ -43,6 +44,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -243,12 +245,12 @@ class InvestmentPortfolioAllocationServiceTest {
         }
 
         @Test
-        @DisplayName("no allocations returned — switchIfEmpty triggers, creates cash-active allocation")
+        @DisplayName("no allocations returned — switchIfEmpty triggers, creates cash-active allocation with all fields")
         void createDepositAllocation_noAllocations_createsCashAllocationAndReturnsDeposit() {
             // Arrange
             UUID portfolioUuid = UUID.randomUUID();
             LocalDate completedAt = LocalDate.now().minusDays(1);
-            Deposit deposit = buildDeposit(portfolioUuid, completedAt, 3_000d);
+            Deposit deposit = buildDeposit(portfolioUuid, completedAt, 10_000d);
 
             PaginatedOASPortfolioAllocationList emptyPage = mock(PaginatedOASPortfolioAllocationList.class);
             when(emptyPage.getResults()).thenReturn(List.of());
@@ -258,8 +260,10 @@ class InvestmentPortfolioAllocationServiceTest {
                 .thenReturn(Mono.just(emptyPage));
 
             OASPortfolioAllocation created = mock(OASPortfolioAllocation.class);
+            ArgumentCaptor<OASAllocationCreateRequest> requestCaptor =
+                ArgumentCaptor.forClass(OASAllocationCreateRequest.class);
             when(allocationsApi.createPortfolioAllocation(
-                eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
+                eq(portfolioUuid.toString()), requestCaptor.capture(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(created));
 
             // Act & Assert
@@ -267,8 +271,13 @@ class InvestmentPortfolioAllocationServiceTest {
                 .expectNextMatches(d -> d == deposit)
                 .verifyComplete();
 
-            verify(allocationsApi)
-                .createPortfolioAllocation(eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull());
+            OASAllocationCreateRequest request = requestCaptor.getValue();
+            assertThat(request.getCashActive()).isEqualTo(10_000d);
+            assertThat(request.getTradeTotal()).isEqualTo(0.0);
+            assertThat(request.getBalance()).isEqualTo(10_000d);
+            assertThat(request.getInvested()).isEqualTo(10_000d);
+            assertThat(request.getEarnings()).isEqualTo(0.0);
+            assertThat(request.getValuationDate()).isEqualTo(completedAt);
         }
 
         @Test
