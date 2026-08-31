@@ -2465,6 +2465,11 @@ components:
           maxLength: 34
           type: string
           description: Name will be displayed if alias field is not filled
+        accountHolderType:
+          type: string
+          minLength: 1
+          maxLength: 10
+          description: Account holder type for the account.
         accountType:
           maxLength: 10
           type: string

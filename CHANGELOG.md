@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.11.0]
+### Changed
+- Added accountHolderType in contact account model
+- Updated bom version to 2026.07 to ingest the accountHolderType in contact account
+
 ## [10.10.0]
 ### Changed
 - Updated stream-investment to be able to seed intraday prices to all the assets
