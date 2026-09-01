@@ -2455,6 +2455,20 @@ components:
 
     ExternalAccountInformation:
       properties:
+        verificationBehaviour:
+          type: string
+          description: >
+            How this account behaves when a beneficiary verification request resolves to it.
+            NORMAL performs the name and holder-type checks. The other values short-circuit the
+            checks and return a fixed reason code, so a seed set can demonstrate outcomes that
+            name matching alone cannot produce. Defaults to NORMAL when omitted.
+          default: NORMAL
+          enum:
+            - NORMAL
+            - OPTED_OUT
+            - NOT_SUPPORTED
+            - SWITCHED
+          example: NORMAL
         externalId:
           $ref: '#/components/schemas/ExternalContactId'
         name:
