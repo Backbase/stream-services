@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>10.9.0</version>
+    <version>10.11.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -42,7 +42,7 @@
     <properties>
         <java.version>25</java.version>
         <ssdk.version>21.0.1</ssdk.version>
-        <backbase-bom.version>2026.03-LTS</backbase-bom.version>
+        <backbase-bom.version>2026.07</backbase-bom.version>
         <boat-maven-plugin.version>0.18.1</boat-maven-plugin.version>
         <backbase.portfolio.version>4.7.0</backbase.portfolio.version>
         <org.jetbrainsannotations.version>26.1.0</org.jetbrainsannotations.version>

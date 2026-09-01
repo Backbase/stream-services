@@ -298,6 +298,17 @@ public class InvestmentPortfolioAllocationService {
         return portfolioPositions.stream().map(a -> a.getPrice() * a.getShares()).reduce(0.0, Double::sum);
     }
 
+    private static OASAllocationCreateRequest buildCashOnlyAllocation(double amount, LocalDate valuationDate) {
+        double roundedAmount = roundPrice(amount);
+        return new OASAllocationCreateRequest()
+            .cashActive(roundedAmount)
+            .tradeTotal(0.0)
+            .balance(roundedAmount)
+            .invested(roundedAmount)
+            .earnings(0.0)
+            .valuationDate(valuationDate);
+    }
+
     public Mono<Deposit> createDepositAllocation(Deposit deposit) {
         String portfolioId = deposit.getPortfolio().toString();
         LocalDate valuationDate = Optional.ofNullable(deposit.getCompletedAt()).map(OffsetDateTime::toLocalDate)
@@ -305,10 +316,8 @@ public class InvestmentPortfolioAllocationService {
         return getAllocations(portfolioId, valuationDate.minusDays(4), valuationDate.plusDays(5), 10)
             .filter(Predicate.not(l -> l.stream().filter(a -> CollectionUtils.isEmpty(a.getPositions()))
                 .toList().isEmpty()))
-            .switchIfEmpty(upsertAllocations(portfolioId, List.of(
-                new OASAllocationCreateRequest()
-                    .cashActive(deposit.getAmount())
-                    .valuationDate(valuationDate)))
+            .switchIfEmpty(upsertAllocations(portfolioId, List.of(buildCashOnlyAllocation(deposit.getAmount(),
+                valuationDate)))
                 .onErrorResume(ex -> Mono.empty())
             )
             .onErrorResume(ex -> {
