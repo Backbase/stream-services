@@ -117,7 +117,7 @@ public class InvestmentRestServiceApiConfiguration {
     public InvestmentRestProductPortfolioService investmentRestProductPortfolioService(
         @Qualifier("restInvestmentApiClient") com.backbase.investment.api.service.sync.ApiClient restInvestmentApiClient,
         IngestConfigProperties portfolioProperties) {
-        return new InvestmentRestProductPortfolioService(restInvestmentApiClient, portfolioProperties);
+        return new InvestmentRestProductPortfolioService(restInvestmentApiClient, portfolioProperties, true);
     }
 
 

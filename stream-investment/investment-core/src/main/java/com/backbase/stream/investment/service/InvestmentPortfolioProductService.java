@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.StringUtils;
@@ -48,7 +47,6 @@ import reactor.util.retry.Retry;
  * </ul>
  */
 @Slf4j
-@RequiredArgsConstructor
 public class InvestmentPortfolioProductService {
 
     private static final Comparator<PortfolioProduct> BY_ORDER =
@@ -61,6 +59,17 @@ public class InvestmentPortfolioProductService {
     private final InvestmentPortfolioProductDocumentService investmentPortfolioProductDocumentService;
     private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
         Mappers.getMapper(RestTemplateModelPortfolioMapper.class);
+
+    public InvestmentPortfolioProductService(InvestmentProductsApi productsApi, IngestConfigProperties config,
+        InvestmentModelPortfolioService modelPortfolioService,
+        InvestmentRestProductPortfolioService investmentRestProductPortfolioService,
+        InvestmentPortfolioProductDocumentService investmentPortfolioProductDocumentService) {
+        this.productsApi = productsApi;
+        this.config = config;
+        this.modelPortfolioService = modelPortfolioService;
+        this.investmentRestProductPortfolioService = investmentRestProductPortfolioService;
+        this.investmentPortfolioProductDocumentService = investmentPortfolioProductDocumentService;
+    }
 
     /**
      * Creates or updates an investment product (portfolio product) for the given arrangement.
@@ -266,8 +275,7 @@ public class InvestmentPortfolioProductService {
             productUuid, portfolioProduct.getName(), portfolioProduct.getProductType());
 
         return investmentRestProductPortfolioService.updatePortfolioProduct(productUuid.toString(),
-                List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
-                portfolioProduct)
+                List.of(config.getAllocation().getModelPortfolioAllocationAsset()), portfolioProduct)
             .doOnSuccess(updated -> {
                 log.debug("Successfully patched portfolio product: uuid={}, name={}, productType={}",
                     updated.getUuid(), updated.getName(), updated.getProductType());
