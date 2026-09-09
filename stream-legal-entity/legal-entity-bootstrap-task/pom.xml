@@ -15,7 +15,7 @@
     <name>Stream :: Legal Entity Bootstrap Task</name>
 
     <properties>
-        <wiremock.version>3.0.1</wiremock.version>
+        <wiremock.version>3.0.3</wiremock.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
         <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
         <archunit.skip>true</archunit.skip>
