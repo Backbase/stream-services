@@ -22,6 +22,7 @@ import com.backbase.stream.investment.ProductPortfolio;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestProductPortfolioService;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

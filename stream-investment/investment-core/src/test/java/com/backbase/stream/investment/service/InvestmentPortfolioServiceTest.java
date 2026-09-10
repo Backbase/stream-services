@@ -355,7 +355,7 @@ class InvestmentPortfolioServiceTest {
                 .verifyComplete();
 
             verify(portfolioApi, never()).listPortfolios(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -551,7 +551,7 @@ class InvestmentPortfolioServiceTest {
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(paginatedList));
             when(portfolioApi.createPortfolio(any(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(fallbackCreated));
@@ -589,7 +589,7 @@ class InvestmentPortfolioServiceTest {
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(paginatedList));
             when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
                 .thenReturn(Mono.just(patched));
@@ -626,7 +626,7 @@ class InvestmentPortfolioServiceTest {
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(paginatedList));
             when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
                 .thenReturn(Mono.just(patched));
@@ -667,7 +667,7 @@ class InvestmentPortfolioServiceTest {
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList));
 
             PortfolioList created = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
@@ -703,7 +703,7 @@ class InvestmentPortfolioServiceTest {
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList));
 
             PortfolioList created = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
@@ -742,7 +742,7 @@ class InvestmentPortfolioServiceTest {
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(paginatedList));
             when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
                 .thenReturn(Mono.just(patched));
@@ -777,7 +777,7 @@ class InvestmentPortfolioServiceTest {
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList));
 
             PortfolioList created = buildPortfolioList(portfolioUuid, externalId, OffsetDateTime.now().minusMonths(6));
@@ -812,7 +812,7 @@ class InvestmentPortfolioServiceTest {
             when(paginatedList.getResults()).thenReturn(List.of(existing));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(paginatedList));
 
             when(portfolioApi.patchPortfolio(eq(portfolioUuid.toString()), isNull(), isNull(), isNull(), any()))
@@ -848,7 +848,7 @@ class InvestmentPortfolioServiceTest {
             when(paginatedList.getResults()).thenReturn(List.of(p1, p2));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(paginatedList));
 
             // Act & Assert
@@ -903,14 +903,14 @@ class InvestmentPortfolioServiceTest {
             when(emptyList1.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId1), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList1));
 
             PaginatedPortfolioListList emptyList2 = mock(PaginatedPortfolioListList.class);
             when(emptyList2.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId2), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList2));
 
             // createPortfolio is called once per arrangement — chain returns so each call gets the right result
@@ -957,11 +957,11 @@ class InvestmentPortfolioServiceTest {
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(successExternalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList));
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(failExternalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.error(new RuntimeException("list portfolios failed")));
 
             PortfolioList created = buildPortfolioList(portfolioUuid, successExternalId,
@@ -996,7 +996,7 @@ class InvestmentPortfolioServiceTest {
             when(emptyList.getResults()).thenReturn(List.of());
             when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
                 isNull(), eq(externalId), isNull(), isNull(), eq(1),
-                isNull(), isNull(), isNull(), isNull()))
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(Mono.just(emptyList));
 
             PortfolioList created = buildPortfolioList(portfolioUuid, externalId,
@@ -1704,7 +1704,7 @@ class InvestmentPortfolioServiceTest {
 
         when(portfolioApi.listPortfolios(isNull(), isNull(), isNull(),
             isNull(), eq(externalId), isNull(), isNull(), eq(1),
-            isNull(), isNull(), isNull(), isNull()))
+            isNull(), isNull(), isNull(), isNull(), isNull()))
             .thenReturn(Mono.just(paginatedList));
     }
 }

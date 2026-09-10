@@ -12,12 +12,14 @@ import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct
 import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_CATEGORY;
 import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_TYPE;
 import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_STATUS;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_TRANSLATIONS;
 
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.ApiClient.CollectionFormat;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.stream.configuration.IngestConfigProperties;
+import com.backbase.stream.investment.TranslationsSupport;
 import com.backbase.stream.investment.ProductPortfolio;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +28,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.ParameterizedTypeReference;
@@ -50,11 +51,26 @@ import reactor.core.publisher.Mono;
  * internally by {@link #productPortfolioParams(ProductPortfolio)}.
  */
 @Slf4j
-@RequiredArgsConstructor
 public class InvestmentRestProductPortfolioService {
 
     private final ApiClient apiClient;
     private final IngestConfigProperties ingestProperties;
+    private final boolean sendTranslations;
+
+    /**
+     * Defaults to not sending {@code translations} so investment-caboose and other targets that omit the
+     * 2-arg constructor flag are safe. Primary investment wiring passes {@code true} explicitly.
+     */
+    public InvestmentRestProductPortfolioService(ApiClient apiClient, IngestConfigProperties ingestProperties) {
+        this(apiClient, ingestProperties, false);
+    }
+
+    public InvestmentRestProductPortfolioService(ApiClient apiClient, IngestConfigProperties ingestProperties,
+        boolean sendTranslations) {
+        this.apiClient = apiClient;
+        this.ingestProperties = ingestProperties;
+        this.sendTranslations = sendTranslations;
+    }
 
     /**
      * Creates a new portfolio product via {@code POST /service-api/v2/products/portfolio/}.
@@ -181,6 +197,10 @@ public class InvestmentRestProductPortfolioService {
             .ifPresent(v -> formParams.add(JSON_PROPERTY_PRODUCT_CATEGORY, v));
         Optional.ofNullable(data.getExtraData())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_EXTRA_DATA, v));
+        if (sendTranslations) {
+            Optional.ofNullable(TranslationsSupport.filterTranslations(data.getTranslations()))
+                .ifPresent(v -> formParams.add(JSON_PROPERTY_TRANSLATIONS, v));
+        }
         if (ingestProperties.getPortfolio().isIngestImages()) {
             Optional.ofNullable(data.getImageResource()).ifPresent(v -> formParams.add(JSON_PROPERTY_IMAGE, v));
         }
