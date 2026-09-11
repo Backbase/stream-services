@@ -144,7 +144,7 @@ public class InvestmentPortfolioService {
     private Mono<PortfolioList> listExistingPortfolios(String externalId) {
         return portfolioApi.listPortfolios(null, null, null,
                 null, externalId, null, null, 1,
-                null, null, null, null)
+                null, null, null, null, null)
             .doOnSuccess(plist -> log.debug(
                 "List portfolios query completed: externalId={}, found={} results",
                 externalId,

@@ -1,10 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [10.12.0]
+## [10.13.0]
 ### Changed
 - Add partyGroups to party ingestion
-- 
+
+## [10.12.0]
+- Update BSJ to include the new translations data for investment portfolio products
+
 ## [10.11.0]
 ### Changed
 - Added accountHolderType in contact account model to facilitate CoP in Contact Manager

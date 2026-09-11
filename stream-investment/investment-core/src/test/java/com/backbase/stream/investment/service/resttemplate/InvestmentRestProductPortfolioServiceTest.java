@@ -11,6 +11,7 @@ import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct
 import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_CATEGORY;
 import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_TYPE;
 import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_STATUS;
+import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct.JSON_PROPERTY_TRANSLATIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -73,7 +74,7 @@ class InvestmentRestProductPortfolioServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new InvestmentRestProductPortfolioService(apiClient, ingestProperties);
+        service = new InvestmentRestProductPortfolioService(apiClient, ingestProperties, true);
         when(apiClient.selectHeaderAccept(any())).thenReturn(List.of(MediaType.APPLICATION_JSON));
         when(apiClient.selectHeaderContentType(any())).thenReturn(MediaType.MULTIPART_FORM_DATA);
         when(apiClient.parameterToMultiValueMap(any(), eq("expand"), any()))
@@ -105,6 +106,64 @@ class InvestmentRestProductPortfolioServiceTest {
 
             assertFormParamsMatchTemplate(formParamsCaptor.getValue(), createdUuid);
             assertThat(queryParamsCaptor.getValue()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("create includes translations form param excluding default locale")
+        void createIncludesFilteredTranslations() {
+            ProductPortfolio template = buildFullTemplate(UUID.randomUUID());
+            template.setTranslations(Map.of(
+                "en-gb", Map.of("name", "Aggressive"),
+                "fr-ch", Map.of("name", "Agressif", "description", "Description FR"),
+                "de-ch", Map.of("name", "Aggressiv"),
+                "es-es", Map.of("name", "Agresivo")));
+
+            when(apiClient.invokeAPI(eq(CREATE_PATH), eq(HttpMethod.POST), any(), any(), any(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(
+                    buildApiProduct(UUID.randomUUID(), "Robo Plan", ProductTypeEnum.ROBO_ADVISOR), HttpStatus.OK));
+
+            StepVerifier.create(service.createPortfolioProduct(template, EXPAND)).expectNextCount(1).verifyComplete();
+
+            @SuppressWarnings("unchecked")
+            Map<String, Map<String, String>> translations = (Map<String, Map<String, String>>) formParamsCaptor.getValue()
+                .getFirst(JSON_PROPERTY_TRANSLATIONS);
+            assertThat(translations).containsOnlyKeys("fr-ch", "de-ch", "es-es");
+            assertThat(translations.get("fr-ch")).containsEntry("name", "Agressif");
+            assertThat(translations.get("fr-ch")).containsEntry("description", "Description FR");
+        }
+
+        @Test
+        @DisplayName("create omits translations form param when sendTranslations is disabled")
+        void createOmitsTranslationsWhenSendTranslationsDisabled() {
+            service = new InvestmentRestProductPortfolioService(apiClient, ingestProperties, false);
+            ProductPortfolio template = buildFullTemplate(UUID.randomUUID());
+            template.setTranslations(Map.of("fr-ch", Map.of("name", "Agressif")));
+
+            when(apiClient.invokeAPI(any(), eq(HttpMethod.POST), any(), any(), any(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(
+                    buildApiProduct(UUID.randomUUID(), "Robo Plan", ProductTypeEnum.ROBO_ADVISOR), HttpStatus.OK));
+
+            StepVerifier.create(service.createPortfolioProduct(template, EXPAND)).expectNextCount(1).verifyComplete();
+
+            assertThat(formParamsCaptor.getValue().containsKey(JSON_PROPERTY_TRANSLATIONS)).isFalse();
+        }
+
+        @Test
+        @DisplayName("create omits translations form param when none are provided")
+        void createOmitsTranslationsWhenAbsent() {
+            ProductPortfolio template = buildFullTemplate(UUID.randomUUID());
+
+            when(apiClient.invokeAPI(any(), eq(HttpMethod.POST), any(), any(), any(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(
+                    buildApiProduct(UUID.randomUUID(), "Robo Plan", ProductTypeEnum.ROBO_ADVISOR), HttpStatus.OK));
+
+            StepVerifier.create(service.createPortfolioProduct(template, EXPAND)).expectNextCount(1).verifyComplete();
+
+            assertThat(formParamsCaptor.getValue()
+                .containsKey(JSON_PROPERTY_TRANSLATIONS)).isFalse();
         }
 
         @Test
@@ -290,6 +349,26 @@ class InvestmentRestProductPortfolioServiceTest {
             StepVerifier.create(service.updatePortfolioProduct(existingUuid.toString(), EXPAND, template))
                 .expectError(NullPointerException.class)
                 .verify();
+        }
+
+        @Test
+        @DisplayName("update omits translations form param when sendTranslations is disabled")
+        void updateOmitsTranslationsWhenSendTranslationsDisabled() {
+            service = new InvestmentRestProductPortfolioService(apiClient, ingestProperties, false);
+            UUID existingUuid = UUID.randomUUID();
+            ProductPortfolio template = buildFullTemplate(existingUuid);
+            template.setTranslations(Map.of("fr-ch", Map.of("name", "Agressif")));
+
+            when(apiClient.invokeAPI(eq(UPDATE_PATH), eq(HttpMethod.PUT), any(), any(), any(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(
+                    buildApiProduct(existingUuid, "Robo Plan", ProductTypeEnum.ROBO_ADVISOR), HttpStatus.OK));
+
+            StepVerifier.create(service.updatePortfolioProduct(existingUuid.toString(), EXPAND, template))
+                .expectNextCount(1)
+                .verifyComplete();
+
+            assertThat(formParamsCaptor.getValue().containsKey(JSON_PROPERTY_TRANSLATIONS)).isFalse();
         }
     }
 
