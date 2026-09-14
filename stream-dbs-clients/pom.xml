@@ -148,6 +148,7 @@
                                 <artifactItem>
                                     <groupId>com.backbase.dbs.user</groupId>
                                     <artifactId>user-manager</artifactId>
+                                    <version>6.11.7</version>
                                     <classifier>api</classifier>
                                     <type>zip</type>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
