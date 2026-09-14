@@ -3219,6 +3219,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PartyPhoneNumber'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyGroup'
         customFields:
           type: object
           additionalProperties:
@@ -3577,6 +3581,31 @@ components:
       required:
         - type
         - number
+    PartyGroup:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Core System ID
+        type:
+          type: string
+          description: Type of group the party belongs to. Possible values - HOUSEHOLD, FAMILY_OFFICE, CORPORATION, PROFESSIONALS.
+        name:
+          type: string
+          description: Unique name of the party group.
+        role:
+          type: string
+          description: Role of the party in the group. Supported values - HEAD_OF_HOUSEHOLD, PAYER, RELATED_PARTY and OTHERS.
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - OTHERS
+          description: Indicates if the group is active, inactive or other.
+        isPrimary:
+          type: boolean
+          description: Indicates whether the party is primary in the group.
   examples:
     RootLegalEntityHierarchyExample:
       description: "Example Request for setting up Root Legal Entity Structure as described on Backbase Community"
