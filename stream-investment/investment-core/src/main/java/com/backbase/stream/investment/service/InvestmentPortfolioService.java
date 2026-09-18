@@ -26,6 +26,7 @@ import com.backbase.stream.investment.model.InvestmentPortfolioTradingAccount;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +35,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -453,6 +455,8 @@ public class InvestmentPortfolioService {
      *     </ul>
      *   </li>
      *   <li>Failed accounts are logged and skipped to prevent batch failures</li>
+     *   <li>Accounts sharing a portfolio are processed sequentially (default account first) to avoid
+     *       {@code is_default} races; different portfolios may still be processed concurrently</li>
      * </ol>
      *
      * @param investmentPortfolioTradingAccounts the source accounts containing all required field data
@@ -469,8 +473,17 @@ public class InvestmentPortfolioService {
         }
 
         return Flux.fromIterable(investmentPortfolioTradingAccounts)
-            .flatMap(this::upsertSingleTradingAccount)
+            .groupBy(account -> account.getPortfolioExternalId() != null
+                ? account.getPortfolioExternalId()
+                : "")
+            .flatMap(portfolioGroup -> portfolioGroup
+                .sort(defaultAccountFirst())
+                .concatMap(this::upsertSingleTradingAccount))
             .collectList();
+    }
+
+    private static Comparator<InvestmentPortfolioTradingAccount> defaultAccountFirst() {
+        return Comparator.comparing(account -> !Boolean.TRUE.equals(account.getIsDefault()));
     }
 
     /**
@@ -574,7 +587,9 @@ public class InvestmentPortfolioService {
     public Mono<PortfolioTradingAccount> upsertPortfolioTradingAccount(PortfolioTradingAccountRequest request) {
 
         return listExistingPortfolioTradingAccounts(request)
-            .flatMap(existing -> patchExistingPortfolioTradingAccount(existing, request))
+            .flatMap(existing -> requiresRecreate(existing, request)
+                ? deleteAndRecreateTradingAccount(existing, request)
+                : patchExistingPortfolioTradingAccount(existing, request))
             .switchIfEmpty(Mono.defer(() -> createPortfolioTradingAccount(request)))
             .doOnSuccess(account -> log.info(
                 "Successfully upserted portfolio trading account: uuid={}, externalAccountId={}",
@@ -585,14 +600,25 @@ public class InvestmentPortfolioService {
     }
 
     /**
+     * Returns true when the existing record's portfolio or account ID no longer matches the source data.
+     *
+     * <p>In that case PATCH would attempt to rewrite identity fields and can collide with another row
+     * in the same portfolio; delete-and-recreate is the correct recovery path.
+     */
+    private boolean requiresRecreate(PortfolioTradingAccount existing, PortfolioTradingAccountRequest request) {
+        return !Objects.equals(existing.getPortfolio(), request.getPortfolio())
+            || !Objects.equals(existing.getAccountId(), request.getAccountId());
+    }
+
+    /**
      * Patches an existing portfolio trading account with updated values.
      *
-     * <p>If the patch operation fails (e.g., due to validation errors or conflicts),
-     * falls back to returning the existing account to preserve data integrity and prevent batch failures.
+     * <p>On unique-constraint or default-account conflicts, deletes stale/conflicting rows and recreates.
+     * Other patch failures fall back to the existing account to prevent batch failures.
      *
      * @param existing the existing trading account to update
      * @param request  the request containing updated values
-     * @return Mono emitting the updated trading account, or the existing account if patch fails
+     * @return Mono emitting the updated trading account, a recreated account, or the existing account
      */
     private Mono<PortfolioTradingAccount> patchExistingPortfolioTradingAccount(
         PortfolioTradingAccount existing,
@@ -602,14 +628,76 @@ public class InvestmentPortfolioService {
         log.debug("Patching portfolio trading account: uuid={}, externalAccountId={}",
             uuid, request.getExternalAccountId());
 
-        return portfolioTradingAccountsApi.patchPortfolioTradingAccount(uuid, request)
+        return clearDefaultIfNeeded(request, existing.getUuid())
+            .then(patchTradingAccount(uuid, request))
             .doOnSuccess(updated -> log.info(
                 "Successfully patched portfolio trading account: uuid={}", updated.getUuid()))
-            .doOnError(throwable -> logPortfolioTradingAccountError("PATCH", "uuid", uuid, throwable))
-            .onErrorResume(WebClientResponseException.class, ex -> {
-                log.info("Using existing portfolio trading account due to patch failure: uuid={}", uuid);
-                return Mono.just(existing);
-            });
+            .onErrorResume(WebClientResponseException.class, ex -> recoverFromPatchConflict(existing, request, ex));
+    }
+
+    private Mono<PortfolioTradingAccount> patchTradingAccount(String uuid, PortfolioTradingAccountRequest request) {
+        return portfolioTradingAccountsApi.patchPortfolioTradingAccount(uuid, request)
+            .doOnError(throwable -> logPortfolioTradingAccountError("PATCH", "uuid", uuid, throwable));
+    }
+
+    /**
+     * Handles PATCH conflicts without deleting unless necessary. Default-account conflicts are resolved by clearing
+     * other defaults first; unique-constraint conflicts indicate stale rows and trigger delete-and-recreate.
+     */
+    private Mono<PortfolioTradingAccount> recoverFromPatchConflict(
+        PortfolioTradingAccount existing,
+        PortfolioTradingAccountRequest request,
+        WebClientResponseException ex) {
+
+        if (!isTradingAccountConflict(ex)) {
+            log.info("Using existing portfolio trading account due to patch failure: uuid={}", existing.getUuid());
+            return Mono.just(existing);
+        }
+
+        String uuid = existing.getUuid().toString();
+        if (isDefaultAccountConflict(ex)) {
+            log.info(
+                "Default-account patch conflict for portfolio trading account, clearing other defaults: uuid={}, externalAccountId={}",
+                uuid, request.getExternalAccountId());
+            return clearOtherDefaultTradingAccounts(request.getPortfolio(), existing.getUuid())
+                .then(patchTradingAccount(uuid, request))
+                .onErrorResume(WebClientResponseException.class, retryEx -> {
+                    if (!isDefaultAccountConflict(retryEx)) {
+                        return Mono.error(retryEx);
+                    }
+                    log.warn(
+                        "Default-account conflict persists after clearing defaults, keeping existing record: uuid={}, externalAccountId={}",
+                        uuid, request.getExternalAccountId());
+                    return Mono.just(existing);
+                });
+        }
+
+        log.info(
+            "Unique-constraint patch conflict for portfolio trading account, recreating: uuid={}, externalAccountId={}",
+            uuid, request.getExternalAccountId());
+        return deleteAndRecreateTradingAccount(existing, request);
+    }
+
+    /**
+     * Deletes a stale trading account and any rows that would block creation, then creates a fresh record.
+     */
+    private Mono<PortfolioTradingAccount> deleteAndRecreateTradingAccount(
+        PortfolioTradingAccount staleRecord,
+        PortfolioTradingAccountRequest request) {
+
+        log.info(
+            "Recreating portfolio trading account: uuid={}, externalAccountId={}, portfolio={}, accountId={}",
+            staleRecord.getUuid(), request.getExternalAccountId(), request.getPortfolio(), request.getAccountId());
+
+        return deleteTradingAccount(staleRecord)
+            .then(deleteConflictingTradingAccounts(request))
+            .then(clearDefaultIfNeeded(request))
+            .then(Mono.defer(() -> portfolioTradingAccountsApi.createPortfolioTradingAccount(request)))
+            .doOnSuccess(account -> log.info(
+                "Recreated portfolio trading account: uuid={}, externalAccountId={}",
+                account.getUuid(), request.getExternalAccountId()))
+            .doOnError(throwable -> logPortfolioTradingAccountError(
+                "RECREATE", "externalAccountId", request.getExternalAccountId(), throwable));
     }
 
     /**
@@ -622,12 +710,126 @@ public class InvestmentPortfolioService {
      */
     public Mono<PortfolioTradingAccount> createPortfolioTradingAccount(PortfolioTradingAccountRequest request) {
 
-        return portfolioTradingAccountsApi.createPortfolioTradingAccount(request)
+        return clearDefaultIfNeeded(request)
+            .then(Mono.defer(() -> portfolioTradingAccountsApi.createPortfolioTradingAccount(request)))
             .doOnSuccess(account -> log.info(
                 "Created portfolio trading account: uuid={}, externalAccountId={}",
                 account.getUuid(), request.getExternalAccountId()))
             .doOnError(throwable -> logPortfolioTradingAccountError(
-                "CREATE", "externalAccountId", request.getExternalAccountId(), throwable));
+                "CREATE", "externalAccountId", request.getExternalAccountId(), throwable))
+            .onErrorResume(WebClientResponseException.class, ex -> {
+                if (!isTradingAccountConflict(ex)) {
+                    return Mono.error(ex);
+                }
+                log.info(
+                    "Create conflict detected for portfolio trading account, clearing stale rows: externalAccountId={}",
+                    request.getExternalAccountId());
+                return deleteConflictingTradingAccounts(request)
+                    .then(clearDefaultIfNeeded(request))
+                    .then(Mono.defer(() -> portfolioTradingAccountsApi.createPortfolioTradingAccount(request)));
+            });
+    }
+
+    private Mono<Void> clearDefaultIfNeeded(PortfolioTradingAccountRequest request) {
+        return clearDefaultIfNeeded(request, null);
+    }
+
+    private Mono<Void> clearDefaultIfNeeded(PortfolioTradingAccountRequest request, UUID excludeUuid) {
+        return Boolean.TRUE.equals(request.getIsDefault())
+            ? clearOtherDefaultTradingAccounts(request.getPortfolio(), excludeUuid)
+            : Mono.empty();
+    }
+
+    private Mono<Void> deleteTradingAccount(PortfolioTradingAccount account) {
+        String uuid = account.getUuid().toString();
+        return portfolioTradingAccountsApi.deletePortfolioTradingAccount(uuid)
+            .doOnSuccess(ignored -> log.info(
+                "Deleted portfolio trading account: uuid={}, externalAccountId={}",
+                uuid, account.getExternalAccountId()))
+            .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
+                log.info("Portfolio trading account already absent during delete: uuid={}", uuid);
+                return Mono.empty();
+            });
+    }
+
+    private Mono<Void> deleteConflictingTradingAccounts(PortfolioTradingAccountRequest request) {
+        return Mono.zip(
+                listTradingAccountsByPortfolioAndAccountId(request.getPortfolio(), request.getAccountId()),
+                listTradingAccountsByPortfolioAndExternalAccountId(
+                    request.getPortfolio(), request.getExternalAccountId()))
+            .flatMapMany(tuple -> Flux.concat(
+                Flux.fromIterable(tuple.getT1()),
+                Flux.fromIterable(tuple.getT2())))
+            .distinct(PortfolioTradingAccount::getUuid)
+            .flatMap(this::deleteTradingAccount)
+            .then();
+    }
+
+    private Mono<List<PortfolioTradingAccount>> listTradingAccountsByPortfolioAndAccountId(
+        UUID portfolioUuid, String accountId) {
+
+        return portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                null, null, accountId, null, null, null, portfolioUuid.toString())
+            .map(this::extractTradingAccountResults)
+            .defaultIfEmpty(List.of());
+    }
+
+    private Mono<List<PortfolioTradingAccount>> listTradingAccountsByPortfolioAndExternalAccountId(
+        UUID portfolioUuid, String externalAccountId) {
+
+        return portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                null, null, null, externalAccountId, null, null, portfolioUuid.toString())
+            .map(this::extractTradingAccountResults)
+            .defaultIfEmpty(List.of());
+    }
+
+    private List<PortfolioTradingAccount> extractTradingAccountResults(
+        PaginatedPortfolioTradingAccountList accounts) {
+
+        if (accounts == null || CollectionUtils.isEmpty(accounts.getResults())) {
+            return List.of();
+        }
+        return accounts.getResults();
+    }
+
+    private Mono<Void> clearOtherDefaultTradingAccounts(UUID portfolioUuid, UUID excludeUuid) {
+        return portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                null, null, null, null, true, null, portfolioUuid.toString())
+            .map(this::extractTradingAccountResults)
+            .defaultIfEmpty(List.of())
+            .flatMapMany(Flux::fromIterable)
+            .filter(account -> excludeUuid == null || !account.getUuid().equals(excludeUuid))
+            .flatMap(account -> portfolioTradingAccountsApi.patchPortfolioTradingAccount(
+                account.getUuid().toString(),
+                toPatchRequest(account, false)))
+            .then();
+    }
+
+    /**
+     * Builds a full PATCH request from an existing account. The investment API requires all fields on PATCH, not
+     * partial updates.
+     */
+    private PortfolioTradingAccountRequest toPatchRequest(PortfolioTradingAccount account, boolean isDefault) {
+        return new PortfolioTradingAccountRequest()
+            .portfolio(account.getPortfolio())
+            .accountId(account.getAccountId())
+            .externalAccountId(account.getExternalAccountId())
+            .isDefault(isDefault)
+            .isInternal(account.getIsInternal());
+    }
+
+    private boolean isTradingAccountConflict(WebClientResponseException ex) {
+        if (!HttpStatus.BAD_REQUEST.equals(ex.getStatusCode())) {
+            return false;
+        }
+        String body = ex.getResponseBodyAsString();
+        return body.contains("must make a unique set")
+            || body.contains("default trading account already exists");
+    }
+
+    private boolean isDefaultAccountConflict(WebClientResponseException ex) {
+        return HttpStatus.BAD_REQUEST.equals(ex.getStatusCode())
+            && ex.getResponseBodyAsString().contains("default trading account already exists");
     }
 
     /**
@@ -648,12 +850,13 @@ public class InvestmentPortfolioService {
         PortfolioTradingAccountRequest request) {
 
         String externalAccountId = request.getExternalAccountId();
+        String portfolioUuid = request.getPortfolio().toString();
 
         return portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                1, null, null, externalAccountId, null, null, null)
+                1, null, null, externalAccountId, null, null, portfolioUuid)
             .doOnSuccess(accounts -> log.debug(
-                "List portfolio trading accounts query completed: externalAccountId={}, found={} results",
-                externalAccountId, accounts != null ? accounts.getResults().size() : 0))
+                "List portfolio trading accounts query completed: portfolio={}, externalAccountId={}, found={} results",
+                portfolioUuid, externalAccountId, accounts != null ? accounts.getResults().size() : 0))
             .doOnError(throwable -> log.error(
                 "Failed to list existing portfolio trading accounts: externalAccountId={}",
                 externalAccountId, throwable))
