@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -100,7 +101,9 @@ class InvestmentPortfolioServiceTest {
      * <ul>
      *   <li>Existing account found → patch succeeds</li>
      *   <li>No existing account → create new</li>
-     *   <li>Patch fails with {@link WebClientResponseException} → falls back to existing</li>
+     *   <li>Portfolio or account ID changed → delete and recreate</li>
+     *   <li>Patch fails with unique/default conflict → delete and recreate</li>
+     *   <li>Patch fails with non-conflict {@link WebClientResponseException} → falls back to existing</li>
      *   <li>Patch fails with non-WebClient exception → error propagated</li>
      *   <li>Multiple existing accounts → {@link IllegalStateException}</li>
      * </ul>
@@ -118,6 +121,8 @@ class InvestmentPortfolioServiceTest {
 
             PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
             when(existing.getUuid()).thenReturn(existingUuid);
+            when(existing.getPortfolio()).thenReturn(portfolioUuid);
+            when(existing.getAccountId()).thenReturn("ACC-001");
             when(existing.getExternalAccountId()).thenReturn("EXT-001");
 
             PortfolioTradingAccount patched = mock(PortfolioTradingAccount.class);
@@ -135,8 +140,11 @@ class InvestmentPortfolioServiceTest {
                 .results(List.of(existing));
 
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                eq(1), isNull(), isNull(), eq("EXT-001"), isNull(), isNull(), isNull()))
+                eq(1), isNull(), isNull(), eq("EXT-001"), isNull(), isNull(), eq(portfolioUuid.toString())))
                 .thenReturn(Mono.just(accountList));
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                isNull(), isNull(), isNull(), isNull(), eq(true), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of())));
 
             when(portfolioTradingAccountsApi.patchPortfolioTradingAccount(
                 existingUuid.toString(), request))
@@ -171,7 +179,7 @@ class InvestmentPortfolioServiceTest {
                 .isInternal(false);
 
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                eq(1), isNull(), isNull(), eq("EXT-002"), isNull(), isNull(), isNull()))
+                eq(1), isNull(), isNull(), eq("EXT-002"), isNull(), isNull(), eq(portfolioUuid.toString())))
                 .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of())));
 
             when(portfolioTradingAccountsApi.createPortfolioTradingAccount(request))
@@ -187,7 +195,240 @@ class InvestmentPortfolioServiceTest {
         }
 
         @Test
-        @DisplayName("patch fails with WebClientResponseException — falls back to existing account")
+        @DisplayName("account identity changed — deletes stale row and recreates")
+        void upsertPortfolioTradingAccount_identityChanged_deletesAndRecreates() {
+            // Arrange
+            UUID existingUuid = UUID.randomUUID();
+            UUID portfolioUuid = UUID.randomUUID();
+
+            PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
+            when(existing.getUuid()).thenReturn(existingUuid);
+            when(existing.getPortfolio()).thenReturn(portfolioUuid);
+            when(existing.getAccountId()).thenReturn("ACC-OLD");
+            when(existing.getExternalAccountId()).thenReturn("EXT-IDENTITY");
+
+            PortfolioTradingAccount recreated = mock(PortfolioTradingAccount.class);
+            UUID recreatedUuid = UUID.randomUUID();
+            when(recreated.getUuid()).thenReturn(recreatedUuid);
+
+            PortfolioTradingAccountRequest request = new PortfolioTradingAccountRequest()
+                .portfolio(portfolioUuid)
+                .accountId("ACC-NEW")
+                .externalAccountId("EXT-IDENTITY")
+                .isDefault(false)
+                .isInternal(false);
+
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                eq(1), isNull(), isNull(), eq("EXT-IDENTITY"), isNull(), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of(existing))));
+            when(portfolioTradingAccountsApi.deletePortfolioTradingAccount(existingUuid.toString()))
+                .thenReturn(Mono.empty());
+            mockNoTradingAccountConflicts(portfolioUuid, "ACC-NEW", "EXT-IDENTITY", false);
+            when(portfolioTradingAccountsApi.createPortfolioTradingAccount(request))
+                .thenReturn(Mono.just(recreated));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertPortfolioTradingAccount(request))
+                .expectNextMatches(acc -> recreatedUuid.equals(acc.getUuid()))
+                .verifyComplete();
+
+            verify(portfolioTradingAccountsApi).deletePortfolioTradingAccount(existingUuid.toString());
+            verify(portfolioTradingAccountsApi).createPortfolioTradingAccount(request);
+            verify(portfolioTradingAccountsApi, never()).patchPortfolioTradingAccount(any(), any());
+        }
+
+        @Test
+        @DisplayName("patch fails with unique constraint conflict — deletes stale rows and recreates")
+        void upsertPortfolioTradingAccount_patchFails_withUniqueConflict_deletesAndRecreates() {
+            // Arrange
+            UUID existingUuid = UUID.randomUUID();
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID conflictingUuid = UUID.randomUUID();
+
+            PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
+            when(existing.getUuid()).thenReturn(existingUuid);
+            when(existing.getPortfolio()).thenReturn(portfolioUuid);
+            when(existing.getAccountId()).thenReturn("ACC-STALE");
+            when(existing.getExternalAccountId()).thenReturn("EXT-CONFLICT");
+
+            PortfolioTradingAccount conflicting = mock(PortfolioTradingAccount.class);
+            when(conflicting.getUuid()).thenReturn(conflictingUuid);
+            when(conflicting.getExternalAccountId()).thenReturn("EXT-OTHER");
+
+            PortfolioTradingAccount recreated = mock(PortfolioTradingAccount.class);
+            UUID recreatedUuid = UUID.randomUUID();
+            when(recreated.getUuid()).thenReturn(recreatedUuid);
+
+            PortfolioTradingAccountRequest request = new PortfolioTradingAccountRequest()
+                .portfolio(portfolioUuid)
+                .accountId("ACC-TARGET")
+                .externalAccountId("EXT-CONFLICT")
+                .isDefault(false)
+                .isInternal(false);
+
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                eq(1), isNull(), isNull(), eq("EXT-CONFLICT"), isNull(), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of(existing))));
+
+            String conflictBody = "{\"errors\":{\"non_field_errors\":"
+                + "[\"The fields portfolio, account_id must make a unique set.\"]}}";
+            when(portfolioTradingAccountsApi.patchPortfolioTradingAccount(existingUuid.toString(), request))
+                .thenReturn(Mono.error(WebClientResponseException.create(
+                    HttpStatus.BAD_REQUEST.value(), "Bad Request",
+                    HttpHeaders.EMPTY, conflictBody.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8)));
+
+            when(portfolioTradingAccountsApi.deletePortfolioTradingAccount(existingUuid.toString()))
+                .thenReturn(Mono.empty());
+            when(portfolioTradingAccountsApi.deletePortfolioTradingAccount(conflictingUuid.toString()))
+                .thenReturn(Mono.empty());
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                isNull(), isNull(), eq("ACC-TARGET"), isNull(), isNull(), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of(conflicting))));
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                isNull(), isNull(), isNull(), eq("EXT-CONFLICT"), isNull(), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of())));
+            when(portfolioTradingAccountsApi.createPortfolioTradingAccount(request))
+                .thenReturn(Mono.just(recreated));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertPortfolioTradingAccount(request))
+                .expectNextMatches(acc -> recreatedUuid.equals(acc.getUuid()))
+                .verifyComplete();
+
+            verify(portfolioTradingAccountsApi).deletePortfolioTradingAccount(existingUuid.toString());
+            verify(portfolioTradingAccountsApi).deletePortfolioTradingAccount(conflictingUuid.toString());
+            verify(portfolioTradingAccountsApi).createPortfolioTradingAccount(request);
+        }
+
+        @Test
+        @DisplayName("patch with isDefault=true — clears other defaults before patching")
+        void upsertPortfolioTradingAccount_defaultAccount_clearsOtherDefaultsBeforePatch() {
+            // Arrange
+            UUID existingUuid = UUID.randomUUID();
+            UUID otherDefaultUuid = UUID.randomUUID();
+            UUID portfolioUuid = UUID.randomUUID();
+
+            PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
+            when(existing.getUuid()).thenReturn(existingUuid);
+            when(existing.getPortfolio()).thenReturn(portfolioUuid);
+            when(existing.getAccountId()).thenReturn("ACC-DEF");
+            when(existing.getExternalAccountId()).thenReturn("EXT-DEF");
+
+            PortfolioTradingAccount otherDefault = mock(PortfolioTradingAccount.class);
+            when(otherDefault.getUuid()).thenReturn(otherDefaultUuid);
+            when(otherDefault.getPortfolio()).thenReturn(portfolioUuid);
+            when(otherDefault.getAccountId()).thenReturn("ACC-OTHER-DEF");
+            when(otherDefault.getExternalAccountId()).thenReturn("EXT-OTHER-DEF");
+            when(otherDefault.getIsInternal()).thenReturn(true);
+
+            PortfolioTradingAccountRequest clearDefaultRequest = new PortfolioTradingAccountRequest()
+                .portfolio(portfolioUuid)
+                .accountId("ACC-OTHER-DEF")
+                .externalAccountId("EXT-OTHER-DEF")
+                .isDefault(false)
+                .isInternal(true);
+
+            PortfolioTradingAccount patched = mock(PortfolioTradingAccount.class);
+            when(patched.getUuid()).thenReturn(existingUuid);
+
+            PortfolioTradingAccountRequest request = new PortfolioTradingAccountRequest()
+                .portfolio(portfolioUuid)
+                .accountId("ACC-DEF")
+                .externalAccountId("EXT-DEF")
+                .isDefault(true)
+                .isInternal(false);
+
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                eq(1), isNull(), isNull(), eq("EXT-DEF"), isNull(), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of(existing))));
+
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                isNull(), isNull(), isNull(), isNull(), eq(true), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of(otherDefault))));
+            when(portfolioTradingAccountsApi.patchPortfolioTradingAccount(
+                otherDefaultUuid.toString(), clearDefaultRequest))
+                .thenReturn(Mono.just(otherDefault));
+            when(portfolioTradingAccountsApi.patchPortfolioTradingAccount(existingUuid.toString(), request))
+                .thenReturn(Mono.just(patched));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertPortfolioTradingAccount(request))
+                .expectNextMatches(acc -> existingUuid.equals(acc.getUuid()))
+                .verifyComplete();
+
+            verify(portfolioTradingAccountsApi, never()).deletePortfolioTradingAccount(any());
+            verify(portfolioTradingAccountsApi).patchPortfolioTradingAccount(
+                otherDefaultUuid.toString(), clearDefaultRequest);
+            verify(portfolioTradingAccountsApi).patchPortfolioTradingAccount(existingUuid.toString(), request);
+        }
+
+        @Test
+        @DisplayName("patch fails with default conflict — clears other defaults and retries patch")
+        void upsertPortfolioTradingAccount_patchFails_withDefaultConflict_clearsDefaultsAndRetriesPatch() {
+            // Arrange
+            UUID existingUuid = UUID.randomUUID();
+            UUID otherDefaultUuid = UUID.randomUUID();
+            UUID portfolioUuid = UUID.randomUUID();
+
+            PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
+            when(existing.getUuid()).thenReturn(existingUuid);
+            when(existing.getPortfolio()).thenReturn(portfolioUuid);
+            when(existing.getAccountId()).thenReturn("ACC-DEF");
+            when(existing.getExternalAccountId()).thenReturn("EXT-DEF");
+
+            PortfolioTradingAccount otherDefault = mock(PortfolioTradingAccount.class);
+            when(otherDefault.getUuid()).thenReturn(otherDefaultUuid);
+            when(otherDefault.getPortfolio()).thenReturn(portfolioUuid);
+            when(otherDefault.getAccountId()).thenReturn("ACC-OTHER-DEF");
+            when(otherDefault.getExternalAccountId()).thenReturn("EXT-OTHER-DEF");
+            when(otherDefault.getIsInternal()).thenReturn(true);
+
+            PortfolioTradingAccountRequest clearDefaultRequest = new PortfolioTradingAccountRequest()
+                .portfolio(portfolioUuid)
+                .accountId("ACC-OTHER-DEF")
+                .externalAccountId("EXT-OTHER-DEF")
+                .isDefault(false)
+                .isInternal(true);
+
+            PortfolioTradingAccount patched = mock(PortfolioTradingAccount.class);
+            when(patched.getUuid()).thenReturn(existingUuid);
+
+            PortfolioTradingAccountRequest request = new PortfolioTradingAccountRequest()
+                .portfolio(portfolioUuid)
+                .accountId("ACC-DEF")
+                .externalAccountId("EXT-DEF")
+                .isDefault(true)
+                .isInternal(false);
+
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                eq(1), isNull(), isNull(), eq("EXT-DEF"), isNull(), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of(existing))));
+
+            String defaultConflictBody = "{\"errors\":{\"is_default\":"
+                + "[\"A default trading account already exists for this portfolio.\"]}}";
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                isNull(), isNull(), isNull(), isNull(), eq(true), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of(otherDefault))));
+            when(portfolioTradingAccountsApi.patchPortfolioTradingAccount(
+                otherDefaultUuid.toString(), clearDefaultRequest))
+                .thenReturn(Mono.just(otherDefault));
+            when(portfolioTradingAccountsApi.patchPortfolioTradingAccount(existingUuid.toString(), request))
+                .thenReturn(Mono.error(WebClientResponseException.create(
+                    HttpStatus.BAD_REQUEST.value(), "Bad Request",
+                    HttpHeaders.EMPTY, defaultConflictBody.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8)))
+                .thenReturn(Mono.just(patched));
+
+            // Act & Assert
+            StepVerifier.create(service.upsertPortfolioTradingAccount(request))
+                .expectNextMatches(acc -> existingUuid.equals(acc.getUuid()))
+                .verifyComplete();
+
+            verify(portfolioTradingAccountsApi, never()).deletePortfolioTradingAccount(any());
+            verify(portfolioTradingAccountsApi, times(2)).patchPortfolioTradingAccount(existingUuid.toString(), request);
+        }
+
+        @Test
+        @DisplayName("patch fails with non-conflict WebClientResponseException — falls back to existing account")
         void upsertPortfolioTradingAccount_patchFails_withWebClientException_fallsBackToExisting() {
             // Arrange
             UUID existingUuid = UUID.randomUUID();
@@ -195,6 +436,8 @@ class InvestmentPortfolioServiceTest {
 
             PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
             when(existing.getUuid()).thenReturn(existingUuid);
+            when(existing.getPortfolio()).thenReturn(portfolioUuid);
+            when(existing.getAccountId()).thenReturn("ACC-003");
             when(existing.getExternalAccountId()).thenReturn("EXT-003");
 
             PortfolioTradingAccountRequest request = new PortfolioTradingAccountRequest()
@@ -208,7 +451,7 @@ class InvestmentPortfolioServiceTest {
                 .results(List.of(existing));
 
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                eq(1), isNull(), isNull(), eq("EXT-003"), isNull(), isNull(), isNull()))
+                eq(1), isNull(), isNull(), eq("EXT-003"), isNull(), isNull(), eq(portfolioUuid.toString())))
                 .thenReturn(Mono.just(accountList));
 
             when(portfolioTradingAccountsApi.patchPortfolioTradingAccount(
@@ -237,6 +480,8 @@ class InvestmentPortfolioServiceTest {
 
             PortfolioTradingAccount existing = mock(PortfolioTradingAccount.class);
             when(existing.getUuid()).thenReturn(existingUuid);
+            when(existing.getPortfolio()).thenReturn(portfolioUuid);
+            when(existing.getAccountId()).thenReturn("ACC-004");
             when(existing.getExternalAccountId()).thenReturn("EXT-004");
 
             PortfolioTradingAccountRequest request = new PortfolioTradingAccountRequest()
@@ -250,7 +495,7 @@ class InvestmentPortfolioServiceTest {
                 .results(List.of(existing));
 
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                eq(1), isNull(), isNull(), eq("EXT-004"), isNull(), isNull(), isNull()))
+                eq(1), isNull(), isNull(), eq("EXT-004"), isNull(), isNull(), eq(portfolioUuid.toString())))
                 .thenReturn(Mono.just(accountList));
 
             when(portfolioTradingAccountsApi.patchPortfolioTradingAccount(
@@ -283,7 +528,7 @@ class InvestmentPortfolioServiceTest {
                 .isInternal(false);
 
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                eq(1), isNull(), isNull(), eq("EXT-005"), isNull(), isNull(), isNull()))
+                eq(1), isNull(), isNull(), eq("EXT-005"), isNull(), isNull(), eq(portfolioUuid.toString())))
                 .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList()
                     .results(List.of(acc1, acc2))));
 
@@ -372,7 +617,7 @@ class InvestmentPortfolioServiceTest {
 
             // Account 1: list returns empty → create fails
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                eq(1), isNull(), isNull(), eq("ACC-FAIL-001"), isNull(), isNull(), isNull()))
+                eq(1), isNull(), isNull(), eq("ACC-FAIL-001"), isNull(), isNull(), eq(portfolioUuid1.toString())))
                 .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of())));
             when(portfolioTradingAccountsApi.createPortfolioTradingAccount(
                 argThat(r -> r != null && "ACC-FAIL-001".equals(r.getExternalAccountId()))))
@@ -383,7 +628,7 @@ class InvestmentPortfolioServiceTest {
             PortfolioTradingAccount created = mock(PortfolioTradingAccount.class);
             when(created.getUuid()).thenReturn(createdUuid);
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                eq(1), isNull(), isNull(), eq("ACC-OK-002"), isNull(), isNull(), isNull()))
+                eq(1), isNull(), isNull(), eq("ACC-OK-002"), isNull(), isNull(), eq(portfolioUuid2.toString())))
                 .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of())));
             when(portfolioTradingAccountsApi.createPortfolioTradingAccount(
                 argThat(r -> r != null && "ACC-OK-002".equals(r.getExternalAccountId()))))
@@ -423,7 +668,7 @@ class InvestmentPortfolioServiceTest {
             mockPortfolioFound(externalId, portfolioUuid);
 
             when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
-                eq(1), isNull(), isNull(), eq("ACC-ALL-FAIL"), isNull(), isNull(), isNull()))
+                eq(1), isNull(), isNull(), eq("ACC-ALL-FAIL"), isNull(), isNull(), eq(portfolioUuid.toString())))
                 .thenReturn(Mono.error(new RuntimeException("API failure")));
 
             List<InvestmentPortfolioTradingAccount> input = List.of(
@@ -478,6 +723,7 @@ class InvestmentPortfolioServiceTest {
                 .isDefault(true)
                 .isInternal(false);
 
+            mockNoTradingAccountConflicts(portfolioUuid, "ACC-NEW", "EXT-NEW", true);
             when(portfolioTradingAccountsApi.createPortfolioTradingAccount(request))
                 .thenReturn(Mono.just(created));
 
@@ -1691,6 +1937,24 @@ class InvestmentPortfolioServiceTest {
         return arrangement;
     }
 
+
+    /**
+     * Stubs list calls used during delete-and-recreate conflict resolution to return no matching rows.
+     */
+    private void mockNoTradingAccountConflicts(UUID portfolioUuid, String accountId, String externalAccountId,
+        boolean isDefault) {
+        when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+            isNull(), isNull(), eq(accountId), isNull(), isNull(), isNull(), eq(portfolioUuid.toString())))
+            .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of())));
+        when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+            isNull(), isNull(), isNull(), eq(externalAccountId), isNull(), isNull(), eq(portfolioUuid.toString())))
+            .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of())));
+        if (isDefault) {
+            when(portfolioTradingAccountsApi.listPortfolioTradingAccounts(
+                isNull(), isNull(), isNull(), isNull(), eq(true), isNull(), eq(portfolioUuid.toString())))
+                .thenReturn(Mono.just(new PaginatedPortfolioTradingAccountList().results(List.of())));
+        }
+    }
 
     /**
      * Stubs {@link PortfolioApi#listPortfolios} to return an existing portfolio with the given UUID.

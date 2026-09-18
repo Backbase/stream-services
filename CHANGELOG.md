@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.14.0]
+### Changed
+- Fix for Investment Portfolio trading accounts patch failing due to uniques validation
+
 ## [10.13.0]
 ### Changed
 - Add partyGroups to party ingestion
