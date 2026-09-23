@@ -313,6 +313,7 @@ public class InvestmentPortfolioProductService {
             })
             .doOnError(throwable -> logPortfolioProductPatchError(
                 productUuid, portfolioProduct.getName(), portfolioProduct.getProductType(), throwable))
+            .onErrorResume(WebClientResponseException.class, ex -> Mono.just(existingProduct))
             .onErrorResume(HttpClientErrorException.class, ex -> Mono.just(existingProduct));
     }
 
