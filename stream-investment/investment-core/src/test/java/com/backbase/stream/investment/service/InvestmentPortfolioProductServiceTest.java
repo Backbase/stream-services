@@ -310,8 +310,8 @@ class InvestmentPortfolioProductServiceTest {
         }
 
         @Test
-        @DisplayName("list API failure — propagates error")
-        void listApiFailure_propagatesError() {
+        @DisplayName("list API failure — skips product and completes batch")
+        void listApiFailure_skipsProduct() {
             ProductPortfolio template = buildTemplate("Self Trading", ProductTypeEnum.SELF_TRADING);
             InvestmentData data = InvestmentData.builder().portfolioProducts(List.of(template)).build();
 
@@ -323,13 +323,13 @@ class InvestmentPortfolioProductServiceTest {
 
             StepVerifier.create(service.upsertInvestmentProducts(data, List.of(buildArrangement(
                 ProductTypeEnum.SELF_TRADING.getValue(), null))))
-                .expectError(RuntimeException.class)
-                .verify();
+                .assertNext(products -> assertThat(products).isEmpty())
+                .verifyComplete();
         }
 
         @Test
-        @DisplayName("create API failure — propagates error")
-        void createApiFailure_propagatesError() {
+        @DisplayName("create API failure — skips product and completes batch")
+        void createApiFailure_skipsProduct() {
             ProductPortfolio template = buildTemplate("Self Trading", ProductTypeEnum.SELF_TRADING);
             InvestmentData data = InvestmentData.builder().portfolioProducts(List.of(template)).build();
 
@@ -339,8 +339,69 @@ class InvestmentPortfolioProductServiceTest {
 
             StepVerifier.create(service.upsertInvestmentProducts(data, List.of(buildArrangement(
                 ProductTypeEnum.SELF_TRADING.getValue(), null))))
-                .expectError(IllegalStateException.class)
-                .verify();
+                .assertNext(products -> assertThat(products).isEmpty())
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("one product fails — continues with remaining products")
+        void oneProductFails_continuesWithRemaining() {
+            UUID successUuid = UUID.randomUUID();
+            ProductPortfolio failing = buildTemplate("Failing Product", ProductTypeEnum.SELF_TRADING);
+            ProductPortfolio succeeding = buildTemplate("Working Product", ProductTypeEnum.ROBO_ADVISOR);
+            InvestmentData data = InvestmentData.builder().portfolioProducts(List.of(failing, succeeding)).build();
+
+            stubListReturnsEmpty(ProductTypeEnum.SELF_TRADING);
+            stubListReturnsEmpty(ProductTypeEnum.ROBO_ADVISOR);
+            when(investmentRestProductPortfolioService.createPortfolioProduct(any(), any()))
+                .thenAnswer(invocation -> {
+                    ProductPortfolio template = invocation.getArgument(0);
+                    if ("Failing Product".equals(template.getName())) {
+                        return Mono.error(new IllegalStateException("create failed"));
+                    }
+                    return Mono.just(buildApiProduct(successUuid, "Working Product", ProductTypeEnum.ROBO_ADVISOR, 1));
+                });
+
+            StepVerifier.create(service.upsertInvestmentProducts(data, List.of(
+                buildArrangement(ProductTypeEnum.SELF_TRADING.getValue(), "Failing Product"),
+                buildArrangement(ProductTypeEnum.ROBO_ADVISOR.getValue(), "Working Product"))))
+                .assertNext(products -> {
+                    assertThat(products).hasSize(1);
+                    assertThat(products.getFirst().getUuid()).isEqualTo(successUuid);
+                })
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("existing product found by externalId when name differs — patches without create")
+        void existingProduct_foundByExternalIdWhenNameDiffers_patches() {
+            UUID existingUuid = UUID.randomUUID();
+            String externalId = "ext-portfolio-self-trading-001";
+            ProductPortfolio template = buildTemplate("Self-Trading Portfolio", ProductTypeEnum.SELF_TRADING);
+            template.setExternalId(externalId);
+            InvestmentData data = InvestmentData.builder().portfolioProducts(List.of(template)).build();
+            InvestmentArrangement arrangement = buildArrangement(
+                ProductTypeEnum.SELF_TRADING.getValue(), "Self-Trading Portfolio");
+
+            PortfolioProduct existing = buildApiProduct(existingUuid, "Legacy Self Trading Name",
+                ProductTypeEnum.SELF_TRADING, 1);
+            stubListByExternalIdReturns(externalId, ProductTypeEnum.SELF_TRADING, existing);
+
+            PortfolioProduct patched = buildApiProduct(existingUuid, "Self-Trading Portfolio",
+                ProductTypeEnum.SELF_TRADING, 1);
+            when(investmentRestProductPortfolioService.updatePortfolioProduct(
+                eq(existingUuid.toString()), eq(List.of(ALLOCATION_ASSET_EXPAND)), any(ProductPortfolio.class)))
+                .thenReturn(Mono.just(patched));
+
+            StepVerifier.create(service.upsertInvestmentProducts(data, List.of(arrangement)))
+                .assertNext(products -> assertThat(products.getFirst().getUuid()).isEqualTo(existingUuid))
+                .verifyComplete();
+
+            verify(investmentRestProductPortfolioService, never()).createPortfolioProduct(any(), any());
+            verify(productsApi, never()).listPortfolioProducts(
+                eq(List.of(ALLOCATION_ASSET_EXPAND)), isNull(), isNull(), isNull(), eq(LIST_PRODUCT_PAGE_SIZE),
+                any(), any(), any(), any(), any(), eq(ORDERING), any(), any(), any());
+            assertThat(arrangement.getInvestmentProductId()).isEqualTo(existingUuid);
         }
 
         @Test
@@ -412,4 +473,17 @@ class InvestmentPortfolioProductServiceTest {
             eq(List.of(productType.getValue())), isNull(), isNull()))
             .thenReturn(Mono.just(page));
     }
+
+    private void stubListByExternalIdReturns(String externalId, ProductTypeEnum productType,
+        PortfolioProduct product) {
+        PaginatedPortfolioProductList page = new PaginatedPortfolioProductList()
+            .count(1)
+            .results(List.of(product));
+        when(productsApi.listPortfolioProducts(
+            eq(List.of(ALLOCATION_ASSET_EXPAND)), isNull(), eq(externalId), isNull(), eq(1),
+            isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+            eq(List.of(productType.getValue())), isNull(), isNull()))
+            .thenReturn(Mono.just(page));
+    }
+
 }

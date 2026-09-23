@@ -12,7 +12,6 @@ import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.ProductPortfolio;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestProductPortfolioService;
 import com.backbase.stream.investment.service.resttemplate.RestTemplateModelPortfolioMapper;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -23,12 +22,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
 
 /**
  * Service wrapper around {@link InvestmentProductsApi} and {@link InvestmentRestProductPortfolioService} providing
@@ -106,6 +105,12 @@ public class InvestmentPortfolioProductService {
                         .map(InvestorModelPortfolio::getName).orElse("")))
                 .doOnError(throwable -> log.error("Failed to upsert portfolio product: name={}, productType={}",
                     p.getName(), p.getProductType(), throwable))
+                .onErrorResume(throwable -> {
+                    log.warn("Skipping portfolio product upsert, continuing with remaining products: name={}, "
+                        + "externalId={}, productType={}",
+                        p.getName(), p.getExternalId(), p.getProductType(), throwable);
+                    return Mono.empty();
+                })
             )
             .collectList()
             .map(products -> {
@@ -195,6 +200,31 @@ public class InvestmentPortfolioProductService {
     }
 
     private Mono<PortfolioProduct> listExistingPortfolioProducts(ProductPortfolio portfolioProduct) {
+        ProductTypeEnum productType = portfolioProduct.getProductType();
+
+        Mono<PortfolioProduct> byExternalId = Mono.empty();
+        if (StringUtils.hasText(portfolioProduct.getExternalId())) {
+            byExternalId = productsApi.listPortfolioProducts(
+                    List.of(config.getAllocation().getModelPortfolioAllocationAsset()),
+                    null, portfolioProduct.getExternalId(), null, 1, null, null, null, null, null, null,
+                    List.of(productType.getValue()), null, null)
+                .flatMap(response -> {
+                    List<PortfolioProduct> results = Objects.requireNonNullElse(response.getResults(), List.of());
+                    if (results.isEmpty()) {
+                        return Mono.empty();
+                    }
+                    PortfolioProduct existingProduct = results.getFirst();
+                    log.info("Found existing portfolio product: uuid={}, externalId={}, name={}, productType={}",
+                        existingProduct.getUuid(), portfolioProduct.getExternalId(), existingProduct.getName(),
+                        productType);
+                    return Mono.just(existingProduct);
+                });
+        }
+
+        return byExternalId.switchIfEmpty(Mono.defer(() -> listExistingPortfolioProductsByName(portfolioProduct)));
+    }
+
+    private Mono<PortfolioProduct> listExistingPortfolioProductsByName(ProductPortfolio portfolioProduct) {
         Integer riskLevel = Optional.ofNullable(portfolioProduct.getModelPortfolio())
             .map(InvestorModelPortfolio::getRiskLevel).orElse(null);
 
@@ -304,15 +334,42 @@ public class InvestmentPortfolioProductService {
 
         return investmentRestProductPortfolioService.createPortfolioProduct(portfolioProduct,
                 List.of(config.getAllocation().getModelPortfolioAllocationAsset()))
-            .retryWhen(Retry.fixedDelay(2, Duration.ofSeconds(1)))
             .doOnSuccess(created -> {
                 log.debug(
                     "Successfully created portfolio product: uuid={}, name={}, productType={}, modelPortfolioUuid={}",
                     created.getUuid(), created.getName(), created.getProductType(), modelPortfolioUuid);
                 investmentData.addPortfolioProducts(created);
             })
+            .onErrorResume(throwable -> {
+                if (!StringUtils.hasText(portfolioProduct.getExternalId()) || !isDuplicateExternalIdError(throwable)) {
+                    return Mono.error(throwable);
+                }
+                log.warn("Portfolio product already exists for externalId={}, falling back to patch: name={}",
+                    portfolioProduct.getExternalId(), portfolioProduct.getName());
+                return listExistingPortfolioProducts(portfolioProduct)
+                    .flatMap(existing -> updateExistingPortfolioProduct(existing, portfolioProduct, investmentData))
+                    .switchIfEmpty(Mono.error(throwable));
+            })
             .doOnError(throwable -> logPortfolioProductCreationError(
                 portfolioProduct.getName(), productType, throwable));
+    }
+
+    private boolean isDuplicateExternalIdError(Throwable throwable) {
+        if (throwable instanceof WebClientResponseException ex
+            && HttpStatus.BAD_REQUEST.equals(ex.getStatusCode())) {
+            return containsDuplicateExternalIdMessage(ex.getResponseBodyAsString());
+        }
+        if (throwable instanceof HttpClientErrorException ex
+            && HttpStatus.BAD_REQUEST.equals(ex.getStatusCode())) {
+            return containsDuplicateExternalIdMessage(ex.getResponseBodyAsString());
+        }
+        return false;
+    }
+
+    private static boolean containsDuplicateExternalIdMessage(String body) {
+        return body != null
+            && body.contains("external_id")
+            && body.contains("already exists");
     }
 
     /**
