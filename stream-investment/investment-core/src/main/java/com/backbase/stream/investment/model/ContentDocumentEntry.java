@@ -18,6 +18,8 @@ import org.springframework.core.io.Resource;
 @Builder
 public class ContentDocumentEntry {
 
+    @JsonProperty("external_id")
+    private String externalId;
     private String name;
     private String description;
     private List<String> tags;

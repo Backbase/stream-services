@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,22 +53,22 @@ public class InvestmentModelPortfolioService {
 
     public Flux<OASModelPortfolioResponse> upsertModels(InvestmentData investmentData) {
         return Flux.fromIterable(Objects.requireNonNullElse(investmentData.getModelPortfolios(), List.of()))
-            .flatMap(modelPortfolioTemplate -> upsertModelPortfolio(modelPortfolioTemplate)
-                .doOnSuccess(modelPortfolio -> modelPortfolioTemplate.uuid(modelPortfolio.getUuid())));
+            .flatMap(modelPortfolioTemplate -> upsertModelPortfolioResponse(modelPortfolioTemplate)
+                .doOnSuccess(response -> modelPortfolioTemplate.uuid(response.getUuid())));
     }
 
-    public Mono<ModelPortfolio> upsertModelPortfolio(InvestorModelPortfolio modelPortfolio) {
+    public Mono<ModelPortfolio> upsertModelPortfolio(ModelPortfolio modelPortfolio) {
         Objects.requireNonNull(modelPortfolio, "ModelPortfolio must not be null");
 
-        ModelPortfolio map = modelPortfolioMapper.map(modelPortfolio);
-        return upsertModelPortfolio(map)
-            .map(mp -> {
-                map.uuid(mp.getUuid());
-                return map;
+        return upsertModelPortfolioResponse(modelPortfolio)
+            .map(response -> {
+                modelPortfolio.uuid(response.getUuid());
+                return modelPortfolio;
             })
             .onErrorResume(WebClientResponseException.class, ex -> {
-                log.warn("Continuing without portfolio model: name={}, riskLevel={}, status={}",
-                    map.getName(), map.getRiskLevel(), ex.getStatusCode());
+                log.warn("Continuing without portfolio model: externalId={}, name={}, riskLevel={}, status={}",
+                    modelPortfolio.getExternalId(), modelPortfolio.getName(), modelPortfolio.getRiskLevel(),
+                    ex.getStatusCode());
                 return Mono.empty();
             });
     }
@@ -77,7 +78,7 @@ public class InvestmentModelPortfolioService {
      *
      * <p>This method implements an upsert pattern:
      * <ol>
-     *   <li>Searches for existing model portfolios by name and risk level</li>
+     *   <li>Searches for existing model portfolios by {@code external_id}, then by name</li>
      *   <li>If found, patches the existing model portfolio</li>
      *   <li>If not found, creates a new model portfolio</li>
      * </ol>
@@ -86,30 +87,77 @@ public class InvestmentModelPortfolioService {
      * @return Mono emitting the created or updated model portfolio response
      * @throws NullPointerException if modelPortfolio is null
      */
-    private Mono<OASModelPortfolioResponse> upsertModelPortfolio(ModelPortfolio modelPortfolio) {
+    private Mono<OASModelPortfolioResponse> upsertModelPortfolioResponse(ModelPortfolio modelPortfolio) {
         Objects.requireNonNull(modelPortfolio, "ModelPortfolio must not be null");
 
         String modelName = modelPortfolio.getName();
         Integer riskLevel = modelPortfolio.getRiskLevel();
 
-        log.debug("Upserting model portfolio: name={}, riskLevel={}", modelName, riskLevel);
+        log.debug("Upserting model portfolio: externalId={}, name={}, riskLevel={}",
+            modelPortfolio.getExternalId(), modelName, riskLevel);
 
-        return listExistingModelPortfolios(modelName, riskLevel)
-            .flatMap(pm -> {
-                if (isTargetAssetWeightCorrect(pm)) {
+        return findExistingModelPortfolio(modelPortfolio)
+            .flatMap(existing -> {
+                if (existing.expanded() != null && isTargetAssetWeightCorrect(existing.expanded())) {
+                    InvestorModelPortfolio pm = existing.expanded();
                     modelPortfolio.setAllocations(modelPortfolioMapper.mapAssetModel(pm.getAllocation()));
                     modelPortfolio.setCashWeight(pm.getCashWeight());
-                } else {
+                } else if (existing.expanded() != null) {
                     log.error(
                         "Stored model target asset weight and cash weight are incorrect for uuid={}, name={}, riskLevel={}",
-                        pm.getUuid(), pm.getName(), pm.getRiskLevel());
+                        existing.uuid(), modelName, riskLevel);
                 }
-                return patchModelPortfolio(pm.getUuid(), modelPortfolio);
+                return patchModelPortfolio(existing.uuid(), modelPortfolio);
             })
             .switchIfEmpty(Mono.defer(() -> createNewModelPortfolio(modelPortfolio)))
             .doOnSuccess(upserted -> log.info(
-                "Successfully upserted model portfolio: uuid={}, name={}, riskLevel={}",
-                upserted.getUuid(), upserted.getName(), upserted.getRiskLevel()));
+                "Successfully upserted model portfolio: uuid={}, externalId={}, name={}, riskLevel={}",
+                upserted.getUuid(), upserted.getExternalId(), upserted.getName(), upserted.getRiskLevel()));
+    }
+
+    private record ExistingModelRef(UUID uuid, InvestorModelPortfolio expanded) {
+    }
+
+    private Mono<ExistingModelRef> findExistingModelPortfolio(ModelPortfolio modelPortfolio) {
+        if (StringUtils.hasText(modelPortfolio.getExternalId())) {
+            return findExistingByExternalId(modelPortfolio.getExternalId())
+                .switchIfEmpty(Mono.defer(() -> listExistingModelPortfolios(modelPortfolio.getName(),
+                        modelPortfolio.getRiskLevel())
+                    .map(inv -> new ExistingModelRef(inv.getUuid(), inv))));
+        }
+        return listExistingModelPortfolios(modelPortfolio.getName(), modelPortfolio.getRiskLevel())
+            .map(inv -> new ExistingModelRef(inv.getUuid(), inv));
+    }
+
+    private Mono<ExistingModelRef> findExistingByExternalId(String externalId) {
+        // Do not expand allocation.asset here: expanded assets are objects in JSON but the
+        // generated OAS list type expects UUID references, which causes DecodingException.
+        return financialAdviceApi.listModelPortfolio(
+                null, null, null,
+                config.getPortfolio().getListModelPageSize(), null, null, null, null, null, null)
+            .doOnError(throwable -> log.error("Failed to list model portfolios for externalId={}", externalId,
+                throwable))
+            .onErrorResume(throwable -> {
+                log.warn("Falling back to name-based model lookup after list-by-external-id failed: externalId={}",
+                    externalId);
+                return Mono.empty();
+            })
+            .flatMap(page -> {
+                List<OASModelPortfolioResponse> results = page != null
+                    ? Objects.requireNonNullElse(page.getResults(), List.of())
+                    : List.of();
+                Optional<OASModelPortfolioResponse> match = results.stream()
+                    .filter(model -> externalId.equals(model.getExternalId()))
+                    .findFirst();
+                if (match.isEmpty()) {
+                    log.info("No existing model portfolio found for externalId={}", externalId);
+                    return Mono.empty();
+                }
+                OASModelPortfolioResponse model = match.get();
+                log.info("Found existing model portfolio by externalId: externalId={}, uuid={}, name={}",
+                    externalId, model.getUuid(), model.getName());
+                return Mono.just(new ExistingModelRef(model.getUuid(), null));
+            });
     }
 
     private boolean isTargetAssetWeightCorrect(InvestorModelPortfolio pm) {
@@ -163,8 +211,8 @@ public class InvestmentModelPortfolioService {
      * @return Mono emitting the newly created model portfolio
      */
     private Mono<OASModelPortfolioResponse> createNewModelPortfolio(ModelPortfolio modelPortfolio) {
-        log.info("Creating new model portfolio: name={}, riskLevel={}",
-            modelPortfolio.getName(), modelPortfolio.getRiskLevel());
+        log.info("Creating new model portfolio: externalId={}, name={}, riskLevel={}",
+            modelPortfolio.getExternalId(), modelPortfolio.getName(), modelPortfolio.getRiskLevel());
         return investmentRestModelPortfolioService.createModelPortfolio(modelPortfolio)
             .doOnError(throwable -> logModelPortfolioError("create",
                 modelPortfolio.getName(), modelPortfolio.getRiskLevel(), throwable));

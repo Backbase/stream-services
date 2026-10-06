@@ -16,9 +16,9 @@ import static com.backbase.investment.api.service.sync.v1.model.PortfolioProduct
 
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.ApiClient.CollectionFormat;
-import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.stream.configuration.IngestConfigProperties;
+import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.TranslationsSupport;
 import com.backbase.stream.investment.ProductPortfolio;
 import java.util.Collections;
@@ -190,7 +190,7 @@ public class InvestmentRestProductPortfolioService {
             .ifPresent(v -> formParams.add(JSON_PROPERTY_ADVICE_ENGINE, v));
         Optional.ofNullable(data.getModelPortfolio())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_MODEL_PORTFOLIO,
-                Optional.of(v).map(InvestorModelPortfolio::getUuid).map(UUID::toString).orElse(null)));
+                Optional.of(v).map(ModelPortfolio::getUuid).map(UUID::toString).orElse(null)));
         Optional.ofNullable(data.getProductType())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_PRODUCT_TYPE, v.getValue()));
         Optional.ofNullable(data.getProductCategory())

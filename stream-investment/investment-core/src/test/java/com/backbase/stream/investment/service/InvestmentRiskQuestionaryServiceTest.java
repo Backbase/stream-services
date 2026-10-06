@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -78,26 +79,22 @@ class InvestmentRiskQuestionaryServiceTest {
         @Test
         @DisplayName("should return empty list and skip API calls when question list is empty")
         void emptyList_returnsEmptyListAndSkipsApiCalls() {
-            // Choices phase also needs listRiskChoices stub for empty list
-            when(riskAssessmentApi.listRiskChoices(any(), any()))
-                .thenReturn(Mono.just(new PaginatedRiskChoiceList().results(List.of())));
-
             StepVerifier.create(service.upsertRiskQuestions(List.of()))
                 .assertNext(result -> assertThat(result).isEmpty())
                 .verifyComplete();
 
             verify(riskAssessmentApi, never()).listRiskQuestions(any(), any());
+            verify(riskAssessmentApi, never()).listRiskChoices(any(), any());
         }
 
         @Test
         @DisplayName("should treat null question list as empty")
         void nullList_treatedAsEmpty() {
-            when(riskAssessmentApi.listRiskChoices(any(), any()))
-                .thenReturn(Mono.just(new PaginatedRiskChoiceList().results(List.of())));
-
             StepVerifier.create(service.upsertRiskQuestions(null))
                 .assertNext(result -> assertThat(result).isEmpty())
                 .verifyComplete();
+
+            verify(riskAssessmentApi, never()).listRiskChoices(any(), any());
         }
     }
 
@@ -208,7 +205,7 @@ class InvestmentRiskQuestionaryServiceTest {
             BaseRiskQuestion questionRef = new BaseRiskQuestion().code("Q1");
             // Use @JsonCreator constructor: (uuid, created, updated)
             RiskChoice existing = new RiskChoice(choiceUuid, null, null)
-                .code("C1")
+                .code("C_Q1")
                 .question(questionRef);
             PaginatedRiskChoiceList page = new PaginatedRiskChoiceList().results(List.of(existing));
 
@@ -240,6 +237,26 @@ class InvestmentRiskQuestionaryServiceTest {
                 .assertNext(result -> assertThat(result).hasSize(1))
                 .verifyComplete();
         }
+
+        @Test
+        @DisplayName("should list risk choices only once when upserting multiple choices")
+        void multipleChoices_listsRiskChoicesOnce() {
+            RiskQuestion question1 = buildQuestion("Q1", 1);
+            RiskQuestion question2 = buildQuestion("Q2", 2);
+            PaginatedRiskChoiceList emptyPage = new PaginatedRiskChoiceList().results(List.of());
+
+            when(riskAssessmentApi.listRiskChoices(any(), any()))
+                .thenReturn(Mono.just(emptyPage));
+            when(riskAssessmentApi.createRiskChoice(any()))
+                .thenReturn(Mono.just(new OASBaseRiskChoice().code("C1")));
+
+            StepVerifier.create(service.upsertRiskQuestionsChoices(List.of(question1, question2)))
+                .assertNext(result -> assertThat(result).hasSize(2))
+                .verifyComplete();
+
+            verify(riskAssessmentApi, times(1)).listRiskChoices(any(), any());
+            verify(riskAssessmentApi, times(2)).createRiskChoice(any());
+        }
     }
 
     // =========================================================================
@@ -253,7 +270,7 @@ class InvestmentRiskQuestionaryServiceTest {
         q.setDescription("Test question " + code);
         q.setScore(5.0);
         QuestionChoice choice = new QuestionChoice();
-        choice.setCode("C1");
+        choice.setCode("C_" + code);
         choice.setOrder(1);
         choice.setDescription("Choice 1");
         choice.setScore(3.0);
