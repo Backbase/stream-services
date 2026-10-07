@@ -1,7 +1,6 @@
 package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
-import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
@@ -11,7 +10,6 @@ import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.ProductPortfolio;
 import com.backbase.stream.investment.service.resttemplate.InvestmentRestProductPortfolioService;
-import com.backbase.stream.investment.service.resttemplate.RestTemplateModelPortfolioMapper;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -21,7 +19,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -56,8 +53,6 @@ public class InvestmentPortfolioProductService {
     private final InvestmentModelPortfolioService modelPortfolioService;
     private final InvestmentRestProductPortfolioService investmentRestProductPortfolioService;
     private final InvestmentPortfolioProductDocumentService investmentPortfolioProductDocumentService;
-    private final RestTemplateModelPortfolioMapper modelPortfolioMapper =
-        Mappers.getMapper(RestTemplateModelPortfolioMapper.class);
 
     public InvestmentPortfolioProductService(InvestmentProductsApi productsApi, IngestConfigProperties config,
         InvestmentModelPortfolioService modelPortfolioService,
@@ -102,7 +97,7 @@ public class InvestmentPortfolioProductService {
                     "Successfully upserted portfolio product: uuid={}, name={}, engine={}, productType={}, model={}",
                     product.getUuid(), product.getName(), product.getAdviceEngine(), product.getProductType(),
                     Optional.ofNullable(product.getModelPortfolio())
-                        .map(InvestorModelPortfolio::getName).orElse("")))
+                        .map(mp -> mp.getName()).orElse("")))
                 .doOnError(throwable -> log.error("Failed to upsert portfolio product: name={}, productType={}",
                     p.getName(), p.getProductType(), throwable))
                 .onErrorResume(throwable -> {
@@ -133,8 +128,7 @@ public class InvestmentPortfolioProductService {
                 Mono<ModelPortfolio> modelPortfolio = upsertPortfolioModel(pp);
                 return modelPortfolio
                     .map(mp -> {
-                        InvestorModelPortfolio mappedModelPortfolio = modelPortfolioMapper.map(mp);
-                        pp.setModelPortfolio(mappedModelPortfolio);
+                        pp.setModelPortfolio(mp);
                         return pp;
                     })
                     .switchIfEmpty(Mono.just(pp));
@@ -143,7 +137,7 @@ public class InvestmentPortfolioProductService {
     }
 
     private Mono<ModelPortfolio> upsertPortfolioModel(ProductPortfolio pp) {
-        InvestorModelPortfolio modelPortfolio = pp.getModelPortfolio();
+        ModelPortfolio modelPortfolio = pp.getModelPortfolio();
         if (modelPortfolio == null) {
             return Mono.empty();
         }
@@ -159,7 +153,7 @@ public class InvestmentPortfolioProductService {
                         + "productType={}, model={}, arrangementName={}",
                     product.getUuid(), product.getName(), product.getAdviceEngine(), product.getProductType(),
                     Optional.ofNullable(product.getModelPortfolio())
-                        .map(InvestorModelPortfolio::getName).orElse(""),
+                        .map(mp -> mp.getName()).orElse(""),
                     arrangement.getName());
                 arrangement.setInvestmentProductId(product.getUuid());
             }));
@@ -189,14 +183,25 @@ public class InvestmentPortfolioProductService {
         return typeProducts.stream().min(BY_ORDER);
     }
 
+    /**
+     * De-duplicates ingest templates before upsert. Uses {@code external_id} when present so rows with the same
+     * display name but different stable ids are all processed; otherwise de-duplicates by name (last wins).
+     */
     private Collection<ProductPortfolio> distinctProducts(List<ProductPortfolio> products) {
         return products.stream()
             .collect(Collectors.toMap(
-                ProductPortfolio::getName,
+                this::distinctProductKey,
                 pp -> pp,
                 (existing, replacement) -> replacement
             ))
             .values();
+    }
+
+    private String distinctProductKey(ProductPortfolio portfolioProduct) {
+        if (StringUtils.hasText(portfolioProduct.getExternalId())) {
+            return portfolioProduct.getExternalId();
+        }
+        return portfolioProduct.getName();
     }
 
     private Mono<PortfolioProduct> listExistingPortfolioProducts(ProductPortfolio portfolioProduct) {
@@ -226,7 +231,7 @@ public class InvestmentPortfolioProductService {
 
     private Mono<PortfolioProduct> listExistingPortfolioProductsByName(ProductPortfolio portfolioProduct) {
         Integer riskLevel = Optional.ofNullable(portfolioProduct.getModelPortfolio())
-            .map(InvestorModelPortfolio::getRiskLevel).orElse(null);
+            .map(ModelPortfolio::getRiskLevel).orElse(null);
 
         ProductTypeEnum productType = portfolioProduct.getProductType();
         String productCategory = portfolioProduct.getProductCategory();
@@ -329,7 +334,7 @@ public class InvestmentPortfolioProductService {
 
         String productType = portfolioProduct.getProductType().getValue();
         UUID modelPortfolioUuid = Optional.ofNullable(portfolioProduct.getModelPortfolio())
-            .map(InvestorModelPortfolio::getUuid).orElse(null);
+            .map(ModelPortfolio::getUuid).orElse(null);
         log.info("Creating portfolio product: name={}, productType={}, modelPortfolioUuid={}",
             portfolioProduct.getName(), productType, modelPortfolioUuid);
 

@@ -92,6 +92,24 @@ class InvestmentRestNewsContentServiceTest {
             any())).thenReturn(ResponseEntity.ok(created));
     }
 
+    private void stubJsonContentEntryPatch(UUID uuid, EntryCreateUpdate patched) {
+        when(apiClient.selectHeaderAccept(any())).thenReturn(List.of(MediaType.APPLICATION_JSON));
+        when(apiClient.selectHeaderContentType(new String[]{"application/json"})).thenReturn(MediaType.APPLICATION_JSON);
+        when(apiClient.invokeAPI(
+            eq("/service-api/v2/content/entries/{uuid}/"),
+            eq(HttpMethod.PATCH),
+            eq(Map.of("uuid", uuid.toString())),
+            any(),
+            jsonBodyCaptor.capture(),
+            any(),
+            any(),
+            any(),
+            any(),
+            eq(MediaType.APPLICATION_JSON),
+            any(),
+            any())).thenReturn(ResponseEntity.ok(patched));
+    }
+
     private void stubMultipartContentEntryPatch(UUID uuid, EntryCreateUpdate patched) {
         when(apiClient.selectHeaderAccept(any())).thenReturn(List.of(MediaType.APPLICATION_JSON));
         when(apiClient.selectHeaderContentType(new String[]{"multipart/form-data"}))
@@ -291,17 +309,23 @@ class InvestmentRestNewsContentServiceTest {
         }
 
         @Test
-        @DisplayName("existing entries with matching title are skipped (not duplicated)")
-        void existingEntriesWithMatchingTitleAreSkipped() {
+        @DisplayName("existing entry matched by externalId is patched when title differs")
+        void existingEntryMatchedByExternalIdPatchesWhenTitleDiffers() throws Exception {
             MarketNewsEntry entry = new MarketNewsEntry();
-            entry.setTitle("Existing News");
+            entry.setTitle("New Headline");
+            entry.setExternalId("ext-news-001");
 
-            Entry existingEntry = new Entry(UUID.randomUUID(), "Existing News",
+            UUID existingUuid = UUID.randomUUID();
+            Entry existingEntry = new Entry(existingUuid, "Old Headline",
                 null, null, null, null, null, null, null, null);
+            existingEntry.setExternalId("ext-news-001");
             PaginatedEntryList page = new PaginatedEntryList().results(List.of(existingEntry));
+            EntryCreateUpdate patched = new EntryCreateUpdate(existingUuid, null, null);
+            patched.setTitle("New Headline");
 
             when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
                 isNull(), isNull(), isNull(), isNull())).thenReturn(page);
+            stubJsonContentEntryPatch(existingUuid, patched);
 
             StepVerifier.create(service.upsertContent(List.of(entry)))
                 .verifyComplete();
@@ -309,6 +333,43 @@ class InvestmentRestNewsContentServiceTest {
             verify(apiClient, never()).invokeAPI(
                 eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH), any(), any(), any(), any(), any(),
+                any(), any(), eq(MediaType.APPLICATION_JSON), any(), any());
+        }
+
+        @Test
+        @DisplayName("existing entries with matching title are patched via JSON without thumbnail field")
+        void existingEntriesWithMatchingTitleArePatched() throws Exception {
+            MarketNewsEntry entry = new MarketNewsEntry();
+            entry.setTitle("Existing News");
+            entry.setExternalId("ext-article-existing");
+
+            UUID existingUuid = UUID.randomUUID();
+            Entry existingEntry = new Entry(existingUuid, "Existing News",
+                null, null, null, null, null, null, null, null);
+            PaginatedEntryList page = new PaginatedEntryList().results(List.of(existingEntry));
+            EntryCreateUpdate patched = new EntryCreateUpdate(existingUuid, null, null);
+            patched.setTitle("Existing News");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(page);
+            stubJsonContentEntryPatch(existingUuid, patched);
+
+            StepVerifier.create(service.upsertContent(List.of(entry)))
+                .verifyComplete();
+
+            verify(apiClient, never()).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH), any(), any(), any(), any(), any(),
+                any(), any(), eq(MediaType.APPLICATION_JSON), any(), any());
+
+            byte[] bodyBytes = (byte[]) jsonBodyCaptor.getValue();
+            JsonNode body = objectMapper.readTree(bodyBytes);
+            assertThat(body.has(JSON_PROPERTY_THUMBNAIL)).isFalse();
+            assertThat(body.get(JSON_PROPERTY_ASSETS).isArray()).isTrue();
         }
 
         @Test

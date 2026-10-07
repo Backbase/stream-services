@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.16.0]
+### Changed
+- Add externalId to the model portfolio, documents, news entries in investment
+
 ## [10.15.0]
 ### Changed
 - Fix for Investment Portfolio products create failing due to uniques validation

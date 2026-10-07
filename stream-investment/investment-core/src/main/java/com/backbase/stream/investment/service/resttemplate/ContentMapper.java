@@ -2,6 +2,7 @@ package com.backbase.stream.investment.service.resttemplate;
 
 import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest;
 import com.backbase.investment.api.service.sync.v1.model.OASDocumentRequestDataRequest;
+import com.backbase.investment.api.service.sync.v1.model.PatchedEntryCreateUpdateRequest;
 import com.backbase.stream.investment.AssetKey;
 import com.backbase.stream.investment.ModelAsset;
 import com.backbase.stream.investment.model.ContentDocumentEntry;
@@ -20,6 +21,10 @@ public interface ContentMapper {
     @Mapping(target = "thumbnail", ignore = true)
     @Mapping(target = "status", constant = "PUBLISHED")
     EntryCreateUpdateRequest map(MarketNewsEntry entry);
+
+    @Mapping(target = "thumbnail", ignore = true)
+    @Mapping(target = "status", constant = "PUBLISHED")
+    PatchedEntryCreateUpdateRequest mapPatch(MarketNewsEntry entry);
 
     @Mapping(target = "assets", source = "assets", qualifiedByName = "mapRawAsserts")
     OASDocumentRequestDataRequest map(ContentDocumentEntry request);

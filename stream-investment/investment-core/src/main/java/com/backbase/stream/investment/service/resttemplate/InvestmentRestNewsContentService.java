@@ -10,9 +10,11 @@ import com.backbase.investment.api.service.sync.v1.model.Entry;
 import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdate;
 import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest;
 import com.backbase.investment.api.service.sync.v1.model.EntryTagRequest;
+import com.backbase.investment.api.service.sync.v1.model.PatchedEntryCreateUpdateRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedEntryTagRequest;
 import com.backbase.stream.investment.model.MarketNewsEntry;
 import com.backbase.stream.investment.model.ContentTag;
+import com.backbase.stream.investment.model.UpsertPartition;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -21,9 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +35,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,7 +45,7 @@ import reactor.core.publisher.Mono;
  * <p>This service manages:
  * <ul>
  *   <li>Market news tag creation and updates</li>
- *   <li>Market news content entry creation (skips duplicates by title)</li>
+ *   <li>Market news content entry create and update (matched by {@code external_id}, then title)</li>
  *   <li>Thumbnail attachment for newly created content entries</li>
  * </ul>
  *
@@ -70,6 +71,7 @@ public class InvestmentRestNewsContentService {
     public static final int CONTENT_RETRIEVE_LIMIT = 100;
 
     private static final String CREATE_CONTENT_ENTRY_PATH = "/service-api/v2/content/entries/";
+    private static final String PATCH_CONTENT_ENTRY_PATH = "/service-api/v2/content/entries/{uuid}/";
     private static final String[] JSON_CONTENT_TYPES = {"application/json"};
 
     private final ContentApi contentApi;
@@ -200,22 +202,18 @@ public class InvestmentRestNewsContentService {
     }
 
     /**
-     * Creates new market news content entries. Entries whose title matches an existing entry are skipped.
-     * Individual failures are logged and swallowed so remaining entries continue processing.
-     *
-     * @param contentEntries list of content entries to create
-     * @return Mono that completes when all eligible entries have been processed
+     * Creates or updates market news content entries matched by {@code external_id}, then by title.
      */
     public Mono<Void> upsertContent(List<MarketNewsEntry> contentEntries) {
         log.info("Starting content entries upsert batch operation: totalEntriesSubmitted={}", contentEntries.size());
         log.debug("Content upsert batch details: entries={}", contentEntries);
 
-        return findEntriesNewContent(contentEntries)
+        return findUpsertEntries(contentEntries)
             .flatMap(this::upsertSingleEntry)
             .count()
-            .doOnNext(entriesCreated -> log.info(
-                "Content upsert batch completed successfully: totalEntriesSubmitted={}, entriesCreated={}",
-                contentEntries.size(), entriesCreated))
+            .doOnNext(entriesProcessed -> log.info(
+                "Content upsert batch completed successfully: totalEntriesSubmitted={}, entriesProcessed={}",
+                contentEntries.size(), entriesProcessed))
             .doOnError(error -> log.error(
                 "Content upsert batch failed: totalEntriesSubmitted={}, errorType={}, errorMessage={}",
                 contentEntries.size(), error.getClass().getSimpleName(), error.getMessage(), error))
@@ -223,28 +221,58 @@ public class InvestmentRestNewsContentService {
     }
 
     /**
-     * Creates a single market news content entry and optionally attaches a thumbnail.
-     * Callers must supply entries that have already been filtered as non-duplicates.
-     * Errors are logged and swallowed to allow processing of remaining entries.
+     * Creates or patches a single market news content entry from an upsert partition produced by
+     * {@link #findUpsertEntries(List)}.
      *
-     * @param request the content entry to create
-     * @return Mono that completes with the created entry, or empty if creation fails
+     * <p>When {@link UpsertPartition#id()} is {@code null}, delegates to {@link #createSingleEntry(MarketNewsEntry)};
+     * otherwise patches the entry at that UUID via {@link #patchSingleEntry(UUID, MarketNewsEntry)}. Both paths
+     * optionally attach a thumbnail. Failures are logged and swallowed in those delegates so batch processing
+     * continues.
+     *
+     * @param partition existing entry UUID (when matched by {@code external_id} or title) and payload to upsert
+     * @return Mono that completes with the created or patched entry, or empty if the operation fails
      */
-    private Mono<EntryCreateUpdate> upsertSingleEntry(MarketNewsEntry request) {
-        log.debug("Creating content entry: title='{}', hasThumbnail={}", request.getTitle(),
-            request.getThumbnailResource() != null);
+    private Mono<EntryCreateUpdate> upsertSingleEntry(UpsertPartition<UUID, MarketNewsEntry> partition) {
+        MarketNewsEntry request = partition.entity();
+        if (partition.id() == null) {
+            return createSingleEntry(request);
+        }
+        return patchSingleEntry(partition.id(), request);
+    }
+
+    private Mono<EntryCreateUpdate> createSingleEntry(MarketNewsEntry request) {
+        log.debug("Creating content entry: externalId={}, title='{}', hasThumbnail={}",
+            request.getExternalId(), request.getTitle(), request.getThumbnailResource() != null);
 
         EntryCreateUpdateRequest createUpdateRequest = contentMapper.map(request);
-        log.debug("Content entry request mapped: title='{}', request={}", request.getTitle(), createUpdateRequest);
 
         return Mono.defer(() -> Mono.fromCallable(() -> createContentEntry(createUpdateRequest)))
             .flatMap(entry -> addThumbnail(entry, request.getThumbnailResource()))
             .doOnSuccess(created -> log.info(
-                "Content entry created successfully: title='{}', uuid={}, thumbnailAttached={}",
-                request.getTitle(), created.getUuid(), request.getThumbnailResource() != null))
+                "Content entry created successfully: externalId={}, title='{}', uuid={}",
+                request.getExternalId(), request.getTitle(), created.getUuid()))
             .doOnError(error -> log.error(
-                "Content entry creation failed: title='{}', errorType={}, errorMessage={}",
-                request.getTitle(), error.getClass().getSimpleName(), error.getMessage(), error))
+                "Content entry creation failed: externalId={}, title='{}', errorType={}, errorMessage={}",
+                request.getExternalId(), request.getTitle(), error.getClass().getSimpleName(), error.getMessage(),
+                error))
+            .onErrorResume(error -> Mono.empty());
+    }
+
+    private Mono<EntryCreateUpdate> patchSingleEntry(UUID uuid, MarketNewsEntry request) {
+        log.debug("Patching content entry: uuid={}, externalId={}, title='{}'",
+            uuid, request.getExternalId(), request.getTitle());
+
+        PatchedEntryCreateUpdateRequest patchRequest = contentMapper.mapPatch(request);
+
+        return Mono.defer(() -> Mono.fromCallable(() -> patchContentEntry(uuid, patchRequest)))
+            .flatMap(entry -> addThumbnail(entry, request.getThumbnailResource()))
+            .doOnSuccess(patched -> log.info(
+                "Content entry patched successfully: externalId={}, title='{}', uuid={}",
+                request.getExternalId(), request.getTitle(), patched.getUuid()))
+            .doOnError(error -> log.error(
+                "Content entry patch failed: uuid={}, externalId={}, title='{}', errorType={}, errorMessage={}",
+                uuid, request.getExternalId(), request.getTitle(), error.getClass().getSimpleName(),
+                error.getMessage(), error))
             .onErrorResume(error -> Mono.empty());
     }
 
@@ -290,40 +318,85 @@ public class InvestmentRestNewsContentService {
     }
 
     /**
-     * Filters the supplied content entries to those not already present in the system.
-     * An entry is considered a duplicate when its title contains an existing entry title.
+     * Patches a content entry via JSON PATCH.
      *
-     * @param contentEntries entries to filter
-     * @return Flux of entries that should be created
+     * <p>Uses the same payload rules as {@link #createContentEntry}: omit {@code thumbnail} (investment rejects
+     * explicit null) and always send an {@code assets} array.
      */
-    private Flux<MarketNewsEntry> findEntriesNewContent(List<MarketNewsEntry> contentEntries) {
-        Map<String, MarketNewsEntry> entryByTitle = contentEntries.stream()
-            .collect(Collectors.toMap(MarketNewsEntry::getTitle, Function.identity()));
-        log.debug("Filtering content entries: requestedTitles={}", entryByTitle.keySet());
+    private EntryCreateUpdate patchContentEntry(UUID uuid, PatchedEntryCreateUpdateRequest request) {
+        ObjectNode requestBody = objectMapper.valueToTree(request);
+        requestBody.remove(JSON_PROPERTY_THUMBNAIL);
+        requestBody.set(JSON_PROPERTY_ASSETS, objectMapper.valueToTree(
+            Objects.requireNonNullElse(request.getAssets(), List.of())));
 
-        List<Entry> existingNews = contentApi.listContentEntries(null, CONTENT_RETRIEVE_LIMIT, 0, null, null, null, null)
-            .getResults().stream().filter(Objects::nonNull).toList();
-
-        if (existingNews.isEmpty()) {
-            log.info(
-                "No existing content found in system: totalEntriesSubmitted={}, existingEntries=0, entriesToCreate={}",
-                entryByTitle.size(), entryByTitle.size());
-            return Flux.fromIterable(entryByTitle.values());
+        final byte[] bodyBytes;
+        try {
+            bodyBytes = objectMapper.writeValueAsBytes(requestBody);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Failed to serialize content entry patch request", exception);
         }
 
-        Set<String> existingTitles = existingNews.stream().map(Entry::getTitle).collect(Collectors.toSet());
-        List<MarketNewsEntry> newEntries = contentEntries.stream()
-            .filter(entry -> existingTitles.stream().noneMatch(existingTitle -> entry.getTitle().contains(existingTitle)))
+        final Map<String, Object> uriVariables = new HashMap<>();
+        uriVariables.put("uuid", uuid.toString());
+
+        final List<MediaType> accept = apiClient.selectHeaderAccept(JSON_CONTENT_TYPES);
+        final MediaType contentType = apiClient.selectHeaderContentType(JSON_CONTENT_TYPES);
+        ParameterizedTypeReference<EntryCreateUpdate> returnType = new ParameterizedTypeReference<>() {
+        };
+
+        return apiClient.invokeAPI(
+                PATCH_CONTENT_ENTRY_PATH,
+                HttpMethod.PATCH,
+                uriVariables,
+                new LinkedMultiValueMap<>(),
+                bodyBytes,
+                new HttpHeaders(),
+                new LinkedMultiValueMap<>(),
+                new LinkedMultiValueMap<>(),
+                accept,
+                contentType,
+                new String[]{},
+                returnType)
+            .getBody();
+    }
+
+    private Flux<UpsertPartition<UUID, MarketNewsEntry>> findUpsertEntries(List<MarketNewsEntry> contentEntries) {
+        List<Entry> existingEntries = contentApi.listContentEntries(null, CONTENT_RETRIEVE_LIMIT, 0, null, null, null,
+                null)
+            .getResults().stream().filter(Objects::nonNull).toList();
+
+        if (existingEntries.isEmpty()) {
+            log.info("No existing content entries in system: entriesToCreate={}", contentEntries.size());
+            return Flux.fromIterable(contentEntries.stream()
+                .map(UpsertPartition::<UUID, MarketNewsEntry>createPartition)
+                .toList());
+        }
+
+        Map<String, UUID> byExternalId = existingEntries.stream()
+            .filter(entry -> StringUtils.hasText(entry.getExternalId()))
+            .collect(Collectors.toMap(Entry::getExternalId, Entry::getUuid, (existing, replacement) -> existing));
+        Map<String, UUID> byTitle = existingEntries.stream()
+            .collect(Collectors.toMap(Entry::getTitle, Entry::getUuid, (existing, replacement) -> existing));
+
+        List<UpsertPartition<UUID, MarketNewsEntry>> partitions = contentEntries.stream()
+            .map(entry -> {
+                UUID existingUuid = null;
+                if (StringUtils.hasText(entry.getExternalId())) {
+                    existingUuid = byExternalId.get(entry.getExternalId());
+                }
+                if (existingUuid == null) {
+                    existingUuid = byTitle.get(entry.getTitle());
+                }
+                return new UpsertPartition<>(existingUuid, entry);
+            })
             .toList();
 
-        log.info(
-            "Content filtering completed: totalEntriesSubmitted={}, existingEntriesFound={}, "
-                + "entriesToCreate={}, duplicatesSkipped={}",
-            entryByTitle.size(), existingNews.size(), newEntries.size(), entryByTitle.size() - newEntries.size());
-        log.debug("Filtered new content titles: titles={}",
-            newEntries.stream().map(MarketNewsEntry::getTitle).collect(Collectors.toList()));
+        log.info("Content entry upsert plan: submitted={}, existingInService={}, toCreate={}, toPatch={}",
+            contentEntries.size(), existingEntries.size(),
+            partitions.stream().filter(p -> p.id() == null).count(),
+            partitions.stream().filter(p -> p.id() != null).count());
 
-        return Flux.fromIterable(newEntries);
+        return Flux.fromIterable(partitions);
     }
 
     /**
@@ -364,7 +437,7 @@ public class InvestmentRestNewsContentService {
 
                 ParameterizedTypeReference<EntryCreateUpdate> localReturnType = new ParameterizedTypeReference<>() {
                 };
-                apiClient.invokeAPI("/service-api/v2/content/entries/{uuid}/", HttpMethod.PATCH, uriVariables,
+                apiClient.invokeAPI(PATCH_CONTENT_ENTRY_PATH, HttpMethod.PATCH, uriVariables,
                     localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
                     localVarAccept, localVarContentType, localVarAuthNames, localReturnType);
 

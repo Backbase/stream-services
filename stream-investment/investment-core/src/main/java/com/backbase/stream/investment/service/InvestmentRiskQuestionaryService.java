@@ -12,9 +12,12 @@ import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.model.RiskQuestion;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -82,12 +85,16 @@ public class InvestmentRiskQuestionaryService {
 
     public Mono<List<RiskQuestion>> upsertRiskQuestionsChoices(List<RiskQuestion> rqs) {
         List<BaseRiskChoice> riskChoices = retrieveAllQuestions(rqs);
-        return Flux.fromIterable(riskChoices)
-            .flatMap(this::upsertRiskChoice)
-            .collectList()
-            .doOnSuccess(choices -> log.debug(
-                "Successfully upserted question choices count: {}", choices.size()))
-            .map(r -> rqs)
+        if (riskChoices.isEmpty()) {
+            return Mono.just(rqs);
+        }
+        return listExistingRiskChoicesByKey()
+            .flatMap(existingByKey -> Flux.fromIterable(riskChoices)
+                .flatMap(choice -> upsertRiskChoice(choice, existingByKey))
+                .collectList()
+                .doOnSuccess(choices -> log.debug(
+                    "Successfully upserted question choices count: {}", choices.size()))
+                .map(ignored -> rqs))
             .onErrorResume(WebClientResponseException.class, e -> {
                 log.error("Error upsert question choices: {}", e.getResponseBodyAsString());
                 return Mono.just(rqs);
@@ -127,21 +134,26 @@ public class InvestmentRiskQuestionaryService {
                 code, order, throwable));
     }
 
-    private Mono<BaseRiskChoice> upsertRiskChoice(BaseRiskChoice choice) {
+    private Mono<BaseRiskChoice> upsertRiskChoice(BaseRiskChoice choice, Map<String, RiskChoice> existingByKey) {
         Objects.requireNonNull(choice, "Risk question choice must not be null");
 
         String code = choice.getCode();
         Integer order = choice.getOrder();
+        String questionCode = choice.getQuestion();
 
-        log.info("Upserting risk choice: question={}, code={}, order={}", choice.getQuestion(), code, order);
+        log.info("Upserting risk choice: question={}, code={}, order={}", questionCode, code, order);
 
-        return listExistingRiskChoices(choice.getQuestion(), code)
-            .flatMap(existing -> patchRiskChoice(existing.getUuid(), choice))
-            .switchIfEmpty(Mono.defer(() -> createNewRiskChoice(choice)))
-            .map(o -> choice)
+        RiskChoice existing = existingByKey.get(choiceLookupKey(questionCode, code));
+        Mono<BaseRiskChoice> upsert = existing != null
+            ? patchRiskChoice(existing.getUuid(), choice)
+            : createNewRiskChoice(choice);
+
+        return upsert
+            .map(ignored -> choice)
             .doOnSuccess(upserted -> log.info(
                 "Successfully upserted risk choice: uuid={}, question={}, code={}, order={}",
-                upserted.getUuid(), upserted.getQuestion(), upserted.getCode(), upserted.getOrder()))
+                existing != null ? existing.getUuid() : null, upserted.getQuestion(), upserted.getCode(),
+                upserted.getOrder()))
             .doOnError(throwable -> log.error(
                 "Failed to upsert risk choice: code={}, order={}",
                 code, order, throwable));
@@ -208,35 +220,30 @@ public class InvestmentRiskQuestionaryService {
             .filter(Objects::nonNull);
     }
 
-    private Mono<RiskChoice> listExistingRiskChoices(String question, String code) {
-        return riskAssessmentApi.listRiskChoices(100, null)
-            .doOnSuccess(choices -> log.debug(
-                "List risk choices query completed: question={}, code={}, found={} total results",
-                question, code, choices != null ? choices.getResults().size() : 0))
-            .doOnError(throwable -> log.error(
-                "Failed to list existing risk choices: question={}, code={}",
-                question, code, throwable))
-            .flatMap(choices -> {
-                if (Objects.isNull(choices) || CollectionUtils.isEmpty(choices.getResults())) {
-                    log.info("No existing risk choice found with question={}, code={}", question, code);
+    /** Lists all risk choices once (paginated) keyed by question code and choice code. */
+    private Mono<Map<String, RiskChoice>> listExistingRiskChoicesByKey() {
+        int pageSize = ingestProperties.getAssessment().getRiskQuestionsPageSize();
+        AtomicInteger offset = new AtomicInteger(0);
+        return riskAssessmentApi.listRiskChoices(pageSize, offset.get())
+            .doOnError(throwable -> log.error("Failed to list existing risk choices", throwable))
+            .expand(response -> {
+                if (response.getNext() == null) {
                     return Mono.empty();
                 }
+                return riskAssessmentApi.listRiskChoices(pageSize, offset.addAndGet(pageSize))
+                    .doOnError(throwable -> log.error(
+                        "Failed to list existing risk choices at offset={}", offset.get(), throwable));
+            })
+            .flatMapIterable(response -> response.getResults() != null ? response.getResults() : List.of())
+            .filter(choice -> choice.getQuestion() != null && choice.getCode() != null)
+            .collect(Collectors.toMap(
+                choice -> choiceLookupKey(choice.getQuestion().getCode(), choice.getCode()),
+                Function.identity(),
+                (first, second) -> first));
+    }
 
-                // Filter by code
-                RiskChoice matchingQuestion = choices.getResults().stream()
-                    .filter(q -> code.equals(q.getCode()) && question.equals(q.getQuestion().getCode()))
-                    .findFirst()
-                    .orElse(null);
-
-                if (matchingQuestion == null) {
-                    log.info("No existing risk choice found with question={}, code={}", question, code);
-                    return Mono.empty();
-                }
-
-                log.info("Found existing risk choice: uuid={}, question={}, code={}",
-                    matchingQuestion.getUuid(), question, code);
-                return Mono.just(matchingQuestion);
-            });
+    private static String choiceLookupKey(String questionCode, String choiceCode) {
+        return questionCode + "::" + choiceCode;
     }
 
     /**

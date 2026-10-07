@@ -18,6 +18,8 @@ import org.springframework.core.io.Resource;
 @AllArgsConstructor
 public class MarketNewsEntry {
 
+    @JsonProperty("external_id")
+    private String externalId;
     private String title;
     private String excerpt;
     private String body;

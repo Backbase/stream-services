@@ -703,6 +703,8 @@ class InvestmentSagaTest {
                 .thenReturn(Mono.just(List.of()));
             when(investmentPortfolioService.upsertDeposits(any()))
                 .thenReturn(Mono.error(new RuntimeException("deposit failed")));
+            when(investmentPortfolioService.upsertWithdrawals(any()))
+                .thenReturn(Mono.empty());
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.empty());
             when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
@@ -736,6 +738,8 @@ class InvestmentSagaTest {
                 .thenReturn(Mono.just(List.of()));
             when(investmentPortfolioService.upsertDeposits(any()))
                 .thenReturn(Mono.just(new Deposit()));
+            when(investmentPortfolioService.upsertWithdrawals(any()))
+                .thenReturn(Mono.empty());
             when(investmentPortfolioAllocationService.createDepositAllocation(any()))
                 .thenReturn(Mono.just(new Deposit()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
@@ -849,6 +853,8 @@ class InvestmentSagaTest {
             .thenReturn(Mono.just(List.of()));
         when(investmentPortfolioService.upsertDeposits(any()))
             .thenReturn(Mono.just(new Deposit()));
+        when(investmentPortfolioService.upsertWithdrawals(any()))
+            .thenReturn(Mono.empty());
         when(investmentPortfolioAllocationService.createDepositAllocation(any()))
             .thenReturn(Mono.just(new Deposit()));
         when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
@@ -874,6 +880,8 @@ class InvestmentSagaTest {
             .thenReturn(Mono.just(List.of()));
         when(investmentPortfolioService.upsertPortfolioTradingAccounts(any()))
             .thenReturn(Mono.just(List.of()));
+        when(investmentPortfolioService.upsertWithdrawals(any()))
+            .thenReturn(Mono.empty());
         when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
             .thenReturn(Mono.empty());
         when(asyncTaskService.checkPriceAsyncTasksFinished(any()))

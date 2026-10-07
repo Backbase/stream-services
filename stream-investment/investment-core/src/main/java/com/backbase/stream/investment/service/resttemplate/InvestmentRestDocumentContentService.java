@@ -28,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import reactor.core.publisher.Flux;
@@ -194,27 +195,39 @@ public class InvestmentRestDocumentContentService {
 
     private Flux<UpsertPartition<UUID, ContentDocumentEntry>> findUpsertDocuments(
         List<ContentDocumentEntry> documents) {
-        List<OASDocumentResponse> existsNews = contentApi.listContentDocuments(null, CONTENT_RETRIEVE_LIMIT, null, 0,
-                null, null)
+        List<OASDocumentResponse> existingDocuments = contentApi.listContentDocuments(null, CONTENT_RETRIEVE_LIMIT,
+                null, 0, null, null)
             .getResults().stream().filter(Objects::nonNull).toList();
 
-        if (existsNews.isEmpty()) {
-            log.info("No existing document found in system: newEntries={}",
-                documents.size());
+        if (existingDocuments.isEmpty()) {
+            log.info("No existing document found in system: newEntries={}", documents.size());
             return Flux.fromIterable(documents.stream()
                 .map(UpsertPartition::<UUID, ContentDocumentEntry>createPartition)
                 .toList());
         }
 
-        Map<String, UUID> existTitles = existsNews.stream()
+        Map<String, UUID> existByExternalId = existingDocuments.stream()
+            .filter(doc -> StringUtils.hasText(doc.getExternalId()))
+            .collect(Collectors.toMap(OASDocumentResponse::getExternalId, OASDocumentResponse::getUuid,
+                (existing, replacement) -> existing));
+        Map<String, UUID> existByName = existingDocuments.stream()
             .collect(Collectors.toMap(OASDocumentResponse::getName, OASDocumentResponse::getUuid,
                 (existing, replacement) -> existing));
 
-        List<UpsertPartition<UUID, ContentDocumentEntry>> newEntries = documents.stream()
-            .map(d -> new UpsertPartition<>(existTitles.get(d.getName()), d))
+        List<UpsertPartition<UUID, ContentDocumentEntry>> partitions = documents.stream()
+            .map(document -> {
+                UUID existingUuid = null;
+                if (StringUtils.hasText(document.getExternalId())) {
+                    existingUuid = existByExternalId.get(document.getExternalId());
+                }
+                if (existingUuid == null) {
+                    existingUuid = existByName.get(document.getName());
+                }
+                return new UpsertPartition<>(existingUuid, document);
+            })
             .toList();
 
-        return Flux.fromIterable(newEntries);
+        return Flux.fromIterable(partitions);
     }
 
     public OASDocumentResponse createContentDocument(OASDocumentRequestDataRequest data, Resource document)

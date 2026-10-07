@@ -7,7 +7,6 @@ import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON
 import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_CATEGORY;
 import static com.backbase.investment.api.service.v1.model.PortfolioProduct.JSON_PROPERTY_PRODUCT_TYPE;
 
-import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioProductBadge;
 import com.backbase.investment.api.service.v1.model.PortfolioProductStatusEnum;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
@@ -46,7 +45,7 @@ public class ProductPortfolio {
     @JsonProperty(JSON_PROPERTY_ADVICE_ENGINE)
     private String adviceEngine;
     @JsonProperty(JSON_PROPERTY_MODEL_PORTFOLIO)
-    private InvestorModelPortfolio modelPortfolio;
+    private ModelPortfolio modelPortfolio;
     @JsonProperty(JSON_PROPERTY_PRODUCT_TYPE)
     private ProductTypeEnum productType;
     @JsonProperty(JSON_PROPERTY_EXTRA_DATA)

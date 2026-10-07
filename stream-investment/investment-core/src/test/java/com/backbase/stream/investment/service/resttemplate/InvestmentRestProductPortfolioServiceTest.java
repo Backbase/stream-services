@@ -19,11 +19,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.investment.api.service.sync.ApiClient;
-import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductStatusEnum;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.stream.configuration.IngestConfigProperties;
+import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.ProductPortfolio;
 import java.util.List;
 import java.util.Map;
@@ -383,8 +383,8 @@ class InvestmentRestProductPortfolioServiceTest {
         template.setStatus(PortfolioProductStatusEnum.ACTIVE);
         template.setAdviceEngine("default-engine");
         template.setExtraData(Map.of("key", "value"));
-        template.setModelPortfolio(new InvestorModelPortfolio(
-            modelPortfolioUuid, "Growth Model", 0.25, 7, null, null, null));
+        template.setModelPortfolio(ModelPortfolio.builder()
+            .uuid(modelPortfolioUuid).name("Growth Model").cashWeight(0.25).riskLevel(7).build());
         return template;
     }
 

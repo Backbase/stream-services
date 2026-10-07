@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
-import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
@@ -231,6 +230,37 @@ class InvestmentPortfolioProductServiceTest {
         }
 
         @Test
+        @DisplayName("same name but different externalId — processes both products")
+        void sameNameDifferentExternalId_processesBoth() {
+            UUID firstUuid = UUID.randomUUID();
+            UUID secondUuid = UUID.randomUUID();
+            ProductPortfolio first = buildTemplate("Shared Name", ProductTypeEnum.SELF_TRADING);
+            first.setExternalId("ext-product-a");
+            ProductPortfolio second = buildTemplate("Shared Name", ProductTypeEnum.SELF_TRADING);
+            second.setExternalId("ext-product-b");
+            InvestmentData data = InvestmentData.builder().portfolioProducts(List.of(first, second)).build();
+
+            stubListByExternalIdReturnsEmpty("ext-product-a", ProductTypeEnum.SELF_TRADING);
+            stubListByExternalIdReturnsEmpty("ext-product-b", ProductTypeEnum.SELF_TRADING);
+            stubListReturnsEmpty(ProductTypeEnum.SELF_TRADING);
+
+            when(investmentRestProductPortfolioService.createPortfolioProduct(any(), any()))
+                .thenAnswer(invocation -> {
+                    ProductPortfolio template = invocation.getArgument(0);
+                    if ("ext-product-a".equals(template.getExternalId())) {
+                        return Mono.just(buildApiProduct(firstUuid, "Shared Name", ProductTypeEnum.SELF_TRADING, 1));
+                    }
+                    return Mono.just(buildApiProduct(secondUuid, "Shared Name", ProductTypeEnum.SELF_TRADING, 2));
+                });
+
+            StepVerifier.create(service.upsertInvestmentProducts(data, List.of()))
+                .assertNext(products -> assertThat(products).hasSize(2))
+                .verifyComplete();
+
+            verify(investmentRestProductPortfolioService, times(2)).createPortfolioProduct(any(), any());
+        }
+
+        @Test
         @DisplayName("arrangement with productPortfolioName — matches product by name")
         void arrangementWithPortfolioName_matchesByName() {
             UUID matchingUuid = UUID.randomUUID();
@@ -266,10 +296,10 @@ class InvestmentPortfolioProductServiceTest {
         void templateWithModelPortfolio_upsertsModelFirst() {
             UUID modelUuid = UUID.randomUUID();
             UUID productUuid = UUID.randomUUID();
-            InvestorModelPortfolio investorModel = new InvestorModelPortfolio(
-                null, "Growth Model", 0.25, 7, null, null, null);
+            ModelPortfolio modelTemplate = ModelPortfolio.builder()
+                .name("Growth Model").cashWeight(0.25).riskLevel(7).externalId("ext-mp-growth-test").build();
             ProductPortfolio template = buildTemplate("Robo Product", ProductTypeEnum.ROBO_ADVISOR);
-            template.setModelPortfolio(investorModel);
+            template.setModelPortfolio(modelTemplate);
             template.setProductCategory("retail");
 
             InvestmentData data = InvestmentData.builder().portfolioProducts(List.of(template)).build();
@@ -278,7 +308,8 @@ class InvestmentPortfolioProductServiceTest {
 
             ModelPortfolio upsertedModel = ModelPortfolio.builder()
                 .uuid(modelUuid).name("Growth Model").riskLevel(7).cashWeight(0.25).build();
-            when(modelPortfolioService.upsertModelPortfolio(investorModel)).thenReturn(Mono.just(upsertedModel));
+            when(modelPortfolioService.upsertModelPortfolio(eq(modelTemplate)))
+                .thenReturn(Mono.just(upsertedModel));
 
             stubListReturnsEmpty(ProductTypeEnum.ROBO_ADVISOR);
             PortfolioProduct created = buildApiProduct(productUuid, "Robo Product", ProductTypeEnum.ROBO_ADVISOR, 1);
@@ -289,7 +320,7 @@ class InvestmentPortfolioProductServiceTest {
                 .assertNext(products -> assertThat(products).hasSize(1))
                 .verifyComplete();
 
-            verify(modelPortfolioService).upsertModelPortfolio(investorModel);
+            verify(modelPortfolioService).upsertModelPortfolio(eq(modelTemplate));
             ArgumentCaptor<ProductPortfolio> templateCaptor = ArgumentCaptor.forClass(ProductPortfolio.class);
             verify(investmentRestProductPortfolioService).createPortfolioProduct(
                 templateCaptor.capture(), eq(List.of(ALLOCATION_ASSET_EXPAND)));
