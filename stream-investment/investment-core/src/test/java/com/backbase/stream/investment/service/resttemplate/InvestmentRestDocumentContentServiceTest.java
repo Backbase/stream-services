@@ -218,6 +218,31 @@ class InvestmentRestDocumentContentServiceTest {
         }
 
         @Test
+        @DisplayName("existing document by externalId triggers patch when name differs")
+        void existingDocumentByExternalIdTriggersPatch() {
+            UUID existingUuid = UUID.randomUUID();
+            final ContentDocumentEntry doc = ContentDocumentEntry.builder()
+                .name("Updated Title")
+                .externalId("ext-doc-001")
+                .build();
+            OASDocumentResponse existingResponse = new OASDocumentResponse(existingUuid);
+            existingResponse.setName("Original Title");
+            existingResponse.setExternalId("ext-doc-001");
+            PaginatedOASDocumentResponseList page = new PaginatedOASDocumentResponseList()
+                .results(List.of(existingResponse));
+            OASDocumentResponse patched = new OASDocumentResponse(existingUuid);
+            patched.setName("Updated Title");
+
+            when(contentApi.listContentDocuments(isNull(), anyInt(), isNull(), anyInt(), isNull(), isNull()))
+                .thenReturn(page);
+            when(apiClient.invokeAPI(anyString(), any(), any(), any(), isNull(), any(), any(), any(), any(), any(),
+                any(), any())).thenReturn(new ResponseEntity<>(patched, HttpStatus.OK));
+
+            StepVerifier.create(service.upsertDocuments(List.of(doc)))
+                .verifyComplete();
+        }
+
+        @Test
         @DisplayName("existing document by name triggers patch via apiClient")
         void existingDocumentTriggersPatch() {
             UUID existingUuid = UUID.randomUUID();
@@ -233,6 +258,25 @@ class InvestmentRestDocumentContentServiceTest {
                 .thenReturn(page);
             when(apiClient.invokeAPI(anyString(), any(), any(), any(), isNull(), any(), any(), any(), any(), any(),
                 any(), any())).thenReturn(new ResponseEntity<>(patched, HttpStatus.OK));
+
+            StepVerifier.create(service.upsertDocuments(List.of(doc)))
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("API failure during document patch is swallowed")
+        void apiFailureDuringPatchIsSwallowed() {
+            UUID existingUuid = UUID.randomUUID();
+            final ContentDocumentEntry doc = ContentDocumentEntry.builder().name("Existing Doc").build();
+            OASDocumentResponse existingResponse = new OASDocumentResponse(existingUuid);
+            existingResponse.setName("Existing Doc");
+            PaginatedOASDocumentResponseList page = new PaginatedOASDocumentResponseList()
+                .results(List.of(existingResponse));
+
+            when(contentApi.listContentDocuments(isNull(), anyInt(), isNull(), anyInt(), isNull(), isNull()))
+                .thenReturn(page);
+            when(apiClient.invokeAPI(anyString(), any(), any(), any(), isNull(), any(), any(), any(), any(), any(),
+                any(), any())).thenThrow(new RuntimeException("patch failed"));
 
             StepVerifier.create(service.upsertDocuments(List.of(doc)))
                 .verifyComplete();

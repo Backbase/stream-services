@@ -18,6 +18,7 @@ import com.backbase.investment.api.service.v1.model.RiskChoice;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.model.QuestionChoice;
 import com.backbase.stream.investment.model.RiskQuestion;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
@@ -141,6 +142,41 @@ class InvestmentRiskQuestionaryServiceTest {
     class PatchPathTests {
 
         @Test
+        @DisplayName("should find existing question on a later page when listing is paginated")
+        void existingQuestion_foundOnSecondPage() {
+            UUID existingUuid = UUID.randomUUID();
+            RiskQuestion question = buildQuestion("Q2", 2);
+
+            OASRiskQuestion other = new OASRiskQuestion(UUID.randomUUID(), null, null);
+            other.setCode("Q_OTHER");
+            OASRiskQuestion existing = new OASRiskQuestion(existingUuid, null, null);
+            existing.setCode("Q2");
+
+            PaginatedOASRiskQuestionList firstPage = new PaginatedOASRiskQuestionList()
+                .results(List.of(other))
+                .next(URI.create("http://next"));
+            PaginatedOASRiskQuestionList secondPage = new PaginatedOASRiskQuestionList()
+                .results(List.of(existing));
+            PaginatedRiskChoiceList emptyChoicePage = new PaginatedRiskChoiceList().results(List.of());
+
+            when(riskAssessmentApi.listRiskQuestions(any(), any()))
+                .thenReturn(Mono.just(firstPage), Mono.just(secondPage));
+            when(riskAssessmentApi.patchRiskQuestion(eq(existingUuid), any()))
+                .thenReturn(Mono.just(new BaseRiskQuestion().code("Q2")));
+            when(riskAssessmentApi.listRiskChoices(any(), any()))
+                .thenReturn(Mono.just(emptyChoicePage));
+            when(riskAssessmentApi.createRiskChoice(any()))
+                .thenReturn(Mono.just(new OASBaseRiskChoice().code("C1")));
+
+            StepVerifier.create(service.upsertRiskQuestions(List.of(question)))
+                .assertNext(result -> assertThat(result).hasSize(1))
+                .verifyComplete();
+
+            verify(riskAssessmentApi).patchRiskQuestion(eq(existingUuid), any());
+            verify(riskAssessmentApi, never()).createRiskQuestion(any());
+        }
+
+        @Test
         @DisplayName("should patch the existing question when one is found with matching code")
         void existingQuestion_patchesExisting() {
             UUID existingUuid = UUID.randomUUID();
@@ -177,6 +213,21 @@ class InvestmentRiskQuestionaryServiceTest {
     @Nested
     @DisplayName("upsertRiskQuestionsChoices – choice upsert")
     class ChoiceUpsertTests {
+
+        @Test
+        @DisplayName("should return input when question has no choices")
+        void questionWithoutChoices_skipsChoiceUpsert() {
+            RiskQuestion question = new RiskQuestion();
+            question.setCode("Q_EMPTY");
+            question.setOrder(1);
+            question.setChoices(List.of());
+
+            StepVerifier.create(service.upsertRiskQuestionsChoices(List.of(question)))
+                .assertNext(result -> assertThat(result).hasSize(1))
+                .verifyComplete();
+
+            verify(riskAssessmentApi, never()).listRiskChoices(any(), any());
+        }
 
         @Test
         @DisplayName("should create choice when none exists for the question")

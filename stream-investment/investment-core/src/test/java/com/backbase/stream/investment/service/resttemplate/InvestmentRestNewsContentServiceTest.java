@@ -309,6 +309,36 @@ class InvestmentRestNewsContentServiceTest {
         }
 
         @Test
+        @DisplayName("existing entry matched by externalId is patched when title differs")
+        void existingEntryMatchedByExternalIdPatchesWhenTitleDiffers() throws Exception {
+            MarketNewsEntry entry = new MarketNewsEntry();
+            entry.setTitle("New Headline");
+            entry.setExternalId("ext-news-001");
+
+            UUID existingUuid = UUID.randomUUID();
+            Entry existingEntry = new Entry(existingUuid, "Old Headline",
+                null, null, null, null, null, null, null, null);
+            existingEntry.setExternalId("ext-news-001");
+            PaginatedEntryList page = new PaginatedEntryList().results(List.of(existingEntry));
+            EntryCreateUpdate patched = new EntryCreateUpdate(existingUuid, null, null);
+            patched.setTitle("New Headline");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(page);
+            stubJsonContentEntryPatch(existingUuid, patched);
+
+            StepVerifier.create(service.upsertContent(List.of(entry)))
+                .verifyComplete();
+
+            verify(apiClient, never()).invokeAPI(
+                eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any());
+            verify(apiClient, times(1)).invokeAPI(
+                eq("/service-api/v2/content/entries/{uuid}/"), eq(HttpMethod.PATCH), any(), any(), any(), any(), any(),
+                any(), any(), eq(MediaType.APPLICATION_JSON), any(), any());
+        }
+
+        @Test
         @DisplayName("existing entries with matching title are patched via JSON without thumbnail field")
         void existingEntriesWithMatchingTitleArePatched() throws Exception {
             MarketNewsEntry entry = new MarketNewsEntry();

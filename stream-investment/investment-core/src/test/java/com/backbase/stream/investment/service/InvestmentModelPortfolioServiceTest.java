@@ -13,6 +13,7 @@ import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.model.AssetModelPortfolio;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
+import com.backbase.investment.api.service.v1.model.PaginatedOASModelPortfolioResponseList;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.InvestmentData;
@@ -381,6 +382,182 @@ class InvestmentModelPortfolioServiceTest {
     }
 
     // =========================================================================
+    // externalId lookup
+    // =========================================================================
+
+    @Nested
+    @DisplayName("externalId lookup")
+    class ExternalIdLookupTests {
+
+        @Test
+        @DisplayName("should patch by uuid when existing model is found by externalId")
+        void externalIdFound_patchesWithoutNameList() {
+            String externalId = "ext-model-balanced-001";
+            UUID existingUuid = UUID.randomUUID();
+            ModelPortfolio template = buildModelPortfolio("Balanced", 5, 0.2);
+            template.setExternalId(externalId);
+            InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
+
+            OASModelPortfolioResponse listed = buildResponse(existingUuid, "Server Name", 5);
+            listed.setExternalId(externalId);
+            PaginatedOASModelPortfolioResponseList page = new PaginatedOASModelPortfolioResponseList()
+                .results(List.of(listed));
+            stubListModelPortfolioReturns(page);
+
+            OASModelPortfolioResponse patched = buildResponse(existingUuid, "Balanced", 5);
+            when(investmentRestModelPortfolioService.patchModelPortfolio(
+                eq(existingUuid.toString()), any(ModelPortfolio.class)))
+                .thenReturn(Mono.just(patched));
+
+            StepVerifier.create(service.upsertModels(data))
+                .assertNext(response -> assertThat(response.getUuid()).isEqualTo(existingUuid))
+                .verifyComplete();
+
+            verify(financialAdviceApi, never()).listModelPortfolioWithResponseSpec(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+            verify(investmentRestModelPortfolioService, never()).createModelPortfolio(any());
+        }
+
+        @Test
+        @DisplayName("should fall back to name search when externalId is not in list results")
+        void externalIdNotFound_fallsBackToNameSearch() {
+            String externalId = "ext-model-missing";
+            UUID existingUuid = UUID.randomUUID();
+            ModelPortfolio template = buildModelPortfolio("Moderate", 4, 0.3);
+            template.setExternalId(externalId);
+            InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
+
+            PaginatedOASModelPortfolioResponseList emptyMatch = new PaginatedOASModelPortfolioResponseList()
+                .results(List.of());
+            stubListModelPortfolioReturns(emptyMatch);
+            stubListReturnsOne("Moderate", 4, 0.3, existingUuid);
+
+            when(investmentRestModelPortfolioService.patchModelPortfolio(
+                eq(existingUuid.toString()), any(ModelPortfolio.class)))
+                .thenReturn(Mono.just(buildResponse(existingUuid, "Moderate", 4)));
+
+            StepVerifier.create(service.upsertModels(data))
+                .assertNext(response -> assertThat(response.getUuid()).isEqualTo(existingUuid))
+                .verifyComplete();
+
+            verify(financialAdviceApi).listModelPortfolioWithResponseSpec(
+                eq(List.of(ALLOCATION_ASSET_EXPAND)), isNull(), isNull(), eq(LIST_MODEL_PAGE_SIZE),
+                eq("Moderate"), isNull(), isNull(), isNull(), isNull(), isNull());
+        }
+
+        @Test
+        @DisplayName("should fall back to name search when list-by-external-id API fails")
+        void externalIdListFails_fallsBackToNameSearch() {
+            String externalId = "ext-model-list-error";
+            UUID existingUuid = UUID.randomUUID();
+            ModelPortfolio template = buildModelPortfolio("Income", 2, 0.4);
+            template.setExternalId(externalId);
+            InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
+
+            when(financialAdviceApi.listModelPortfolio(
+                isNull(), isNull(), isNull(), eq(LIST_MODEL_PAGE_SIZE), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull()))
+                .thenReturn(Mono.error(new RuntimeException("list failed")));
+            stubListReturnsOne("Income", 2, 0.4, existingUuid);
+
+            when(investmentRestModelPortfolioService.patchModelPortfolio(
+                eq(existingUuid.toString()), any(ModelPortfolio.class)))
+                .thenReturn(Mono.just(buildResponse(existingUuid, "Income", 2)));
+
+            StepVerifier.create(service.upsertModels(data))
+                .assertNext(response -> assertThat(response.getUuid()).isEqualTo(existingUuid))
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("should create when externalId lookup empty and name search finds nothing")
+        void externalIdEmptyAndNameNotFound_createsNew() {
+            String externalId = "ext-model-new";
+            UUID newUuid = UUID.randomUUID();
+            ModelPortfolio template = buildModelPortfolio("Growth", 7, 0.25);
+            template.setExternalId(externalId);
+            InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
+
+            stubListModelPortfolioReturns(new PaginatedOASModelPortfolioResponseList().results(List.of()));
+            stubListReturnsEmpty("Growth");
+
+            when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
+                .thenReturn(Mono.just(buildResponse(newUuid, "Growth", 7)));
+
+            StepVerifier.create(service.upsertModels(data))
+                .assertNext(response -> assertThat(response.getUuid()).isEqualTo(newUuid))
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("should still patch when expanded portfolio has incorrect target weights")
+        void incorrectStoredWeights_stillPatches() {
+            UUID existingUuid = UUID.randomUUID();
+            ModelPortfolio template = buildModelPortfolio("Dynamic", 8, 0.1);
+            InvestmentData data = InvestmentData.builder().modelPortfolios(List.of(template)).build();
+
+            AssetModelPortfolio badAllocation = new AssetModelPortfolio().weight(0.3);
+            InvestorModelPortfolio existing = new InvestorModelPortfolio(
+                existingUuid, "Dynamic", 0.5, 8, List.of(badAllocation), null, null);
+            PaginatedExpandedModelPortfolioList page = PaginatedExpandedModelPortfolioList.builder()
+                .count(1)
+                .results(List.of(existing))
+                .build();
+            stubListReturns(page, "Dynamic");
+
+            when(investmentRestModelPortfolioService.patchModelPortfolio(
+                eq(existingUuid.toString()), any(ModelPortfolio.class)))
+                .thenReturn(Mono.just(buildResponse(existingUuid, "Dynamic", 8)));
+
+            StepVerifier.create(service.upsertModels(data))
+                .assertNext(response -> assertThat(response.getUuid()).isEqualTo(existingUuid))
+                .verifyComplete();
+        }
+    }
+
+    // =========================================================================
+    // upsertModelPortfolio
+    // =========================================================================
+
+    @Nested
+    @DisplayName("upsertModelPortfolio")
+    class UpsertModelPortfolioTests {
+
+        @Test
+        @DisplayName("should return model portfolio with uuid set on success")
+        void success_setsUuidOnModelPortfolio() {
+            UUID expectedUuid = UUID.randomUUID();
+            ModelPortfolio template = buildModelPortfolio("Stable", 4, 0.3);
+
+            stubListReturnsEmpty("Stable");
+            when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
+                .thenReturn(Mono.just(buildResponse(expectedUuid, "Stable", 4)));
+
+            StepVerifier.create(service.upsertModelPortfolio(template))
+                .assertNext(result -> {
+                    assertThat(result.getUuid()).isEqualTo(expectedUuid);
+                    assertThat(result.getName()).isEqualTo("Stable");
+                })
+                .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("should complete empty when WebClientResponseException occurs")
+        void webClientError_completesEmpty() {
+            ModelPortfolio template = buildModelPortfolio("Stable", 4, 0.3);
+
+            stubListReturnsEmpty("Stable");
+            WebClientResponseException ex = WebClientResponseException.create(
+                HttpStatus.BAD_REQUEST.value(), "Bad Request", null, null, null);
+            when(investmentRestModelPortfolioService.createModelPortfolio(any(ModelPortfolio.class)))
+                .thenReturn(Mono.error(ex));
+
+            StepVerifier.create(service.upsertModelPortfolio(template))
+                .verifyComplete();
+        }
+    }
+
+    // =========================================================================
     // patchModelPortfolio
     // =========================================================================
 
@@ -521,6 +698,13 @@ class InvestmentModelPortfolioServiceTest {
             eq(name), isNull(), isNull(), isNull(), isNull(), isNull()))
             .thenReturn(responseSpec);
         when(responseSpec.bodyToMono(PaginatedExpandedModelPortfolioList.class))
+            .thenReturn(Mono.just(page));
+    }
+
+    private void stubListModelPortfolioReturns(PaginatedOASModelPortfolioResponseList page) {
+        when(financialAdviceApi.listModelPortfolio(
+            isNull(), isNull(), isNull(), eq(LIST_MODEL_PAGE_SIZE), isNull(), isNull(), isNull(), isNull(),
+            isNull(), isNull()))
             .thenReturn(Mono.just(page));
     }
 }
