@@ -30,9 +30,7 @@ import com.backbase.stream.investment.ModelAsset;
 import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,8 +116,8 @@ public class InvestmentPortfolioAllocationService {
                                 lastValuation.getInvested(),
                                 lastValuation.getCashActive(), lastValuation.getTradeTotal());
                         }).switchIfEmpty(
-                            orderPositions(portfolio.getUuid(), workDays(startDay, endDay), m, priceDayByAssetKey,
-                                initAmount)
+                            orderPositions(portfolio.getUuid(), portfolio.getActivated(), workDays(startDay, endDay), m,
+                                priceDayByAssetKey, initAmount)
                                 .flatMap(dp -> generateAllocations(priceDayByAssetKey, dp, initAmount)))
                         .flatMap(allocations -> this.upsertAllocations(portfolio.getUuid().toString(), allocations)));
             })
@@ -195,8 +193,9 @@ public class InvestmentPortfolioAllocationService {
 
     @Nonnull
     private Mono<Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>>> orderPositions(UUID portfolioId,
-        List<LocalDate> days, ModelPortfolio model, Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
-        double initialCash) {
+        OffsetDateTime portfolioActivated, List<LocalDate> days, ModelPortfolio model,
+        Map<String, Map<LocalDate, Double>> priceDayByAssetKey, double initialCash) {
+        OffsetDateTime orderCompletedAt = WorkDayService.offsetAtBusinessDaysAfter(portfolioActivated, 1);
         return days.stream().map(day -> Pair.of(day, model.getAllocations().stream().map(
                 a -> getPrice(a.asset().getKeyString(), priceDayByAssetKey, day).map(
                     price -> new OASAllocationPositionCreateRequest().asset(a.asset().getAssetMap())
@@ -218,7 +217,7 @@ public class InvestmentPortfolioAllocationService {
                                         .portfolio(portfolioId)
                                         .status(StatusA7dEnum.COMPLETED)
                                         .method(Method570Enum.MARKET)
-                                        .completed(startDay.atTime(LocalTime.MIDNIGHT).atOffset(ZoneOffset.UTC))
+                                        .completed(orderCompletedAt)
                                         .currency(currency(p.getAsset())).shares(roundPrice(p.getShares()))
                                         .priceAvg(roundPrice(p.getPrice())), null, null, null)
                                 .doOnSuccess(

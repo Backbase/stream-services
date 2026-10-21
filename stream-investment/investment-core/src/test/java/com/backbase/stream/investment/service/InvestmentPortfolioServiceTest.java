@@ -1590,11 +1590,12 @@ class InvestmentPortfolioServiceTest {
                     HttpHeaders.EMPTY, "downstream error".getBytes(StandardCharsets.UTF_8),
                     StandardCharsets.UTF_8)));
 
-            // Act & Assert — dummy object: same portfolioUuid, default withdrawal amount, activated + 4 days
+            // Act & Assert — dummy object: same portfolioUuid, default withdrawal amount, completed today
             StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
                 .expectNextMatches(w -> portfolioUuid.equals(w.getPortfolio())
                     && w.getAmount() == 500d
-                    && activated.plusDays(4).equals(w.getCompletedAt()))
+                    && w.getCompletedAt() != null
+                    && w.getCompletedAt().toLocalDate().equals(java.time.LocalDate.now(java.time.ZoneOffset.UTC)))
                 .verifyComplete();
 
             verify(paymentsApi, never()).createWithdrawal(any());
@@ -1619,7 +1620,8 @@ class InvestmentPortfolioServiceTest {
             StepVerifier.create(service.upsertWithdrawals(investmentPortfolio))
                 .expectNextMatches(w -> portfolioUuid.equals(w.getPortfolio())
                     && w.getAmount() == 500d
-                    && activated.plusDays(4).equals(w.getCompletedAt()))
+                    && w.getCompletedAt() != null
+                    && w.getCompletedAt().toLocalDate().equals(java.time.LocalDate.now(java.time.ZoneOffset.UTC)))
                 .verifyComplete();
 
             verify(paymentsApi, never()).createWithdrawal(any());

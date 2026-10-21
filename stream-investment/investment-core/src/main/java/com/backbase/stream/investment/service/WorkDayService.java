@@ -4,7 +4,9 @@ import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -44,6 +46,17 @@ public class WorkDayService {
             nextDay = nextDay.plusDays(1);
         }
         return nextDay;
+    }
+
+    /**
+     * {@code activation} calendar date plus {@code skipDays}, then adjusted forward past weekends.
+     */
+    static OffsetDateTime offsetAtBusinessDaysAfter(OffsetDateTime activation, int skipDays) {
+        LocalDate base = activation != null
+            ? activation.toLocalDate()
+            : LocalDate.now(ZoneOffset.UTC);
+        LocalDate completedDay = findNextWorkday(base, skipDays);
+        return completedDay.atTime(LocalTime.MIDNIGHT).atOffset(ZoneOffset.UTC);
     }
 
     private static Predicate<LocalDate> isWeekend() {

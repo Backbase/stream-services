@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.17.0]
+### Changed
+- Fix deposits, orders, withdrawals, activity tab in investment
+
 ## [10.16.0]
 ### Changed
 - Add externalId to the model portfolio, documents, news entries in investment
