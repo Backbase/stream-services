@@ -307,7 +307,7 @@ public class InvestmentPortfolioService {
 
     @Nonnull
     private Mono<Deposit> createDeposit(PortfolioList portfolio, double defaultAmount) {
-        OffsetDateTime activated = portfolio.getActivated();
+        OffsetDateTime activated = resolvePortfolioActivation(portfolio);
         return paymentsApi.createDeposit(new DepositRequest()
                 .portfolio(portfolio.getUuid())
                 .provider(config.getDeposit().getProvider())
@@ -396,7 +396,7 @@ public class InvestmentPortfolioService {
                 return Mono.just(new IntegrationWithdrawalCreate()
                     .portfolio(portfolio.getUuid())
                     .amount(withdrawalAmount)
-                    .completedAt(portfolio.getActivated().plusDays(4)));
+                    .completedAt(OffsetDateTime.now(ZoneOffset.UTC)));
             });
     }
 
@@ -406,7 +406,7 @@ public class InvestmentPortfolioService {
      * <p>The withdrawal is created with:
      * <ul>
      *   <li>Status {@code COMPLETED}</li>
-     *   <li>Completion date set to portfolio activation date + 3 days</li>
+     *   <li>Completion date set to the current UTC time (avoids retrospective allocation adjustment)</li>
      *   <li>Provider from configuration</li>
      * </ul>
      *
@@ -420,7 +420,7 @@ public class InvestmentPortfolioService {
                 .portfolio(portfolio.getUuid())
                 .provider(config.getWithdrawal().getProvider())
                 .status(StatusDa8Enum.COMPLETED)
-                .completedAt(portfolio.getActivated().plusDays(3))
+                .completedAt(OffsetDateTime.now(ZoneOffset.UTC))
                 .amount(amount)
             )
             .doOnSuccess(withdrawal -> log.info("Created withdrawal {} for portfolio {}",
@@ -927,6 +927,10 @@ public class InvestmentPortfolioService {
 
     private OffsetDateTime computePortfolioActivationDate() {
         return OffsetDateTime.now(ZoneOffset.UTC).minusMonths(config.getPortfolio().getActivationPastMonths());
+    }
+
+    private OffsetDateTime resolvePortfolioActivation(PortfolioList portfolio) {
+        return Optional.ofNullable(portfolio.getActivated()).orElseGet(this::computePortfolioActivationDate);
     }
 
     /**
