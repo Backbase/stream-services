@@ -1292,8 +1292,7 @@ public class AccessGroupService {
         log.debug("Removing permissions from all Data Groups for user: {} in service agreement {}", userInternalId,
             serviceAgreementInternalId);
         return assignPermissionsServiceApi.putUserPermissions(
-            serviceAgreementInternalId,
-            userInternalId,
+            userInternalId, serviceAgreementInternalId,
             List.of());
     }
 

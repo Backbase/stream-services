@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [10.6.2]
+### Changed
+- Fix parameters order in remove permissions in AccessGroupService
+
 ## [10.6.1]
 ### Changed
 - Updated plan manager ingestion logic to attempt to retrieve plans if they don't exist in the pre-filled map.
