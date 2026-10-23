@@ -560,7 +560,7 @@ public class AccessGroupService {
         String serviceAgreementId = serviceAgreement.getInternalId();
         String userId = jobProfileUser.getUser().getInternalId();
 
-        return assignPermissionsServiceApi.putUserPermissions(serviceAgreementId, userId, functionGroups)
+        return assignPermissionsServiceApi.putUserPermissions(userId, serviceAgreementId, functionGroups)
             .onErrorResume(WebClientResponseException.class, e -> {
                 streamTask.error(ACCESS_GROUP, "assign-permissions", "failed", serviceAgreement.getExternalId(),
                     serviceAgreementId, e, e.getResponseBodyAsString(), "Failed to to assign permissions");
@@ -1292,9 +1292,9 @@ public class AccessGroupService {
         log.debug("Removing permissions from all Data Groups for user: {} in service agreement {}", userInternalId,
             serviceAgreementInternalId);
         return assignPermissionsServiceApi.putUserPermissions(
-            serviceAgreementInternalId,
-            userInternalId,
-            List.of());
+                userInternalId,
+                serviceAgreementInternalId,
+                List.of());
     }
 
     /**

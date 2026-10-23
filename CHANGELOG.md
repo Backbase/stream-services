@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [10.17.1]
+### Added
+- Fixed the order of the parameters in the method removePermissionsForUser in AccessGroupService
 
 ## [10.17.0]
 ### Changed
