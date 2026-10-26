@@ -2107,8 +2107,8 @@ class AccessGroupServiceTest {
     @Test
     void shouldRemoveUserPermissions() {
         when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
-        subject.removePermissionsForUser("sa-id", "user-id").block();
-        verify(assignPermissionsServiceApi).putUserPermissions("sa-id", "user-id", List.of());
+        subject.removePermissionsForUser("user-id","sa-id").block();
+        verify(assignPermissionsServiceApi).putUserPermissions("user-id","sa-id",List.of());
     }
 
     @Test
