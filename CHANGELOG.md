@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [10.6.4]
+### Changed
+- Fix parameters order in remove permissions in AccessGroupService in other calling methods and junits
 
 ## [10.6.3]
 ### Changed
