@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>10.17.1</version>
+        <version>11.0.0-SNAPSHOT</version>
         <relativePath>../../stream-starter</relativePath>
     </parent>
 
@@ -26,8 +26,8 @@
         <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
         <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
         <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
-        <spring-cloud.version>2025.1.1</spring-cloud.version>
-        <boat-maven-plugin.version>18.0.1</boat-maven-plugin.version>
+        <spring-cloud.version>2025.1.3</spring-cloud.version>
+        <boat-maven-plugin.version>0.19.1</boat-maven-plugin.version>
     </properties>
 
     <dependencyManagement>

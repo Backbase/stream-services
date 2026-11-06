@@ -1,11 +1,11 @@
 package com.backbase.stream.clients.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.ServiceInstance;
@@ -15,8 +15,9 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 class CompositeApiClientConfigTest {
 
-    @Mock
-    private Factory<ServiceInstance> loadBalancerFactory;
+    // Must be a real mock: SSDK 22 InterServiceWebClientConfiguration requires a non-null ReactiveLoadBalancer.Factory
+    @SuppressWarnings("unchecked")
+    private final Factory<ServiceInstance> loadBalancerFactory = mock(Factory.class);
 
     private ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 

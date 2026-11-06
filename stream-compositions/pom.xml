@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>10.17.1</version>
+        <version>11.0.0-SNAPSHOT</version>
         <relativePath>../stream-sdk/stream-starter</relativePath>
     </parent>
 
@@ -25,14 +25,18 @@
     </modules>
 
     <properties>
-        <backbase-bom.version>2026.03-LTS</backbase-bom.version>
-        <boat-maven-plugin.version>0.18.1</boat-maven-plugin.version>
+        <backbase-bom.version>2026.09.2-LTS</backbase-bom.version>
+        <boat-maven-plugin.version>0.19.1</boat-maven-plugin.version>
+        <!-- BOAT 0.19+ bundle merges structurally identical schemas by default, which renames/drops generated models
+             (e.g. TransactionCursorUpsertRequest, ProductCatalogPushIngestionRequest). Keep the previous behaviour. -->
+        <openapi.generator.maven.plugin.deduplicateSchemas>false</openapi.generator.maven.plugin.deduplicateSchemas>
         <testcontainers.version>2.0.4</testcontainers.version>
         <mock.server.version>5.15.0</mock.server.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
-        <spring-cloud.version>2025.1.1</spring-cloud.version>
-        <ssdk.version>21.0.1</ssdk.version>
+        <spring-cloud.version>2025.1.3</spring-cloud.version>
+        <spring-cloud-contract.version>5.0.3</spring-cloud-contract.version>
+        <ssdk.version>22.0.0</ssdk.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <archuint.skip>true</archuint.skip>
@@ -49,6 +53,14 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Spring Cloud Contract is no longer part of the spring-cloud-dependencies release train (2025.1.3+) -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-contract-dependencies</artifactId>
+                <version>${spring-cloud-contract.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
