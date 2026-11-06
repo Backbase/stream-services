@@ -1,5 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [11.0.0]
+### Changed
+- Upgrade to SSDK 22.0.0 (Spring Boot 4.1.1), boat-maven-plugin 0.19.1 and Backbase BOM 2026.09.2-LTS in preparation for the 2026.10 breaking release
+- Upgrade Spring Cloud to 2025.1.3 and import spring-cloud-contract-dependencies 5.0.3 explicitly
+- Upgrade FixtureMonkey to 1.2.3
+- **Breaking:** `UserProfileService.updateUserProfile` and `UserProfileMapper.toUpdate` now use `GetUserProfile` (`ReplaceUserProfile` was removed from the user-profile-manager spec)
+- Composition specs reference payment-order-service-api v3.23.0
+
 ## [10.17.1]
 ### Added
 - Fixed the order of the parameters in the method removePermissionsForUser in AccessGroupService
