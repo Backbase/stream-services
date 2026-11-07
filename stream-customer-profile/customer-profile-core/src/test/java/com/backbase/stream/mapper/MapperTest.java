@@ -136,7 +136,7 @@ class MapperTest {
             .set("postalAddresses[0].type", PartyPostalAddress.TypeEnum.BUSINESS)
             .size("customFields", 3)
             .size("partyPartyRelationships", 1)
-            .size("partyGroups", 2)
+            .size("groups", 2)
             .sample();
 
         var resultDto = partyMapper.partyToPartyUpsertDto(party);
@@ -166,7 +166,7 @@ class MapperTest {
             .set("postalAddresses", new ArrayList<>())
             .set("customFields", new HashMap<>())
             .set("partyPartyRelationships", new ArrayList<>())
-            .set("partyGroups", new ArrayList<>())
+            .set("groups", new ArrayList<>())
             .sample();
 
         var resultDto = partyMapper.partyToPartyUpsertDto(party);
@@ -196,7 +196,7 @@ class MapperTest {
             .setNull("postalAddresses")
             .setNull("customFields")
             .setNull("partyPartyRelationships")
-            .setNull("partyGroups")
+            .setNull("groups")
             .setNull("groups")
             .setNull("electronicAddresses.emails")
             .setNull("electronicAddresses.urls")

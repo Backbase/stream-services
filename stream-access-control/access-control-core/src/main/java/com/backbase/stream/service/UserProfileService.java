@@ -3,7 +3,6 @@ package com.backbase.stream.service;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
 import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
 import com.backbase.dbs.user.profile.api.service.v2.model.GetUserProfile;
-import com.backbase.dbs.user.profile.api.service.v2.model.ReplaceUserProfile;
 import com.backbase.stream.mapper.UserProfileMapper;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -47,7 +46,7 @@ public class UserProfileService {
                     throwable.getResponseBodyAsString()));
     }
 
-    public Mono<GetUserProfile> updateUserProfile(String userId, ReplaceUserProfile requestBody) {
+    public Mono<GetUserProfile> updateUserProfile(String userId, GetUserProfile requestBody) {
         return userProfileApi.replaceUserProfile(userId, requestBody)
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 log.error("Failed to update User Profile: {}\n{}", requestBody.getExternalId(),

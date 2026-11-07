@@ -4,7 +4,6 @@ import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
 import com.backbase.dbs.user.profile.api.service.v2.model.GetUserProfile;
 import com.backbase.dbs.user.profile.api.service.v2.model.MultiValued;
 import com.backbase.dbs.user.profile.api.service.v2.model.Name;
-import com.backbase.dbs.user.profile.api.service.v2.model.ReplaceUserProfile;
 import com.backbase.stream.legalentity.model.Multivalued;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.legalentity.model.UserProfile;
@@ -89,7 +88,7 @@ public abstract class UserProfileMapper {
 
     abstract List<MultiValued> mapAll(List<Multivalued> multivalued);
 
-    public abstract ReplaceUserProfile toUpdate(CreateUserProfile userItem);
+    public abstract GetUserProfile toUpdate(CreateUserProfile userItem);
 
     public abstract UserProfile toUserProfile(GetUserProfile userItem);
 

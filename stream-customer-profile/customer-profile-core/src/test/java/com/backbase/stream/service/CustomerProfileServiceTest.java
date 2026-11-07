@@ -48,7 +48,10 @@ class CustomerProfileServiceTest {
             .set("legalEntityId", legalEntityId)
             .sample();
         var expectedResponseDto = fixtureMonkey.giveMeBuilder(PartyResponseUpsertDto.class)
-            .set("partyReferenceId", legalEntityId).sample();
+            .set("partyReferenceId", legalEntityId)
+            // customerReferenceId is optional (@Nullable) since BOM 2026.09, so FixtureMonkey may leave it null
+            .set("customerReferenceId", UUID.randomUUID().toString())
+            .sample();
 
         when(partyManagementIntegrationApiMock.upsertParty(any(PartyUpsertDto.class)))
             .thenReturn(Mono.just(expectedResponseDto));
