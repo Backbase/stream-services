@@ -1,5 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [11.1.0]
+### Fixed
+- MAINT-45235: Ingestion no longer fails with `Duplicate key ... (attempted merging values class FunctionGroupItem ...)` when a service agreement has a local (CUSTOM) job role with the same name as a reference job role, for example after copying a reference job role in the UI. `LegalEntitySaga`, `ServiceAgreementSagaV2`, `ProductIngestionSaga` and `ApprovalSaga` now resolve job roles by name through `FunctionGroupUtils.functionGroupsByName`, which prefers the REFERENCE job role on a name clash and logs a warning.
+
 ## [11.0.0]
 ### Changed
 - Upgrade to SSDK 22.0.0 (Spring Boot 4.1.1), boat-maven-plugin 0.19.1 and Backbase BOM 2026.09.2-LTS in preparation for the 2026.10 breaking release
