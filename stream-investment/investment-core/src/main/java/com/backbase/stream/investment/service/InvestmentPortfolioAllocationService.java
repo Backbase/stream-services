@@ -21,16 +21,20 @@ import com.backbase.investment.api.service.v1.model.PaginatedOASPortfolioAllocat
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
+import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA7dEnum;
+import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.ModelAsset;
 import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.ProductPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +75,11 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentPortfolioAllocationService {
 
+    private static final String ADIDAS_ISIN = "DE000A1EWWW0";
+    private static final double DEFAULT_SELF_TRADING_ALLOCATION_WEIGHT = 0.2;
+    private static final double DEFAULT_SELF_TRADING_CASH_WEIGHT = 0.6;
+    private static final int DEFAULT_GENERIC_ALLOCATION_ASSET_COUNT = 2;
+
     private final AllocationsApi allocationsApi;
     private final AssetUniverseApi assetUniverseApi;
     private final InvestmentApi investmentApi;
@@ -86,10 +95,16 @@ public class InvestmentPortfolioAllocationService {
 
     public Mono<List<OASPortfolioAllocation>> generateAllocations(InvestmentPortfolio investmentPortfolio,
         List<PortfolioProduct> portfolioProducts, InvestmentAssetData investmentAssetData) {
+        return generateAllocations(investmentPortfolio, portfolioProducts, investmentAssetData, List.of());
+    }
+
+    public Mono<List<OASPortfolioAllocation>> generateAllocations(InvestmentPortfolio investmentPortfolio,
+        List<PortfolioProduct> portfolioProducts, InvestmentAssetData investmentAssetData,
+        List<ProductPortfolio> productTemplates) {
         PortfolioList portfolio = investmentPortfolio.getPortfolio();
         double initAmount = investmentPortfolio.getInitialCashOrDefault(
             ingestProperties.getAllocation().getDefaultAmount());
-        return getPortfolioModel(portfolio, portfolioProducts, investmentAssetData.getAssetByUuid())
+        return getPortfolioModel(portfolio, portfolioProducts, investmentAssetData.getAssetByUuid(), productTemplates)
             .flatMap(m -> {
                 LocalDate endDay = LocalDate.now();
                 LocalDate startDay = nextWorkDay(portfolio.getActivated(), endDay, 4);
@@ -121,7 +136,10 @@ public class InvestmentPortfolioAllocationService {
                                 .flatMap(dp -> generateAllocations(priceDayByAssetKey, dp, initAmount)))
                         .flatMap(allocations -> this.upsertAllocations(portfolio.getUuid().toString(), allocations)));
             })
-            .onErrorResume(ex -> Mono.empty());
+            .onErrorResume(ex -> {
+                log.warn("Portfolio allocation generation failed: portfolio={}", portfolio.getUuid(), ex);
+                return Mono.empty();
+            });
     }
 
     private Mono<List<OASPortfolioAllocation>> getAllocations(String portfolioId,
@@ -220,8 +238,9 @@ public class InvestmentPortfolioAllocationService {
                                         .completed(orderCompletedAt)
                                         .currency(currency(p.getAsset())).shares(roundPrice(p.getShares()))
                                         .priceAvg(roundPrice(p.getPrice())), null, null, null)
-                                .doOnSuccess(
-                                    created -> log.info("Successfully upserted investment portfolio allocation"))
+                                .doOnSuccess(created -> log.info(
+                                    "Created positions for portfolio : portfolio={}, asset={}, shares={}",
+                                    portfolioId, assetKey(p.getAsset()), roundPrice(p.getShares())))
                                 .doOnError(throwable -> {
                                     if (throwable instanceof WebClientResponseException ex) {
                                         log.error(
@@ -260,17 +279,112 @@ public class InvestmentPortfolioAllocationService {
     }
 
     private Mono<ModelPortfolio> getPortfolioModel(PortfolioList portfolio, List<PortfolioProduct> portfolioProducts,
-        Map<UUID, Asset> assetByUuid) {
+        Map<UUID, Asset> assetByUuid, List<ProductPortfolio> productTemplates) {
+        return Mono.just(portfolioProducts.stream()
+            .filter(m -> m.getUuid().equals(portfolio.getProduct()))
+            .findFirst()
+            .map(product -> resolvePortfolioModel(portfolio, product, assetByUuid, productTemplates))
+            .orElseGet(() -> buildGenericDefaultModel(assetByUuid)));
+    }
 
-        return Mono.just(portfolioProducts.stream().filter(m -> m.getUuid().equals(portfolio.getProduct())).findFirst()
-            .map(PortfolioProduct::getModelPortfolio).map(m -> ModelPortfolio.builder().cashWeight(m.getCashWeight())
-                .allocations(m.getAllocation().stream().map(a -> new Allocation(
-                    new ModelAsset(a.getAsset().getIsin(), a.getAsset().getMarket(), a.getAsset().getCurrency()),
-                    a.getWeight())).toList()).build()).orElse(ModelPortfolio.builder().cashWeight(0.6).allocations(
-                    assetByUuid.values().stream().limit(2)
-                        .map(a -> new Allocation(new ModelAsset(a.getIsin(), a.getMarket(), a.getCurrency()), 0.2))
-                        .toList())
-                .build()));
+    private ModelPortfolio resolvePortfolioModel(PortfolioList portfolio, PortfolioProduct product,
+        Map<UUID, Asset> assetByUuid, List<ProductPortfolio> productTemplates) {
+        if (hasModelAllocations(product.getModelPortfolio())) {
+            return buildModelPortfolioFromInvestorModel(product.getModelPortfolio());
+        }
+        if (isRoboProduct(product)) {
+            Optional<ModelPortfolio> bootstrapModel = findBootstrapModelForProduct(product, productTemplates);
+            if (bootstrapModel.isPresent()) {
+                ModelPortfolio model = bootstrapModel.get();
+                log.debug("Resolved robo model from bootstrap template: productUuid={}, name={}, allocationCount={}",
+                    product.getUuid(), product.getName(), model.getAllocations().size());
+                return model;
+            }
+        }
+        if (isSelfTradingProduct(product)) {
+            return buildSelfTradingDefaultModel(portfolio, assetByUuid);
+        }
+        return buildGenericDefaultModel(assetByUuid);
+    }
+
+    private static Optional<ModelPortfolio> findBootstrapModelForProduct(PortfolioProduct product,
+        List<ProductPortfolio> productTemplates) {
+        if (CollectionUtils.isEmpty(productTemplates)) {
+            return Optional.empty();
+        }
+        return productTemplates.stream()
+            .filter(template -> matchesProductTemplate(product, template))
+            .map(ProductPortfolio::getModelPortfolio)
+            .filter(InvestmentPortfolioAllocationService::hasStreamModelAllocations)
+            .findFirst();
+    }
+
+    private static boolean matchesProductTemplate(PortfolioProduct product, ProductPortfolio template) {
+        if (product.getUuid() != null && template.getUuid() != null && product.getUuid().equals(template.getUuid())) {
+            return true;
+        }
+        return product.getName() != null && product.getName().equals(template.getName());
+    }
+
+    private static boolean hasStreamModelAllocations(ModelPortfolio model) {
+        return model != null && !CollectionUtils.isEmpty(model.getAllocations());
+    }
+
+    private static boolean isRoboProduct(PortfolioProduct product) {
+        return ProductTypeEnum.ROBO_ADVISOR == product.getProductType();
+    }
+
+    private static boolean hasModelAllocations(InvestorModelPortfolio model) {
+        return model != null && model.getAllocation() != null && !model.getAllocation().isEmpty();
+    }
+
+    private ModelPortfolio buildModelPortfolioFromInvestorModel(InvestorModelPortfolio model) {
+        return ModelPortfolio.builder().cashWeight(model.getCashWeight())
+            .allocations(model.getAllocation().stream().map(a -> new Allocation(
+                new ModelAsset(a.getAsset().getIsin(), a.getAsset().getMarket(), a.getAsset().getCurrency()),
+                a.getWeight())).toList()).build();
+    }
+
+    private ModelPortfolio buildGenericDefaultModel(Map<UUID, Asset> assetByUuid) {
+        return ModelPortfolio.builder().cashWeight(DEFAULT_SELF_TRADING_CASH_WEIGHT).allocations(
+            assetByUuid.values().stream().limit(DEFAULT_GENERIC_ALLOCATION_ASSET_COUNT)
+                .map(a -> new Allocation(new ModelAsset(a.getIsin(), a.getMarket(), a.getCurrency()),
+                    DEFAULT_SELF_TRADING_ALLOCATION_WEIGHT))
+                .toList()).build();
+    }
+
+    private ModelPortfolio buildSelfTradingDefaultModel(PortfolioList portfolio, Map<UUID, Asset> assetByUuid) {
+        String portfolioCurrency = Optional.ofNullable(portfolio.getCurrency())
+            .orElse(ingestProperties.getPortfolio().getDefaultCurrency());
+        List<Asset> currencyMatchedAssets = assetByUuid.values().stream()
+            .filter(asset -> portfolioCurrency.equalsIgnoreCase(asset.getCurrency()))
+            .toList();
+
+        List<Asset> selectedAssets = new ArrayList<>();
+        currencyMatchedAssets.stream()
+            .filter(asset -> ADIDAS_ISIN.equals(asset.getIsin()))
+            .findFirst()
+            .ifPresent(selectedAssets::add);
+        currencyMatchedAssets.stream()
+            .filter(asset -> selectedAssets.stream().noneMatch(selected -> selected.getUuid().equals(asset.getUuid())))
+            .limit(Math.max(0, DEFAULT_GENERIC_ALLOCATION_ASSET_COUNT - selectedAssets.size()))
+            .forEach(selectedAssets::add);
+
+        if (selectedAssets.isEmpty()) {
+            return buildGenericDefaultModel(assetByUuid);
+        }
+
+        return ModelPortfolio.builder().cashWeight(DEFAULT_SELF_TRADING_CASH_WEIGHT)
+            .allocations(selectedAssets.stream()
+                .map(asset -> new Allocation(
+                    new ModelAsset(asset.getIsin(), asset.getMarket(), asset.getCurrency()),
+                    DEFAULT_SELF_TRADING_ALLOCATION_WEIGHT))
+                .toList())
+            .build();
+    }
+
+    private static boolean isSelfTradingProduct(PortfolioProduct product) {
+        return ProductTypeEnum.SELF_TRADING == product.getProductType();
     }
 
     private String assetKey(Map<String, Object> params) {

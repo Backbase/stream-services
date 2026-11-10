@@ -707,7 +707,7 @@ class InvestmentSagaTest {
                 .thenReturn(Mono.empty());
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.empty());
-            when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
+            when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any(), any()))
                 .thenReturn(Mono.empty());
 
             StepVerifier.create(investmentSaga.executeTask(task))
@@ -744,7 +744,7 @@ class InvestmentSagaTest {
                 .thenReturn(Mono.just(new Deposit()));
             when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
                 .thenReturn(Mono.empty());
-            when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
+            when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any(), any()))
                 .thenReturn(Mono.error(new RuntimeException("Allocation upsert failure")));
 
             StepVerifier.create(investmentSaga.executeTask(task))
@@ -857,7 +857,7 @@ class InvestmentSagaTest {
             .thenReturn(Mono.empty());
         when(investmentPortfolioAllocationService.createDepositAllocation(any()))
             .thenReturn(Mono.just(new Deposit()));
-        when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
+        when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any(), any()))
             .thenReturn(Mono.empty());
         when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
             .thenReturn(Mono.empty());
@@ -882,7 +882,7 @@ class InvestmentSagaTest {
             .thenReturn(Mono.just(List.of()));
         when(investmentPortfolioService.upsertWithdrawals(any()))
             .thenReturn(Mono.empty());
-        when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any()))
+        when(investmentPortfolioAllocationService.generateAllocations(any(), any(), any(), any()))
             .thenReturn(Mono.empty());
         when(asyncTaskService.checkPriceAsyncTasksFinished(any()))
             .thenReturn(Mono.empty());
