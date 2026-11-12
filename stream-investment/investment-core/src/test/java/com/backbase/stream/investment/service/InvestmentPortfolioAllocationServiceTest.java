@@ -7,6 +7,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,7 @@ import com.backbase.investment.api.service.v1.model.Deposit;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.OASAllocationCreateRequest;
 import com.backbase.investment.api.service.v1.model.OASAllocationPosition;
+import com.backbase.investment.api.service.v1.model.OASCreateOrderRequest;
 import com.backbase.investment.api.service.v1.model.OASOrder;
 import com.backbase.investment.api.service.v1.model.OASPortfolioAllocation;
 import com.backbase.investment.api.service.v1.model.OASPrice;
@@ -27,12 +29,15 @@ import com.backbase.investment.api.service.v1.model.PaginatedOASPortfolioAllocat
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
+import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.RelatedAssetSerializerWithAssetCategories;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.ModelAsset;
+import com.backbase.stream.investment.ModelPortfolio;
+import com.backbase.stream.investment.ProductPortfolio;
 import com.backbase.stream.investment.model.InvestmentPortfolio;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -600,6 +605,195 @@ class InvestmentPortfolioAllocationServiceTest {
             verify(allocationsApi, atLeastOnce())
                 .createPortfolioAllocation(eq(portfolioUuid.toString()), any(), isNull(), isNull(), isNull());
         }
+
+        @Test
+        @DisplayName("robo product without ingested model — uses bootstrap template allocations")
+        void generateAllocations_roboProduct_usesBootstrapTemplateWhenIngestedModelMissing() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productUuid = UUID.randomUUID();
+
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
+            when(portfolio.getProduct()).thenReturn(productUuid);
+            when(portfolio.getActivated()).thenReturn(OffsetDateTime.now().minusMonths(2));
+
+            PortfolioProduct ingestedProduct = mock(PortfolioProduct.class);
+            when(ingestedProduct.getUuid()).thenReturn(productUuid);
+            when(ingestedProduct.getName()).thenReturn("Balanced");
+            when(ingestedProduct.getProductType()).thenReturn(ProductTypeEnum.ROBO_ADVISOR);
+            when(ingestedProduct.getModelPortfolio()).thenReturn(null);
+
+            ProductPortfolio template = new ProductPortfolio();
+            template.setUuid(productUuid);
+            template.setName("Balanced");
+            template.setModelPortfolio(ModelPortfolio.builder().cashWeight(0.1).allocations(List.of(
+                new Allocation(new ModelAsset("ROBO-T1", "XETR", "EUR"), 0.45),
+                new Allocation(new ModelAsset("ROBO-T2", "XETR", "EUR"), 0.45))).build());
+
+            LocalDate priceDay = Stream.iterate(LocalDate.now().minusDays(5), d -> d.minusDays(1))
+                .filter(d -> d.getDayOfWeek().getValue() <= 5)
+                .findFirst().orElseThrow();
+            stubAssetClosePrices("EUR", "ROBO-T1", "XETR", priceDay, 10.0);
+            stubAssetClosePrices("EUR", "ROBO-T2", "XETR", priceDay, 20.0);
+
+            PaginatedOASPortfolioAllocationList emptyAllocPage = mock(PaginatedOASPortfolioAllocationList.class);
+            when(emptyAllocPage.getResults()).thenReturn(List.of());
+            when(allocationsApi.listPortfolioAllocations(
+                eq(portfolioUuid.toString()), isNull(), isNull(), eq(1), isNull(), isNull(), any(), any()))
+                .thenReturn(Mono.just(emptyAllocPage));
+
+            PaginatedOASOrderList emptyOrderList = mock(PaginatedOASOrderList.class);
+            when(emptyOrderList.getResults()).thenReturn(List.of());
+            when(investmentApi.listOrders(isNull(), any(), isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull(), isNull(), isNull(), eq(portfolioUuid.toString()), isNull()))
+                .thenReturn(Mono.just(emptyOrderList));
+            when(investmentApi.createOrder(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(mock(OASOrder.class)));
+
+            when(allocationsApi.createPortfolioAllocation(
+                eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(mock(OASPortfolioAllocation.class)));
+
+            InvestmentAssetData assetData = InvestmentAssetData.builder()
+                .assets(List.of(buildAsset("ROBO-T1", "XETR", "EUR"), buildAsset("ROBO-T2", "XETR", "EUR")))
+                .build();
+
+            StepVerifier.create(service.generateAllocations(
+                    investmentPortfolio, List.of(ingestedProduct), assetData, List.of(template)))
+                .expectNextMatches(result -> !result.isEmpty())
+                .verifyComplete();
+
+            verify(investmentApi, times(2)).createOrder(any(), isNull(), isNull(), isNull());
+        }
+
+        @Test
+        @DisplayName("robo product with model — uses investor model allocations, not self-trading defaults")
+        void generateAllocations_roboProduct_usesInvestorModelAllocations() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productUuid = UUID.randomUUID();
+            UUID modelUuid = UUID.randomUUID();
+
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
+            when(portfolio.getProduct()).thenReturn(productUuid);
+            when(portfolio.getCurrency()).thenReturn("EUR");
+            when(portfolio.getActivated()).thenReturn(OffsetDateTime.now().minusMonths(2));
+
+            PortfolioProduct portfolioProduct = buildPortfolioProductWithModel(
+                productUuid, modelUuid,
+                List.of(
+                    new Allocation(new ModelAsset("ROBO-1", "XETR", "EUR"), 0.3),
+                    new Allocation(new ModelAsset("ROBO-2", "XETR", "EUR"), 0.2),
+                    new Allocation(new ModelAsset("ROBO-3", "XETR", "EUR"), 0.1)),
+                0.4);
+            when(portfolioProduct.getProductType()).thenReturn(ProductTypeEnum.ROBO_ADVISOR);
+
+            LocalDate priceDay = Stream.iterate(LocalDate.now().minusDays(5), d -> d.minusDays(1))
+                .filter(d -> d.getDayOfWeek().getValue() <= 5)
+                .findFirst().orElseThrow();
+            stubAssetClosePrices("EUR", "ROBO-1", "XETR", priceDay, 10.0);
+            stubAssetClosePrices("EUR", "ROBO-2", "XETR", priceDay, 20.0);
+            stubAssetClosePrices("EUR", "ROBO-3", "XETR", priceDay, 30.0);
+
+            PaginatedOASPortfolioAllocationList emptyAllocPage = mock(PaginatedOASPortfolioAllocationList.class);
+            when(emptyAllocPage.getResults()).thenReturn(List.of());
+            when(allocationsApi.listPortfolioAllocations(
+                eq(portfolioUuid.toString()), isNull(), isNull(), eq(1), isNull(), isNull(), any(), any()))
+                .thenReturn(Mono.just(emptyAllocPage));
+
+            PaginatedOASOrderList emptyOrderList = mock(PaginatedOASOrderList.class);
+            when(emptyOrderList.getResults()).thenReturn(List.of());
+            when(investmentApi.listOrders(isNull(), any(), isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull(), isNull(), isNull(), eq(portfolioUuid.toString()), isNull()))
+                .thenReturn(Mono.just(emptyOrderList));
+            when(investmentApi.createOrder(any(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(mock(OASOrder.class)));
+
+            OASPortfolioAllocation createdAlloc = mock(OASPortfolioAllocation.class);
+            when(allocationsApi.createPortfolioAllocation(
+                eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(createdAlloc));
+
+            InvestmentAssetData assetData = InvestmentAssetData.builder()
+                .assets(List.of(
+                    buildAsset("DE000A1EWWW0", "XETR", "EUR"),
+                    buildAsset("USD-ONLY", "XNAS", "USD")))
+                .build();
+
+            StepVerifier.create(service.generateAllocations(investmentPortfolio, List.of(portfolioProduct), assetData))
+                .expectNextMatches(result -> !result.isEmpty())
+                .verifyComplete();
+
+            verify(investmentApi, times(3)).createOrder(any(), isNull(), isNull(), isNull());
+            verify(assetUniverseApi).listAssetClosePrices(
+                eq("EUR"), any(), any(), isNull(), isNull(), isNull(), isNull(),
+                eq("ROBO-3"), isNull(), eq("XETR"), isNull(), isNull());
+        }
+
+        @Test
+        @DisplayName("self-trading product without model — orders only portfolio-currency assets including Adidas")
+        void generateAllocations_selfTradingProduct_ordersCurrencyMatchedAssetsIncludingAdidas() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productUuid = UUID.randomUUID();
+
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
+            when(portfolio.getProduct()).thenReturn(productUuid);
+            when(portfolio.getCurrency()).thenReturn("EUR");
+            when(portfolio.getActivated()).thenReturn(OffsetDateTime.now().minusMonths(2));
+
+            PortfolioProduct portfolioProduct = mock(PortfolioProduct.class);
+            when(portfolioProduct.getUuid()).thenReturn(productUuid);
+            when(portfolioProduct.getProductType()).thenReturn(ProductTypeEnum.SELF_TRADING);
+            when(portfolioProduct.getModelPortfolio()).thenReturn(null);
+
+            Asset usdAsset = buildAsset("US-ISIN", "XNAS", "USD");
+            Asset adidasAsset = buildAsset("DE000A1EWWW0", "XETR", "EUR");
+            Asset otherEurAsset = buildAsset("EUR-ISIN", "XETR", "EUR");
+
+            LocalDate priceDay = Stream.iterate(LocalDate.now().minusDays(5), d -> d.minusDays(1))
+                .filter(d -> d.getDayOfWeek().getValue() <= 5)
+                .findFirst().orElseThrow();
+
+            stubAssetClosePrices("EUR", "DE000A1EWWW0", "XETR", priceDay, 100.0);
+            stubAssetClosePrices("EUR", "EUR-ISIN", "XETR", priceDay, 50.0);
+
+            PaginatedOASPortfolioAllocationList emptyAllocPage = mock(PaginatedOASPortfolioAllocationList.class);
+            when(emptyAllocPage.getResults()).thenReturn(List.of());
+            when(allocationsApi.listPortfolioAllocations(
+                eq(portfolioUuid.toString()), isNull(), isNull(), eq(1), isNull(), isNull(), any(), any()))
+                .thenReturn(Mono.just(emptyAllocPage));
+
+            PaginatedOASOrderList emptyOrderList = mock(PaginatedOASOrderList.class);
+            when(emptyOrderList.getResults()).thenReturn(List.of());
+            when(investmentApi.listOrders(isNull(), any(), isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull(), isNull(), isNull(), eq(portfolioUuid.toString()), isNull()))
+                .thenReturn(Mono.just(emptyOrderList));
+
+            ArgumentCaptor<OASCreateOrderRequest> orderCaptor = ArgumentCaptor.forClass(OASCreateOrderRequest.class);
+            when(investmentApi.createOrder(orderCaptor.capture(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(mock(OASOrder.class)));
+
+            OASPortfolioAllocation createdAlloc = mock(OASPortfolioAllocation.class);
+            when(allocationsApi.createPortfolioAllocation(
+                eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(createdAlloc));
+
+            InvestmentAssetData assetData = InvestmentAssetData.builder()
+                .assets(List.of(usdAsset, adidasAsset, otherEurAsset))
+                .build();
+
+            StepVerifier.create(service.generateAllocations(investmentPortfolio, List.of(portfolioProduct), assetData))
+                .expectNextMatches(result -> !result.isEmpty())
+                .verifyComplete();
+
+            verify(investmentApi, times(2)).createOrder(any(), isNull(), isNull(), isNull());
+            List<String> orderedIsins = orderCaptor.getAllValues().stream()
+                .map(order -> order.getAsset().get("isin").toString())
+                .toList();
+            assertThat(orderedIsins).containsExactlyInAnyOrder("DE000A1EWWW0", "EUR-ISIN");
+            assertThat(orderedIsins).doesNotContain("US-ISIN");
+        }
     }
 
     // =========================================================================
@@ -647,6 +841,19 @@ class InvestmentPortfolioAllocationServiceTest {
         when(product.getUuid()).thenReturn(productUuid);
         when(product.getModelPortfolio()).thenReturn(investorModel);
         return product;
+    }
+
+    private void stubAssetClosePrices(String currency, String isin, String market, LocalDate priceDay,
+        double amount) {
+        OASPrice price = mock(OASPrice.class);
+        when(price.getAmount()).thenReturn(amount);
+        when(price.getDatetime()).thenReturn(priceDay.atTime(0, 0).atOffset(ZoneOffset.UTC));
+        PaginatedOASPriceList priceList = mock(PaginatedOASPriceList.class);
+        when(priceList.getResults()).thenReturn(List.of(price));
+        when(assetUniverseApi.listAssetClosePrices(
+            eq(currency), any(), any(), isNull(), isNull(), isNull(), isNull(),
+            eq(isin), isNull(), eq(market), isNull(), isNull()))
+            .thenReturn(Mono.just(priceList));
     }
 }
 

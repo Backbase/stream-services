@@ -196,7 +196,9 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 .flatMap(
                     p -> investmentPortfolioAllocationService.generateAllocations(p,
                         data.getIngestedPortfolioProducts(),
-                        investmentTask.getData().getInvestmentAssetData())))
+                        investmentTask.getData().getInvestmentAssetData(),
+                        Objects.requireNonNullElse(data.getPortfolioProducts(), List.of())))
+                )
             .collectList()
             .doOnError(throwable -> {
                 log.error("Allocation generation failed: taskId={}, portfolioUuids={}",
