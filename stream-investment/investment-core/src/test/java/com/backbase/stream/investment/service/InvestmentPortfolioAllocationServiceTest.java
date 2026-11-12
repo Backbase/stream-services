@@ -731,6 +731,65 @@ class InvestmentPortfolioAllocationServiceTest {
         }
 
         @Test
+        @DisplayName("savings plan without model — orders only the mapped underlying asset")
+        void generateAllocations_savingsPlanProduct_ordersSingleMappedUnderlyingAsset() {
+            UUID portfolioUuid = UUID.randomUUID();
+            UUID productUuid = UUID.randomUUID();
+
+            PortfolioList portfolio = buildPortfolioList(portfolioUuid);
+            InvestmentPortfolio investmentPortfolio = InvestmentPortfolio.builder().portfolio(portfolio).build();
+            when(portfolio.getProduct()).thenReturn(productUuid);
+            when(portfolio.getActivated()).thenReturn(OffsetDateTime.now().minusMonths(2));
+
+            PortfolioProduct portfolioProduct = mock(PortfolioProduct.class);
+            when(portfolioProduct.getUuid()).thenReturn(productUuid);
+            when(portfolioProduct.getName()).thenReturn("Opportunity Horizon Fund");
+            when(portfolioProduct.getProductType()).thenReturn(ProductTypeEnum.SAVINGS_PLAN);
+            when(portfolioProduct.getModelPortfolio()).thenReturn(null);
+
+            Asset lyqyAsset = buildAsset("LU1812090543", "XETR", "EUR");
+            lyqyAsset.setTicker("LYQY");
+            Asset otherAsset = buildAsset("IE00B4WXJJ64", "XETR", "EUR");
+            otherAsset.setTicker("EUNH");
+
+            LocalDate priceDay = Stream.iterate(LocalDate.now().minusDays(5), d -> d.minusDays(1))
+                .filter(d -> d.getDayOfWeek().getValue() <= 5)
+                .findFirst().orElseThrow();
+            stubAssetClosePrices("EUR", "LU1812090543", "XETR", priceDay, 125.0);
+
+            PaginatedOASPortfolioAllocationList emptyAllocPage = mock(PaginatedOASPortfolioAllocationList.class);
+            when(emptyAllocPage.getResults()).thenReturn(List.of());
+            when(allocationsApi.listPortfolioAllocations(
+                eq(portfolioUuid.toString()), isNull(), isNull(), eq(1), isNull(), isNull(), any(), any()))
+                .thenReturn(Mono.just(emptyAllocPage));
+
+            PaginatedOASOrderList emptyOrderList = mock(PaginatedOASOrderList.class);
+            when(emptyOrderList.getResults()).thenReturn(List.of());
+            when(investmentApi.listOrders(isNull(), any(), isNull(), isNull(), isNull(), isNull(), isNull(),
+                isNull(), isNull(), isNull(), isNull(), eq(portfolioUuid.toString()), isNull()))
+                .thenReturn(Mono.just(emptyOrderList));
+
+            ArgumentCaptor<OASCreateOrderRequest> orderCaptor = ArgumentCaptor.forClass(OASCreateOrderRequest.class);
+            when(investmentApi.createOrder(orderCaptor.capture(), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(mock(OASOrder.class)));
+
+            when(allocationsApi.createPortfolioAllocation(
+                eq(portfolioUuid.toString()), any(OASAllocationCreateRequest.class), isNull(), isNull(), isNull()))
+                .thenReturn(Mono.just(mock(OASPortfolioAllocation.class)));
+
+            InvestmentAssetData assetData = InvestmentAssetData.builder()
+                .assets(List.of(lyqyAsset, otherAsset))
+                .build();
+
+            StepVerifier.create(service.generateAllocations(investmentPortfolio, List.of(portfolioProduct), assetData))
+                .expectNextMatches(result -> !result.isEmpty())
+                .verifyComplete();
+
+            verify(investmentApi, times(1)).createOrder(any(), isNull(), isNull(), isNull());
+            assertThat(orderCaptor.getValue().getAsset().get("isin")).isEqualTo("LU1812090543");
+        }
+
+        @Test
         @DisplayName("self-trading product without model — orders only portfolio-currency assets including Adidas")
         void generateAllocations_selfTradingProduct_ordersCurrencyMatchedAssetsIncludingAdidas() {
             UUID portfolioUuid = UUID.randomUUID();
