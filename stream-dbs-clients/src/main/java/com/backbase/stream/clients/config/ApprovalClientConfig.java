@@ -53,4 +53,23 @@ public class ApprovalClientConfig extends CompositeApiClientConfig {
         return new PolicyAssignmentsApi(approvalsApiClient);
     }
 
+    /**
+     * Client for the Approval Management Service API, which accepts expression-based (sequential) policies.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public com.backbase.dbs.approval.api.management.service.ApiClient approvalsManagementApiClient(
+        ObjectMapper legacyObjectMapper, DateFormat dateFormat) {
+        return new com.backbase.dbs.approval.api.management.service.ApiClient(getWebClient(), legacyObjectMapper,
+            dateFormat)
+            .setBasePath(createBasePath());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public com.backbase.dbs.approval.api.management.service.v1.PoliciesApi managementPoliciesApi(
+        com.backbase.dbs.approval.api.management.service.ApiClient approvalsManagementApiClient) {
+        return new com.backbase.dbs.approval.api.management.service.v1.PoliciesApi(approvalsManagementApiClient);
+    }
+
 }

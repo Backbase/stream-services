@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [11.2.0]
+### Added
+- Approvals: policies can define an `expression` (operators `and`, `or`, `then`), for example sequential approval
+  policies. These policies are created through the Approval Management Service API v1; policies without an
+  `expression` keep using Service API v2 unchanged.
+
 ## [11.1.0]
 ### Changed
 - investment ingest orders only for assets that match the portfolio currency

@@ -8,6 +8,7 @@ import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.ApprovalsIntegrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -21,10 +22,11 @@ public class ApprovalsServiceConfiguration {
     @Bean
     public ApprovalsIntegrationService approvalIntegrationService(ApprovalTypesApi approvalTypesApi,
         ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi, PoliciesApi policiesApi,
-        PolicyAssignmentsApi policyAssignmentsApi, AccessGroupService  accessGroupService) {
+        PolicyAssignmentsApi policyAssignmentsApi, AccessGroupService  accessGroupService,
+        ObjectProvider<com.backbase.dbs.approval.api.management.service.v1.PoliciesApi> managementPoliciesApi) {
 
         return new ApprovalsIntegrationService(approvalTypesApi, approvalTypeAssignmentsApi,
-            policiesApi, policyAssignmentsApi, accessGroupService);
+            policiesApi, policyAssignmentsApi, accessGroupService, managementPoliciesApi.getIfAvailable());
     }
 
 }

@@ -1,0 +1,23 @@
+{
+  "name": "Sequential policy",
+  "description": "Level A or Level B, then Level C",
+  "scope": {
+    "type": "local",
+    "serviceAgreementId": "sa-id-example-corporate-sa"
+  },
+  "expression": {
+    "expressionType": "operator",
+    "operatorType": "then",
+    "operands": [
+      {
+        "expressionType": "operator",
+        "operatorType": "or",
+        "operands": [
+          { "expressionType": "unit", "approvalTypeId": "approval-type-id-Level A", "count": 1 },
+          { "expressionType": "unit", "approvalTypeId": "approval-type-id-Level B", "count": 1 }
+        ]
+      },
+      { "expressionType": "unit", "approvalTypeId": "approval-type-id-Level C", "count": 1 }
+    ]
+  }
+}

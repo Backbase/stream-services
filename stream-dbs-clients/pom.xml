@@ -637,6 +637,23 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>generate-approval-management-service-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/approval/approval-management-service-api-v1.*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.approval.api.management.service.v1</apiPackage>
+                            <modelPackage>com.backbase.dbs.approval.api.management.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useOneOfInterfaces>true</useOneOfInterfaces>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>generate-identity-integration-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>

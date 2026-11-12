@@ -45,3 +45,39 @@ bootstrap:
               - approvalTypeName: HelpDesk
                 jobProfileName: Digital helpdesk and Operations User
 ```
+
+## Expression-based policies
+
+A policy can define an `expression` instead of `items` and `logicalItems`. Use it for policies that `logicalItems`
+can't describe, such as AND across groups, or sequential approvals with `then` (one group approves first, then the
+next). Policies with an `expression` are created through the Approval Management Service API
+(`POST /service-api/v1/approvals/management/policies`); all other policies keep using Service API v2.
+
+An expression is a tree of nodes. Each node is either:
+
+- an operator node: `operator` (`and`, `or` or `then`) and at least two `operands`;
+- a unit node: `approvalTypeName` (or `approvalTypeId`) and `count`.
+
+A node with both an `operator` and an approval type, or with neither, is rejected, as is a unit with `operands` or
+without `count`. Approval-service validates the rest of the expression, for example that `then` is allowed for the
+business function the policy is assigned to.
+
+```
+        policies:
+          - name: Supervisor or HelpDesk, then Manager
+            description: Supervisor or HelpDesk approves first, then Manager
+            expression:
+              operator: then
+              operands:
+                - operator: or
+                  operands:
+                    - approvalTypeName: Supervisor
+                      count: 1
+                    - approvalTypeName: HelpDesk
+                      count: 1
+                - approvalTypeName: Manager
+                  count: 1
+```
+
+If a policy defines both an `expression` and `items` or `logicalItems`, the `expression` is used and the items are
+ignored with a warning.
