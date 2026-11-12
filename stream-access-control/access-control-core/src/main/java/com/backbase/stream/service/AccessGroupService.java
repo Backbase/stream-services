@@ -73,6 +73,7 @@ import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.utils.BatchResponseUtils;
+import com.backbase.stream.utils.FunctionGroupUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import jakarta.validation.constraints.NotNull;
@@ -1603,8 +1604,7 @@ public class AccessGroupService {
 
         Mono<Map<String, FunctionGroupItem>> functionGroupsFromDb = getFunctionGroupsForServiceAgreement(
             serviceAgreement.getInternalId())
-            .flatMapMany(Flux::fromIterable)
-            .collectMap(FunctionGroupItem::getName, Function.identity());
+            .map(list -> FunctionGroupUtils.functionGroupsByName(list, serviceAgreement.getInternalId()));
 
         var concurrency = accessControlProperties.getConcurrency();
 
