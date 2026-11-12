@@ -1,0 +1,50 @@
+{
+  "name": "sequential approvals",
+  "approvalTypes": [
+    { "name": "Level A", "description": "Level A", "rank": 1, "scope": "LOCAL", "serviceAgreementId": "example-corporate-sa" },
+    { "name": "Level B", "description": "Level B", "rank": 2, "scope": "LOCAL", "serviceAgreementId": "example-corporate-sa" },
+    { "name": "Level C", "description": "Level C", "rank": 3, "scope": "LOCAL", "serviceAgreementId": "example-corporate-sa" }
+  ],
+  "policies": [
+    {
+      "name": "Sequential policy",
+      "description": "Level A or Level B, then Level C",
+      "scope": "LOCAL",
+      "serviceAgreementId": "example-corporate-sa",
+      "expression": {
+        "operator": "then",
+        "operands": [
+          {
+            "operator": "or",
+            "operands": [
+              { "approvalTypeName": "Level A", "count": 1 },
+              { "approvalTypeName": "Level B", "count": 1 }
+            ]
+          },
+          { "approvalTypeName": "Level C", "count": 1 }
+        ]
+      }
+    },
+    {
+      "name": "Single Control",
+      "description": "One Level A",
+      "scope": "LOCAL",
+      "serviceAgreementId": "example-corporate-sa",
+      "logicalItems": [
+        { "rank": 1, "items": [ { "approvalTypeName": "Level A", "numberOfApprovals": 1 } ] }
+      ]
+    }
+  ],
+  "policyAssignments": [
+    {
+      "externalServiceAgreementId": "example-corporate-sa",
+      "policyAssignmentItems": [
+        {
+          "externalServiceAgreementId": "example-corporate-sa",
+          "functions": [ "US Domestic Wire" ],
+          "bounds": [ { "policyName": "Sequential policy" } ]
+        }
+      ]
+    }
+  ]
+}

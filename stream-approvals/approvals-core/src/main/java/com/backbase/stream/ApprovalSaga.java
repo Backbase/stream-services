@@ -7,6 +7,7 @@ import com.backbase.stream.approval.model.Approval;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;
 import com.backbase.stream.approval.model.PolicyAssignmentItem;
+import com.backbase.stream.approval.model.PolicyExpression;
 import com.backbase.stream.approval.model.PolicyItem;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.ApprovalsIntegrationService;
@@ -96,6 +97,7 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                 propagateCreatedApprovalTypeId(approvalTypeIdByName, p.getItems());
                 Optional.ofNullable(p.getLogicalItems()).orElse(Collections.emptyList())
                     .forEach(li -> propagateCreatedApprovalTypeId(approvalTypeIdByName, li.getItems()));
+                propagateCreatedApprovalTypeId(approvalTypeIdByName, p.getExpression());
                 return p;
             })
             .flatMap(approvalsIntegrationService::createPolicy)
@@ -192,6 +194,19 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                     i.setApprovalTypeId(newId);
                 }
             });
+    }
+
+    private void propagateCreatedApprovalTypeId(Map<String, String> approvalTypeIdByName,
+        PolicyExpression expression) {
+        if (expression == null) {
+            return;
+        }
+        String newId = approvalTypeIdByName.get(expression.getApprovalTypeName());
+        if (Objects.nonNull(newId)) {
+            expression.setApprovalTypeId(newId);
+        }
+        Optional.ofNullable(expression.getOperands()).orElse(Collections.emptyList())
+            .forEach(operand -> propagateCreatedApprovalTypeId(approvalTypeIdByName, operand));
     }
 
 }

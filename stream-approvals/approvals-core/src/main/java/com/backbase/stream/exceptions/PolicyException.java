@@ -16,6 +16,13 @@ public class PolicyException extends RuntimeException {
         this.message = message;
     }
 
+    public PolicyException(Policy policy, String message) {
+        super(message);
+        httpResponse = null;
+        this.policy = policy;
+        this.message = message;
+    }
+
     public String getHttpResponse() {
         return httpResponse;
     }
