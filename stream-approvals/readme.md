@@ -48,9 +48,11 @@ bootstrap:
 
 ## Expression-based policies
 
-A policy can define an `expression` instead of `items` and `logicalItems`. Use it for policies that `logicalItems`
-can't describe, such as AND across groups, or sequential approvals with `then` (one group approves first, then the
-next). Policies with an `expression` are created through the Approval Management Service API
+A policy can define an `expression` instead of `items` and `logicalItems`. Those two describe an OR of AND groups:
+`items` are combined with AND, and `logicalItems` combines its groups with OR and the `items` in each group with AND.
+Use `expression` for sequential approvals with `then` (one group approves first, then the next), which `items` and
+`logicalItems` can't describe, or to write nested expressions such as `(A or B) and C` directly. Policies with an
+`expression` are created through the Approval Management Service API
 (`POST /service-api/v1/approvals/management/policies`); all other policies keep using Service API v2.
 
 An expression is a tree of nodes. Each node is either:
