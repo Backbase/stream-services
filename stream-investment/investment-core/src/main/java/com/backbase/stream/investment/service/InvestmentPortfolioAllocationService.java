@@ -75,22 +75,11 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentPortfolioAllocationService {
 
-    private static final String ADIDAS_ISIN = "DE000A1EWWW0";
     private static final double DEFAULT_SELF_TRADING_ALLOCATION_WEIGHT = 0.2;
     private static final double DEFAULT_SELF_TRADING_CASH_WEIGHT = 0.6;
     private static final double DEFAULT_SAVINGS_PLAN_ALLOCATION_WEIGHT = 1.0;
     private static final double DEFAULT_SAVINGS_PLAN_CASH_WEIGHT = 0.0;
     private static final int DEFAULT_GENERIC_ALLOCATION_ASSET_COUNT = 2;
-
-    /**
-     * Savings-plan products no longer carry a model portfolio in BSJ bootstrap data; orders and allocations must
-     * target a single underlying asset per product.
-     */
-    private static final Map<String, String> SAVINGS_PLAN_UNDERLYING_TICKER_BY_PRODUCT_NAME = Map.of(
-        "Opportunity Horizon Fund", "LYQY",
-        "Balanced Growth Fund", "VOO",
-        "Safe Investment Fund", "EUNH"
-    );
 
     private final AllocationsApi allocationsApi;
     private final AssetUniverseApi assetUniverseApi;
@@ -382,10 +371,13 @@ public class InvestmentPortfolioAllocationService {
             .toList();
 
         List<Asset> selectedAssets = new ArrayList<>();
-        currencyMatchedAssets.stream()
-            .filter(asset -> ADIDAS_ISIN.equals(asset.getIsin()))
-            .findFirst()
-            .ifPresent(selectedAssets::add);
+        String preferredIsin = ingestProperties.getAllocation().getSelfTradingPreferredIsin();
+        if (preferredIsin != null && !preferredIsin.isBlank()) {
+            currencyMatchedAssets.stream()
+                .filter(asset -> preferredIsin.equals(asset.getIsin()))
+                .findFirst()
+                .ifPresent(selectedAssets::add);
+        }
         currencyMatchedAssets.stream()
             .filter(asset -> selectedAssets.stream().noneMatch(selected -> selected.getUuid().equals(asset.getUuid())))
             .limit(Math.max(0, DEFAULT_GENERIC_ALLOCATION_ASSET_COUNT - selectedAssets.size()))
@@ -420,7 +412,7 @@ public class InvestmentPortfolioAllocationService {
                 product.getUuid());
             return Optional.empty();
         }
-        String ticker = SAVINGS_PLAN_UNDERLYING_TICKER_BY_PRODUCT_NAME.get(productName);
+        String ticker = ingestProperties.getAllocation().getSavingsPlanUnderlyingTickerByProductName().get(productName);
         if (ticker == null) {
             log.warn("No underlying asset mapping for savings plan product: productUuid={}, name={}",
                 product.getUuid(), productName);

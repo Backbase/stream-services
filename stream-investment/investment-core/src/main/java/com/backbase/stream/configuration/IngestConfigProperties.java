@@ -1,5 +1,6 @@
 package com.backbase.stream.configuration;
 
+import java.util.Map;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -27,6 +28,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *             activation-past-months: 3
  *           allocation:
  *             model-portfolio-allocation-asset: "model_portfolio.allocation.asset"
+ *             self-trading-preferred-isin: DE000A1EWWW0
+ *             savings-plan-underlying-ticker-by-product-name:
+ *               "Opportunity Horizon Fund": LYQY
  *           deposit:
  *             provider: real-bank
  *             default-amount: 25000.0
@@ -81,6 +85,8 @@ public class IngestConfigProperties {
     @Data
     public static class AllocationConfig {
 
+        private static final String DEFAULT_SELF_TRADING_PREFERRED_ISIN = "DE000A1EWWW0";
+
         /**
          * The allocation-asset expansion key sent when listing or managing portfolio products. Changing this value
          * allows switching between different allocation-asset model definitions without a code change.
@@ -89,6 +95,22 @@ public class IngestConfigProperties {
         private int allocationConcurrency = 5;
 
         private double defaultAmount = DEFAULT_INIT_CASH;
+
+        /**
+         * When seeding self-trading portfolios without a model, this ISIN is preferred among assets that match the
+         * portfolio currency (if present in the asset universe). Set to blank to skip preferred-asset selection.
+         */
+        private String selfTradingPreferredIsin = DEFAULT_SELF_TRADING_PREFERRED_ISIN;
+
+        /**
+         * Maps savings-plan portfolio product names to underlying asset tickers used for BUY orders when no investor
+         * model is present on the product.
+         */
+        private Map<String, String> savingsPlanUnderlyingTickerByProductName = Map.of(
+            "Opportunity Horizon Fund", "LYQY",
+            "Balanced Growth Fund", "VOO",
+            "Safe Investment Fund", "EUNH"
+        );
     }
 
     // -------------------------------------------------------------------------
