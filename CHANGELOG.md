@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - MAINT-45235: Ingestion no longer fails with `Duplicate key ... (attempted merging values class FunctionGroupItem ...)` when a service agreement has a local (CUSTOM) job role with the same name as a reference job role, for example after copying a reference job role in the UI. `LegalEntitySaga`, `ServiceAgreementSagaV2`, `ProductIngestionSaga` and `ApprovalSaga` now resolve job roles by name through `FunctionGroupUtils.functionGroupsByName`, which prefers the REFERENCE job role on a name clash and logs a warning.
 
+
+## [11.2.0]
+### Changed
+- Investment buy fixed assets for savings plan portfolios
+
 ## [11.1.0]
 ### Changed
-- investment ingest orders only for assets that match the portfolio currency
+- Investment ingest orders only for assets that match the portfolio currency
 
 ## [11.0.0]
 ### Changed

@@ -75,9 +75,10 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentPortfolioAllocationService {
 
-    private static final String ADIDAS_ISIN = "DE000A1EWWW0";
     private static final double DEFAULT_SELF_TRADING_ALLOCATION_WEIGHT = 0.2;
     private static final double DEFAULT_SELF_TRADING_CASH_WEIGHT = 0.6;
+    private static final double DEFAULT_SAVINGS_PLAN_ALLOCATION_WEIGHT = 1.0;
+    private static final double DEFAULT_SAVINGS_PLAN_CASH_WEIGHT = 0.0;
     private static final int DEFAULT_GENERIC_ALLOCATION_ASSET_COUNT = 2;
 
     private final AllocationsApi allocationsApi;
@@ -301,6 +302,15 @@ public class InvestmentPortfolioAllocationService {
                 return model;
             }
         }
+        if (isSavingsPlanProduct(product)) {
+            Optional<ModelPortfolio> savingsPlanModel = buildSavingsPlanModel(product, assetByUuid);
+            if (savingsPlanModel.isPresent()) {
+                ModelPortfolio model = savingsPlanModel.get();
+                log.debug("Resolved savings plan single-asset model: productUuid={}, name={}, underlyingIsin={}",
+                    product.getUuid(), product.getName(), model.getAllocations().getFirst().asset().getIsin());
+                return model;
+            }
+        }
         if (isSelfTradingProduct(product)) {
             return buildSelfTradingDefaultModel(portfolio, assetByUuid);
         }
@@ -361,10 +371,13 @@ public class InvestmentPortfolioAllocationService {
             .toList();
 
         List<Asset> selectedAssets = new ArrayList<>();
-        currencyMatchedAssets.stream()
-            .filter(asset -> ADIDAS_ISIN.equals(asset.getIsin()))
-            .findFirst()
-            .ifPresent(selectedAssets::add);
+        String preferredIsin = ingestProperties.getAllocation().getSelfTradingPreferredIsin();
+        if (preferredIsin != null && !preferredIsin.isBlank()) {
+            currencyMatchedAssets.stream()
+                .filter(asset -> preferredIsin.equals(asset.getIsin()))
+                .findFirst()
+                .ifPresent(selectedAssets::add);
+        }
         currencyMatchedAssets.stream()
             .filter(asset -> selectedAssets.stream().noneMatch(selected -> selected.getUuid().equals(asset.getUuid())))
             .limit(Math.max(0, DEFAULT_GENERIC_ALLOCATION_ASSET_COUNT - selectedAssets.size()))
@@ -385,6 +398,42 @@ public class InvestmentPortfolioAllocationService {
 
     private static boolean isSelfTradingProduct(PortfolioProduct product) {
         return ProductTypeEnum.SELF_TRADING == product.getProductType();
+    }
+
+    private static boolean isSavingsPlanProduct(PortfolioProduct product) {
+        return ProductTypeEnum.SAVINGS_PLAN == product.getProductType();
+    }
+
+    private Optional<ModelPortfolio> buildSavingsPlanModel(PortfolioProduct product,
+        Map<UUID, Asset> assetByUuid) {
+        String productName = product.getName();
+        if (productName == null) {
+            log.warn("Savings plan product has no name; cannot resolve underlying asset: productUuid={}",
+                product.getUuid());
+            return Optional.empty();
+        }
+        String ticker = ingestProperties.getAllocation().getSavingsPlanUnderlyingTickerByProductName().get(productName);
+        if (ticker == null) {
+            log.warn("No underlying asset mapping for savings plan product: productUuid={}, name={}",
+                product.getUuid(), productName);
+            return Optional.empty();
+        }
+        Optional<Asset> underlyingAsset = assetByUuid.values().stream()
+            .filter(asset -> ticker.equalsIgnoreCase(asset.getTicker()))
+            .findFirst();
+        if (underlyingAsset.isEmpty()) {
+            log.warn(
+                "Underlying asset not found in asset universe for savings plan: productUuid={}, name={}, ticker={}",
+                product.getUuid(), productName, ticker);
+            return Optional.empty();
+        }
+        Asset asset = underlyingAsset.get();
+        return Optional.of(ModelPortfolio.builder()
+            .cashWeight(DEFAULT_SAVINGS_PLAN_CASH_WEIGHT)
+            .allocations(List.of(new Allocation(
+                new ModelAsset(asset.getIsin(), asset.getMarket(), asset.getCurrency()),
+                DEFAULT_SAVINGS_PLAN_ALLOCATION_WEIGHT)))
+            .build());
     }
 
     private String assetKey(Map<String, Object> params) {
