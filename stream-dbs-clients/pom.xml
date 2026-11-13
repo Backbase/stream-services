@@ -558,9 +558,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v3*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.transaction.api.service.v3</apiPackage>
-                            <modelPackage>com.backbase.dbs.transaction.api.service.v3.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v4*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.transaction.api.service.v4</apiPackage>
+                            <modelPackage>com.backbase.dbs.transaction.api.service.v4.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>

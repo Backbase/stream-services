@@ -1,11 +1,11 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
-import com.backbase.dbs.transaction.api.service.v3.model.ArrangementItem;
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionItem;
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionsDeleteRequestBody;
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPatchRequestBody;
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody;
+import com.backbase.dbs.transaction.api.service.v4.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v4.model.ArrangementItem;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionItem;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionsDeleteRequestBody;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionsPatchRequestBody;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionsPostRequestBody;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.transaction.TransactionsQuery;

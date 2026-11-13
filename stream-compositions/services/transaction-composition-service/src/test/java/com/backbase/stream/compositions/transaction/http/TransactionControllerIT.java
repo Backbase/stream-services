@@ -3,7 +3,7 @@ package com.backbase.stream.compositions.transaction.http;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionsPostResponseBody;
 import com.backbase.stream.compositions.transaction.api.model.TransactionPullIngestionRequest;
 import com.backbase.stream.compositions.transaction.api.model.TransactionPushIngestionRequest;
 import com.backbase.stream.compositions.transaction.api.model.TransactionsPostRequestBody;
