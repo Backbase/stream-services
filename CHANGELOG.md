@@ -1,9 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+
+## [11.2.0]
+### Changed
+- Investment buy fixed assets for savings plan portfolios
+
 ## [11.1.0]
 ### Changed
-- investment ingest orders only for assets that match the portfolio currency
+- Investment ingest orders only for assets that match the portfolio currency
 
 ## [11.0.0]
 ### Changed
