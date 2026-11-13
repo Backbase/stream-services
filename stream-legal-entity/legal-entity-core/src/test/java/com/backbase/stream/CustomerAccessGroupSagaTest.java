@@ -222,6 +222,37 @@ class CustomerAccessGroupSagaTest {
     }
 
     @Test
+    void shouldPreferReferenceFunctionGroupWhenNamesClash() {
+        String fgName = "fgName";
+        String referenceId = "referenceId";
+        String customId = "customId";
+        JobProfileUser jobProfileUser = new JobProfileUser()
+            .user(new User().internalId("userId"))
+            .businessFunctionGroups(List.of(new BusinessFunctionGroup().id(referenceId)))
+            .jobRoleNameToCustomerAccessGroupNames(List.of(
+                new JobRoleNameToCustomerAccessGroupNames().jobRoleName(fgName)
+                    .customerAccessGroupNames(List.of("cag-name-1"))));
+        ServiceAgreementV2 serviceAgreementV2 = new ServiceAgreementV2().jobProfileUsers(List.of(jobProfileUser));
+        ServiceAgreementTaskV2 task = mockServiceAgreementTask(serviceAgreementV2);
+
+        CustomerAccessGroupItem cag1 = new CustomerAccessGroupItem().id(1L).name("cag-name-1").mandatory(true);
+        when(customerAccessGroupService.getCustomerAccessGroups()).thenReturn(Mono.just(List.of(cag1)));
+        when(customerAccessGroupService.assignCustomerAccessGroupsToJobRoles(any(), any(), any(), any()))
+            .thenReturn(Mono.just(jobProfileUser));
+        // custom copy returned last, so a plain collectMap would pick it
+        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Mono.just(new GetFunctionGroups()
+            .functionGroups(List.of(
+                new FunctionGroupItem().id(referenceId).name(fgName).type(FunctionGroupItem.TypeEnum.REFERENCE),
+                new FunctionGroupItem().id(customId).name(fgName).type(FunctionGroupItem.TypeEnum.CUSTOM)))));
+
+        StepVerifier.create(customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task))
+            .expectNext(task).verifyComplete();
+
+        verify(customerAccessGroupService).assignCustomerAccessGroupsToJobRoles(task, jobProfileUser,
+            serviceAgreementV2, Map.of(referenceId, Set.of(1L)));
+    }
+
+    @Test
     void shouldThrowExceptionIfFunctionGroupNameNotExist() {
         String fg1Name = "fg1Name";
         String fg2Name = "fg2Name";

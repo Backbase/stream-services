@@ -221,4 +221,46 @@ class UpdatedServiceAgreementSagaTest {
         permissionsRequest.put(user2, permissionUser2);
         verify(accessGroupService).assignPermissionsBatch(any(), eq(permissionsRequest));
     }
+
+    @Test
+    void updateServiceAgreementAssignsOnlyReferenceJobRoleWhenNamesClash() {
+        final String saExternalId = "dupSaExternalId";
+        final String saInternalId = "dupSaInternalId";
+        User user1 = new User().externalId("someUserExId1");
+        BaseProductGroup baseProductGroup = new BaseProductGroup();
+        JobProfileUser jobProfileUser1 = new JobProfileUser().user(user1).addReferenceJobRoleNamesItem("someJobRole1");
+        UpdatedServiceAgreement serviceAgreement = new UpdatedServiceAgreement().addProductGroupsItem(baseProductGroup)
+            .addSaUsersItem(new ServiceAgreementUserAction().userProfile(jobProfileUser1));
+        serviceAgreement.externalId(saExternalId).internalId(saInternalId).name("someSa");
+        ServiceAgreement internalSA = new ServiceAgreement().externalId(saExternalId).internalId(saInternalId);
+        UpdatedServiceAgreementTask task = new UpdatedServiceAgreementTask(serviceAgreement);
+        // custom copy listed last, so it would win without reference preference
+        List<FunctionGroupItem> functionGroups = asList(
+            new FunctionGroupItem().id("referenceId").name("someJobRole1").type(TypeEnum.REFERENCE),
+            new FunctionGroupItem().id("customId").name("someJobRole1").type(TypeEnum.CUSTOM));
+        ProductGroup productGroup = new ProductGroup().serviceAgreement(serviceAgreement);
+
+        when(accessGroupService.updateServiceAgreementAssociations(eq(task), eq(serviceAgreement), any()))
+            .thenReturn(Mono.just(serviceAgreement));
+        when(accessGroupService.setupProductGroups(any())).thenReturn(Mono.just(new ProductGroupTask(productGroup)));
+        when(accessGroupService.getUserByExternalId(eq("someUserExId1"), eq(true)))
+            .thenReturn(Mono.just(new GetUser().id("someUserInId1").externalId("someUserExId1")));
+        when(accessGroupService.getFunctionGroupsForServiceAgreement(eq(saInternalId)))
+            .thenReturn(Mono.just(functionGroups));
+        when(accessGroupService.assignPermissionsBatch(any(), any())).thenReturn(Mono.just(
+            new BatchProductGroupTask().data(new BatchProductGroup().serviceAgreement(serviceAgreement))));
+        when(accessGroupService.getServiceAgreementByExternalId(eq(saExternalId))).thenReturn(Mono.just(internalSA));
+        when(arrangementService.getArrangementByExternalId(ArgumentMatchers.<List<String>>any()))
+            .thenReturn(Flux.empty());
+
+        UpdatedServiceAgreementTask actual = updatedServiceAgreementSaga.executeTask(task).block();
+
+        assertEquals(StreamTask.State.COMPLETED, actual.getState());
+        ArgumentCaptor<Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>>> captor =
+            ArgumentCaptor.forClass(Map.class);
+        verify(accessGroupService).assignPermissionsBatch(any(), captor.capture());
+        Map<BusinessFunctionGroup, List<BaseProductGroup>> assigned = captor.getValue().get(user1);
+        assertEquals(1, assigned.size());
+        assertEquals("referenceId", assigned.keySet().iterator().next().getId());
+    }
 }

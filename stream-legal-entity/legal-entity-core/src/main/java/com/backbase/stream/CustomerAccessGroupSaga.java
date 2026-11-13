@@ -11,6 +11,7 @@ import com.backbase.stream.legalentity.model.JobRoleNameToCustomerAccessGroupNam
 import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.service.CustomerAccessGroupService;
+import com.backbase.stream.utils.FunctionGroupUtils;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -178,6 +179,10 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
     private Mono<Map<String, String>> getFunctionGroupsInSaNameToIdMap(ServiceAgreementTaskV2 streamTask) {
         return functionGroupsApi.getFunctionGroups(streamTask.getServiceAgreement().getInternalId())
             .flatMapIterable(GetFunctionGroups::getFunctionGroups)
-            .collectMap(FunctionGroupItem::getName, FunctionGroupItem::getId);
+            .collectList()
+            .map(list -> FunctionGroupUtils.functionGroupsByName(list,
+                streamTask.getServiceAgreement().getInternalId()))
+            .map(byName -> byName.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getId())));
     }
 }
