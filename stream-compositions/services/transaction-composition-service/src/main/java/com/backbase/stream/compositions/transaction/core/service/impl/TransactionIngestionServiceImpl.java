@@ -1,7 +1,7 @@
 package com.backbase.stream.compositions.transaction.core.service.impl;
 
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody;
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionsPostRequestBody;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionsPostResponseBody;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties;
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;

@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [11.2.0]
+### Changed
+- **Breaking:** Migrate Transaction Manager client from service-api **v3** to **v4** (v3 removed in 2026.10). Composition OpenAPI `$ref`s pin `transaction-manager-service-api-v4.3.0`; `stream-dbs-clients` codegen uses `transaction-manager-service-api-v4*.yaml`.
+- **Breaking:** `sequenceNumber` is required on composition push API (HTTP 400 if missing/invalid) and on the Stream transaction event schema. For event/pull/bootstrap ingest paths that map into DBS models, Stream defaults blank/invalid values to a numeric `externalId` (≤20 chars) or `"0"`.
+
 ## [11.1.0]
 ### Changed
 - investment ingest orders only for assets that match the portfolio currency
