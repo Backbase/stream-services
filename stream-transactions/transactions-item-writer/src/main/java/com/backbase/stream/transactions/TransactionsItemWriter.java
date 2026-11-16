@@ -1,6 +1,6 @@
 package com.backbase.stream.transactions;
 
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionsPostRequestBody;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;

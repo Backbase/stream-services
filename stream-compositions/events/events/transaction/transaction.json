@@ -223,7 +223,8 @@
         "externalId",
         "type",
         "typeGroup",
-        "transactionAmountCurrency"
+        "transactionAmountCurrency",
+        "sequenceNumber"
       ]
     }
   }
