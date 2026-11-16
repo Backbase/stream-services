@@ -3,7 +3,6 @@ package com.backbase.stream.product;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
-import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
@@ -37,6 +36,7 @@ import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.UserService;
+import com.backbase.stream.utils.FunctionGroupUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import io.micrometer.tracing.annotation.ContinueSpan;
@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -155,8 +154,8 @@ public class ProductIngestionSaga {
         if (!isEmpty(jobProfileUser.getReferenceJobRoleNames())) {
             return accessGroupService.getFunctionGroupsForServiceAgreement(serviceAgreement.getInternalId())
                 .map(functionGroups -> {
-                    Map<String, FunctionGroupItem> idByFunctionGroupName = functionGroups.stream()
-                        .collect(toMap(FunctionGroupItem::getName, Function.identity()));
+                    Map<String, FunctionGroupItem> idByFunctionGroupName = FunctionGroupUtils.functionGroupsByName(
+                        functionGroups, serviceAgreement.getInternalId());
                     return jobProfileUser.getReferenceJobRoleNames().stream()
                         .map(idByFunctionGroupName::get)
                         .filter(Objects::nonNull)

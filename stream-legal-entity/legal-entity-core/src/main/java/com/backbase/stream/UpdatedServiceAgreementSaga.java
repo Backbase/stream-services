@@ -17,6 +17,7 @@ import com.backbase.stream.legalentity.model.UpdatedServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.ProductGroupMapper;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
+import com.backbase.stream.utils.FunctionGroupUtils;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
@@ -274,7 +275,9 @@ public class UpdatedServiceAgreementSaga implements StreamTaskExecutor<UpdatedSe
                     MessageFormat.format("Failed to retrieve Function Groups for Service Agreement: {0}",
                         sa.getExternalId())));
             })
-            .map(list -> list.stream().map(businessFunctionGroupMapper::map).collect(Collectors.toList()));
+            .map(list -> FunctionGroupUtils.functionGroupsByName(list, sa.getInternalId()).values().stream()
+                .map(businessFunctionGroupMapper::map)
+                .collect(Collectors.toList()));
     }
 
     private Mono<UpdatedServiceAgreementTask> setupUserPermissions(UpdatedServiceAgreementTask task,

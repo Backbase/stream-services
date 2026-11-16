@@ -177,6 +177,31 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     }
 
     @Test
+    void shouldUpdateJobRoleForSAWhenDuplicateNamesVisible() {
+        final String saInternalId = "someSaInternalId";
+        final String saExternalId = "someSaExternalId";
+
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, "desc", "name");
+
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(List.of(
+                new FunctionGroupItem().name("jobRole").id("1").type(FunctionGroupItem.TypeEnum.REFERENCE),
+                new FunctionGroupItem().name("jobRole").id("2").type(FunctionGroupItem.TypeEnum.CUSTOM)))));
+        Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
+            .thenReturn(Flux.fromIterable(Collections.emptyList()));
+        Mockito.when(accessControlProperties.getConcurrency()).thenReturn(1);
+
+        JobRole jobRole = new JobRole().name("jobRole").validFrom(VALID_FROM).validUntil(VALID_UNTIL);
+
+        List<JobRole> result = subject.setupJobRoleForSa(streamTask, serviceAgreement, Stream.of(jobRole)).block();
+
+        Assertions.assertNotNull(result);
+        Mockito.verify(functionGroupIntegrationApi).batchUpdateFunctionGroups(any());
+        Mockito.verify(functionGroupIntegrationApi, Mockito.never()).ingestFunctionGroup(any());
+    }
+
+    @Test
     void shouldUpdateOldJobRoleForSA() {
         final String saInternalId = "someSaInternalId";
         final String saExternalId = "someSaExternalId";
