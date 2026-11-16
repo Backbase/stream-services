@@ -68,6 +68,7 @@ import com.backbase.stream.service.CustomerProfileService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
+import com.backbase.stream.utils.FunctionGroupUtils;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -624,9 +625,8 @@ public class LegalEntitySaga extends HelperProcessor implements StreamTaskExecut
             return accessGroupService.getFunctionGroupsForServiceAgreement(
                     retrieveServiceAgreement(streamTask.getData()).getInternalId())
                 .map(functionGroups -> {
-                    Map<String, com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem> idByFunctionGroupName = functionGroups
-                        .stream()
-                        .collect(Collectors.toMap(FunctionGroupItem::getName, Function.identity()));
+                    Map<String, FunctionGroupItem> idByFunctionGroupName = FunctionGroupUtils.functionGroupsByName(
+                        functionGroups, retrieveServiceAgreement(streamTask.getData()).getInternalId());
                     return jobProfileUser.getReferenceJobRoleNames().stream()
                         .map(idByFunctionGroupName::get)
                         .filter(Objects::nonNull)

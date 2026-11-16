@@ -65,6 +65,28 @@ class ApprovalSagaTest {
             Objects.requireNonNull(value, "Approval task should not be null.").getApproval().getName());
     }
 
+    @Test
+    void executeTaskPrefersReferenceJobRoleWhenLocalCopyHasSameName() {
+        Approval approval = (Approval) approvals().findFirst().orElseThrow().get()[0];
+        ApprovalTask approvalTask = new ApprovalTask(approval);
+
+        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(
+            Mono.just(List.of(
+                new FunctionGroupItem().name("All").id("local-copy-id")
+                    .type(FunctionGroupItem.TypeEnum.CUSTOM).serviceAgreementId("customer-sa-id"),
+                new FunctionGroupItem().name("All").id("reference-id")
+                    .type(FunctionGroupItem.TypeEnum.REFERENCE).serviceAgreementId("master-sa-id"))));
+        when(accessGroupService.getServiceAgreementByExternalId(any())).thenReturn(
+            Mono.just(new ServiceAgreement().internalId("customer-sa-id")));
+
+        var value = approvalSaga.executeTask(approvalTask).block();
+
+        assertNotNull(value);
+        assertEquals("reference-id", approval.getFunctionGroupIdByName().get("All"));
+        assertEquals("reference-id",
+            approval.getPolicyAssignments().getFirst().getApprovalTypeAssignments().getFirst().getJobProfileId());
+    }
+
     public static Stream<Arguments> approvals() {
         return Stream.of(
             Arguments.of(new Approval()

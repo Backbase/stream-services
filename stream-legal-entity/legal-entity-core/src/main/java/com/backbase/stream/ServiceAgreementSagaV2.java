@@ -51,6 +51,7 @@ import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
+import com.backbase.stream.utils.FunctionGroupUtils;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -437,8 +438,8 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             return accessGroupService.getFunctionGroupsForServiceAgreement(
                     streamTask.getServiceAgreement().getInternalId())
                 .map(functionGroups -> {
-                    Map<String, FunctionGroupItem> idByFunctionGroupName = functionGroups.stream()
-                        .collect(Collectors.toMap(FunctionGroupItem::getName, Function.identity()));
+                    Map<String, FunctionGroupItem> idByFunctionGroupName = FunctionGroupUtils.functionGroupsByName(
+                        functionGroups, streamTask.getServiceAgreement().getInternalId());
                     return jobProfileUser.getReferenceJobRoleNames().stream()
                         .map(idByFunctionGroupName::get)
                         .filter(Objects::nonNull)

@@ -2,7 +2,6 @@ package com.backbase.stream;
 
 import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
 
-import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
 import com.backbase.stream.approval.model.Approval;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;
@@ -10,6 +9,7 @@ import com.backbase.stream.approval.model.PolicyAssignmentItem;
 import com.backbase.stream.approval.model.PolicyItem;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.ApprovalsIntegrationService;
+import com.backbase.stream.utils.FunctionGroupUtils;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import io.micrometer.tracing.annotation.ContinueSpan;
 import io.micrometer.tracing.annotation.SpanTag;
@@ -150,10 +150,11 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
             .flatMap(pa -> {
                 String externalServiceAgreementId = pa.getExternalServiceAgreementId();
                 return accessGroupService.getServiceAgreementByExternalId(externalServiceAgreementId)
-                    .flatMap(sa -> accessGroupService.getFunctionGroupsForServiceAgreement(sa.getInternalId()))
-                    .map(fgs -> fgs.stream()
-                        .filter(fg -> Objects.nonNull(fg.getId()))
-                        .collect(Collectors.toMap(FunctionGroupItem::getName, FunctionGroupItem::getId)))
+                    .flatMap(sa -> accessGroupService.getFunctionGroupsForServiceAgreement(sa.getInternalId())
+                        .map(fgs -> FunctionGroupUtils.functionGroupsByName(
+                                fgs.stream().filter(fg -> Objects.nonNull(fg.getId())).toList(), sa.getInternalId())
+                            .entrySet().stream()
+                            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getId()))))
                     .map(functionGroupIdByName -> {
                         approval.setFunctionGroupIdByName(functionGroupIdByName);
                         log.debug("functionGroupIdByName: {}", functionGroupIdByName);
