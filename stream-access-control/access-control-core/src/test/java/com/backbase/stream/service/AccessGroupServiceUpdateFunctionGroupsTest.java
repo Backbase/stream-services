@@ -703,6 +703,32 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     }
 
     @Test
+    void setupFunctionGroupsKeepsReferenceIdWhenSameNamedCopyIsVisible() {
+        final String saInternalId = "someSaInternalId";
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, "someSaExternalId", "d", "n");
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        // custom copy listed first, so name-only matching would pick it
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(List.of(
+                new FunctionGroupItem().name("fg1").id("customId").type(FunctionGroupItem.TypeEnum.CUSTOM),
+                new FunctionGroupItem().name("fg1").id("referenceId").type(FunctionGroupItem.TypeEnum.REFERENCE)))));
+        Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
+            .thenReturn(Flux.fromIterable(Collections.emptyList()));
+
+        BusinessFunctionGroup withReferenceId = new BusinessFunctionGroup().name("fg1").id("referenceId");
+        BusinessFunctionGroup withoutId = new BusinessFunctionGroup().name("fg1");
+
+        List<BusinessFunctionGroup> result =
+            subject.setupFunctionGroups(streamTask, serviceAgreement, List.of(withReferenceId, withoutId)).block();
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("referenceId", withReferenceId.getId());
+        // without an id, the reference role is preferred over the custom copy
+        Assertions.assertEquals("referenceId", withoutId.getId());
+    }
+
+    @Test
     void setupFunctionGroups() {
         final String saInternalId = "someSaInternalId";
         final String saExternalId = "someSaExternalId";

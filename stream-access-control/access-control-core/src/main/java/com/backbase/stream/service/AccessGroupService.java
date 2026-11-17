@@ -1442,7 +1442,15 @@ public class AccessGroupService {
 
     private void enrich(List<FunctionGroupItem> functionGroups,
         BusinessFunctionGroup businessFunctionGroup) {
-        functionGroups.stream().filter(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item))
+        // An id that already points at one of the visible function groups is authoritative: matching by name alone
+        // could swap a reference job role for a same-named local copy.
+        if (businessFunctionGroup.getId() != null
+            && functionGroups.stream().anyMatch(item -> businessFunctionGroup.getId().equals(item.getId()))) {
+            return;
+        }
+        FunctionGroupUtils.functionGroupsByName(functionGroups, businessFunctionGroup.getServiceAgreementId())
+            .values().stream()
+            .filter(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item))
             .findFirst()
             .ifPresent(item -> businessFunctionGroup.setId(item.getId()));
     }
