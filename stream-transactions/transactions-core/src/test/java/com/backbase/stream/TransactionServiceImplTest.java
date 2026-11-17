@@ -1,7 +1,7 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
-import com.backbase.dbs.transaction.api.service.v3.model.TransactionItem;
+import com.backbase.dbs.transaction.api.service.v4.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v4.model.TransactionItem;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.transaction.TransactionsQuery;
 import org.junit.jupiter.api.Test;
