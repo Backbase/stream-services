@@ -1164,7 +1164,8 @@ public class AccessGroupService {
                         .collectList()
                         .flatMap(bfg -> {
                             List<BusinessFunctionGroup> existingBusinessGroups =
-                                getExistingBusinessGroups(businessFunctionGroups, functionGroups);
+                                getExistingBusinessGroups(businessFunctionGroups, functionGroups,
+                                    serviceAgreement.getInternalId());
                             log.debug("existingBusinessGroups: {}", existingBusinessGroups);
                             return updateBatchBusinessFunctionGroup(streamTask, serviceAgreement, existingBusinessGroups)
                                 .flatMap(updated -> {
@@ -1429,30 +1430,51 @@ public class AccessGroupService {
 
     private List<BusinessFunctionGroup> getExistingBusinessGroups(
         List<BusinessFunctionGroup> businessFunctionGroups,
-        List<FunctionGroupItem> functionGroups) {
+        List<FunctionGroupItem> functionGroups,
+        String serviceAgreementInternalId) {
+
+        // resolved once, so a name clash is logged once per call and not once per business function group
+        Map<String, FunctionGroupItem> preferredByName =
+            FunctionGroupUtils.functionGroupsByName(functionGroups, serviceAgreementInternalId);
 
         return businessFunctionGroups.stream()
             .filter(businessFunctionGroup -> filter(functionGroups, businessFunctionGroup))
             .map(businessFunctionGroup -> {
-                enrich(functionGroups, businessFunctionGroup);
+                enrich(functionGroups, preferredByName, serviceAgreementInternalId, businessFunctionGroup);
                 return businessFunctionGroup;
             })
             .collect(Collectors.toList());
     }
 
-    private void enrich(List<FunctionGroupItem> functionGroups,
-        BusinessFunctionGroup businessFunctionGroup) {
-        // An id that already points at one of the visible function groups is authoritative: matching by name alone
-        // could swap a reference job role for a same-named local copy.
-        if (businessFunctionGroup.getId() != null
-            && functionGroups.stream().anyMatch(item -> businessFunctionGroup.getId().equals(item.getId()))) {
-            return;
+    /**
+     * Resolve the function group a business function group refers to and set its id and service agreement id together.
+     *
+     * <p>An id that already points at a visible function group is authoritative. Otherwise, when several visible
+     * function groups share the name: a local (DEFAULT) job role resolves to the one owned by the current service
+     * agreement, anything else resolves to the REFERENCE one.
+     */
+    private void enrich(List<FunctionGroupItem> functionGroups, Map<String, FunctionGroupItem> preferredByName,
+        String serviceAgreementInternalId, BusinessFunctionGroup businessFunctionGroup) {
+
+        Optional<FunctionGroupItem> resolved = Optional.empty();
+        if (businessFunctionGroup.getId() != null) {
+            resolved = functionGroups.stream()
+                .filter(item -> businessFunctionGroup.getId().equals(item.getId()))
+                .findFirst();
         }
-        FunctionGroupUtils.functionGroupsByName(functionGroups, businessFunctionGroup.getServiceAgreementId())
-            .values().stream()
-            .filter(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item))
-            .findFirst()
-            .ifPresent(item -> businessFunctionGroup.setId(item.getId()));
+        if (resolved.isEmpty() && BusinessFunctionGroup.TypeEnum.DEFAULT.equals(businessFunctionGroup.getType())) {
+            resolved = functionGroups.stream()
+                .filter(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item))
+                .filter(item -> Objects.equals(serviceAgreementInternalId, item.getServiceAgreementId()))
+                .findFirst();
+        }
+        if (resolved.isEmpty()) {
+            resolved = Optional.ofNullable(preferredByName.get(businessFunctionGroup.getName()));
+        }
+        resolved.ifPresent(item -> {
+            businessFunctionGroup.setId(item.getId());
+            businessFunctionGroup.setServiceAgreementId(item.getServiceAgreementId());
+        });
     }
 
     private boolean filter(List<FunctionGroupItem> functionGroups, BusinessFunctionGroup businessFunctionGroup) {

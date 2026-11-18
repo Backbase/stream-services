@@ -703,29 +703,41 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     }
 
     @Test
-    void setupFunctionGroupsKeepsReferenceIdWhenSameNamedCopyIsVisible() {
+    void setupFunctionGroupsResolvesSameNamedFunctionGroupsByTypeAndOwner() {
         final String saInternalId = "someSaInternalId";
         ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, "someSaExternalId", "d", "n");
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        // custom copy listed first, so name-only matching would pick it
+        // custom copy (owned by this SA) listed first, so name-only matching would pick it
         Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
             .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(List.of(
-                new FunctionGroupItem().name("fg1").id("customId").type(FunctionGroupItem.TypeEnum.CUSTOM),
-                new FunctionGroupItem().name("fg1").id("referenceId").type(FunctionGroupItem.TypeEnum.REFERENCE)))));
+                new FunctionGroupItem().name("fg1").id("customId").serviceAgreementId(saInternalId)
+                    .type(FunctionGroupItem.TypeEnum.CUSTOM),
+                new FunctionGroupItem().name("fg1").id("referenceId").serviceAgreementId("masterSaId")
+                    .type(FunctionGroupItem.TypeEnum.REFERENCE)))));
         Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
-        BusinessFunctionGroup withReferenceId = new BusinessFunctionGroup().name("fg1").id("referenceId");
-        BusinessFunctionGroup withoutId = new BusinessFunctionGroup().name("fg1");
+        // already resolved id is kept, whatever the name lookup would say
+        BusinessFunctionGroup withReferenceId = new BusinessFunctionGroup().name("fg1").id("referenceId")
+            .type(BusinessFunctionGroup.TypeEnum.TEMPLATE);
+        // template without id -> reference job role
+        BusinessFunctionGroup template = new BusinessFunctionGroup().name("fg1")
+            .type(BusinessFunctionGroup.TypeEnum.TEMPLATE);
+        // local job role without id -> the one owned by the current SA
+        BusinessFunctionGroup local = new BusinessFunctionGroup().name("fg1")
+            .type(BusinessFunctionGroup.TypeEnum.DEFAULT);
 
-        List<BusinessFunctionGroup> result =
-            subject.setupFunctionGroups(streamTask, serviceAgreement, List.of(withReferenceId, withoutId)).block();
+        List<BusinessFunctionGroup> result = subject.setupFunctionGroups(streamTask, serviceAgreement,
+            List.of(withReferenceId, template, local)).block();
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("referenceId", withReferenceId.getId());
-        // without an id, the reference role is preferred over the custom copy
-        Assertions.assertEquals("referenceId", withoutId.getId());
+        Assertions.assertEquals("masterSaId", withReferenceId.getServiceAgreementId());
+        Assertions.assertEquals("referenceId", template.getId());
+        Assertions.assertEquals("masterSaId", template.getServiceAgreementId());
+        Assertions.assertEquals("customId", local.getId());
+        Assertions.assertEquals(saInternalId, local.getServiceAgreementId());
     }
 
     @Test
