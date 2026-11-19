@@ -600,6 +600,61 @@ class AccessGroupServiceTest {
     }
 
     @Test
+    void assignPermissionsBatchSendsEachFunctionGroupOnceWhenReferenceAndCopyAreVisible() {
+        // Given: customer SA sees the reference job role of the master SA and a same-named local copy
+        BatchProductGroupTask task = new BatchProductGroupTask().data(
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa-external-id").internalId("sa-internal-id")));
+        task.setIngestionMode(BatchProductIngestionMode.UPSERT);
+
+        FunctionGroupItem copy = new FunctionGroupItem().id("copy-id").name("job-role")
+            .serviceAgreementId("sa-internal-id").type(TypeEnum.CUSTOM);
+        FunctionGroupItem reference = new FunctionGroupItem().id("reference-id").name("job-role")
+            .serviceAgreementId("master-sa-internal-id").type(TypeEnum.REFERENCE);
+        // copy first, so that picking "the first match by name" would select it
+        when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(List.of(copy, reference))));
+
+        BusinessFunctionGroup template = new BusinessFunctionGroup().name("job-role")
+            .type(BusinessFunctionGroup.TypeEnum.TEMPLATE);
+        subject.setupFunctionGroups(task, task.getData().getServiceAgreement(), List.of(template)).block();
+        Assertions.assertEquals("reference-id", template.getId());
+
+        // the user already holds the reference job role with a data group
+        when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
+            .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
+                new UserPermissionItem().functionGroupId("reference-id").dataGroupIds(Set.of("data-group-id-1"))))));
+        when(functionGroupServiceApi.bulkSearchFunctionGroups(any()))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(List.of(reference))));
+        when(serviceAgreementServiceApi.getServiceAgreementById("master-sa-internal-id"))
+            .thenReturn(Mono.just(
+                new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreement()
+                    .id("master-sa-internal-id").externalId("master-sa-external-id")));
+        when(dataGroupServiceApi.bulkSearchDataGroups(any()))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(List.of(
+                new DataGroup().id("data-group-id-1").name("data-group-name-1").type("ARRANGEMENTS"),
+                new DataGroup().id("data-group-id-2").name("data-group-name-2").type("ARRANGEMENTS")))));
+        when(assignPermissionsIntegrationApi.batchUpdateUserPermissions(any())).thenReturn(Flux.empty());
+
+        // When: the job role is assigned again, now with another data group
+        subject.assignPermissionsBatch(task, Map.of(
+            new User().internalId("user-internal-id").externalId("user-external-id"),
+            Map.of(template, List.of(new BaseProductGroup().internalId("data-group-id-2"))))).block();
+
+        // Then: one entry for {name, SA}, merged with the existing data group
+        ArgumentCaptor<List<AssignUserPermissionsBatch>> captor = ArgumentCaptor.forClass(List.class);
+        verify(assignPermissionsIntegrationApi).batchUpdateUserPermissions(captor.capture());
+        var permissions = captor.getValue().getFirst().getPermissions();
+        assertEquals(1, permissions.size());
+        var permission = permissions.getFirst();
+        assertEquals("job-role", permission.getFunctionGroup().getName());
+        assertEquals("master-sa-external-id", permission.getFunctionGroup().getServiceAgreementExternalId());
+        assertEquals(Set.of("data-group-name-1", "data-group-name-2"),
+            permission.getDataGroups().stream().map(DataGroupNameIdentifier::getName)
+                .collect(java.util.stream.Collectors.toSet()));
+    }
+
+    @Test
     void assignPermissionsBatch_noPermissions() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
