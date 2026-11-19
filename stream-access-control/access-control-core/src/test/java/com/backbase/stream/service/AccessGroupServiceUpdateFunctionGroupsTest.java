@@ -741,6 +741,72 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     }
 
     @Test
+    void setupFunctionGroupsFallsBackToReferenceForLocalRoleWithoutLocalCopy() {
+        final String saInternalId = "someSaInternalId";
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, "someSaExternalId", "d", "n");
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        // only the reference role is visible, there is no copy owned by this SA
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(List.of(
+                new FunctionGroupItem().name("fg1").id("referenceId").serviceAgreementId("masterSaId")
+                    .type(FunctionGroupItem.TypeEnum.REFERENCE)))));
+        Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
+            .thenReturn(Flux.fromIterable(Collections.emptyList()));
+
+        BusinessFunctionGroup local = new BusinessFunctionGroup().name("fg1")
+            .type(BusinessFunctionGroup.TypeEnum.DEFAULT);
+
+        subject.setupFunctionGroups(streamTask, serviceAgreement, List.of(local)).block();
+
+        Assertions.assertEquals("referenceId", local.getId());
+        Assertions.assertEquals("masterSaId", local.getServiceAgreementId());
+    }
+
+    @Test
+    void setupFunctionGroupsIgnoresExistingIdThatBelongsToAnotherName() {
+        final String saInternalId = "someSaInternalId";
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, "someSaExternalId", "d", "n");
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(List.of(
+                new FunctionGroupItem().name("fg1").id("fg1Id").serviceAgreementId(saInternalId)
+                    .type(FunctionGroupItem.TypeEnum.CUSTOM),
+                new FunctionGroupItem().name("fg2").id("fg2Id").serviceAgreementId(saInternalId)
+                    .type(FunctionGroupItem.TypeEnum.CUSTOM)))));
+        Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
+            .thenReturn(Flux.fromIterable(Collections.emptyList()));
+
+        // stale id of another job role: must not be kept for "fg1"
+        BusinessFunctionGroup renamed = new BusinessFunctionGroup().name("fg1").id("fg2Id");
+
+        subject.setupFunctionGroups(streamTask, serviceAgreement, List.of(renamed)).block();
+
+        Assertions.assertEquals("fg1Id", renamed.getId());
+        Assertions.assertEquals(saInternalId, renamed.getServiceAgreementId());
+    }
+
+    @Test
+    void setupFunctionGroupsSetsServiceAgreementIdOnCreatedFunctionGroup() {
+        final String saInternalId = "someSaInternalId";
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, "someSaExternalId", "d", "n");
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(Collections.emptyList())));
+        Mockito.when(functionGroupServiceApi.createFunctionGroup(any()))
+            .thenReturn(Mono.just(new ResultId().id("createdId")));
+
+        BusinessFunctionGroup created = new BusinessFunctionGroup().name("newFg");
+
+        subject.setupFunctionGroups(streamTask, serviceAgreement, List.of(created)).block();
+
+        Assertions.assertEquals("createdId", created.getId());
+        Assertions.assertEquals(saInternalId, created.getServiceAgreementId());
+    }
+
+    @Test
     void setupFunctionGroups() {
         final String saInternalId = "someSaInternalId";
         final String saExternalId = "someSaExternalId";

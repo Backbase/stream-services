@@ -1,13 +1,20 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-## [11.2.0]
+## [11.5.0]
+### Fixed
+- MAINT-45235: Assigning permissions no longer fails with `You can not mix the same function group with and without data groups combinations` when a reference job role and a same-named local copy are both visible. `AccessGroupService.setupFunctionGroups` keeps an already resolved job role id (when the name matches), otherwise resolves a local (DEFAULT) job role to the one owned by the service agreement and any other job role to the REFERENCE one, and always sets the service agreement id together with the id (also for job roles created in the same run). `AccessGroupService.setupJobRoleForSa`, `CustomerAccessGroupSaga` and `UpdatedServiceAgreementSaga` use the same resolution.
+
+## [11.4.0]
+### Changed
+- **Breaking:** Migrate Transaction Manager client from service-api **v3** to **v4** (v3 removed in 2026.10). Composition OpenAPI `$ref`s pin `transaction-manager-service-api-v4.3.0`; `stream-dbs-clients` codegen uses `transaction-manager-service-api-v4*.yaml`.
+- **Breaking:** `sequenceNumber` is required on composition push API (HTTP 400 if missing/invalid) and on the Stream transaction event schema. For event/pull/bootstrap ingest paths that map into DBS models, Stream defaults blank/invalid values to a numeric `externalId` (≤20 chars) or `"0"`.
+
+## [11.3.0]
 ### Fixed
 - MAINT-45235: Ingestion no longer fails with `Duplicate key ... (attempted merging values class FunctionGroupItem ...)` when a service agreement has a local (CUSTOM) job role with the same name as a reference job role, for example after copying a reference job role in the UI. `LegalEntitySaga`, `ServiceAgreementSagaV2`, `ProductIngestionSaga` and `ApprovalSaga` now resolve job roles by name through `FunctionGroupUtils.functionGroupsByName`, which prefers the REFERENCE job role on a name clash and logs a warning.
 
 ## [11.2.0]
 ### Changed
-- **Breaking:** Migrate Transaction Manager client from service-api **v3** to **v4** (v3 removed in 2026.10). Composition OpenAPI `$ref`s pin `transaction-manager-service-api-v4.3.0`; `stream-dbs-clients` codegen uses `transaction-manager-service-api-v4*.yaml`.
-- **Breaking:** `sequenceNumber` is required on composition push API (HTTP 400 if missing/invalid) and on the Stream transaction event schema. For event/pull/bootstrap ingest paths that map into DBS models, Stream defaults blank/invalid values to a numeric `externalId` (≤20 chars) or `"0"`.
 - Investment buy fixed assets for savings plan portfolios
 
 ## [11.1.0]

@@ -1449,7 +1449,7 @@ public class AccessGroupService {
     /**
      * Resolve the function group a business function group refers to and set its id and service agreement id together.
      *
-     * <p>An id that already points at a visible function group is authoritative. Otherwise, when several visible
+     * <p>An id that already points at a visible function group with the same name is authoritative. Otherwise, when several visible
      * function groups share the name: a local (DEFAULT) job role resolves to the one owned by the current service
      * agreement, anything else resolves to the REFERENCE one.
      */
@@ -1460,6 +1460,7 @@ public class AccessGroupService {
         if (businessFunctionGroup.getId() != null) {
             resolved = functionGroups.stream()
                 .filter(item -> businessFunctionGroup.getId().equals(item.getId()))
+                .filter(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item))
                 .findFirst();
         }
         if (resolved.isEmpty() && BusinessFunctionGroup.TypeEnum.DEFAULT.equals(businessFunctionGroup.getType())) {
@@ -1528,6 +1529,7 @@ public class AccessGroupService {
                 businessFunctionGroup.getName(), idItem.getId()))
             .map(idItem -> {
                 businessFunctionGroup.setId(idItem.getId());
+                businessFunctionGroup.setServiceAgreementId(serviceAgreement.getInternalId());
                 return businessFunctionGroup;
             });
 
