@@ -1,0 +1,1092 @@
+openapi: 3.0.3
+info:
+  title: CDP Profile Service - Service API
+  description: |
+    This internal service API is used to manage customer profiles, including personal information, addresses, and product holdings.
+  version: 1.0.0-beta
+  x-api-domain: customer-management
+  x-api-service: customer-data-platform
+servers:
+- url: http://localhost:8080
+tags:
+- name: Profiles
+  description: Internal operations related to customer profiles.
+paths:
+  /service-api/v1/profiles:
+    get:
+      tags:
+      - Profiles
+      summary: Fetch all customer profiles
+      operationId: getProfiles
+      parameters:
+      - name: page
+        in: query
+        description: "The page number to retrieve, starting at 0."
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          default: 0
+      - name: size
+        in: query
+        description: The number of events to return per page.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 20
+          minimum: 1
+          type: integer
+          default: 10
+      - name: sortDirection
+        in: query
+        description: The direction to sort by.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: asc
+          enum:
+          - asc
+          - desc
+      responses:
+        "200":
+          description: Customer profiles retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/paged-customer-profile-response"
+        "404":
+          description: Customer profiles can't be retrieved.
+    post:
+      tags:
+      - Profiles
+      summary: Create a customer profile
+      operationId: createProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/customer-profile-create-request"
+        required: true
+      responses:
+        "201":
+          description: Profile created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customer-profile"
+        "400":
+          description: Invalid input provided.
+  /service-api/v1/profiles/{id}:
+    get:
+      tags:
+      - Profiles
+      summary: Get a customer profile by ID
+      operationId: getProfile
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the customer.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: 4b3488af-a244-40ee-bc74-d7d8699fcc03
+      responses:
+        "200":
+          description: Customer profile retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customer-profile"
+        "404":
+          description: Customer profile not found.
+    delete:
+      tags:
+      - Profiles
+      summary: Delete a customer profile
+      operationId: deleteProfile
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the customer to delete.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "202":
+          description: Profile deletion request accepted and will be processed asynchronously.
+    patch:
+      tags:
+      - Profiles
+      summary: Update a customer profile
+      operationId: updateProfile
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the customer to update.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/customer-profile-update-request"
+        required: true
+      responses:
+        "200":
+          description: Profile updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customer-profile"
+        "400":
+          description: Invalid input provided.
+        "404":
+          description: Profile not found.
+  /service-api/v1/profiles/merge:
+    post:
+      tags:
+      - Profiles
+      summary: Merge two customer profiles
+      operationId: mergeProfiles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/merge-profile-request"
+        required: true
+      responses:
+        "200":
+          description: Profiles merged successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customer-profile"
+        "400":
+          description: Invalid merge request.
+  /service-api/v1/profiles/external/{id}:
+    get:
+      tags:
+      - Profiles
+      summary: Get customers profile by ID
+      operationId: getProfileByExternalId
+      parameters:
+      - name: id
+        in: path
+        description: Identifier for the customer.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: 4b3488af-a244-40ee-bc74-d7d8699fcc03
+      - name: page
+        in: query
+        description: "The page number to retrieve, starting at 0."
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          default: 0
+      - name: size
+        in: query
+        description: The number of events to return per page.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 20
+          minimum: 1
+          type: integer
+          default: 10
+      responses:
+        "200":
+          description: Customer profiles retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/paged-customer-profile-response"
+        "404":
+          description: Customer profile not found.
+    delete:
+      tags:
+      - Profiles
+      summary: Delete a customer profile
+      operationId: deleteProfileByExternalId
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the customer to delete.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Customer profile deleted successfully.
+        "404":
+          description: Customer profile not found.
+    patch:
+      tags:
+      - Profiles
+      summary: Update a customer profile
+      operationId: updateProfileByExternalId
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier for the customer to update.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/customer-profile-update"
+        required: true
+      responses:
+        "200":
+          description: Customer profile updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customer-profile"
+        "404":
+          description: Customer profile not found.
+  /service-api/v1/profiles/{cdpCustomerId}/events:
+    get:
+      tags:
+      - Profiles
+      summary: Fetch all events for customer
+      description: |
+        Fetch all the events.
+      operationId: getEventsByCdpCustomerId
+      parameters:
+      - name: cdpCustomerId
+        in: path
+        description: The unique identifier for the event.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: 4b3488af-a244-40ee-bc74-d7d8699fcc03
+      - name: page
+        in: query
+        description: "The page number to retrieve, starting at 0."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 0
+      - name: size
+        in: query
+        description: The number of events to return per page.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 20
+      - name: sortDirection
+        in: query
+        description: The direction to sort by.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: asc
+          enum:
+          - asc
+          - desc
+      responses:
+        "200":
+          description: A paginated list of matching events.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/paged-event-entity-response"
+  /service-api/v1/events/counts:
+    get:
+      tags:
+      - Events
+      summary: Count events by types and date range
+      description: Returns a dictionary of event counts for the specified types within
+        a given time period.
+      operationId: countEventsByTypes
+      parameters:
+      - name: eventTypes
+        in: query
+        description: A list of event types to count (maximum 15 types).
+        required: true
+        style: form
+        explode: true
+        schema:
+          maxItems: 15
+          minItems: 1
+          type: array
+          items:
+            type: string
+      - name: segmentCodes
+        in: query
+        description: A list of segmentCodes to filter events (maximum 15 types).
+        required: false
+        style: form
+        explode: true
+        schema:
+          maxItems: 15
+          minItems: 0
+          type: array
+          items:
+            type: string
+      - name: fromDate
+        in: query
+        description: Start date-time (ISO 8601) for the search range.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          format: date-time
+      - name: toDate
+        in: query
+        description: End date-time (ISO 8601) for the search range.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          format: date-time
+      responses:
+        "200":
+          description: Event counts retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int64
+                description: A map where key is the eventType and value is the count.
+                example:
+                  LOGIN_ATTEMPT: 150
+                  PAYMENT_SUCCESS: 45
+                  PROFILE_UPDATE: 12
+        "400":
+          description: Invalid input parameters.
+components:
+  schemas:
+    paged-customer-profile-response:
+      title: Paged Customer Profile Response
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of customer profiles for the current page.
+          items:
+            $ref: "#/components/schemas/customer-profile"
+        page:
+          type: integer
+          description: The current page number.
+        size:
+          type: integer
+          description: The number of items per page.
+        totalElements:
+          type: integer
+          description: The total number of profiles available.
+      description: A paginated response containing a list of customer profiles.
+    customer-profile-create-request:
+      title: CustomerProfileCreateRequest
+      required:
+      - externalIds
+      - profileStatus
+      - profileType
+      type: object
+      properties:
+        externalIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/external-id"
+        organizationInfo:
+          $ref: "#/components/schemas/organization-info"
+        personalInfo:
+          $ref: "#/components/schemas/personal-info"
+        deliveryChannels:
+          type: array
+          items:
+            $ref: "#/components/schemas/delivery-channel"
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/address"
+        profileExtendedData:
+          $ref: "#/components/schemas/profile-extended-data"
+        cardProductHoldings:
+          type: array
+          items:
+            $ref: "#/components/schemas/card-product-holding"
+        productHoldings:
+          type: array
+          items:
+            $ref: "#/components/schemas/product-holding"
+        preferences:
+          type: object
+          additionalProperties:
+            type: object
+        complianceInfo:
+          type: object
+          additionalProperties:
+            type: object
+        segments:
+          type: array
+          items:
+            $ref: "#/components/schemas/segment"
+        profileStatus:
+          type: string
+          description: The status of the profile.
+          example: ACTIVE
+        profileType:
+          type: string
+          enum:
+          - ORGANIZATION
+          - PERSON
+          - EMPLOYEE
+      description: Request body for creating a new customer profile.
+    customer-profile:
+      title: CustomerProfile
+      required:
+      - externalIds
+      - profileStatus
+      - profileType
+      type: object
+      properties:
+        cdpCustomerId:
+          type: string
+          description: Unique identifier for the customer profile in the CDP.
+          example: 4b3488af-a244-40ee-bc74-d7d8699fcc03
+        externalIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/external-id"
+        organizationInfo:
+          $ref: "#/components/schemas/organization-info"
+        personalInfo:
+          $ref: "#/components/schemas/personal-info"
+        deliveryChannels:
+          type: array
+          items:
+            $ref: "#/components/schemas/delivery-channel"
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/address"
+        profileExtendedData:
+          $ref: "#/components/schemas/profile-extended-data"
+        cardProductHoldings:
+          type: array
+          items:
+            $ref: "#/components/schemas/card-product-holding"
+        productHoldings:
+          type: array
+          items:
+            $ref: "#/components/schemas/product-holding"
+        financialSummary:
+          type: object
+          additionalProperties:
+            type: object
+          description: Aggregated financial data related to the customer profile.
+        behavioralMetrics:
+          type: object
+          additionalProperties:
+            type: object
+          description: Aggregated financial data related to the customer profile.
+        inferredAttributes:
+          type: object
+          additionalProperties:
+            type: object
+          description: Aggregated financial data related to the customer profile.
+        preferences:
+          type: object
+          additionalProperties:
+            type: object
+          description: Aggregated financial data related to the customer profile.
+        complianceInfo:
+          type: object
+          additionalProperties:
+            type: object
+          description: Aggregated financial data related to the customer profile.
+        segments:
+          type: array
+          items:
+            $ref: "#/components/schemas/segment"
+        segmentCodes:
+          type: array
+          description: A list of customer segment codes that this profile belongs
+            to.
+          example:
+          - segment1
+          - segment2
+          - segment10
+          items:
+            type: string
+        profileStatus:
+          type: string
+          description: The status of the profile.
+          example: ACTIVE
+        profileType:
+          type: string
+          enum:
+          - ORGANIZATION
+          - PERSON
+          - EMPLOYEE
+        lastUpdated:
+          type: string
+          format: date-time
+          example: 2025-05-20T18:32:56Z
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-05-20T18:32:56Z
+        version:
+          type: integer
+          format: int64
+          example: 56
+      description: A complete customer profile data model.
+    customer-profile-update-request:
+      title: CustomerProfileUpdateRequest
+      type: object
+      properties:
+        organizationInfo:
+          $ref: "#/components/schemas/organization-info"
+        personalInfo:
+          $ref: "#/components/schemas/personal-info"
+        deliveryChannels:
+          type: array
+          items:
+            $ref: "#/components/schemas/delivery-channel"
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/address"
+        profileExtendedData:
+          $ref: "#/components/schemas/profile-extended-data"
+        cardProductHoldings:
+          type: array
+          items:
+            $ref: "#/components/schemas/card-product-holding"
+        productHoldings:
+          type: array
+          items:
+            $ref: "#/components/schemas/product-holding"
+        preferences:
+          type: object
+          additionalProperties:
+            type: object
+        complianceInfo:
+          type: object
+          additionalProperties:
+            type: object
+        segments:
+          type: array
+          items:
+            $ref: "#/components/schemas/segment"
+        profileStatus:
+          type: string
+          description: The status of the profile.
+          example: ACTIVE
+      description: Request body for updating an existing customer profile.
+    merge-profile-request:
+      title: Merge Profile Request
+      type: object
+      description: Request containing a list of profile IDs to be merged into a single
+        profile.
+    customer-profile-update:
+      title: Customer Profile Update
+      type: object
+      description: The request body for updating a customer profile using a PATCH
+        operation.
+    paged-event-entity-response:
+      title: Paged Event Entity Response
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of event entities for the current page.
+          items:
+            $ref: "#/components/schemas/event-entity"
+        page:
+          type: integer
+          description: The current page number.
+        size:
+          type: integer
+          description: The number of items per page.
+        totalElements:
+          type: integer
+          description: The total number of events available.
+      description: A paginated response containing a list of event entities.
+    external-id:
+      title: ExternalId
+      required:
+      - id
+      - source
+      - type
+      type: object
+      properties:
+        source:
+          type: string
+          description: "The source system of the identifier (e.g., BACKBASE, CORE)."
+          example: BACKBASE
+        id:
+          type: string
+          example: 3a3488af-a244-40ee-bc74-d7d8699fcc01
+        type:
+          type: string
+          description: "The type of identifier (e.g., USER_ID)."
+          example: USER_ID
+        verified:
+          type: boolean
+          description: Indicates if the identifier has been verified.
+          example: true
+    organization-info:
+      title: OrganizationInfo
+      type: object
+      properties:
+        name:
+          type: string
+          description: the name of the organization
+        legalStructure:
+          type: string
+          description: the legal structure of the organization
+        type:
+          type: string
+          description: the type of the organization
+        sector:
+          type: string
+          description: "the business sector of the organisation, according to ISO20022\
+            \ standards"
+        email:
+          type: string
+          description: Primary email address
+          format: email
+          example: johndoe@gmail.com
+        phone:
+          type: string
+          description: Primary phone number
+          example: "+380671234567"
+        address:
+          $ref: "#/components/schemas/address"
+        establishmentDate:
+          type: string
+          description: the date when the organisation was established
+          format: date
+      description: filled in only if this profile stands for the organization
+    personal-info:
+      title: PersonalInfo
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        middleName:
+          type: string
+          example: Sebastian
+        fullName:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          description: Primary email address
+          format: email
+          example: johndoe@gmail.com
+        phone:
+          type: string
+          description: Primary phone number
+          example: "+380671234567"
+        address:
+          $ref: "#/components/schemas/address"
+        dateOfBirth:
+          type: string
+          format: date
+          example: 1986-06-14
+        gender:
+          type: string
+          example: MALE
+          enum:
+          - MALE
+          - FEMALE
+          - NON-BINARY
+        preferredLocale:
+          type: string
+          example: en_US
+        nationality:
+          type: string
+          example: Ukrainian
+        maritalStatus:
+          type: string
+          example: married
+        occupation:
+          type: string
+          example: software development
+        employer:
+          type: string
+          example: "185726526739063089"
+        employerName:
+          type: string
+          example: Backbase
+    delivery-channel:
+      title: DeliveryChannel
+      required:
+      - type
+      - value
+      type: object
+      properties:
+        type:
+          type: string
+          example: EMAIL
+          enum:
+          - EMAIL
+          - PHONE
+          - APP
+          - PUSH
+          - SMS
+          - SOCIAL
+          - OTHER
+        value:
+          type: string
+          example: johndoe@gmail.com
+        verified:
+          type: boolean
+          example: true
+        optIn:
+          type: boolean
+          example: true
+        primary:
+          type: boolean
+          example: true
+    address:
+      title: Address
+      type: object
+      properties:
+        street1:
+          type: string
+          example: "Park Lane, ave"
+        street2:
+          type: string
+        city:
+          type: string
+          example: New York
+        state:
+          type: string
+          example: New York
+        postalCode:
+          type: string
+          example: "12345"
+        country:
+          type: string
+          example: US
+        type:
+          type: string
+          example: HOME
+        primary:
+          type: boolean
+          example: true
+      description: Address schema
+    profile-extended-data:
+      title: ProfileExtendedData
+      type: object
+      additionalProperties:
+        type: object
+      description: A map for storing arbitrary key-value pairs of extended profile
+        data.
+      example:
+        loyaltyMemberId: L-12345
+        lastLoginPlatform: iOS
+        isPremiumCustomer: true
+        customPreferences:
+          theme: dark
+          notifications: daily
+    card-product-holding:
+      title: CardProductHolding
+      required:
+      - accountId
+      - productKind
+      - productType
+      type: object
+      properties:
+        externalIds:
+          type: array
+          description: External identifiers associated with the card product
+          items:
+            $ref: "#/components/schemas/external-id"
+        cardNumberLast4:
+          type: string
+          description: "Type of product (e.g., 'currentAccount', 'termDeposit', 'loan',\
+            \ 'creditCard')"
+        cardType:
+          type: string
+          description: "Type of product (e.g., 'currentAccount', 'termDeposit', 'loan',\
+            \ 'creditCard')"
+        cardIssuer:
+          type: string
+          description: "Primary identifier for the product (account ID, loan ID, card\
+            \ ID)"
+        validThrough:
+          type: string
+          description: Date when the product was opened/created
+          format: date
+        metadata:
+          type: object
+          additionalProperties:
+            type: object
+          description: any additional information for the product holding
+      description: Details of a credit or debit card product held by the customer.
+    product-holding:
+      title: ProductHolding
+      required:
+      - externalIds
+      - productKind
+      - productType
+      type: object
+      properties:
+        externalIds:
+          type: array
+          description: "External identifiers for the product holding (e.g., account\
+            \ number, IBAN)"
+          items:
+            $ref: "#/components/schemas/external-id"
+        productKind:
+          type: string
+          description: "Type of product (e.g., 'currentAccount', 'termDeposit', 'loan',\
+            \ 'creditCard')"
+          example: loans
+        productType:
+          type: string
+          description: "Type of product (e.g., 'currentAccount', 'termDeposit', 'loan',\
+            \ 'creditCard')"
+          example: Mortgage
+        accountNumberMasked:
+          type: string
+          description: Masked account number for display purposes
+          example: NL?? ABNA 0417 XXXX
+        currency:
+          type: string
+          description: Currency code (ISO 4217)
+          example: USD
+        openingDate:
+          type: string
+          description: Date when the product was opened/created
+          format: date
+          example: 2024-03-17
+        status:
+          type: string
+          example: ACTIVE
+        balance:
+          type: number
+          description: "Current balance (for accounts), outstanding balance (for loans),\
+            \ principal (for TDs)"
+          format: decimal
+          example: 15068.78
+        interestRate:
+          type: number
+          description: Interest rate (if applicable)
+          format: decimal
+          example: 22.5
+        linkedAccountId:
+          type: string
+          description: For cards/overdrafts linked to an account
+        creditLimit:
+          type: number
+          description: Credit limit for credit cards/overdrafts
+          format: decimal
+          example: 1000
+        availableCredit:
+          type: number
+          description: Available credit (for credit products)
+          format: decimal
+          example: 1000
+        expiryDate:
+          type: string
+          description: Expiry date for cards
+          format: date
+          example: 2027-05-01
+        maturityDate:
+          type: string
+          description: Maturity date for term deposits/loans
+          format: date
+          example: 2027-05-20
+        productName:
+          type: string
+          description: Product name as displayed to customer
+        productCode:
+          type: string
+          description: Internal product code
+        originatingBranch:
+          type: string
+          description: Branch or channel where product was opened
+        metadata:
+          type: object
+          additionalProperties:
+            type: object
+          description: any additional information for the product holding
+      description: "Details of a product holding (account, loan, card, etc.) for a\
+        \ customer"
+    segment:
+      title: Segment
+      required:
+      - assignedAt
+      - code
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+          description: "unique programmatic code for the segment (e.g., 'RFM_CHAMPION_CUSTOMER')"
+        name:
+          type: string
+          description: human-readable name of the segment
+        assignedAt:
+          type: string
+          description: timestamp when the segment was assigned to the customer
+          format: date-time
+        additional:
+          type: object
+          additionalProperties:
+            type: string
+      description: A customer segment data model.
+    event-entity:
+      title: EventEntity
+      type: object
+      properties:
+        eventId:
+          type: string
+          description: The unique identifier for the event.
+          example: evt_a1b2c3d4e5f6
+        eventType:
+          type: string
+          description: "The type of the event (e.g., 'user.login', 'transaction.completed')."
+          example: user.login
+        timestamp:
+          type: string
+          description: The ISO 8601 timestamp of when the event occurred.
+          format: date-time
+          example: 2025-10-09T08:32:49Z
+        sourceSystem:
+          type: string
+          description: "The system that originated the event (e.g., 'WebApp', 'MobileApp')."
+          example: WebApp
+        sourceType:
+          type: string
+          description: "The type of the source entity (e.g., 'user', 'account')."
+          example: user
+        sourceId:
+          type: string
+          description: The ID of the source entity.
+          example: usr_f6e5d4c3b2a1
+        sessionId:
+          type: string
+          description: The session identifier associated with the event.
+          example: sess_9876543210
+        cdpCustomerId:
+          type: string
+          description: The Customer Data Platform unique identifier for the customer.
+          example: cdp_xyz987abc654
+        data:
+          type: object
+          additionalProperties:
+            type: object
+          description: A flexible map containing the primary event payload.
+          example:
+            loginMethod: password
+            successful: true
+        context:
+          type: object
+          additionalProperties:
+            type: object
+          description: A flexible map containing contextual information about the
+            event.
+          example:
+            deviceType: mobile
+            location: "Kraków, PL"
+        metadata:
+          $ref: "#/components/schemas/event-metadata"
+      description: Represents a generic event captured by the system.
+    event-metadata:
+      title: EventMetadata
+      type: object
+      properties:
+        schemaVersion:
+          type: string
+          description: The version of the event schema.
+          example: 1.2.0
+        source:
+          type: string
+          description: The specific source.
+        traceId:
+          type: string
+          description: The distributed tracing identifier.
+          example: trace_1122334455
+        ingestedAt:
+          type: string
+          description: The ISO 8601 timestamp of when the event was ingested by the
+            system.
+          format: date-time
+          example: 2025-10-09T08:32:50.123Z
+        processingStatus:
+          type: string
+          description: The current processing status of the event.
+          example: PROCESSED
+        processedBy:
+          type: array
+          description: A list of services or processors that have handled this event.
+          example:
+          - ingestion-service
+          - profile-builder
+          items:
+            type: string
+        sourceIp:
+          type: string
+          description: The IP address from which the event originated.
+          format: ipv4
+          example: 198.51.100.14
+        userAgent:
+          type: string
+          description: The user agent string of the client that generated the event.
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,\
+            \ like Gecko) Chrome/125.0.0.0 Safari/537.36"
+        correlationId:
+          type: string
+          description: An ID to correlate events across different systems.
+          example: corr_aabbccddeeff
+        additionalProperties:
+          type: object
+          additionalProperties:
+            type: string
+          description: A map for any other arbitrary metadata properties.
+          example:
+            data_center: europe-west3
+      description: Metadata associated with the processing and ingestion of the event.
+  examples: {}

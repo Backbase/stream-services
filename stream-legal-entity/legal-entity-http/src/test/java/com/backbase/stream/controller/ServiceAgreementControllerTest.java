@@ -21,6 +21,7 @@ import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.loan.inbound.api.service.v2.LoansApi;
 import com.backbase.stream.CustomerAccessGroupSaga;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
+import com.backbase.stream.cdp.CdpSaga;
 import com.backbase.stream.clients.config.CustomerProfileClientConfig;
 import com.backbase.stream.config.LegalEntityHttpConfiguration;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
@@ -125,6 +126,9 @@ class ServiceAgreementControllerTest {
 
     @MockitoBean
     private UserKindSegmentationSaga userKindSegmentationSaga;
+
+    @MockitoBean
+    private CdpSaga cdpSaga;
 
     @MockitoBean
     private PlansService plansService;

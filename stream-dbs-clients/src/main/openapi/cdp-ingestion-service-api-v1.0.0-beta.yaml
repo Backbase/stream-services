@@ -1,0 +1,1955 @@
+openapi: 3.0.3
+info:
+  title: CDP Ingestion Service API Spec
+  description: Specs for CDP Ingestion Service API
+  version: 1.0.0-beta
+  x-icon: credit_card
+servers:
+- url: http://localhost:8080
+  description: prism mock server
+tags:
+- name: cdp
+paths:
+  /service-api/v1/ingestEvents:
+    post:
+      tags:
+      - cdp
+      summary: Ingest multiple CDP events
+      description: Accepts and processes multiple CDP events for bulk ingestion into
+        the platform
+      operationId: ingestEvents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CdpEvents"
+            examples:
+              cdpEvents:
+                $ref: "#/components/examples/CdpEventsExample"
+                value: null
+        required: true
+      responses:
+        "200":
+          description: Events successfully processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkIngestionSuccessResponse"
+              examples:
+                bulkSuccess:
+                  $ref: "#/components/examples/BulkIngestionSuccessExample"
+                  value: null
+        "400":
+          description: |
+            The server cannot or will not process the request due to something that is perceived to be a client error.
+            For example, invalid event structure or missing required fields.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestError"
+              examples:
+                badRequestError:
+                  $ref: "#/components/examples/BadRequestExample"
+                  value: null
+        "401":
+          description: Request lacks valid authentication credentials for the target
+            resource.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+              example:
+                $ref: "#/components/examples/not-found-error"
+        "500":
+          description: Internal server error occurred while processing the event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+  /service-api/v1/validation/event-types/{eventType}/rules:
+    get:
+      tags:
+      - validation
+      summary: Get validation rules
+      description: Retrieves validation rules for a specific event type
+      operationId: getValidationRules
+      parameters:
+      - name: eventType
+        in: path
+        description: Event type to get rules for
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maxLength: 100
+          type: string
+      responses:
+        "200":
+          description: Successfully retrieved validation rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ValidationRule"
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+    post:
+      tags:
+      - validation
+      summary: Create validation rules
+      description: Creates one or more validation rules for validating CDP events
+      operationId: createValidationRules
+      parameters:
+      - name: eventType
+        in: path
+        description: Event type these rules apply to
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maxLength: 100
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidationRule"
+            examples:
+              validationRule:
+                $ref: "#/components/examples/ValidationRuleExample"
+                value: null
+        required: true
+      responses:
+        "201":
+          description: Validation rule successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationRule"
+              examples:
+                validationRule:
+                  $ref: "#/components/examples/ValidationRuleExample"
+                  value: null
+        "400":
+          description: Bad request - invalid schema format or duplicate schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SchemaValidationError"
+              examples:
+                schemaValidationError:
+                  $ref: "#/components/examples/SchemaValidationErrorExample"
+                  value: null
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+  /service-api/v1/validation/event-types/{eventType}/rules/{uuid}:
+    put:
+      tags:
+      - validation
+      summary: Update validation rule
+      description: Updates an existing validation rule
+      operationId: updateValidationRule
+      parameters:
+      - name: eventType
+        in: path
+        description: Event type this rule applies to
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maxLength: 100
+          type: string
+      - name: uuid
+        in: path
+        description: Validation rule UUID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidationRule"
+        required: true
+      responses:
+        "200":
+          description: Validation rule successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationRule"
+        "400":
+          description: Bad request - invalid validation rule data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestError"
+              examples:
+                badRequestError:
+                  $ref: "#/components/examples/BadRequestExample"
+                  value: null
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "404":
+          description: Validation rule not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+    delete:
+      tags:
+      - validation
+      summary: Delete validation rule
+      description: Deletes a validation rule by its UUID
+      operationId: deleteValidationRule
+      parameters:
+      - name: eventType
+        in: path
+        description: Event type this rule applies to
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maxLength: 100
+          type: string
+      - name: uuid
+        in: path
+        description: Validation rule UUID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Validation rule successfully deleted
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "404":
+          description: Validation rule not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+  /service-api/v1/validation/event-types:
+    get:
+      tags:
+      - validation
+      summary: Get all event types
+      description: Retrieves all available event types
+      operationId: getAllEventTypes
+      responses:
+        "200":
+          description: Successfully retrieved event types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventType"
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+    post:
+      tags:
+      - validation
+      summary: Create a new event type
+      description: Creates a new event type for CDP events
+      operationId: createEventType
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventType"
+        required: true
+      responses:
+        "201":
+          description: Event type successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventType"
+        "400":
+          description: Bad request - invalid event type data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestError"
+              examples:
+                badRequestError:
+                  $ref: "#/components/examples/BadRequestExample"
+                  value: null
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+  /service-api/v1/validation/event-types/{eventType}:
+    delete:
+      tags:
+      - validation
+      summary: Delete the event type
+      description: Deletes the event type
+      operationId: deleteEventType
+      parameters:
+      - name: eventType
+        in: path
+        description: Event type to delete
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maxLength: 100
+          type: string
+      responses:
+        "204":
+          description: Event type successfully deleted
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "404":
+          description: Event type configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+  /service-api/v1/validation/event-types/{eventType}/configuration:
+    get:
+      tags:
+      - validation
+      summary: Get configuration for an event type
+      description: Retrieves the configuration for a specific event type (1-to-1 relationship)
+      operationId: getEventTypeConfiguration
+      parameters:
+      - name: eventType
+        in: path
+        description: Event type to get configuration for
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maxLength: 100
+          type: string
+      responses:
+        "200":
+          description: Successfully retrieved event type configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventTypeConfiguration"
+              examples:
+                eventTypeConfiguration:
+                  $ref: "#/components/examples/EventTypeConfigurationExample"
+                  value: null
+        "404":
+          description: Configuration not found for this event type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+    put:
+      tags:
+      - validation
+      summary: Create or update configuration for an event type
+      description: Creates or updates the configuration for a specific event type
+        (1-to-1 relationship)
+      operationId: createOrUpdateEventTypeConfiguration
+      parameters:
+      - name: eventType
+        in: path
+        description: Event type to configure
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maxLength: 100
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventTypeConfiguration"
+        required: true
+      responses:
+        "200":
+          description: Event type configuration successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventTypeConfiguration"
+              examples:
+                eventTypeConfiguration:
+                  $ref: "#/components/examples/EventTypeConfigurationExample"
+                  value: null
+        "201":
+          description: Event type configuration successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventTypeConfiguration"
+              examples:
+                eventTypeConfiguration:
+                  $ref: "#/components/examples/EventTypeConfigurationExample"
+                  value: null
+        "400":
+          description: Bad request - invalid configuration data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestError"
+              examples:
+                badRequestError:
+                  $ref: "#/components/examples/BadRequestExample"
+                  value: null
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+    delete:
+      tags:
+      - validation
+      summary: Delete configuration for an event type
+      description: Deletes the configuration for a specific event type
+      operationId: deleteEventTypeConfiguration
+      parameters:
+      - name: eventType
+        in: path
+        description: Event type
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maxLength: 100
+          type: string
+      responses:
+        "204":
+          description: Event type configuration successfully deleted
+        "401":
+          description: Request lacks valid authentication credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+              examples:
+                unauthorizedError:
+                  $ref: "#/components/examples/UnauthorizedExample"
+                  value: null
+        "404":
+          description: Event type configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalServerError"
+              examples:
+                internalServerError:
+                  $ref: "#/components/examples/InternalServerErrorExample"
+                  value: null
+      x-BbAccessControl: false
+components:
+  schemas:
+    CdpEvent:
+      required:
+      - data
+      - eventId
+      - eventType
+      - sourceId
+      - sourceSystem
+      - sourceType
+      type: object
+      properties:
+        eventId:
+          type: string
+          description: Unique identifier of the event in the source system
+          example: 12345678-1234-5678-9012-123456789012
+        eventType:
+          type: string
+          description: Type of the event - used for event validation and processing
+            definitions
+          example: login
+        timestamp:
+          type: string
+          description: Time when event was emitted by the source system
+          format: date-time
+          example: 2023-09-16T10:30:00Z
+        sourceSystem:
+          type: string
+          description: "System where the event originated (e.g., web_app, mobile_app)"
+          example: mobile_app
+        sourceType:
+          type: string
+          description: "Identifies the type of the source entity. Examples: USER_ID,\
+            \ CUSTOMER_ID, ACCOUNT_ID, DATA_GROUP_ID"
+          example: USER_ID
+        sourceId:
+          type: string
+          description: The id of the entity in the source system
+          example: user-123456
+        sessionId:
+          type: string
+          description: "ID of the user session (for web originated events, mostly)"
+          example: session-789012
+        cdpCustomerId:
+          type: string
+          description: Provided if the source system is aware of the CDP customer
+            profile id
+          example: cdp_789
+        data:
+          type: object
+          additionalProperties: true
+          description: "The main entity Map<String,Object> to provide the information\
+            \ for CDP"
+        context:
+          type: object
+          additionalProperties: true
+          description: Map of String and Object to store any information on the context
+        metadata:
+          type: object
+          properties:
+            schemaVersion:
+              type: string
+              description: Event schema version
+            source:
+              type: string
+              description: The name of the event's service origin
+            correlationId:
+              type: string
+              description: Correlation ID for tracing across services
+            traceId:
+              type: string
+              description: Trace ID for distributed tracing
+            processedBy:
+              type: array
+              description: List of services that processed the event
+              items:
+                type: string
+            sourceIp:
+              type: string
+              description: Source IP address (for web/mobile events)
+            userAgent:
+              type: string
+              description: User agent (for web/mobile events)
+          additionalProperties: false
+          description: Event metadata from source system
+    CdpEvents:
+      required:
+      - cdpEvents
+      type: object
+      properties:
+        cdpEvents:
+          maxItems: 100
+          minItems: 1
+          type: array
+          description: Array of CDP events to be processed
+          example:
+          - eventId: 123e4567-e89b-12d3-a456-426614174000
+            eventType: USER_ACTION
+            timestamp: 2024-06-10T12:34:56Z
+            sourceSystem: webApp
+            sourceType: USER_ID
+            sourceId: user_001
+            sessionId: session_abc123
+            cdpCustomerId: null
+            data:
+              action: login
+              device: Chrome
+              location:
+                country: US
+                city: New York
+            context: null
+            metadata:
+              schemaVersion: 2.1.0
+              source: webApp
+              correlationId: corr-123e4567-e89b-12d3
+              traceId: trace-123e4567-e89b-12d3
+              processedBy: []
+              sourceIp: 192.168.1.1
+              userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+          - eventId: 456e7890-e12b-34d5-b789-567890123456
+            eventType: TRANSACTION
+            timestamp: 2024-06-10T12:35:30Z
+            sourceSystem: mobileApp
+            sourceType: USER_ID
+            sourceId: user_001
+            sessionId: session_abc123
+            cdpCustomerId: cdp_customer_001
+            data:
+              action: payment
+              amount: 150.0
+              currency: USD
+              merchant: Amazon
+            context:
+              deviceType: mobile
+              appVersion: 2.1.0
+            metadata:
+              schemaVersion: 2.1.0
+              source: mobileApp
+              correlationId: corr-456e7890-e12b-34d5
+              traceId: trace-456e7890-e12b-34d5
+              processedBy: []
+              sourceIp: 10.0.0.5
+              userAgent: MobileApp/2.1.0 (iOS 15.0)
+          items:
+            $ref: "#/components/schemas/cdp-event"
+    IngestionSuccessResponse:
+      required:
+      - eventId
+      - status
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the ingestion request
+          example: SUCCESS
+          enum:
+          - SUCCESS
+        eventId:
+          type: string
+          description: The ID of the ingested event
+          format: uuid
+          example: 12345678-1234-5678-9012-123456789012
+        message:
+          type: string
+          description: Optional success message
+          example: Event successfully ingested
+        timestamp:
+          type: string
+          description: When the event was processed (ISO 8601 format)
+          format: date-time
+          example: 2023-09-16T10:30:01.5Z
+    BulkIngestionSuccessResponse:
+      required:
+      - processedEvents
+      - status
+      - totalEvents
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the bulk ingestion request
+          example: SUCCESS
+          enum:
+          - SUCCESS
+          - PARTIAL_SUCCESS
+        totalEvents:
+          minimum: 1
+          type: integer
+          description: Total number of events received
+          example: 3
+        processedEvents:
+          minimum: 0
+          type: integer
+          description: Number of events successfully processed
+          example: 3
+        failedEvents:
+          minimum: 0
+          type: integer
+          description: Number of events that failed processing
+          example: 0
+        errors:
+          type: array
+          description: List of errors for failed events (if any)
+          example: []
+          items:
+            type: object
+            properties:
+              eventId:
+                type: string
+                description: ID of the event that failed
+              error:
+                type: string
+                description: Error message
+              errorCode:
+                type: string
+                description: Error code
+        message:
+          type: string
+          description: Optional success message
+          example: All events successfully ingested
+        timestamp:
+          type: string
+          description: When the bulk processing was completed (ISO 8601 format)
+          format: date-time
+          example: 2024-06-10T12:36:05.5Z
+    ValidationRule:
+      required:
+      - errorMessage
+      - fieldPath
+      - ruleName
+      - validationConfig
+      - validationType
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the validation rule
+          format: uuid
+          readOnly: true
+          example: 123e4567-e89b-12d3-a456-426614174000
+        ruleName:
+          maxLength: 200
+          minLength: 1
+          type: string
+          description: Name of the validation rule
+          example: User ID Required
+        validationType:
+          $ref: "#/components/schemas/validation-type"
+        fieldPath:
+          maxLength: 500
+          minLength: 1
+          type: string
+          description: JSONPath to the field to validate
+          example: $.data.userId
+        validationConfig:
+          type: object
+          additionalProperties: true
+          description: Configuration object for the validation rule
+          example:
+            required: true
+        errorMessage:
+          maxLength: 500
+          minLength: 1
+          type: string
+          description: Error message to return when validation fails
+          example: User ID is required
+    SchemaValidationError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: High-level error message
+          example: Invalid JSON schema format
+        ruleName:
+          type: string
+          description: Name of the validation rule that failed
+          example: ProfileCreatedEvent Schema v1.0
+        details:
+          type: array
+          description: Detailed validation errors for specific fields
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: The field path where the error occurred
+                example: properties.userId.type
+              error:
+                type: string
+                description: Specific error message for this field
+                example: "Invalid type: should be 'string'"
+      example:
+        message: Invalid JSON schema format
+        ruleName: ProfileCreatedEvent Schema v1.0
+        details:
+        - field: properties.userId.type
+          error: "Invalid type: should be 'string'"
+        - field: required
+          error: Missing required field 'email'
+    EventType:
+      required:
+      - eventType
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique UUID identifier for the event type
+          format: uuid
+          readOnly: true
+          example: 550e8400-e29b-41d4-a716-446655440000
+        eventType:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: The event type identifier
+          example: login
+        displayName:
+          maxLength: 200
+          type: string
+          description: Human-readable display name for the event type
+          example: User Login Event
+        description:
+          type: string
+          description: Description of the event type
+          example: Event triggered when a user successfully logs into the system
+    EventTypeAction:
+      required:
+      - actionName
+      - eventType
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique UUID identifier for the event type action
+          format: uuid
+          readOnly: true
+          example: 660e8400-e29b-41d4-a716-446655440001
+        eventType:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: The event type this action applies to
+          example: ProfileCreatedEvent
+        actionName:
+          maxLength: 200
+          minLength: 1
+          type: string
+          description: Name of the action to be performed
+          example: Identity Resolution
+        description:
+          maxLength: 500
+          type: string
+          description: Description of what this action does
+          example: Enrich event with identity resolution data
+        actionConfig:
+          type: object
+          additionalProperties: true
+          description: |
+            Configuration parameters for the event type processing.
+            Contains two main sections:
+            - profilesMatchingQueryString: Elasticsearch query object to find target profiles
+            - actions: Map of action names to enabled/disabled flags
+          example:
+            profilesMatchingQueryString:
+              term:
+                externalIds.id.keyword: '%s'
+            actions:
+              save-event: true
+              create-profile: true
+              update-segments: true
+              send-notification: false
+    EventTypeConfiguration:
+      required:
+      - eventType
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique UUID identifier for the event type configuration
+          format: uuid
+          readOnly: true
+          example: 660e8400-e29b-41d4-a716-446655440001
+        eventType:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: The event type this configuration applies to
+          example: ProfileCreatedEvent
+        profilesMatchingQuery:
+          type: object
+          additionalProperties: true
+          description: |
+            Elasticsearch query object to find target profiles for this event type.
+            This query determines which user profiles this event should be applied to.
+          example:
+            term:
+              externalIds.id.keyword: '%s'
+        eventConfig:
+          type: object
+          additionalProperties: true
+          description: |
+            Configuration for event enrichment actions.
+            Contains map of action names to enabled/disabled flags.
+          example:
+            actions:
+              save-event: true
+              create-profile: true
+              update-segments: true
+              send-notification: false
+      example:
+        $ref: ../examples/event-type-configuration.json
+    ValidationType:
+      type: string
+      description: Type of validation to perform
+      enum:
+      - SCHEMA_VALIDATION
+      x-enum-descriptions:
+      - Validates the entire data object against a JSON Schema
+    BadRequestError:
+      title: BadRequestError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: "#/components/schemas/error-item"
+    UnauthorizedError:
+      title: UnauthorizedError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: "#/components/schemas/error-item"
+    NotFoundError:
+      title: NotFoundError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: "#/components/schemas/error-item"
+    InternalServerError:
+      title: SimpleError
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+    ErrorItem:
+      title: ErrorItem
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information.
+        key:
+          minLength: 1
+          type: string
+          description: "{capability-name}.api.{api-key-name}. For generated validation\
+            \ errors this is the path in the document the error resolves to. e.g.\
+            \ object name + '.' + field"
+        context:
+          title: Context
+          type: object
+          additionalProperties:
+            type: string
+          description: Context can be anything used to construct localised messages.
+    error:
+      title: Error
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: "#/components/schemas/error-item"
+    cdp-event:
+      required:
+      - data
+      - eventId
+      - eventType
+      - sourceId
+      - sourceSystem
+      - sourceType
+      type: object
+      properties:
+        eventId:
+          type: string
+          description: Unique identifier of the event in the source system
+          example: 12345678-1234-5678-9012-123456789012
+        eventType:
+          type: string
+          description: Type of the event - used for event validation and processing
+            definitions
+          example: login
+        timestamp:
+          type: string
+          description: Time when event was emitted by the source system
+          format: date-time
+          example: 2023-09-16T10:30:00Z
+        sourceSystem:
+          type: string
+          description: "System where the event originated (e.g., web_app, mobile_app)"
+          example: mobile_app
+        sourceType:
+          type: string
+          description: "Identifies the type of the source entity. Examples: USER_ID,\
+            \ CUSTOMER_ID, ACCOUNT_ID, DATA_GROUP_ID"
+          example: USER_ID
+        sourceId:
+          type: string
+          description: The id of the entity in the source system
+          example: user-123456
+        sessionId:
+          type: string
+          description: "ID of the user session (for web originated events, mostly)"
+          example: session-789012
+        cdpCustomerId:
+          type: string
+          description: Provided if the source system is aware of the CDP customer
+            profile id
+          example: cdp_789
+        data:
+          type: object
+          additionalProperties: true
+          description: "The main entity Map<String,Object> to provide the information\
+            \ for CDP"
+        context:
+          type: object
+          additionalProperties: true
+          description: Map of String and Object to store any information on the context
+        metadata:
+          type: object
+          properties:
+            schemaVersion:
+              type: string
+              description: Event schema version
+            source:
+              type: string
+              description: The name of the event's service origin
+            correlationId:
+              type: string
+              description: Correlation ID for tracing across services
+            traceId:
+              type: string
+              description: Trace ID for distributed tracing
+            processedBy:
+              type: array
+              description: List of services that processed the event
+              items:
+                type: string
+            sourceIp:
+              type: string
+              description: Source IP address (for web/mobile events)
+            userAgent:
+              type: string
+              description: User agent (for web/mobile events)
+          additionalProperties: false
+          description: Event metadata from source system
+    cdp-events:
+      required:
+      - cdpEvents
+      type: object
+      properties:
+        cdpEvents:
+          maxItems: 100
+          minItems: 1
+          type: array
+          description: Array of CDP events to be processed
+          example:
+          - eventId: 123e4567-e89b-12d3-a456-426614174000
+            eventType: USER_ACTION
+            timestamp: 2024-06-10T12:34:56Z
+            sourceSystem: webApp
+            sourceType: USER_ID
+            sourceId: user_001
+            sessionId: session_abc123
+            cdpCustomerId: null
+            data:
+              action: login
+              device: Chrome
+              location:
+                country: US
+                city: New York
+            context: null
+            metadata:
+              schemaVersion: 2.1.0
+              source: webApp
+              correlationId: corr-123e4567-e89b-12d3
+              traceId: trace-123e4567-e89b-12d3
+              processedBy: []
+              sourceIp: 192.168.1.1
+              userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+          - eventId: 456e7890-e12b-34d5-b789-567890123456
+            eventType: TRANSACTION
+            timestamp: 2024-06-10T12:35:30Z
+            sourceSystem: mobileApp
+            sourceType: USER_ID
+            sourceId: user_001
+            sessionId: session_abc123
+            cdpCustomerId: cdp_customer_001
+            data:
+              action: payment
+              amount: 150.0
+              currency: USD
+              merchant: Amazon
+            context:
+              deviceType: mobile
+              appVersion: 2.1.0
+            metadata:
+              schemaVersion: 2.1.0
+              source: mobileApp
+              correlationId: corr-456e7890-e12b-34d5
+              traceId: trace-456e7890-e12b-34d5
+              processedBy: []
+              sourceIp: 10.0.0.5
+              userAgent: MobileApp/2.1.0 (iOS 15.0)
+          items:
+            $ref: "#/components/schemas/cdp-event"
+    ingestion-success-response:
+      required:
+      - eventId
+      - status
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the ingestion request
+          example: SUCCESS
+          enum:
+          - SUCCESS
+        eventId:
+          type: string
+          description: The ID of the ingested event
+          format: uuid
+          example: 12345678-1234-5678-9012-123456789012
+        message:
+          type: string
+          description: Optional success message
+          example: Event successfully ingested
+        timestamp:
+          type: string
+          description: When the event was processed (ISO 8601 format)
+          format: date-time
+          example: 2023-09-16T10:30:01.5Z
+    bulk-ingestion-success-response:
+      required:
+      - processedEvents
+      - status
+      - totalEvents
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the bulk ingestion request
+          example: SUCCESS
+          enum:
+          - SUCCESS
+          - PARTIAL_SUCCESS
+        totalEvents:
+          minimum: 1
+          type: integer
+          description: Total number of events received
+          example: 3
+        processedEvents:
+          minimum: 0
+          type: integer
+          description: Number of events successfully processed
+          example: 3
+        failedEvents:
+          minimum: 0
+          type: integer
+          description: Number of events that failed processing
+          example: 0
+        errors:
+          type: array
+          description: List of errors for failed events (if any)
+          example: []
+          items:
+            type: object
+            properties:
+              eventId:
+                type: string
+                description: ID of the event that failed
+              error:
+                type: string
+                description: Error message
+              errorCode:
+                type: string
+                description: Error code
+        message:
+          type: string
+          description: Optional success message
+          example: All events successfully ingested
+        timestamp:
+          type: string
+          description: When the bulk processing was completed (ISO 8601 format)
+          format: date-time
+          example: 2024-06-10T12:36:05.5Z
+    validation-rule:
+      required:
+      - errorMessage
+      - fieldPath
+      - ruleName
+      - validationConfig
+      - validationType
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the validation rule
+          format: uuid
+          readOnly: true
+          example: 123e4567-e89b-12d3-a456-426614174000
+        ruleName:
+          maxLength: 200
+          minLength: 1
+          type: string
+          description: Name of the validation rule
+          example: User ID Required
+        validationType:
+          $ref: "#/components/schemas/validation-type"
+        fieldPath:
+          maxLength: 500
+          minLength: 1
+          type: string
+          description: JSONPath to the field to validate
+          example: $.data.userId
+        validationConfig:
+          type: object
+          additionalProperties: true
+          description: Configuration object for the validation rule
+          example:
+            required: true
+        errorMessage:
+          maxLength: 500
+          minLength: 1
+          type: string
+          description: Error message to return when validation fails
+          example: User ID is required
+    schema-validation-error:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: High-level error message
+          example: Invalid JSON schema format
+        ruleName:
+          type: string
+          description: Name of the validation rule that failed
+          example: ProfileCreatedEvent Schema v1.0
+        details:
+          type: array
+          description: Detailed validation errors for specific fields
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: The field path where the error occurred
+                example: properties.userId.type
+              error:
+                type: string
+                description: Specific error message for this field
+                example: "Invalid type: should be 'string'"
+      example:
+        message: Invalid JSON schema format
+        ruleName: ProfileCreatedEvent Schema v1.0
+        details:
+        - field: properties.userId.type
+          error: "Invalid type: should be 'string'"
+        - field: required
+          error: Missing required field 'email'
+    event-type:
+      required:
+      - eventType
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique UUID identifier for the event type
+          format: uuid
+          readOnly: true
+          example: 550e8400-e29b-41d4-a716-446655440000
+        eventType:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: The event type identifier
+          example: login
+        displayName:
+          maxLength: 200
+          type: string
+          description: Human-readable display name for the event type
+          example: User Login Event
+        description:
+          type: string
+          description: Description of the event type
+          example: Event triggered when a user successfully logs into the system
+    event-type-action:
+      required:
+      - actionName
+      - eventType
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique UUID identifier for the event type action
+          format: uuid
+          readOnly: true
+          example: 660e8400-e29b-41d4-a716-446655440001
+        eventType:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: The event type this action applies to
+          example: ProfileCreatedEvent
+        actionName:
+          maxLength: 200
+          minLength: 1
+          type: string
+          description: Name of the action to be performed
+          example: Identity Resolution
+        description:
+          maxLength: 500
+          type: string
+          description: Description of what this action does
+          example: Enrich event with identity resolution data
+        actionConfig:
+          type: object
+          additionalProperties: true
+          description: |
+            Configuration parameters for the event type processing.
+            Contains two main sections:
+            - profilesMatchingQueryString: Elasticsearch query object to find target profiles
+            - actions: Map of action names to enabled/disabled flags
+          example:
+            profilesMatchingQueryString:
+              term:
+                externalIds.id.keyword: '%s'
+            actions:
+              save-event: true
+              create-profile: true
+              update-segments: true
+              send-notification: false
+    event-type-configuration:
+      required:
+      - eventType
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique UUID identifier for the event type configuration
+          format: uuid
+          readOnly: true
+          example: 660e8400-e29b-41d4-a716-446655440001
+        eventType:
+          maxLength: 100
+          minLength: 1
+          type: string
+          description: The event type this configuration applies to
+          example: ProfileCreatedEvent
+        profilesMatchingQuery:
+          type: object
+          additionalProperties: true
+          description: |
+            Elasticsearch query object to find target profiles for this event type.
+            This query determines which user profiles this event should be applied to.
+          example:
+            term:
+              externalIds.id.keyword: '%s'
+        eventConfig:
+          type: object
+          additionalProperties: true
+          description: |
+            Configuration for event enrichment actions.
+            Contains map of action names to enabled/disabled flags.
+          example:
+            actions:
+              save-event: true
+              create-profile: true
+              update-segments: true
+              send-notification: false
+      example:
+        $ref: ../examples/event-type-configuration.json
+    validation-type:
+      type: string
+      description: Type of validation to perform
+      enum:
+      - SCHEMA_VALIDATION
+      x-enum-descriptions:
+      - Validates the entire data object against a JSON Schema
+    bad-request-error:
+      title: BadRequestError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: "#/components/schemas/error-item"
+    unauthorized-error:
+      title: UnauthorizedError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: "#/components/schemas/error-item"
+    not-found-error:
+      title: NotFoundError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: "#/components/schemas/error-item"
+    simple-error:
+      title: SimpleError
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+    error-item:
+      title: ErrorItem
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information.
+        key:
+          minLength: 1
+          type: string
+          description: "{capability-name}.api.{api-key-name}. For generated validation\
+            \ errors this is the path in the document the error resolves to. e.g.\
+            \ object name + '.' + field"
+        context:
+          title: Context
+          type: object
+          additionalProperties:
+            type: string
+          description: Context can be anything used to construct localised messages.
+  responses:
+    "404NotFound":
+      description: Not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error"
+          example:
+            $ref: "#/components/examples/not-found-error"
+  examples:
+    ValidationRuleExample:
+      summary: ValidationRuleExample
+      value:
+        id: 550e8400-e29b-41d4-a716-446655440001
+        ruleName: ProfileCreatedEvent Schema v1.0
+        validationType: SCHEMA_VALIDATION
+        fieldPath: data
+        errorMessage: Event data must conform to ProfileCreatedEvent schema
+        validationConfig:
+          $schema: http://json-schema.org/draft-07/schema#
+          type: object
+          required:
+          - userId
+          - email
+          properties:
+            userId:
+              type: string
+              minLength: 1
+            email:
+              type: string
+              format: email
+    ValidationRulesListExample:
+      summary: ValidationRulesListExample
+      value:
+        value:
+        - id: 550e8400-e29b-41d4-a716-446655440001
+          ruleName: ProfileCreatedEvent Schema v1.0
+          validationType: SCHEMA_VALIDATION
+          fieldPath: data
+          errorMessage: Event data must conform to ProfileCreatedEvent schema
+          validationConfig:
+            $schema: http://json-schema.org/draft-07/schema#
+            type: object
+            required:
+            - userId
+            - email
+            properties:
+              userId:
+                type: string
+                minLength: 1
+              email:
+                type: string
+                format: email
+    SchemaValidationErrorExample:
+      summary: SchemaValidationErrorExample
+      value:
+        message: Invalid JSON schema format
+        ruleName: ProfileCreatedEvent Schema v1.0
+        details:
+        - field: properties.userId.type
+          error: "Invalid type: should be 'string'"
+        - field: required
+          error: Missing required field 'email'
+    EventTypeExample:
+      summary: EventTypeExample
+      value:
+        id: 770e8400-e29b-41d4-a716-446655440001
+        eventType: ProfileCreatedEvent
+        description: Event triggered when a new user profile is created in the system
+        version: 1.0.0
+        active: true
+    EventTypesListExample:
+      summary: EventTypesListExample
+      value:
+        value:
+        - id: 770e8400-e29b-41d4-a716-446655440001
+          eventType: ProfileCreatedEvent
+          description: Event triggered when a new user profile is created
+          version: 1.0.0
+          active: true
+        - id: 880e8400-e29b-41d4-a716-446655440002
+          eventType: InteractionCapturedEvent
+          description: Event triggered when a user interaction is captured
+          version: 1.0.0
+          active: true
+    EventTypeConfigurationExample:
+      summary: EventTypeConfigurationExample
+      value:
+        id: 660e8400-e29b-41d4-a716-446655440001
+        eventType: ProfileCreatedEvent
+        description: Configuration for profile creation event processing
+        profilesMatchingQuery:
+          term:
+            externalIds.id.keyword: '%s'
+        eventConfig:
+          actions:
+            save-event: true
+            create-profile: true
+            update-segments: true
+            send-notification: false
+    CdpEventExample:
+      summary: CdpEventExample
+      value:
+        eventId: 12345678-1234-5678-9012-123456789012
+        eventType: USER_ACTION
+        timestamp: 2023-09-16T10:30:00.000Z
+        sourceSystem: mobile_app
+        sourceType: USER_ID
+        sourceId: user-123456
+        sessionId: session-789012
+        cdpCustomerId: null
+        data:
+          action: login
+          page: /dashboard
+          location:
+            country: US
+            city: New York
+            latitude: 40.7128
+            longitude: -74.006
+          customProperties:
+            campaign_id: summer_promo_2023
+            ab_test_variant: variant_b
+        context: null
+        metadata:
+          schemaVersion: 2.1.0
+          source: mobile_app
+          correlationId: corr-12345678-1234-5678
+          traceId: trace-12345678-1234-5678
+          processedBy: []
+          sourceIp: 192.168.1.100
+          userAgent: Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)
+    CdpEventsExample:
+      summary: CdpEventsExample
+      value:
+        cdpEvents:
+        - eventId: 123e4567-e89b-12d3-a456-426614174000
+          eventType: USER_ACTION
+          timestamp: 2024-06-10T12:34:56Z
+          sourceSystem: webApp
+          sourceType: USER_ID
+          sourceId: user_001
+          sessionId: session_abc123
+          cdpCustomerId: null
+          data:
+            action: login
+            page: /dashboard
+            location:
+              country: US
+              city: New York
+              latitude: 40.7128
+              longitude: -74.006
+          context: null
+          metadata:
+            schemaVersion: 2.1.0
+            source: webApp
+            correlationId: corr-123e4567-e89b-12d3
+            traceId: trace-123e4567-e89b-12d3
+            processedBy: []
+            sourceIp: 192.168.1.1
+            userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+        - eventId: 456e7890-e12b-34d5-b789-567890123456
+          eventType: TRANSACTION
+          timestamp: 2024-06-10T12:35:30Z
+          sourceSystem: mobileApp
+          sourceType: USER_ID
+          sourceId: user_001
+          sessionId: session_abc123
+          cdpCustomerId: cdp_customer_001
+          data:
+            action: payment
+            amount: 150.0
+            currency: USD
+            merchant: Amazon
+            paymentMethod: credit_card
+          context:
+            deviceType: mobile
+            appVersion: 2.1.0
+          metadata:
+            schemaVersion: 2.1.0
+            source: mobileApp
+            correlationId: corr-456e7890-e12b-34d5
+            traceId: trace-456e7890-e12b-34d5
+            processedBy: []
+            sourceIp: 10.0.0.5
+            userAgent: MobileApp/2.1.0 (iOS 15.0)
+        - eventId: 789e0123-e45f-67g8-c901-234567890123
+          eventType: PAGE_VIEW
+          timestamp: 2024-06-10T12:36:00Z
+          sourceSystem: webApp
+          sourceType: USER_ID
+          sourceId: user_002
+          sessionId: session_def456
+          cdpCustomerId: null
+          data:
+            action: page_view
+            page: /products/electronics
+            duration: 45
+            referrer: https://google.com
+          context: null
+          metadata:
+            schemaVersion: 2.1.0
+            source: webApp
+            correlationId: corr-789e0123-e45f-67g8
+            traceId: trace-789e0123-e45f-67g8
+            processedBy: []
+            sourceIp: 192.168.1.2
+            userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+    IngestionSuccessExample:
+      summary: IngestionSuccessExample
+      value:
+        status: SUCCESS
+        eventId: 12345678-1234-5678-9012-123456789012
+        message: Event successfully ingested
+        timestamp: 2023-09-16T10:30:01.500Z
+    BulkIngestionSuccessExample:
+      summary: BulkIngestionSuccessExample
+      value:
+        status: SUCCESS
+        totalEvents: 3
+        processedEvents: 3
+        failedEvents: 0
+        errors: []
+        message: All 3 events successfully ingested
+        timestamp: 2024-06-10T12:36:05.500Z
+    BadRequestExample:
+      summary: BadRequestExample
+      value:
+        message: Bad Request
+        key: REQUEST_ERROR
+        errors:
+        - message: "Value Exceeded. Must be between {min} and {max}."
+          key: common.api.shoesize
+          context:
+            max: "50"
+            min: "1"
+    UnauthorizedExample:
+      summary: UnauthorizedExample
+      value:
+        message: Access to requested resource denied.
+        key: UNAUTHORIZED_ERROR
+        errors:
+        - message: Resource access denied due to invalid credentials.
+          key: common.api.token
+          context:
+            accessToken: expired
+    ErrorItemExample:
+      summary: ErrorItemExample
+      value:
+        message: "Value Exceeded. Must be between {min} and {max}."
+        key: common.api.shoesize
+        context:
+          max: "50"
+          min: "1"
+    InternalServerErrorExample:
+      summary: InternalServerErrorExample
+      value:
+        message: Description of error
+        key: SERVER_ERROR
+    not-found-error:
+      summary: not-found-error
+      value:
+        message: Resource not found.
+        key: NOT_FOUND_ERROR
+        errors:
+        - message: "Unable to find the requested resource: {resource}."
+          key: common.api.resource
+          context:
+            resource: aResource

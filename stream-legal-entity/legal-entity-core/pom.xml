@@ -36,6 +36,13 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
+            <artifactId>cdp-core</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
             <artifactId>contacts-core</artifactId>
             <version>${project.version}</version>
         </dependency>
