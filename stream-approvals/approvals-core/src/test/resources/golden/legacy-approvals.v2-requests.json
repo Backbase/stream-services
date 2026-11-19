@@ -1,0 +1,181 @@
+{
+  "approvalTypeAssignments" : [ {
+    "approvalTypeAssignments" : [ {
+      "approvalTypeId" : "approval-type-id-Manager",
+      "jobProfileId" : "function-group-id-Corporate Manager",
+      "additions" : { }
+    }, {
+      "approvalTypeId" : "approval-type-id-Clerk",
+      "jobProfileId" : "function-group-id-Corporate Clerk",
+      "additions" : { }
+    }, {
+      "approvalTypeId" : "approval-type-id-Level A",
+      "jobProfileId" : "function-group-id-Corporate Manager",
+      "additions" : { }
+    } ],
+    "additions" : { }
+  } ],
+  "approvalTypes" : [ {
+    "name" : "Level A",
+    "description" : "Level A approvals",
+    "rank" : 1,
+    "scope" : "SYSTEM",
+    "additions" : { }
+  }, {
+    "name" : "Level B",
+    "description" : "Level B approvals",
+    "rank" : 2,
+    "scope" : "SYSTEM",
+    "additions" : { }
+  }, {
+    "name" : "Level C",
+    "description" : "Level C approvals",
+    "rank" : 3,
+    "scope" : "SYSTEM",
+    "additions" : { }
+  }, {
+    "name" : "Manager",
+    "description" : "Manager approvals",
+    "rank" : 10,
+    "scope" : "LOCAL",
+    "creatorServiceAgreementId" : "sa-id-example-corporate-sa",
+    "additions" : { }
+  }, {
+    "name" : "Clerk",
+    "description" : "Clerk approvals",
+    "rank" : 11,
+    "scope" : "LOCAL",
+    "creatorServiceAgreementId" : "sa-id-example-corporate-sa",
+    "additions" : { }
+  } ],
+  "policies" : [ {
+    "name" : "Zero Approval policy",
+    "description" : "No approvals required",
+    "scope" : "SYSTEM",
+    "items" : [ ],
+    "logicalItems" : [ ]
+  }, {
+    "name" : "Items policy",
+    "description" : "Two Level A approvals",
+    "scope" : "SYSTEM",
+    "items" : [ {
+      "approvalTypeId" : "approval-type-id-Level A",
+      "numberOfApprovals" : 2
+    } ],
+    "logicalItems" : [ ]
+  }, {
+    "name" : "Single Control",
+    "description" : "One Level A or one Level B",
+    "scope" : "SYSTEM",
+    "items" : [ ],
+    "logicalItems" : [ {
+      "items" : [ {
+        "approvalTypeId" : "approval-type-id-Level A",
+        "numberOfApprovals" : 1
+      } ]
+    }, {
+      "items" : [ {
+        "approvalTypeId" : "approval-type-id-Level B",
+        "numberOfApprovals" : 1
+      } ]
+    } ]
+  }, {
+    "name" : "Dual Control",
+    "description" : "Two Level A, two Level B, or one of each",
+    "scope" : "SYSTEM",
+    "items" : [ ],
+    "logicalItems" : [ {
+      "items" : [ {
+        "approvalTypeId" : "approval-type-id-Level A",
+        "numberOfApprovals" : 2
+      } ]
+    }, {
+      "items" : [ {
+        "approvalTypeId" : "approval-type-id-Level B",
+        "numberOfApprovals" : 2
+      } ]
+    }, {
+      "items" : [ {
+        "approvalTypeId" : "approval-type-id-Level A",
+        "numberOfApprovals" : 1
+      }, {
+        "approvalTypeId" : "approval-type-id-Level B",
+        "numberOfApprovals" : 1
+      } ]
+    } ]
+  }, {
+    "name" : "Local Manager policy",
+    "description" : "One Manager or two Clerks",
+    "scope" : "LOCAL",
+    "serviceAgreementId" : "sa-id-example-corporate-sa",
+    "items" : [ ],
+    "logicalItems" : [ {
+      "items" : [ {
+        "approvalTypeId" : "approval-type-id-Manager",
+        "numberOfApprovals" : 1
+      } ]
+    }, {
+      "items" : [ {
+        "approvalTypeId" : "approval-type-id-Clerk",
+        "numberOfApprovals" : 2
+      } ]
+    } ]
+  }, {
+    "name" : "Local policy without scope",
+    "description" : "One Clerk, local because a service agreement is set",
+    "scope" : null,
+    "serviceAgreementId" : "sa-id-example-corporate-sa",
+    "items" : [ ],
+    "logicalItems" : [ {
+      "items" : [ {
+        "approvalTypeId" : "approval-type-id-Clerk",
+        "numberOfApprovals" : 1
+      } ]
+    } ]
+  } ],
+  "policyAssignments" : [ {
+    "policyAssignments" : [ {
+      "externalServiceAgreementId" : "example-corporate-sa",
+      "functions" : [ "Assign Permissions", "Manage Data Groups" ],
+      "bounds" : [ {
+        "policyId" : "policy-id-Dual Control",
+        "additions" : { }
+      } ],
+      "dataGroupSpecificBounds" : [ ],
+      "additions" : { }
+    }, {
+      "externalServiceAgreementId" : "example-corporate-sa",
+      "functions" : [ "US Domestic Wire" ],
+      "bounds" : [ {
+        "policyId" : "policy-id-Single Control",
+        "upperBound" : {
+          "amount" : "10000",
+          "currencyCode" : "USD",
+          "additions" : { }
+        },
+        "additions" : { }
+      }, {
+        "policyId" : "policy-id-Local Manager policy",
+        "upperBound" : {
+          "amount" : "99999999",
+          "currencyCode" : "USD",
+          "additions" : { }
+        },
+        "additions" : { }
+      } ],
+      "dataGroupSpecificBounds" : [ ],
+      "additions" : { }
+    }, {
+      "externalServiceAgreementId" : "example-corporate-sa",
+      "functions" : [ "Contacts" ],
+      "bounds" : [ {
+        "policyId" : "policy-id-Zero Approval policy",
+        "additions" : { }
+      } ],
+      "dataGroupSpecificBounds" : [ ],
+      "additions" : { }
+    } ],
+    "additions" : { }
+  } ],
+  "taskErrors" : [ ]
+}

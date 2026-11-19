@@ -1,0 +1,97 @@
+{
+  "name": "legacy approvals",
+  "approvalTypes": [
+    { "name": "Level A", "description": "Level A approvals", "rank": 1, "scope": "SYSTEM" },
+    { "name": "Level B", "description": "Level B approvals", "rank": 2, "scope": "SYSTEM" },
+    { "name": "Level C", "description": "Level C approvals", "rank": 3, "scope": "SYSTEM" },
+    { "name": "Manager", "description": "Manager approvals", "rank": 10, "scope": "LOCAL", "serviceAgreementId": "example-corporate-sa" },
+    { "name": "Clerk", "description": "Clerk approvals", "rank": 11, "scope": "LOCAL", "serviceAgreementId": "example-corporate-sa" }
+  ],
+  "policies": [
+    {
+      "name": "Zero Approval policy",
+      "description": "No approvals required",
+      "scope": "SYSTEM"
+    },
+    {
+      "name": "Items policy",
+      "description": "Two Level A approvals",
+      "scope": "SYSTEM",
+      "items": [
+        { "approvalTypeName": "Level A", "numberOfApprovals": 2 }
+      ]
+    },
+    {
+      "name": "Single Control",
+      "description": "One Level A or one Level B",
+      "scope": "SYSTEM",
+      "logicalItems": [
+        { "rank": 1, "items": [ { "approvalTypeName": "Level A", "numberOfApprovals": 1 } ] },
+        { "rank": 2, "operator": "OR", "items": [ { "approvalTypeName": "Level B", "numberOfApprovals": 1 } ] }
+      ]
+    },
+    {
+      "name": "Dual Control",
+      "description": "Two Level A, two Level B, or one of each",
+      "scope": "SYSTEM",
+      "logicalItems": [
+        { "rank": 1, "operator": "OR", "items": [ { "approvalTypeName": "Level A", "numberOfApprovals": 2 } ] },
+        { "rank": 2, "operator": "OR", "items": [ { "approvalTypeName": "Level B", "numberOfApprovals": 2 } ] },
+        {
+          "rank": 3,
+          "operator": "OR",
+          "items": [
+            { "approvalTypeName": "Level A", "numberOfApprovals": 1 },
+            { "approvalTypeName": "Level B", "numberOfApprovals": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Local Manager policy",
+      "description": "One Manager or two Clerks",
+      "scope": "LOCAL",
+      "serviceAgreementId": "example-corporate-sa",
+      "logicalItems": [
+        { "rank": 1, "items": [ { "approvalTypeName": "Manager", "numberOfApprovals": 1 } ] },
+        { "rank": 2, "operator": "OR", "items": [ { "approvalTypeName": "Clerk", "numberOfApprovals": 2 } ] }
+      ]
+    },
+    {
+      "name": "Local policy without scope",
+      "description": "One Clerk, local because a service agreement is set",
+      "serviceAgreementId": "example-corporate-sa",
+      "logicalItems": [
+        { "rank": 1, "items": [ { "approvalTypeName": "Clerk", "numberOfApprovals": 1 } ] }
+      ]
+    }
+  ],
+  "policyAssignments": [
+    {
+      "externalServiceAgreementId": "example-corporate-sa",
+      "policyAssignmentItems": [
+        {
+          "externalServiceAgreementId": "example-corporate-sa",
+          "functions": [ "Assign Permissions", "Manage Data Groups" ],
+          "bounds": [ { "policyName": "Dual Control" } ]
+        },
+        {
+          "functions": [ "US Domestic Wire" ],
+          "bounds": [
+            { "policyName": "Single Control", "upperBound": { "amount": "10000", "currencyCode": "USD" } },
+            { "policyName": "Local Manager policy", "upperBound": { "amount": "99999999", "currencyCode": "USD" } }
+          ]
+        },
+        {
+          "functions": [ "Contacts" ],
+          "bounds": [ { "policyName": "Zero Approval policy" } ]
+        }
+      ],
+      "approvalTypeAssignments": [
+        { "approvalTypeName": "Manager", "jobProfileName": "Corporate Manager" },
+        { "approvalTypeName": "Clerk", "jobProfileName": "Corporate Clerk" },
+        { "approvalTypeName": "Level A", "jobProfileName": "Corporate Manager" }
+      ]
+    }
+  ]
+}
