@@ -17,7 +17,6 @@ import com.backbase.stream.mapper.ApprovalMapper;
 import com.backbase.stream.mapper.PolicyMapper;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpRequest;
@@ -26,7 +25,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 
 @Slf4j
-@RequiredArgsConstructor
 public class ApprovalsIntegrationService {
 
     private final ApprovalMapper approvalMapper = Mappers.getMapper(ApprovalMapper.class);
@@ -37,6 +35,33 @@ public class ApprovalsIntegrationService {
     private final PoliciesApi policiesApi;
     private final PolicyAssignmentsApi policyAssignmentsApi;
     private final AccessGroupService accessGroupService;
+    private final com.backbase.dbs.approval.api.management.service.v1.PoliciesApi managementPoliciesApi;
+
+    /**
+     * Creates the service without the Approval Management Service API client; policies with an expression fail.
+     */
+    public ApprovalsIntegrationService(ApprovalTypesApi approvalTypesApi,
+        ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi, PoliciesApi policiesApi,
+        PolicyAssignmentsApi policyAssignmentsApi, AccessGroupService accessGroupService) {
+        this(approvalTypesApi, approvalTypeAssignmentsApi, policiesApi, policyAssignmentsApi, accessGroupService,
+            null);
+    }
+
+    /**
+     * Creates the service. Policies with an expression are created through the Approval Management Service API,
+     * all other policies through Service API v2.
+     */
+    public ApprovalsIntegrationService(ApprovalTypesApi approvalTypesApi,
+        ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi, PoliciesApi policiesApi,
+        PolicyAssignmentsApi policyAssignmentsApi, AccessGroupService accessGroupService,
+        com.backbase.dbs.approval.api.management.service.v1.PoliciesApi managementPoliciesApi) {
+        this.approvalTypesApi = approvalTypesApi;
+        this.approvalTypeAssignmentsApi = approvalTypeAssignmentsApi;
+        this.policiesApi = policiesApi;
+        this.policyAssignmentsApi = policyAssignmentsApi;
+        this.accessGroupService = accessGroupService;
+        this.managementPoliciesApi = managementPoliciesApi;
+    }
 
     public Mono<ApprovalType> createApprovalType(ApprovalType approvalType) {
         return Mono.just(approvalType)
@@ -78,8 +103,7 @@ public class ApprovalsIntegrationService {
             .flatMap(inputPolicy -> {
                 if (inputPolicy.getServiceAgreementId() == null) {
                     // Directly proceed with system policy creation
-                    return policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(inputPolicy))
-                        .map(createdPolicyResponse -> mapCreatedPolicy(inputPolicy, createdPolicyResponse));
+                    return postPolicy(inputPolicy);
                 } else {
                     // Handle local policy creation
                     return accessGroupService.getServiceAgreementByExternalId(inputPolicy.getServiceAgreementId())
@@ -87,15 +111,44 @@ public class ApprovalsIntegrationService {
                         .defaultIfEmpty(inputPolicy.getServiceAgreementId())
                         .flatMap(internalId -> {
                             inputPolicy.setServiceAgreementId(internalId);
-                            return policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(inputPolicy))
-                                .map(createdPolicyResponse -> mapCreatedPolicy(inputPolicy, createdPolicyResponse));
+                            return postPolicy(inputPolicy);
                         });
                 }
             })
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
                 Mono.error(new PolicyException(policy, "Failed to create Policy", exception)))
+            .onErrorMap(IllegalArgumentException.class, exception ->
+                new PolicyException(policy, "Invalid policy expression: " + exception.getMessage()))
             .onErrorStop();
+    }
+
+    private Mono<Policy> postPolicy(Policy inputPolicy) {
+        if (inputPolicy.getExpression() != null) {
+            return postExpressionPolicy(inputPolicy);
+        }
+        return policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(inputPolicy))
+            .map(createdPolicyResponse -> mapCreatedPolicy(inputPolicy, createdPolicyResponse));
+    }
+
+    private Mono<Policy> postExpressionPolicy(Policy inputPolicy) {
+        if (managementPoliciesApi == null) {
+            return Mono.error(new PolicyException(inputPolicy,
+                "Policy with an expression requires the Approval Management Service API client"));
+        }
+        if (!CollectionUtils.isEmpty(inputPolicy.getItems())
+            || !CollectionUtils.isEmpty(inputPolicy.getLogicalItems())) {
+            log.warn("Policy '{}' defines an expression; its items and logicalItems are ignored.",
+                inputPolicy.getName());
+        }
+        return Mono.fromCallable(() -> policyMapper.mapExpressionPolicy(inputPolicy))
+            .flatMap(managementPoliciesApi::postPolicy)
+            .map(createdPolicyResponse -> {
+                log.info("Created approval policy: '{}' with identifier: [{}] from its expression.",
+                    inputPolicy.getName(), createdPolicyResponse.getId());
+                inputPolicy.setInternalId(createdPolicyResponse.getId());
+                return inputPolicy;
+            });
     }
 
     private Policy mapCreatedPolicy(Policy inputPolicy, PostPolicyServiceApiResponse createdPolicyResponse) {

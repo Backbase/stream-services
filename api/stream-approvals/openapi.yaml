@@ -120,6 +120,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PolicyItem'
+        expression:
+          $ref: '#/components/schemas/PolicyExpression'
+    PolicyExpression:
+      type: object
+      title: "Policy Expression Configuration"
+      description: >-
+        Expression tree of a policy. A node is either an operator node, with operator and at least two
+        operands, or a unit node, with approvalTypeName (or approvalTypeId) and count. A node that has both
+        or neither is rejected.
+      properties:
+        operator:
+          type: string
+          enum:
+            - and
+            - or
+            - then
+        operands:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyExpression'
+        approvalTypeId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        approvalTypeName:
+          type: string
+        count:
+          type: integer
+          minimum: 1
     PolicyItem:
       type: object
       title: "Policy Item Configuration"
