@@ -55,21 +55,10 @@ public class InvestmentRestProductPortfolioService {
 
     private final ApiClient apiClient;
     private final IngestConfigProperties ingestProperties;
-    private final boolean sendTranslations;
 
-    /**
-     * Defaults to not sending {@code translations} so investment-caboose and other targets that omit the
-     * 2-arg constructor flag are safe. Primary investment wiring passes {@code true} explicitly.
-     */
     public InvestmentRestProductPortfolioService(ApiClient apiClient, IngestConfigProperties ingestProperties) {
-        this(apiClient, ingestProperties, false);
-    }
-
-    public InvestmentRestProductPortfolioService(ApiClient apiClient, IngestConfigProperties ingestProperties,
-        boolean sendTranslations) {
         this.apiClient = apiClient;
         this.ingestProperties = ingestProperties;
-        this.sendTranslations = sendTranslations;
     }
 
     /**
@@ -197,10 +186,8 @@ public class InvestmentRestProductPortfolioService {
             .ifPresent(v -> formParams.add(JSON_PROPERTY_PRODUCT_CATEGORY, v));
         Optional.ofNullable(data.getExtraData())
             .ifPresent(v -> formParams.add(JSON_PROPERTY_EXTRA_DATA, v));
-        if (sendTranslations) {
-            Optional.ofNullable(TranslationsSupport.filterTranslations(data.getTranslations()))
-                .ifPresent(v -> formParams.add(JSON_PROPERTY_TRANSLATIONS, v));
-        }
+        Optional.ofNullable(TranslationsSupport.filterTranslations(data.getTranslations()))
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_TRANSLATIONS, v));
         if (ingestProperties.getPortfolio().isIngestImages()) {
             Optional.ofNullable(data.getImageResource()).ifPresent(v -> formParams.add(JSON_PROPERTY_IMAGE, v));
         }

@@ -21,6 +21,7 @@ import org.mapstruct.Named;
 public interface RestTemplateAssetMapper {
 
     @Mapping(target = "categories", ignore = true)
+    @Mapping(target = "translations", ignore = true)
     OASAssetRequestDataRequest mapAsset(Asset asset,
         Map<String, UUID> categoryIdByCode);
 

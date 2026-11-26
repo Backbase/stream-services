@@ -2,6 +2,7 @@ package com.backbase.stream.investment.service.resttemplate;
 
 import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_ASSETS;
 import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_THUMBNAIL;
+import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_TRANSLATIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -277,6 +278,32 @@ class InvestmentRestNewsContentServiceTest {
             verify(apiClient, never()).invokeAPI(
                 eq("/service-api/v2/content/entries/"), eq(HttpMethod.POST), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("create includes filtered translations excluding default locale")
+        void createIncludesFilteredTranslations() throws Exception {
+            MarketNewsEntry entry = new MarketNewsEntry();
+            entry.setTitle("News Title");
+            entry.setTags(List.of("INVESTOR_AREA"));
+            entry.setTranslations(Map.of(
+                "en-gb", Map.of("title", "News Title"),
+                "fr-ch", Map.of("title", "Titre", "excerpt", "Extrait")));
+
+            PaginatedEntryList emptyPage = new PaginatedEntryList().results(List.of());
+            EntryCreateUpdate created = new EntryCreateUpdate(UUID.randomUUID(), null, null);
+            created.setTitle("News Title");
+
+            when(contentApi.listContentEntries(isNull(), anyInt(), anyInt(),
+                isNull(), isNull(), isNull(), isNull())).thenReturn(emptyPage);
+            stubJsonContentEntryCreate(created);
+
+            StepVerifier.create(service.upsertContent(List.of(entry))).verifyComplete();
+
+            byte[] bodyBytes = (byte[]) jsonBodyCaptor.getValue();
+            JsonNode body = objectMapper.readTree(bodyBytes);
+            assertThat(body.get(JSON_PROPERTY_TRANSLATIONS).get("fr-ch").get("title").asText()).isEqualTo("Titre");
+            assertThat(body.get(JSON_PROPERTY_TRANSLATIONS).has("en-gb")).isFalse();
         }
 
         @Test

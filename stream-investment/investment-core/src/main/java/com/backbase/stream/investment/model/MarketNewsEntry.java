@@ -6,6 +6,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,5 +35,6 @@ public class MarketNewsEntry {
     private OffsetDateTime publishedOn;
     private Integer order;
     private List<ModelAsset> assets = new ArrayList<>();
+    private Map<String, Map<String, String>> translations;
 
 }

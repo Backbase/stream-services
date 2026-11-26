@@ -42,6 +42,7 @@ public class Asset implements AssetKey {
     private String description;
     private Double price;
     private RandomParam priceConfig;
+    private Map<String, Map<String, String>> translations;
 
     @Override
     public String getIsin() {

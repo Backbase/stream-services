@@ -7,6 +7,7 @@ import com.backbase.investment.api.service.sync.v1.model.DocumentTagRequest;
 import com.backbase.investment.api.service.sync.v1.model.OASDocumentRequestDataRequest;
 import com.backbase.investment.api.service.sync.v1.model.OASDocumentResponse;
 import com.backbase.investment.api.service.sync.v1.model.PatchedDocumentTagRequest;
+import com.backbase.stream.investment.TranslationsSupport;
 import com.backbase.stream.investment.model.ContentDocumentEntry;
 import com.backbase.stream.investment.model.ContentTag;
 import com.backbase.stream.investment.model.UpsertPartition;
@@ -164,6 +165,7 @@ public class InvestmentRestDocumentContentService {
         log.debug("Patching document entry: title='{}', hasDocument={}", request.getName(),
             request.getDocumentResource() != null);
         OASDocumentRequestDataRequest createDocumentRequest = contentMapper.map(request);
+        applyDocumentTranslations(createDocumentRequest, request);
         log.debug("Document entry request mapped: {}", createDocumentRequest);
         return Mono.defer(() -> Mono.fromCallable(() -> patchDocument(uuid, createDocumentRequest, request.getDocumentResource()))
             .doOnSuccess(
@@ -181,6 +183,7 @@ public class InvestmentRestDocumentContentService {
             request.getDocumentResource() != null);
 
         OASDocumentRequestDataRequest createDocumentRequest = contentMapper.map(request);
+        applyDocumentTranslations(createDocumentRequest, request);
         log.debug("Document entry request mapped: {}", createDocumentRequest);
         return Mono.defer(() -> Mono.fromCallable(() -> createContentDocument(createDocumentRequest, request.getDocumentResource()))
             .doOnSuccess(
@@ -306,6 +309,10 @@ public class InvestmentRestDocumentContentService {
                 localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
                 localVarAccept, localVarContentType, localVarAuthNames, localReturnType)
             .getBody();
+    }
+
+    private void applyDocumentTranslations(OASDocumentRequestDataRequest dataRequest, ContentDocumentEntry entry) {
+        dataRequest.setTranslations(TranslationsSupport.filterTranslations(entry.getTranslations()));
     }
 
 }

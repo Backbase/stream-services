@@ -74,7 +74,7 @@ class InvestmentRestProductPortfolioServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new InvestmentRestProductPortfolioService(apiClient, ingestProperties, true);
+        service = new InvestmentRestProductPortfolioService(apiClient, ingestProperties);
         when(apiClient.selectHeaderAccept(any())).thenReturn(List.of(MediaType.APPLICATION_JSON));
         when(apiClient.selectHeaderContentType(any())).thenReturn(MediaType.MULTIPART_FORM_DATA);
         when(apiClient.parameterToMultiValueMap(any(), eq("expand"), any()))
@@ -131,23 +131,6 @@ class InvestmentRestProductPortfolioServiceTest {
             assertThat(translations).containsOnlyKeys("fr-ch", "de-ch", "es-es");
             assertThat(translations.get("fr-ch")).containsEntry("name", "Agressif");
             assertThat(translations.get("fr-ch")).containsEntry("description", "Description FR");
-        }
-
-        @Test
-        @DisplayName("create omits translations form param when sendTranslations is disabled")
-        void createOmitsTranslationsWhenSendTranslationsDisabled() {
-            service = new InvestmentRestProductPortfolioService(apiClient, ingestProperties, false);
-            ProductPortfolio template = buildFullTemplate(UUID.randomUUID());
-            template.setTranslations(Map.of("fr-ch", Map.of("name", "Agressif")));
-
-            when(apiClient.invokeAPI(any(), eq(HttpMethod.POST), any(), any(), any(), any(), any(),
-                formParamsCaptor.capture(), any(), any(), any(), any()))
-                .thenReturn(new ResponseEntity<>(
-                    buildApiProduct(UUID.randomUUID(), "Robo Plan", ProductTypeEnum.ROBO_ADVISOR), HttpStatus.OK));
-
-            StepVerifier.create(service.createPortfolioProduct(template, EXPAND)).expectNextCount(1).verifyComplete();
-
-            assertThat(formParamsCaptor.getValue().containsKey(JSON_PROPERTY_TRANSLATIONS)).isFalse();
         }
 
         @Test
@@ -351,25 +334,6 @@ class InvestmentRestProductPortfolioServiceTest {
                 .verify();
         }
 
-        @Test
-        @DisplayName("update omits translations form param when sendTranslations is disabled")
-        void updateOmitsTranslationsWhenSendTranslationsDisabled() {
-            service = new InvestmentRestProductPortfolioService(apiClient, ingestProperties, false);
-            UUID existingUuid = UUID.randomUUID();
-            ProductPortfolio template = buildFullTemplate(existingUuid);
-            template.setTranslations(Map.of("fr-ch", Map.of("name", "Agressif")));
-
-            when(apiClient.invokeAPI(eq(UPDATE_PATH), eq(HttpMethod.PUT), any(), any(), any(), any(), any(),
-                formParamsCaptor.capture(), any(), any(), any(), any()))
-                .thenReturn(new ResponseEntity<>(
-                    buildApiProduct(existingUuid, "Robo Plan", ProductTypeEnum.ROBO_ADVISOR), HttpStatus.OK));
-
-            StepVerifier.create(service.updatePortfolioProduct(existingUuid.toString(), EXPAND, template))
-                .expectNextCount(1)
-                .verifyComplete();
-
-            assertThat(formParamsCaptor.getValue().containsKey(JSON_PROPERTY_TRANSLATIONS)).isFalse();
-        }
     }
 
     private ProductPortfolio buildFullTemplate(UUID modelPortfolioUuid) {

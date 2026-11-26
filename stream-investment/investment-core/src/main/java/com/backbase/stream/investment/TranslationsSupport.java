@@ -1,5 +1,7 @@
 package com.backbase.stream.investment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -42,5 +44,24 @@ public final class TranslationsSupport {
             }
         });
         return filtered.isEmpty() ? null : filtered;
+    }
+
+    /**
+     * Serializes filtered translations as a JSON string (e.g. tests or custom clients).
+     * Production paths use {@link #filterTranslations(Map)} on the JSON request body or multipart {@link Map}
+     * (portfolio products; asset categories when an image is sent in the same request).
+     */
+    public static String serializeForMultipartForm(
+        ObjectMapper objectMapper,
+        Map<String, Map<String, String>> translations) {
+        Map<String, Map<String, String>> filtered = filterTranslations(translations);
+        if (filtered == null) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(filtered);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize translations for multipart form", e);
+        }
     }
 }

@@ -1,12 +1,15 @@
 package com.backbase.stream.investment.service.resttemplate;
 
 import com.backbase.investment.api.service.sync.ApiClient;
+import static com.backbase.investment.api.service.sync.v1.model.AssetCategoryRequest.JSON_PROPERTY_TRANSLATIONS;
+
 import com.backbase.investment.api.service.sync.v1.model.AssetCategory;
 import com.backbase.investment.api.service.sync.v1.model.AssetCategoryRequest;
 import com.backbase.investment.api.service.sync.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedAssetCategoryRequest;
 import com.backbase.investment.api.service.v1.model.Asset;
 import com.backbase.stream.configuration.IngestConfigProperties;
+import com.backbase.stream.investment.TranslationsSupport;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,6 +44,7 @@ public class InvestmentRestAssetUniverseService {
         Map<String, UUID> categoryIdByCode) {
 
         OASAssetRequestDataRequest assetRequestDataRequest = assetMapper.mapAsset(asset, categoryIdByCode);
+        applyAssetTranslations(assetRequestDataRequest, asset);
 
         log.info(
             "Start created asset with assetIdentifier:: assetUuid={}, assetName='{}', logoFile='{}'",
@@ -71,6 +75,7 @@ public class InvestmentRestAssetUniverseService {
             "Starting asset update: assetUuid={}, assetName='{}', logoFile='{}'",
             assetUuid, asset.getName(), asset.getLogo());
         OASAssetRequestDataRequest assetRequestDataRequest = assetMapper.mapAsset(asset, categoryIdByCode);
+        applyAssetTranslations(assetRequestDataRequest, asset);
         return Mono.defer(() -> Mono.just(patchAsset(assetUuid, assetRequestDataRequest, asset.getLogoFile())))
             .map(patchedAsset -> {
                 log.info(
@@ -258,29 +263,36 @@ public class InvestmentRestAssetUniverseService {
             final MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<String, String>();
             final MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<String, Object>();
 
-            Optional.ofNullable(assetCategoryPatch.getName())
-                .ifPresent(v -> localVarFormParams.add("name", v));
-            Optional.ofNullable(assetCategoryPatch.getCode())
-                .ifPresent(v -> localVarFormParams.add("code", v));
-            Optional.ofNullable(assetCategoryPatch.getOrder())
-                .ifPresent(v -> localVarFormParams.add("order", v));
-            Optional.ofNullable(assetCategoryPatch.getType())
-                .ifPresent(v -> localVarFormParams.add("type", v));
-            Optional.ofNullable(assetCategoryPatch.getExcerpt())
-                .ifPresent(v -> localVarFormParams.add("excerpt", v));
-            Optional.ofNullable(assetCategoryPatch.getDescription())
-                .ifPresent(v -> localVarFormParams.add("description", v));
-            if (ingestProperties.getAsset().isIngestImages()) {
-                Optional.ofNullable(image).ifPresent(v -> localVarFormParams.add("image", v));
+            final boolean multipart = useMultipartForCategory(image);
+            final Object requestBody;
+            final String[] localVarContentTypes;
+            if (multipart) {
+                Optional.ofNullable(assetCategoryPatch.getName())
+                    .ifPresent(v -> localVarFormParams.add("name", v));
+                Optional.ofNullable(assetCategoryPatch.getCode())
+                    .ifPresent(v -> localVarFormParams.add("code", v));
+                Optional.ofNullable(assetCategoryPatch.getOrder())
+                    .ifPresent(v -> localVarFormParams.add("order", v));
+                Optional.ofNullable(assetCategoryPatch.getType())
+                    .ifPresent(v -> localVarFormParams.add("type", v));
+                Optional.ofNullable(assetCategoryPatch.getExcerpt())
+                    .ifPresent(v -> localVarFormParams.add("excerpt", v));
+                Optional.ofNullable(assetCategoryPatch.getDescription())
+                    .ifPresent(v -> localVarFormParams.add("description", v));
+                applyCategoryTranslationsToForm(localVarFormParams, assetCategoryEntry);
+                localVarFormParams.add("image", image);
+                requestBody = null;
+                localVarContentTypes = new String[]{"multipart/form-data"};
+            } else {
+                assetCategoryPatch.setTranslations(filteredCategoryTranslations(assetCategoryEntry));
+                requestBody = assetCategoryPatch;
+                localVarContentTypes = new String[]{"application/json"};
             }
 
             final String[] localVarAccepts = {
                 "application/json"
             };
             final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
-            final String[] localVarContentTypes = {
-                "multipart/form-data"
-            };
             final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
 
             String[] localVarAuthNames = new String[]{};
@@ -289,7 +301,7 @@ public class InvestmentRestAssetUniverseService {
             };
             return Mono.just(
                 apiClient.invokeAPI("/service-api/v2/asset/asset-categories/{uuid}/", HttpMethod.PATCH, uriVariables,
-                        localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
+                        localVarQueryParams, requestBody, localVarHeaderParams, localVarCookieParams, localVarFormParams,
                         localVarAccept, localVarContentType, localVarAuthNames, localReturnType)
                     .getBody());
         });
@@ -323,29 +335,36 @@ public class InvestmentRestAssetUniverseService {
             final MultiValueMap<String, String> localVarCookieParams = new LinkedMultiValueMap<String, String>();
             final MultiValueMap<String, Object> localVarFormParams = new LinkedMultiValueMap<String, Object>();
 
-            Optional.ofNullable(assetCategoryRequest.getName())
-                .ifPresent(v -> localVarFormParams.add("name", v));
-            Optional.ofNullable(assetCategoryRequest.getCode())
-                .ifPresent(v -> localVarFormParams.add("code", v));
-            Optional.ofNullable(assetCategoryRequest.getOrder())
-                .ifPresent(v -> localVarFormParams.add("order", v));
-            Optional.ofNullable(assetCategoryRequest.getType())
-                .ifPresent(v -> localVarFormParams.add("type", v));
-            Optional.ofNullable(assetCategoryRequest.getExcerpt())
-                .ifPresent(v -> localVarFormParams.add("excerpt", v));
-            Optional.ofNullable(assetCategoryRequest.getDescription())
-                .ifPresent(v -> localVarFormParams.add("description", v));
-            if (ingestProperties.getAsset().isIngestImages()) {
-                Optional.ofNullable(image).ifPresent(v -> localVarFormParams.add("image", v));
+            final boolean multipart = useMultipartForCategory(image);
+            final Object requestBody;
+            final String[] localVarContentTypes;
+            if (multipart) {
+                Optional.ofNullable(assetCategoryRequest.getName())
+                    .ifPresent(v -> localVarFormParams.add("name", v));
+                Optional.ofNullable(assetCategoryRequest.getCode())
+                    .ifPresent(v -> localVarFormParams.add("code", v));
+                Optional.ofNullable(assetCategoryRequest.getOrder())
+                    .ifPresent(v -> localVarFormParams.add("order", v));
+                Optional.ofNullable(assetCategoryRequest.getType())
+                    .ifPresent(v -> localVarFormParams.add("type", v));
+                Optional.ofNullable(assetCategoryRequest.getExcerpt())
+                    .ifPresent(v -> localVarFormParams.add("excerpt", v));
+                Optional.ofNullable(assetCategoryRequest.getDescription())
+                    .ifPresent(v -> localVarFormParams.add("description", v));
+                applyCategoryTranslationsToForm(localVarFormParams, assetCategoryEntry);
+                localVarFormParams.add("image", image);
+                requestBody = null;
+                localVarContentTypes = new String[]{"multipart/form-data"};
+            } else {
+                assetCategoryRequest.setTranslations(filteredCategoryTranslations(assetCategoryEntry));
+                requestBody = assetCategoryRequest;
+                localVarContentTypes = new String[]{"application/json"};
             }
 
             final String[] localVarAccepts = {
                 "application/json"
             };
             final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
-            final String[] localVarContentTypes = {
-                "multipart/form-data"
-            };
             final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
 
             String[] localVarAuthNames = new String[]{};
@@ -354,11 +373,35 @@ public class InvestmentRestAssetUniverseService {
             };
             return Mono.just(apiClient.invokeAPI("/service-api/v2/asset/asset-categories/", HttpMethod.POST,
                     uriVariables,
-                    localVarQueryParams, null, localVarHeaderParams, localVarCookieParams, localVarFormParams,
+                    localVarQueryParams, requestBody, localVarHeaderParams, localVarCookieParams, localVarFormParams,
                     localVarAccept, localVarContentType, localVarAuthNames, localReturnType)
                 .getBody());
         });
 
+    }
+
+    /**
+     * Investment accepts category {@code translations} as a nested object. Flat multipart without an image
+     * does not encode maps correctly; use JSON on the OpenAPI request DTO instead (Jackson on {@link ApiClient}'s
+     * RestTemplate). With an image in the same request, use multipart and the same filtered {@link Map} as portfolio products.
+     */
+    private boolean useMultipartForCategory(Resource image) {
+        return ingestProperties.getAsset().isIngestImages() && image != null;
+    }
+
+    private static Map<String, Map<String, String>> filteredCategoryTranslations(AssetCategoryEntry entry) {
+        return TranslationsSupport.filterTranslations(entry.getTranslations());
+    }
+
+    private static void applyCategoryTranslationsToForm(MultiValueMap<String, Object> formParams,
+        AssetCategoryEntry entry) {
+        Optional.ofNullable(filteredCategoryTranslations(entry))
+            .ifPresent(v -> formParams.add(JSON_PROPERTY_TRANSLATIONS, v));
+    }
+
+    private void applyAssetTranslations(OASAssetRequestDataRequest request,
+        com.backbase.stream.investment.Asset asset) {
+        request.setTranslations(TranslationsSupport.filterTranslations(asset.getTranslations()));
     }
 
 }

@@ -1,5 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
+## [11.6.0]
+### Changed
+- Update BSJ to include translations data for investment asset categories, content entries, document entries, and assets
+
 ## [11.5.0]
 ### Fixed
 - MAINT-45235: Assigning permissions no longer fails with `You can not mix the same function group with and without data groups combinations` when a reference job role and a same-named local copy are both visible. `AccessGroupService.setupFunctionGroups` keeps an already resolved job role id (when the name matches), otherwise resolves a local (DEFAULT) job role to the one owned by the service agreement and any other job role to the REFERENCE one, and always sets the service agreement id together with the id (also for job roles created in the same run). `AccessGroupService.setupJobRoleForSa`, `CustomerAccessGroupSaga` and `UpdatedServiceAgreementSaga` use the same resolution.

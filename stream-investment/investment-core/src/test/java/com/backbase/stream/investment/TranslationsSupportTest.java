@@ -2,6 +2,7 @@ package com.backbase.stream.investment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -46,5 +47,15 @@ class TranslationsSupportTest {
 
         assertThat(TranslationsSupport.filterTranslations(translations).get("fr-ch"))
             .containsOnlyKeys("name");
+    }
+
+    @Test
+    void serializeForMultipartForm_writesFilteredJson() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = TranslationsSupport.serializeForMultipartForm(mapper, Map.of(
+            "en-gb", Map.of("name", "Aggressive"),
+            "fr-ch", Map.of("name", "Agressif")));
+
+        assertThat(json).isEqualTo("{\"fr-ch\":{\"name\":\"Agressif\"}}");
     }
 }

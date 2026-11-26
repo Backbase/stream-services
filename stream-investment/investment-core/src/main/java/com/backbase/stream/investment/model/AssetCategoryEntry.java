@@ -1,5 +1,6 @@
 package com.backbase.stream.investment.model;
 
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,5 +23,6 @@ public class AssetCategoryEntry {
     private String description;
     private String image;
     private Resource imageResource;
+    private Map<String, Map<String, String>> translations;
 
 }
