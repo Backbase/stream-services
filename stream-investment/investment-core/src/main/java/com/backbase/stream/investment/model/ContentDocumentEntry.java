@@ -28,5 +28,6 @@ public class ContentDocumentEntry {
     private Map<String, String> extraData;
     private String document;
     private Resource documentResource;
+    private Map<String, Map<String, String>> translations;
 
 }

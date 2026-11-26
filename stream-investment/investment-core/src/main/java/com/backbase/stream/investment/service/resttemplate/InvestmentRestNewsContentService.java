@@ -2,6 +2,7 @@ package com.backbase.stream.investment.service.resttemplate;
 
 import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_ASSETS;
 import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_THUMBNAIL;
+import static com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateRequest.JSON_PROPERTY_TRANSLATIONS;
 import static com.backbase.stream.investment.service.resttemplate.InvestmentRestAssetUniverseService.getFileNameForLog;
 
 import com.backbase.investment.api.service.sync.ApiClient;
@@ -12,6 +13,7 @@ import com.backbase.investment.api.service.sync.v1.model.EntryCreateUpdateReques
 import com.backbase.investment.api.service.sync.v1.model.EntryTagRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedEntryCreateUpdateRequest;
 import com.backbase.investment.api.service.sync.v1.model.PatchedEntryTagRequest;
+import com.backbase.stream.investment.TranslationsSupport;
 import com.backbase.stream.investment.model.MarketNewsEntry;
 import com.backbase.stream.investment.model.ContentTag;
 import com.backbase.stream.investment.model.UpsertPartition;
@@ -245,6 +247,7 @@ public class InvestmentRestNewsContentService {
             request.getExternalId(), request.getTitle(), request.getThumbnailResource() != null);
 
         EntryCreateUpdateRequest createUpdateRequest = contentMapper.map(request);
+        applyEntryTranslations(createUpdateRequest, request);
 
         return Mono.defer(() -> Mono.fromCallable(() -> createContentEntry(createUpdateRequest)))
             .flatMap(entry -> addThumbnail(entry, request.getThumbnailResource()))
@@ -263,6 +266,7 @@ public class InvestmentRestNewsContentService {
             uuid, request.getExternalId(), request.getTitle());
 
         PatchedEntryCreateUpdateRequest patchRequest = contentMapper.mapPatch(request);
+        applyEntryTranslations(patchRequest, request);
 
         return Mono.defer(() -> Mono.fromCallable(() -> patchContentEntry(uuid, patchRequest)))
             .flatMap(entry -> addThumbnail(entry, request.getThumbnailResource()))
@@ -283,11 +287,22 @@ public class InvestmentRestNewsContentService {
      * included, even when empty. The payload is serialised to {@code byte[]} because
      * {@code RestTemplate} does not reliably serialise {@link ObjectNode} bodies.
      */
+    private void applyEntryTranslations(EntryCreateUpdateRequest request, MarketNewsEntry entry) {
+        request.setTranslations(TranslationsSupport.filterTranslations(entry.getTranslations()));
+    }
+
+    private void applyEntryTranslations(PatchedEntryCreateUpdateRequest request, MarketNewsEntry entry) {
+        request.setTranslations(TranslationsSupport.filterTranslations(entry.getTranslations()));
+    }
+
     private EntryCreateUpdate createContentEntry(EntryCreateUpdateRequest request) {
         ObjectNode requestBody = objectMapper.valueToTree(request);
         requestBody.remove(JSON_PROPERTY_THUMBNAIL);
         requestBody.set(JSON_PROPERTY_ASSETS, objectMapper.valueToTree(
             Objects.requireNonNullElse(request.getAssets(), List.of())));
+        if (request.getTranslations() == null) {
+            requestBody.remove(JSON_PROPERTY_TRANSLATIONS);
+        }
 
         final byte[] bodyBytes;
         try {
@@ -328,6 +343,9 @@ public class InvestmentRestNewsContentService {
         requestBody.remove(JSON_PROPERTY_THUMBNAIL);
         requestBody.set(JSON_PROPERTY_ASSETS, objectMapper.valueToTree(
             Objects.requireNonNullElse(request.getAssets(), List.of())));
+        if (request.getTranslations() == null) {
+            requestBody.remove(JSON_PROPERTY_TRANSLATIONS);
+        }
 
         final byte[] bodyBytes;
         try {

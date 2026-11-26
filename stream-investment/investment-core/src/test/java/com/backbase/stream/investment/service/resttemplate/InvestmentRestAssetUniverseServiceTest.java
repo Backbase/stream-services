@@ -1,5 +1,6 @@
 package com.backbase.stream.investment.service.resttemplate;
 
+import static com.backbase.investment.api.service.sync.v1.model.AssetCategoryRequest.JSON_PROPERTY_TRANSLATIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.investment.api.service.sync.ApiClient;
 import com.backbase.investment.api.service.sync.v1.model.AssetCategory;
+import com.backbase.investment.api.service.sync.v1.model.AssetCategoryRequest;
 import com.backbase.stream.configuration.IngestConfigProperties;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.model.AssetCategoryEntry;
@@ -20,8 +22,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.MultiValueMap;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -33,6 +38,12 @@ class InvestmentRestAssetUniverseServiceTest {
 
     @Mock
     private ApiClient apiClient;
+
+    @Captor
+    private ArgumentCaptor<MultiValueMap<String, Object>> formParamsCaptor;
+
+    @Captor
+    private ArgumentCaptor<Object> requestBodyCaptor;
 
     private final IngestConfigProperties ingestProperties = new IngestConfigProperties();
 
@@ -246,6 +257,68 @@ class InvestmentRestAssetUniverseServiceTest {
     class CreateAssetCategory {
 
         @Test
+        @DisplayName("create without image sends translations on JSON body excluding default locale")
+        void createIncludesFilteredTranslations() {
+            AssetCategoryEntry entry = new AssetCategoryEntry();
+            entry.setName("Tech");
+            entry.setCode("TECH");
+            entry.setOrder(1);
+            entry.setType("CATEGORY");
+            entry.setTranslations(Map.of(
+                "fr-ch", Map.of("name", "Technologie", "description", "Description FR"),
+                "en-gb", Map.of("name", "Tech")));
+
+            AssetCategory created = new AssetCategory(UUID.randomUUID());
+            created.setName("Tech");
+
+            when(apiClient.invokeAPI(anyString(), any(), any(), any(), requestBodyCaptor.capture(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(created, HttpStatus.OK));
+
+            StepVerifier.create(service.createAssetCategory(entry, null))
+                .expectNextCount(1)
+                .verifyComplete();
+
+            assertThat(requestBodyCaptor.getValue()).isInstanceOf(AssetCategoryRequest.class);
+            Map<String, Map<String, String>> translations =
+                ((AssetCategoryRequest) requestBodyCaptor.getValue()).getTranslations();
+            assertThat(translations).containsOnlyKeys("fr-ch");
+            assertThat(translations.get("fr-ch")).containsEntry("name", "Technologie");
+            assertThat(formParamsCaptor.getValue()).doesNotContainKey(JSON_PROPERTY_TRANSLATIONS);
+        }
+
+        @Test
+        @DisplayName("create with image sends translations as multipart map")
+        void createWithImageSendsTranslationsOnForm() {
+            ingestProperties.getAsset().setIngestImages(true);
+            AssetCategoryEntry entry = new AssetCategoryEntry();
+            entry.setName("Tech");
+            entry.setCode("TECH");
+            entry.setOrder(1);
+            entry.setType("CATEGORY");
+            entry.setTranslations(Map.of("fr-ch", Map.of("name", "Technologie")));
+            Resource logo = new ByteArrayResource(new byte[]{1}) {
+                @Override
+                public String getFilename() {
+                    return "logo.png";
+                }
+            };
+
+            when(apiClient.invokeAPI(anyString(), any(), any(), any(), isNull(), any(), any(),
+                formParamsCaptor.capture(), any(), any(), any(), any()))
+                .thenReturn(new ResponseEntity<>(new AssetCategory(UUID.randomUUID()), HttpStatus.OK));
+
+            StepVerifier.create(service.createAssetCategory(entry, logo)).expectNextCount(1).verifyComplete();
+
+            assertThat(formParamsCaptor.getValue().getFirst(JSON_PROPERTY_TRANSLATIONS))
+                .isInstanceOf(Map.class);
+            @SuppressWarnings("unchecked")
+            Map<String, Map<String, String>> translations =
+                (Map<String, Map<String, String>>) formParamsCaptor.getValue().getFirst(JSON_PROPERTY_TRANSLATIONS);
+            assertThat(translations).containsOnlyKeys("fr-ch");
+        }
+
+        @Test
         @DisplayName("successful create returns AssetCategory")
         void successfulCreateReturnsCategory() {
             AssetCategoryEntry entry = new AssetCategoryEntry();
@@ -256,7 +329,7 @@ class InvestmentRestAssetUniverseServiceTest {
             AssetCategory created = new AssetCategory(createdUuid);
             created.setName("Tech");
 
-            when(apiClient.invokeAPI(anyString(), any(), any(), any(), isNull(), any(), any(), any(), any(), any(),
+            when(apiClient.invokeAPI(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any())).thenReturn(new ResponseEntity<>(created, HttpStatus.OK));
 
             StepVerifier.create(service.createAssetCategory(entry, null))
@@ -270,9 +343,12 @@ class InvestmentRestAssetUniverseServiceTest {
         @Test
         @DisplayName("category with image passes image in form params")
         void categoryWithImageIncludesImageInRequest() {
+            ingestProperties.getAsset().setIngestImages(true);
             AssetCategoryEntry entry = new AssetCategoryEntry();
             entry.setName("Bonds");
             entry.setCode("BONDS");
+            entry.setOrder(1);
+            entry.setType("CATEGORY");
 
             final Resource image = new ByteArrayResource("img-data".getBytes()) {
                 @Override
@@ -312,7 +388,7 @@ class InvestmentRestAssetUniverseServiceTest {
             AssetCategory patched = new AssetCategory(categoryId);
             patched.setName("FixedIncome");
 
-            when(apiClient.invokeAPI(anyString(), any(), any(), any(), isNull(), any(), any(), any(), any(), any(),
+            when(apiClient.invokeAPI(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any())).thenReturn(new ResponseEntity<>(patched, HttpStatus.OK));
 
             StepVerifier.create(service.patchAssetCategory(categoryId, entry, null))

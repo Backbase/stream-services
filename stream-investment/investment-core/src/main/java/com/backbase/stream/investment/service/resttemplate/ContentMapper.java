@@ -20,13 +20,16 @@ public interface ContentMapper {
 
     @Mapping(target = "thumbnail", ignore = true)
     @Mapping(target = "status", constant = "PUBLISHED")
+    @Mapping(target = "translations", ignore = true)
     EntryCreateUpdateRequest map(MarketNewsEntry entry);
 
     @Mapping(target = "thumbnail", ignore = true)
     @Mapping(target = "status", constant = "PUBLISHED")
+    @Mapping(target = "translations", ignore = true)
     PatchedEntryCreateUpdateRequest mapPatch(MarketNewsEntry entry);
 
     @Mapping(target = "assets", source = "assets", qualifiedByName = "mapRawAsserts")
+    @Mapping(target = "translations", ignore = true)
     OASDocumentRequestDataRequest map(ContentDocumentEntry request);
 
     @Named("mapRawAsserts")
