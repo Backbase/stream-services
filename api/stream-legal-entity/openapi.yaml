@@ -1402,6 +1402,17 @@ components:
           minLength: 1
           type: string
           description: Phone number.
+        countryCode:
+          maxLength: 4
+          pattern: ^\+[0-9]+$
+          type: string
+          description: Phone’s country calling code, for example +1. Country calling code can be obtained from https://countrycode.org/.
+          example: '+1'
+        countryIsoCode:
+          maxLength: 3
+          type: string
+          description: Phone’s ISO country code. Country code can be obtained from the United Nations (ISO 3166, Alpha-2 code)- https://www.iban.com/country-codes.
+          example: US
     PostalAddress:
       required:
         - key
