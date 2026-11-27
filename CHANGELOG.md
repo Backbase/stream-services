@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [11.7.0]
+### Added
+- MAINT-45622: `PhoneNumber` (used by `User.mobileNumber`) has optional `countryCode` (for example `+1`) and `countryIsoCode` (for example `US`) fields, matching `PartyPhoneNumber`. Stream does not use them yet; they are passed through for consumers such as bootstrap-engine.
+
 ## [11.6.0]
 ### Changed
 - Update BSJ to include translations data for investment asset categories, content entries, document entries, and assets
